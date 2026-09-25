@@ -1,0 +1,28 @@
+name: Atlas-8 Backtest
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Download CoinGecko data
+        run: python scripts/download_data.py
+      - name: Run backtests
+        run: python scripts/run_backtest.py
+      - name: Publish results
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-8-results
+          path: |
+            results/**
+            data/metadata/**
