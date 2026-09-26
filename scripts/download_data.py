@@ -8,7 +8,7 @@ import requests
 ROOT=Path(__file__).resolve().parents[1]
 cfg=json.loads((ROOT/"config/universe.json").read_text())
 OUT=ROOT/"data"; OUT.mkdir(exist_ok=True); (OUT/"metadata").mkdir(exist_ok=True)
-BINANCE="https://fapi.binance.com/fapi/v1/klines"
+BINANCE="https://data-api.binance.vision/api/v3/klines"
 HYPER="https://api.hyperliquid.xyz/info"
 STEP={"1d":86400000,"4h":14400000}
 
