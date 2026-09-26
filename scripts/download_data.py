@@ -1,60 +1,68 @@
 from __future__ import annotations
-import json,time
-from datetime import datetime,timezone,timedelta
+import json, time
+from datetime import datetime, timezone
 from pathlib import Path
-import requests,pandas as pd
+import pandas as pd
+import requests
 
 ROOT=Path(__file__).resolve().parents[1]
 cfg=json.loads((ROOT/"config/universe.json").read_text())
 OUT=ROOT/"data"; OUT.mkdir(exist_ok=True); (OUT/"metadata").mkdir(exist_ok=True)
-BASE="https://api.coingecko.com/api/v3/coins/{}/market_chart/range"
+BINANCE="https://fapi.binance.com/fapi/v1/klines"
+HYPER="https://api.hyperliquid.xyz/info"
+STEP={"1d":86400000,"4h":14400000}
 
-def get(coin,start,end,interval=None):
-    p={"vs_currency":"usd","from":start.timestamp(),"to":end.timestamp()}
-    if interval: p["interval"]=interval
-    for attempt in range(8):
-        r=requests.get(BASE.format(coin),params=p,timeout=60)
-        if r.status_code==429:
-            time.sleep(min(60,2**attempt)); continue
-        r.raise_for_status()
-        j=r.json()
-        px=pd.DataFrame(j["prices"],columns=["ts","close"])
-        vol=pd.DataFrame(j.get("total_volumes",[]),columns=["ts","volume"])
-        px["time"]=pd.to_datetime(px.ts,unit="ms",utc=True)
-        if not vol.empty:
-            vol["time"]=pd.to_datetime(vol.ts,unit="ms",utc=True)
-            px=px.merge(vol[["time","volume"]],on="time",how="left")
-        else: px["volume"]=0.0
-        return px[["time","close","volume"]].drop_duplicates("time").sort_values("time")
-    raise RuntimeError("CoinGecko rate limit persisted")
+def binance(symbol, interval, start, end):
+    rows=[]; cur=start
+    while cur < end:
+        p={"symbol":symbol,"interval":interval,"startTime":cur,"endTime":end,"limit":1500}
+        for a in range(8):
+            r=requests.get(BINANCE,params=p,timeout=30)
+            if r.status_code==429:
+                time.sleep(min(60,2**a)); continue
+            r.raise_for_status(); batch=r.json(); break
+        else: raise RuntimeError("Binance rate limit persisted")
+        if not batch: break
+        rows.extend(batch); nxt=int(batch[-1][0])+STEP[interval]
+        if nxt<=cur: break
+        cur=nxt
+        time.sleep(.15)
+        if len(batch)<1500: break
+    if not rows: raise RuntimeError(f"No Binance data for {symbol} {interval}")
+    d=pd.DataFrame(rows,columns=["ts","open","high","low","close","volume","ct","qv","trades","tb","tq","x"])
+    d["time"]=pd.to_datetime(d.ts,unit="ms",utc=True)
+    for c in ["open","high","low","close","volume"]: d[c]=pd.to_numeric(d[c])
+    return d[["time","open","high","low","close","volume"]].drop_duplicates("time").sort_values("time")
 
-def pseudo_ohlc(x,freq):
-    # CoinGecko market_chart supplies sampled prices rather than exchange candles.
-    # We aggregate sampled observations into OHLC for reproducible research.
-    z=x.set_index("time")
-    o=z["close"].resample(freq).first()
-    h=z["close"].resample(freq).max()
-    l=z["close"].resample(freq).min()
-    c=z["close"].resample(freq).last()
-    v=z["volume"].resample(freq).sum()
-    return pd.DataFrame({"time":o.index,"open":o.values,"high":h.values,"low":l.values,"close":c.values,"volume":v.values}).dropna()
+def hyper(coin, interval, start, end):
+    body={"type":"candleSnapshot","req":{"coin":coin,"interval":interval,"startTime":start,"endTime":end}}
+    r=requests.post(HYPER,json=body,timeout=30); r.raise_for_status(); data=r.json()
+    if not data: raise RuntimeError(f"No Hyperliquid data for {coin} {interval}")
+    d=pd.DataFrame(data)
+    d["time"]=pd.to_datetime(d.t,unit="ms",utc=True)
+    for c in ["o","h","l","c","v"]: d[c]=pd.to_numeric(d[c])
+    return d.rename(columns={"o":"open","h":"high","l":"low","c":"close","v":"volume"})[["time","open","high","low","close","volume"]].drop_duplicates("time").sort_values("time")
 
-end=datetime.now(timezone.utc); start=end-timedelta(days=3650)
-for sym,coin in cfg["symbols"].items():
-    # Full history: daily auto-granularity.
-    d=get(coin,start,end)
-    daily=pseudo_ohlc(d,"1D")
+now=pd.Timestamp.now(tz="UTC")
+end=int(now.timestamp()*1000); start=int(datetime(2017,1,1,tzinfo=timezone.utc).timestamp()*1000)
+for sym,spec in cfg["symbols"].items():
+    if spec["source"]=="binance_futures":
+        daily=binance(spec["symbol"],"1d",start,end)
+        four=binance(spec["symbol"],"4h",start,end)
+    else:
+        daily=hyper(spec["symbol"],"1d",start,end)
+        four=hyper(spec["symbol"],"4h",end-5000*STEP["4h"],end)
+    daily=daily[daily.time+pd.Timedelta(days=1)<=now]
+    four=four[four.time+pd.Timedelta(hours=4)<=now]
     daily.to_parquet(OUT/f"{sym}_1d.parquet",index=False)
-
-    # Recent 100 days: explicit hourly, then aggregate to 4H.
-    s=end-timedelta(days=100)
-    h=get(coin,s,end,interval="hourly")
-    four=pseudo_ohlc(h,"4h")
     four.to_parquet(OUT/f"{sym}_4h_recent.parquet",index=False)
-
     (OUT/"metadata"/f"{sym}.json").write_text(json.dumps({
-        "coin_id":coin,"daily_start":start.isoformat(),"end":end.isoformat(),
-        "four_hour_start":s.isoformat(),"four_hour_end":end.isoformat(),
-        "source":"CoinGecko /coins/{id}/market_chart/range",
-        "four_hour_note":"4H candles are aggregated from CoinGecko hourly sampled market-chart observations."
+        "asset":sym,"source":spec["source"],"market":spec["symbol"],
+        "daily_rows":len(daily),"four_hour_rows":len(four),
+        "daily_start":daily.time.min().isoformat() if not daily.empty else None,
+        "daily_end":daily.time.max().isoformat() if not daily.empty else None,
+        "four_hour_start":four.time.min().isoformat() if not four.empty else None,
+        "four_hour_end":four.time.max().isoformat() if not four.empty else None,
+        "note":"Exact exchange OHLCV candles. No CoinGecko API key required."
     },indent=2))
+    print(f"{sym}: daily={len(daily):,} 4h={len(four):,} source={spec['source']}")
