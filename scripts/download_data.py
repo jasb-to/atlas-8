@@ -15,7 +15,7 @@ STEP={"1d":86400000,"4h":14400000}
 def binance(symbol, interval, start, end):
     rows=[]; cur=start
     while cur < end:
-        p={"symbol":symbol,"interval":interval,"startTime":cur,"endTime":end,"limit":1500}
+        p={"symbol":symbol,"interval":interval,"startTime":cur,"endTime":end,"limit":1000}
         for a in range(8):
             r=requests.get(BINANCE,params=p,timeout=30)
             if r.status_code==429:
