@@ -50,3 +50,5 @@ out=pd.DataFrame(rows)
 (ROOT/"results").mkdir(exist_ok=True)
 out.to_csv(ROOT/"results/walk_forward.csv",index=False)
 print(out.to_string(index=False))
+
+# Run the per-asset fingerprint/confirmation study in the same research job.\nimport runpy\nrunpy.run_path(str(ROOT / "scripts" / "asset_research.py"), run_name="__main__")\n
