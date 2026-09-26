@@ -27,7 +27,7 @@ def binance(symbol, interval, start, end):
         if nxt<=cur: break
         cur=nxt
         time.sleep(.15)
-        if len(batch)<1500: break
+        if len(batch)<1000: break
     if not rows: raise RuntimeError(f"No Binance data for {symbol} {interval}")
     d=pd.DataFrame(rows,columns=["ts","open","high","low","close","volume","ct","qv","trades","tb","tq","x"])
     d["time"]=pd.to_datetime(d.ts,unit="ms",utc=True)
@@ -46,7 +46,7 @@ def hyper(coin, interval, start, end):
 now=pd.Timestamp.now(tz="UTC")
 end=int(now.timestamp()*1000); start=int(datetime(2017,1,1,tzinfo=timezone.utc).timestamp()*1000)
 for sym,spec in cfg["symbols"].items():
-    if spec["source"]=="binance_futures":
+    if spec["source"]=="binance_spot":
         daily=binance(spec["symbol"],"1d",start,end)
         four=binance(spec["symbol"],"4h",start,end)
     else:
