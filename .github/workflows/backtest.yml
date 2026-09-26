@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Download CoinGecko data
+      - name: Download public exchange OHLCV data
         run: python scripts/download_data.py
       - name: Run backtests
         run: python scripts/run_backtest.py
