@@ -3,7 +3,7 @@ import unittest
 
 import pandas as pd
 
-from research.trendlines import Pivot, classify_line_state, fit_touch_trendlines
+from research.trendlines import Pivot, Trendline, classify_line_state, fit_touch_trendlines
 
 
 class TrendlineGeometryTests(unittest.TestCase):
@@ -52,6 +52,43 @@ class TrendlineGeometryTests(unittest.TestCase):
         )
         self.assertTrue(lines)
         self.assertAlmostEqual(lines[0].value_at(2), 10.2, places=6)
+
+    def test_pre_break_touch_is_not_reported_as_retest(self):
+        frame = self.candles(
+            [9.95, 9.96, 9.94, 9.97],
+            highs=[10.0, 10.0, 10.0, 10.0],
+            closes=[9.98, 9.97, 9.96, 9.98],
+        )
+        line = Trendline(
+            kind="resistance",
+            start=Pivot(0, 10.0, "resistance", 1),
+            end=Pivot(1, 10.0, "resistance", 2),
+            slope_per_bar=0.0,
+            tolerance=0.01,
+            touch_indices=(0, 1),
+            violations=(),
+        )
+        state = classify_line_state(frame, line, index=3, tolerance_pct=0.001)
+        self.assertFalse(state["retest_detected"])
+
+    def test_retest_requires_breakout_then_later_reclaim(self):
+        frame = self.candles(
+            [9.95, 9.96, 9.94, 10.08, 10.0, 10.05],
+            highs=[10.0, 10.0, 10.0, 10.25, 10.15, 10.2],
+            closes=[9.98, 9.97, 9.96, 10.2, 10.1, 10.12],
+        )
+        line = Trendline(
+            kind="resistance",
+            start=Pivot(0, 10.0, "resistance", 1),
+            end=Pivot(1, 10.0, "resistance", 2),
+            slope_per_bar=0.0,
+            tolerance=0.01,
+            touch_indices=(0, 1),
+            violations=(),
+        )
+        state = classify_line_state(frame, line, index=5, tolerance_pct=0.001)
+        self.assertTrue(state["retest_detected"])
+        self.assertEqual(state["retest_index"], 4)
 
 
 if __name__ == "__main__":
