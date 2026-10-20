@@ -1,0 +1,41 @@
+name: Trendline research validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "research/trendlines.py"
+      - "research/validate_kraken_trendlines.py"
+      - "tests/test_trendlines.py"
+      - ".github/workflows/trendline-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install audit dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Run geometry regression tests
+        run: python -m unittest discover -s tests -p 'test_trendlines.py' -v
+      - name: Fetch Kraken completed BTC/USD 4H candles and audit geometry
+        run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
+      - name: Upload raw candles and audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kraken-trendline-audit
+          path: results/trendline-audit/
+          if-no-files-found: warn
+          retention-days: 14
