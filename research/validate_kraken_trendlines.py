@@ -155,6 +155,61 @@ def audit(
     }
 
 
+
+def plot_audit(frame: pd.DataFrame, result: dict, output_path: Path) -> None:
+    """Render recent BTC candles, anchored candidates, and each counted wick contact."""
+    import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
+
+    cutoff = frame["timestamp"].iloc[-1] - pd.Timedelta(days=30)
+    visible = frame.loc[frame["timestamp"] >= cutoff]
+    fig, ax = plt.subplots(figsize=(15, 7))
+    for row in visible.itertuples(index=False):
+        x = mdates.date2num(row.timestamp.to_pydatetime())
+        color = "black" if row.close >= row.open else "grey"
+        ax.vlines(x, row.low, row.high, color=color, linewidth=0.7)
+        ax.vlines(x, min(row.open, row.close), max(row.open, row.close), color=color, linewidth=2)
+
+    for line in result["lines"]:
+        start_time = pd.Timestamp(line["start_time"])
+        end_time = pd.Timestamp(line["end_time"])
+        if start_time < cutoff or end_time < cutoff:
+            continue
+        start_idx = int(line["start_index"])
+        slope = float(line["slope_per_4h_candle"])
+        start_price = float(line["start_wick_price"])
+        projected_price = start_price + slope * (len(frame) - 1 - start_idx)
+        if max(start_price, projected_price) < visible["low"].min() or min(start_price, projected_price) > visible["high"].max():
+            continue
+        ax.plot(
+            [start_time, frame["timestamp"].iloc[-1]],
+            [start_price, projected_price],
+            linewidth=1.2,
+            alpha=0.8,
+            label=f'{line["kind"]} · {line["touch_count"]} touches · {line["current_distance_pct"]:.2f}%',
+        )
+        ax.scatter(
+            [start_time, end_time],
+            [line["start_wick_price"], line["end_wick_price"]],
+            s=25,
+        )
+        for touch in line["touches"]:
+            touch_time = pd.Timestamp(touch["time"])
+            if touch_time >= cutoff:
+                ax.scatter(touch_time, touch["wick_price"], marker="x", s=18)
+
+    ax.set_xlim(cutoff, frame["timestamp"].iloc[-1] + pd.Timedelta(hours=4))
+    ax.set_ylim(float(visible["low"].min()) * 0.98, float(visible["high"].max()) * 1.02)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
+    ax.grid(True, alpha=0.2)
+    ax.set_title(f'{result["pair"]} {result["interval_minutes"]}m — recent-anchored trendline audit')
+    ax.set_ylabel("Price (USD)")
+    ax.legend(loc="upper left", fontsize=7, ncol=2)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pair", default="XBTUSD")
@@ -169,6 +224,7 @@ def main() -> None:
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     frame.to_csv(out / "kraken_ohlc.csv", index=False)
+    plot_audit(frame, result, out / "trendline_audit.png")
     (out / "trendline_audit.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "lines"}, indent=2))
     print(f"Detailed line/touch audit: {out / 'trendline_audit.json'}")
