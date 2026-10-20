@@ -90,6 +90,24 @@ class TrendlineGeometryTests(unittest.TestCase):
         self.assertTrue(state["retest_detected"])
         self.assertEqual(state["retest_index"], 4)
 
+    def test_broken_state_persists_after_initial_break_candle(self):
+        frame = self.candles(
+            [10.0, 9.8, 9.7, 9.6, 9.5],
+            highs=[11.0, 10.5, 10.2, 10.0, 9.9],
+            closes=[10.5, 9.9, 9.8, 9.7, 9.6],
+        )
+        line = Trendline(
+            kind="support",
+            start=Pivot(0, 10.0, "support", 1),
+            end=Pivot(1, 10.0, "support", 2),
+            slope_per_bar=0.0,
+            tolerance=0.01,
+            touch_indices=(0, 1),
+            violations=(),
+        )
+        state = classify_line_state(frame, line, index=4, tolerance_pct=0.001)
+        self.assertEqual(state["state"], "breakdown")
+
 
 if __name__ == "__main__":
     unittest.main()
