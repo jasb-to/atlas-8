@@ -64,7 +64,10 @@ def fetch_ohlc(pair: str = "XBTUSD", interval: int = 240) -> pd.DataFrame:
     return frame
 
 
-def audit(frame: pd.DataFrame, min_touches: int, tolerance_pct: float) -> dict:
+def audit(
+    frame: pd.DataFrame, min_touches: int, tolerance_pct: float,
+    pair: str = "XBTUSD", interval: int = 240,
+) -> dict:
     pivots = find_wick_pivots(frame, left_bars=3, right_bars=3)
     lines = []
     for kind in ("support", "resistance"):
@@ -126,8 +129,8 @@ def audit(frame: pd.DataFrame, min_touches: int, tolerance_pct: float) -> dict:
     last = frame.iloc[-1]
     return {
         "source": "Kraken Spot public OHLC API",
-        "pair": "XBTUSD",
-        "interval_minutes": 240,
+        "pair": pair,
+        "interval_minutes": interval,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "first_completed_candle_utc": frame.iloc[0]["timestamp"].isoformat(),
         "last_completed_candle_utc": last["timestamp"].isoformat(),
@@ -162,7 +165,7 @@ def main() -> None:
     args = parser.parse_args()
 
     frame = fetch_ohlc(args.pair, args.interval)
-    result = audit(frame, args.min_touches, args.tolerance_pct)
+    result = audit(frame, args.min_touches, args.tolerance_pct, args.pair, args.interval)
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     frame.to_csv(out / "kraken_ohlc.csv", index=False)
