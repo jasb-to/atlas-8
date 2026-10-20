@@ -83,7 +83,8 @@ def fit_touch_trendlines(
 
     tolerance_pct is a fraction of line price (0.0015 = 0.15%). For support, lows
     must approach the line from above; for resistance, highs must approach from below.
-    A line is rejected when any candle penetrates it by more than max_penetration_pct.
+    Candidate quality is checked only between the two anchors. Later breaks remain
+    observable and must not erase a historically valid line from the research output.
     """
     _validate_ohlc(candles)
     if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0:
@@ -103,9 +104,11 @@ def fit_touch_trendlines(
                 continue
             seen.add((start.index, end.index))
             slope = (end.price - start.price) / (end.index - start.index)
-            idx = np.arange(start.index, len(candles))
+            # Validate the line only over its formation segment. A later breakout or
+            # breakdown is an event to report, not a reason to erase the old trendline.
+            idx = np.arange(start.index, end.index + 1)
             values = start.price + slope * (idx - start.index)
-            relevant_wick = wick[start.index:]
+            relevant_wick = wick[start.index : end.index + 1]
             distance = relevant_wick - values
             tol = np.maximum(np.abs(values) * tolerance_pct, 1e-12)
             penetration = np.maximum(np.abs(values) * max_penetration_pct, 1e-12)
