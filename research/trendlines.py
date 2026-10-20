@@ -121,9 +121,25 @@ def fit_touch_trendlines(
                 touch_mask = (distance >= -penetration) & (distance <= tol)
                 violation_mask = distance < -penetration
 
-            touch_indices = tuple((np.flatnonzero(touch_mask) + start.index).tolist())
+            # Count independent swing-wick contacts, not every consecutive candle
+            # that happens to sit inside the tolerance band. This prevents a 10-candle
+            # grind along a line being reported as 10 separate touches.
+            pivot_indices = np.array(
+                [p.index for p in points if start.index <= p.index <= end.index],
+                dtype=int,
+            )
+            pivot_wicks = wick[pivot_indices] if len(pivot_indices) else np.array([])
+            pivot_line_values = start.price + slope * (pivot_indices - start.index)
+            pivot_distances = pivot_wicks - pivot_line_values
+            pivot_tolerances = np.maximum(np.abs(pivot_line_values) * tolerance_pct, 1e-12)
+            pivot_penetrations = np.maximum(np.abs(pivot_line_values) * max_penetration_pct, 1e-12)
+            if kind == "resistance":
+                pivot_distances = -pivot_distances
+            pivot_touch_mask = (pivot_distances >= -pivot_penetrations) & (pivot_distances <= pivot_tolerances)
+            touch_indices = tuple(pivot_indices[np.flatnonzero(pivot_touch_mask)].tolist())
             violations = tuple((np.flatnonzero(violation_mask) + start.index).tolist())
-            # Both anchor candles must count as contacts, and touches are distinct candles.
+            # Both anchor candles must count as contacts; all contacts are confirmed
+            # same-side swing pivots, while every intervening candle is checked for penetration.
             if len(touch_indices) < min_touches or violations:
                 continue
             lines.append(
