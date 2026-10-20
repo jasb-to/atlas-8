@@ -171,12 +171,15 @@ def classify_line_state(
     tol = abs(line_now) * tolerance_pct
 
     if line.kind == "resistance":
-        broken = float(row["close"]) > line_now + tol and float(prev["close"]) <= line_prev + abs(line_prev) * tolerance_pct
+        # State is persistent while price remains beyond the line, not only on the
+        # single candle that first crossed it.
+        broken = float(row["close"]) > line_now + tol
         near = abs(float(row["high"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
         state = "breakout" if broken else ("approaching" if float(row["close"]) < line_now and line_now - float(row["close"]) <= tol * 3 else "watch")
         retest_side = "support"
     else:
-        broken = float(row["close"]) < line_now - tol and float(prev["close"]) >= line_prev - abs(line_prev) * tolerance_pct
+        # Keep a broken line marked as broken until price closes back across it.
+        broken = float(row["close"]) < line_now - tol
         near = abs(float(row["low"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
         state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and float(row["close"]) - line_now <= tol * 3 else "watch")
         retest_side = "resistance"
