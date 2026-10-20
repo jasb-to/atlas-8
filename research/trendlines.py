@@ -181,24 +181,47 @@ def classify_line_state(
         state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and float(row["close"]) - line_now <= tol * 3 else "watch")
         retest_side = "resistance"
 
+    # A retest is only valid after a confirmed close through the line. Find the
+    # latest such break first, then inspect only subsequent candles; otherwise an
+    # ordinary pre-break touch can be mislabeled as a retest.
     retest = False
     retest_index = None
-    if line.kind == "resistance" and line.end.index < i:
-        for j in range(max(line.end.index + 1, i - retest_lookahead_bars), i + 1):
+    scan_start = max(line.end.index + 1, i - retest_lookahead_bars)
+    prior_breaks = []
+    for k in range(scan_start, i):
+        current = candles.iloc[k]
+        previous = candles.iloc[k - 1]
+        value = line.value_at(k)
+        previous_value = line.value_at(k - 1)
+        if line.kind == "resistance":
+            crossed = (
+                float(current["close"]) > value + abs(value) * tolerance_pct
+                and float(previous["close"]) <= previous_value + abs(previous_value) * tolerance_pct
+            )
+        else:
+            crossed = (
+                float(current["close"]) < value - abs(value) * tolerance_pct
+                and float(previous["close"]) >= previous_value - abs(previous_value) * tolerance_pct
+            )
+        if crossed:
+            prior_breaks.append(k)
+
+    if prior_breaks:
+        break_index = prior_breaks[-1]
+        for j in range(break_index + 1, i + 1):
             r = candles.iloc[j]
             v = line.value_at(j)
-            contacted = float(r["low"]) <= v + abs(v) * tolerance_pct
-            held = float(r["close"]) >= v - abs(v) * tolerance_pct
-            if contacted and held and float(r["close"]) > v:
+            if line.kind == "resistance":
+                contacted = float(r["low"]) <= v + abs(v) * tolerance_pct
+                held = float(r["close"]) >= v - abs(v) * tolerance_pct
+                confirmed_side = float(r["close"]) > v
+            else:
+                contacted = float(r["high"]) >= v - abs(v) * tolerance_pct
+                held = float(r["close"]) <= v + abs(v) * tolerance_pct
+                confirmed_side = float(r["close"]) < v
+            if contacted and held and confirmed_side:
                 retest, retest_index = True, j
-    elif line.kind == "support" and line.end.index < i:
-        for j in range(max(line.end.index + 1, i - retest_lookahead_bars), i + 1):
-            r = candles.iloc[j]
-            v = line.value_at(j)
-            contacted = float(r["high"]) >= v - abs(v) * tolerance_pct
-            held = float(r["close"]) <= v + abs(v) * tolerance_pct
-            if contacted and held and float(r["close"]) < v:
-                retest, retest_index = True, j
+                break
 
     return {
         "index": i,
