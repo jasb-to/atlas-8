@@ -26,6 +26,15 @@ class SheldonStrategyTests(unittest.TestCase):
     def test_opposite_direction_is_separate(self):
         self.assertEqual(len(consolidate_setups([event(1),event(2,"short")],frame())),2)
 
+    def test_structural_target_uses_prior_data_and_fib_extension_fallback(self):
+        candles = frame()
+        got = replay_trades([event(3)], candles, target_mode="structure_fib")
+        self.assertEqual(len(got), 1)
+        self.assertEqual(got[0]["target_mode"], "structure_fib")
+        self.assertIn(got[0]["target_type"], {"prior_structure", "fib_1.272_extension"})
+        if got[0]["target_type"] == "fib_1.272_extension":
+            self.assertGreater(got[0]["target_price"], got[0]["entry_price"])
+
     def test_replay_enters_next_open_and_stop_wins(self):
         candles=frame(); candles.loc[2,"low"]=90
         got=replay_trades([event(1)],candles)
