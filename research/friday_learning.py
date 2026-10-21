@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -79,11 +80,40 @@ def _counts(values: Iterable[Any]) -> dict[str, int]:
     return dict(sorted(result.items()))
 
 
+def _walk_forward_variant(trades: list[dict[str, Any]], split_time: str,
+                          last_candle_time: str, max_hold_bars: int = 18) -> dict[str, Any]:
+    """Chronological train/test summary; exclude trades crossing split or right-censored at data end."""
+    split = datetime.fromisoformat(split_time.replace("Z", "+00:00"))
+    last = datetime.fromisoformat(last_candle_time.replace("Z", "+00:00"))
+    train, test, excluded = [], [], 0
+    for trade in trades:
+        try:
+            entry = datetime.fromisoformat(str(trade["entry_time"]).replace("Z", "+00:00"))
+            exit_time = datetime.fromisoformat(str(trade["exit_time"]).replace("Z", "+00:00"))
+        except (KeyError, TypeError, ValueError):
+            excluded += 1
+            continue
+        held = int(trade.get("bars_held", 0) or 0)
+        censored = trade.get("exit_reason") == "time_exit" and held < max_hold_bars and exit_time >= last
+        if censored or exit_time > last:
+            excluded += 1
+        elif exit_time < split:
+            train.append(trade)
+        elif entry >= split:
+            test.append(trade)
+        else:
+            # A position spanning the split is not counted in either period.
+            excluded += 1
+    return {"train": _trade_stats(train), "test": _trade_stats(test), "excluded_cross_split_or_censored": excluded}
+
+
 def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str, Any]],
                          events: list[dict[str, Any]] | None = None,
                          structural_trades: list[dict[str, Any]] | None = None,
                          entry2_trades: list[dict[str, Any]] | None = None,
-                         entry2_structural_trades: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+                         entry2_structural_trades: list[dict[str, Any]] | None = None,
+                         split_time: str | None = None,
+                         last_candle_time: str | None = None) -> dict[str, Any]:
     statuses = _counts(row.get("status", "unknown") for row in decisions)
     blockers = _counts(blocker for row in decisions for blocker in (row.get("blockers") or []))
     model_statuses = _counts((row.get("model") or {}).get("status", "unknown") for row in decisions)
@@ -117,6 +147,17 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
         "by_strategy_version": {key: _trade_stats(value) for key, value in sorted(by_version.items())},
         "by_direction": {key: _trade_stats(value) for key, value in sorted(by_direction.items())},
         "directional_forward_returns": movement,
+        "walk_forward": ({
+            "status": "ready",
+            "split_time": split_time,
+            "last_candle_time": last_candle_time,
+            "variants": {
+                "entry1_fixed_r": _walk_forward_variant(trades, split_time, last_candle_time),
+                "entry1_structural_targets": _walk_forward_variant(structural_trades or [], split_time, last_candle_time),
+                "entry2_fixed_r": _walk_forward_variant(entry2_trades or [], split_time, last_candle_time),
+                "entry2_structural_targets": _walk_forward_variant(entry2_structural_trades or [], split_time, last_candle_time),
+            },
+        } if split_time and last_candle_time else {"status": "not_configured"}),
         "learning_policy": {
             "automatic_parameter_changes": False,
             "model_is_advisory_until_walk_forward_validation": True,
@@ -133,12 +174,14 @@ def main() -> int:
     parser.add_argument("--structural-trades", default=None, help="JSONL Entry 1 replay using prior-structure/Fibonacci-extension targets")
     parser.add_argument("--entry2-trades", default=None, help="JSONL replay for confirmed Entry 2 continuation triggers")
     parser.add_argument("--entry2-structural-trades", default=None, help="JSONL Entry 2 replay using prior-structure/Fibonacci-extension targets")
+    parser.add_argument("--split-time", default=None, help="ISO timestamp splitting chronological train and test periods")
+    parser.add_argument("--last-candle-time", default=None, help="ISO timestamp of final candle for censoring incomplete trades")
     parser.add_argument("--output", default="results/friday-learning-report.json")
     args = parser.parse_args()
     report = build_learning_report(
         read_jsonl(args.decisions), read_jsonl(args.trades), read_jsonl(args.events),
         read_jsonl(args.structural_trades), read_jsonl(args.entry2_trades),
-        read_jsonl(args.entry2_structural_trades),
+        read_jsonl(args.entry2_structural_trades), args.split_time, args.last_candle_time,
     )
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
