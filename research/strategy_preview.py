@@ -18,6 +18,7 @@ LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
 RETEST_TOL = 0.003
 RETEST_BARS = 18              # 72 hours; allow the setup to take days
+CONTINUATION_BARS = 6         # 24 hours after retest to confirm the reaction break
 LOOKBACK = 180
 MAX_LINE_AGE = 90
 MAX_DISTANCE = 0.025
@@ -198,9 +199,15 @@ def causal_replay(raw):
             # Entry 3 continuation through that reaction structure.
             if age<=RETEST_BARS and contact and held and not e.get("retest_confirmed"):
                 e.update({"retest_confirmed":True,"retest_confirmed_time":row.timestamp.isoformat(),
+                    "retest_confirmed_bar_index":i,
                     "retest_close":close_i,"retest_high":float(row.high),"retest_low":float(row.low),
                     "outcome":"retest_held_waiting_continuation","outcome_bars":age})
                 continue
+            # Invalidation always wins over a same-candle continuation trigger.
+            # This avoids reporting an add after the breakout structure has failed.
+            if invalid:
+                e.update({"outcome":"failed_break","outcome_bars":age,"failure_time":row.timestamp.isoformat()})
+                active.remove(a); continue
             if e.get("retest_confirmed") and not e.get("continuation_add_time"):
                 trigger = float(e["retest_high"]) if e["direction"]=="long" else float(e["retest_low"])
                 continued = float(row.close)>trigger if e["direction"]=="long" else float(row.close)<trigger
@@ -210,10 +217,12 @@ def causal_replay(raw):
                         "continuation_add_close":close_i,"continuation_trigger":trigger,
                         "outcome":"continuation_add_confirmed","outcome_bars":age})
                     active.remove(a); continue
-            if invalid:
-                e.update({"outcome":"failed_break","outcome_bars":age,"failure_time":row.timestamp.isoformat()})
-                active.remove(a); continue
-            if age>=RETEST_BARS:
+                retest_i = int(e.get("retest_confirmed_bar_index", i))
+                if i - retest_i >= CONTINUATION_BARS:
+                    e.update({"outcome":"no_continuation_within_window",
+                        "outcome_bars":age,"continuation_expired_time":row.timestamp.isoformat()})
+                    active.remove(a); continue
+            elif age>=RETEST_BARS and not e.get("retest_confirmed"):
                 e.update({"outcome":"no_retest_within_window","outcome_bars":age})
                 active.remove(a)
     for e in events:
@@ -304,7 +313,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades) for name in ("target","stop","time_exit")}},
         "latest_momentum_context":momentum_context(frame,len(frame)-1),
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
-            ("retest_held_waiting_continuation","continuation_add_confirmed","failed_break","no_retest_within_window","pending")},
+            ("retest_held_waiting_continuation","continuation_add_confirmed","failed_break","no_retest_within_window","pending","no_continuation_within_window")},
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
             "entry_2":"post-break retest within 18 bars / 72h, close holds breakout side; wait, do not add yet",
             "add":"Entry 2 add only after a later closed candle breaks the retest reaction high/low in breakout direction",
