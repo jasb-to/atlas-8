@@ -115,6 +115,15 @@ def _num(x):
         return round(v,4) if np.isfinite(v) else None
     except (TypeError, ValueError): return None
 
+def write_jsonl(path, rows):
+    """Write one valid JSON object per physical line for downstream replay reports."""
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+
 def causal_replay(raw):
     frame = indicators(raw.sort_values("timestamp").reset_index(drop=True))
     events, active = [], []
@@ -363,8 +372,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         ("trade_replay.jsonl", trades),
         ("structural_target_replay.jsonl", trades_structural),
     ):
-        payload = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows)
-        (out / filename).write_text(payload, encoding="utf-8")
+        write_jsonl(out / filename, rows)
     md=["# 4H Break Strategy Preview — "+pair,"",f"- Generated: {result['generated_at_utc']}",
         f"- Last completed candle: {last.timestamp.isoformat()}",f"- Last close: {float(last.close):.6f}",
         f"- Daily bias (lagged): {last.daily_bias}",f"- 4H EMA 8/21: {_num(last.ema8_4h)} / {_num(last.ema21_4h)}",
