@@ -77,8 +77,11 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 all_rows.append(row_event)
                 if store.configured:
                     store.record_trade_event(row_event)
+                    lifecycle_state_key = hashlib.sha256(
+                        f"{row_event['event_key']}|{normalized.get('outcome', 'pending')}|{normalized.get('event_add', '')}".encode()
+                    ).hexdigest()
                     store.record_archive(make_archive_record(
-                        record_key=row_event["event_key"], record_type="setup_lifecycle",
+                        record_key=lifecycle_state_key, record_type="setup_lifecycle",
                         pair=pair, timeframe="4H", signal_time=row_event.get("signal_time"),
                         payload=normalized,
                     ))
