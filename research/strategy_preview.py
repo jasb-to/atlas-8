@@ -56,9 +56,9 @@ def line_retest(frame, line, break_i, i):
         row, lv = frame.iloc[j], line.value_at(j)
         tol = abs(lv)*RETEST_TOL
         if line.kind == "resistance":
-            contact, held = float(row.low) <= lv+tol, float(row.close) >= lv-tol
+            contact, held = float(row.low) <= lv+tol, float(row.close) >= lv
         else:
-            contact, held = float(row.high) >= lv-tol, float(row.close) <= lv+tol
+            contact, held = float(row.high) >= lv-tol, float(row.close) <= lv
         if contact: return True, j, held
     return False, None, False
 
@@ -119,10 +119,10 @@ def causal_replay(raw):
             lv=line.start.price+line.slope_per_bar*(i-global_start)
             row=frame.iloc[i]; tol=abs(lv)*RETEST_TOL; close_i=float(row.close)
             if line.kind=="resistance":
-                contact=float(row.low)<=lv+tol; held=close_i>=lv-tol
+                contact=float(row.low)<=lv+tol; held=close_i>=lv
                 invalid=close_i<lv-abs(lv)*0.003
             else:
-                contact=float(row.high)>=lv-tol; held=close_i<=lv+tol
+                contact=float(row.high)>=lv-tol; held=close_i<=lv
                 invalid=close_i>lv+abs(lv)*0.003
             if age<=RETEST_BARS and contact and held:
                 e.update({"event_add":"RETEST_HOLD_ADD","add_signal_time":row.timestamp.isoformat(),
@@ -135,7 +135,7 @@ def causal_replay(raw):
                 e.update({"outcome":"no_retest_within_window","outcome_bars":age})
                 active.remove(a)
     for e in events:
-        matches=frame.index[frame.timestamp.astype(str)==e["signal_time"]]
+        matches=frame.index[frame.timestamp == pd.Timestamp(e["signal_time"])]
         if not len(matches): continue
         si=int(matches[0]); entry=float(frame.iloc[si].close)
         for h in (3,6,12,18):
