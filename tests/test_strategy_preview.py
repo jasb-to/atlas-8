@@ -1,9 +1,10 @@
 """Focused tests for the causal 4H break strategy preview."""
 import unittest
+from unittest.mock import patch
 
 import pandas as pd
 
-from research.strategy_preview import break_crossed, line_retest, momentum_context
+from research.strategy_preview import break_crossed, causal_replay, line_retest, momentum_context
 from research.trendlines import Pivot, Trendline
 
 
@@ -61,6 +62,24 @@ class StrategyPreviewTests(unittest.TestCase):
     def test_retest_window_allows_multiple_days(self):
         from research.strategy_preview import RETEST_BARS
         self.assertEqual(RETEST_BARS * 4, 72)
+
+
+    def test_live_preview_does_not_retain_stale_line_when_latest_has_none(self):
+        n = 100
+        frame = pd.DataFrame({
+            "timestamp": pd.date_range("2026-10-01", periods=n, freq="4h", tz="UTC"),
+            "open": [100.0 + i * 0.1 for i in range(n)],
+            "high": [101.0 + i * 0.1 for i in range(n)],
+            "low": [99.0 + i * 0.1 for i in range(n)],
+            "close": [100.5 + i * 0.1 for i in range(n)],
+            "volume": [1000.0] * n,
+        })
+        with patch("research.strategy_preview.find_wick_pivots", return_value=[]), \\
+             patch("research.strategy_preview.fit_touch_trendlines", return_value=[]):
+            _, status, enriched = causal_replay(frame)
+        self.assertEqual(status["state"], "no_qualifying_line")
+        self.assertEqual(status["last_closed_candle"], enriched.iloc[-1].timestamp.isoformat())
+        self.assertAlmostEqual(status["close"], float(enriched.iloc[-1].close), places=5)
 
 
 if __name__ == "__main__":
