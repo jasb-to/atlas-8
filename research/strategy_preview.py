@@ -246,6 +246,16 @@ def causal_replay(raw):
         e["forward_returns_note"]="Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     return events,status,frame
 
+def entry2_replay_events(events):
+    """Build a separate replay sample from confirmed continuation closes only."""
+    return [
+        {**event, "break_signal_time": event["signal_time"],
+         "signal_time": event["continuation_add_time"], "entry_type": "ENTRY_2_CONTINUATION"}
+        for event in events
+        if event.get("outcome") == "continuation_add_confirmed" and event.get("continuation_add_time")
+    ]
+
+
 def latest_setup_state(events, last_closed_candle):
     """Summarise the newest recent probe/add lifecycle for monitoring output."""
     if not events:
@@ -296,12 +306,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     trades_structural=replay_trades(setups,frame,target_mode="structure_fib")
     # Entry 2 replay enters only after the retest reaction extreme is broken by
     # a later closed candle. This is a separate sample from the Entry 1 probe.
-    entry2_setups=[
-        {**event, "break_signal_time": event["signal_time"],
-         "signal_time": event["continuation_add_time"]}
-        for event in setups
-        if event.get("outcome") == "continuation_add_confirmed" and event.get("continuation_add_time")
-    ]
+    entry2_setups=entry2_replay_events(setups)
     entry2_trades=replay_trades(entry2_setups,frame)
     entry2_trades_structural=replay_trades(entry2_setups,frame,target_mode="structure_fib")
     last=frame.iloc[-1]
