@@ -84,8 +84,9 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
     blockers = _counts(blocker for row in decisions for blocker in (row.get("blockers") or []))
     model_statuses = _counts((row.get("model") or {}).get("status", "unknown") for row in decisions)
     movement = {}
+    event_rows = events if events is not None else []
     for horizon in (3, 6, 12, 18):
-        values = [_finite(row.get(f"forward_{horizon}_bar_return_pct")) for row in trades]
+        values = [_finite(row.get(f"forward_{horizon}_bar_return_pct")) for row in event_rows]
         values = [v for v in values if v is not None]
         movement[f"{horizon}_bar"] = {
             "observations": len(values),
