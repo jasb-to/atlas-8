@@ -44,7 +44,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             latest = _utc(result["last_completed_candle_utc"])
             row = {
                 "pair": pair, "status": "ok", "last_completed_candle_utc": latest.isoformat(),
-                "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state"),
+                "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
                 "friday_decision": result["friday_decision"].get("state"),
                 "break_event_count": result["event_count"],
                 "persistence": "configured" if store.configured else "not_configured",
