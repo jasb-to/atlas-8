@@ -13,13 +13,15 @@ class FridayLearningReportTests(unittest.TestCase):
             {"direction": "long", "net_equity_return_pct": 1.0, "exit_reason": "target", "target_type": "prior_structure", "strategy_version": "v1"},
             {"direction": "short", "net_equity_return_pct": -0.5, "exit_reason": "stop", "target_type": "fib_1.272_extension", "strategy_version": "v1"},
         ]
-        report = build_learning_report(decisions, trades)
+        report = build_learning_report(decisions, trades, [{"forward_3_bar_return_pct": 2.0}])
         self.assertEqual(report["decision_count"], 2)
         self.assertEqual(report["no_trade_count"], 1)
         self.assertEqual(report["replay"]["trades"], 2)
         self.assertEqual(report["replay"]["win_rate_pct"], 50.0)
         self.assertEqual(report["replay"]["exit_reasons"], {"stop": 1, "target": 1})
         self.assertFalse(report["learning_policy"]["automatic_parameter_changes"])
+        self.assertEqual(report["directional_forward_returns"]["3_bar"]["observations"], 1)
+        self.assertEqual(report["directional_forward_returns"]["3_bar"]["mean_directional_return_pct"], 2.0)
 
     def test_empty_report_is_valid_json_data(self):
         report = build_learning_report([], [])
