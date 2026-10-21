@@ -13,6 +13,8 @@ from typing import Any, Mapping
 
 import requests
 
+from research.signal_journal import _json_safe
+
 TRADES_TABLE = "friday_trade_events"
 RUNS_TABLE = "friday_cron_runs"
 ALERTS_TABLE = "friday_alert_deliveries"
@@ -137,7 +139,7 @@ class SupabaseFridayStore:
 def make_trade_event(*, pair: str, timeframe: str, event: Mapping[str, Any],
                      run_id: str, strategy_version: str = "friday-price-action-v1") -> dict[str, Any]:
     """Normalize a detected event into an idempotent row."""
-    return {
+    return _json_safe({
         "event_key": event_key(pair, timeframe, event),
         "pair": pair.upper(),
         "timeframe": timeframe,
@@ -155,13 +157,13 @@ def make_trade_event(*, pair: str, timeframe: str, event: Mapping[str, Any],
         "failure_time": event.get("failure_time"),
         "run_id": run_id,
         "evidence": dict(event),
-    }
+    })
 
 
 def make_cron_run(*, run_id: str, status: str, pair_results: list[Mapping[str, Any]],
                   started_at: str, finished_at: str | None = None,
                   error: str | None = None) -> dict[str, Any]:
-    return {
+    return _json_safe({
         "run_id": run_id,
         "started_at": started_at,
         "finished_at": finished_at or utc_now(),
@@ -169,7 +171,7 @@ def make_cron_run(*, run_id: str, status: str, pair_results: list[Mapping[str, A
         "pairs_checked": len(pair_results),
         "pair_results": list(pair_results),
         "error": error,
-    }
+    })
 
 
 
@@ -178,7 +180,7 @@ def make_archive_record(*, record_key: str, record_type: str, pair: str,
                         payload: Mapping[str, Any],
                         strategy_version: str = "friday-price-action-v1") -> dict[str, Any]:
     """Build a JSON-safe, idempotent long-horizon research archive row."""
-    return {
+    return _json_safe({
         "record_key": record_key,
         "record_type": record_type,
         "pair": pair.upper(),
@@ -186,4 +188,4 @@ def make_archive_record(*, record_key: str, record_type: str, pair: str,
         "strategy_version": strategy_version,
         "signal_time": signal_time,
         "payload": dict(payload),
-    }
+    })
