@@ -5,13 +5,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "research/trendlines.py"
-      - "research/validate_kraken_trendlines.py"
-      - "research/strategy_preview.py"
-      - "research/sheldon_strategy.py"
-      - "tests/test_trendlines.py"
-      - "tests/test_strategy_preview.py"
-      - "tests/test_sheldon_strategy.py"
+      - "research/**"
+      - "tests/**"
       - ".github/workflows/trendline-validation.yml"
 
 permissions:
@@ -31,25 +26,21 @@ jobs:
           cache: pip
       - name: Install research dependencies
         run: python -m pip install --upgrade pip pandas numpy requests matplotlib
-      - name: Run trendline geometry regression tests
-        run: python -m unittest discover -s tests -p 'test_trendlines.py' -v
-      - name: Run causal strategy regression tests
-        run: python -m unittest discover -s tests -p 'test_strategy_preview.py' -v
-      - name: Run Sheldon setup and trade replay tests
-        run: python -m unittest discover -s tests -p 'test_sheldon_strategy.py' -v
+      - name: Run all causal research regression tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Fetch Kraken BTC/USD 4H data and audit geometry
         run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
-      - name: Replay 4H break strategy and build current preview
+      - name: Replay 4H strategy and build BTC preview
         run: python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
       - name: Fetch Kraken VIRTUAL/USD 4H data and audit geometry
         run: python -m research.validate_kraken_trendlines --pair VIRTUALUSD --interval 240 --output-dir results/virtual-trendline-audit
-      - name: Replay VIRTUAL/USD 4H strategy and build current preview
+      - name: Replay 4H strategy and build VIRTUAL preview
         run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual-strategy-preview
-      - name: Upload live data, geometry and strategy preview
+      - name: Upload live data, geometry, tests and strategy previews
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-8-btc-4h-strategy-preview
+          name: atlas-8-btc-virtual-4h-research-preview
           path: |
             results/trendline-audit/
             results/strategy-preview/
