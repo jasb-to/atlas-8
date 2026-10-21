@@ -37,6 +37,18 @@ jobs:
         run: python -m research.validate_kraken_trendlines --pair VIRTUALUSD --interval 240 --output-dir results/virtual-trendline-audit
       - name: Replay 4H strategy and build VIRTUAL preview
         run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual-strategy-preview
+      - name: Validate learning reports from fresh replay exports
+        run: |
+          python -m research.friday_learning \
+            --decisions results/strategy-preview/decision_journal.jsonl \
+            --trades results/strategy-preview/trade_replay.jsonl \
+            --events results/strategy-preview/break_events.jsonl \
+            --output results/strategy-preview/learning_report.json
+          python -m research.friday_learning \
+            --decisions results/virtual-strategy-preview/decision_journal.jsonl \
+            --trades results/virtual-strategy-preview/trade_replay.jsonl \
+            --events results/virtual-strategy-preview/break_events.jsonl \
+            --output results/virtual-strategy-preview/learning_report.json
       - name: Upload live data, geometry, tests and strategy previews
         if: always()
         uses: actions/upload-artifact@v4
