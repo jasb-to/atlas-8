@@ -42,7 +42,6 @@ def fetch_ohlc(pair: str = "XBTUSD", interval: int = 240) -> pd.DataFrame:
     if pair_key is None:
         raise RuntimeError(f"No OHLC pair data in Kraken response: {list(result)}")
 
-    # Kraken row format: time, open, high, low, close, vwap, volume, trade_count.
     rows = result[pair_key]
     frame = pd.DataFrame(
         rows,
@@ -54,8 +53,7 @@ def fetch_ohlc(pair: str = "XBTUSD", interval: int = 240) -> pd.DataFrame:
     frame["trades"] = pd.to_numeric(frame["trades"], errors="raise").astype(int)
     frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
 
-    # REST OHLC always includes the current not-yet-committed candle as the final row.
-    # Drop it explicitly; use only candles whose interval has fully elapsed.
+    # Kraken REST OHLC includes the current, potentially incomplete candle.
     now = pd.Timestamp.now(tz="UTC")
     candle_end = frame["timestamp"] + pd.Timedelta(minutes=interval)
     frame = frame.loc[candle_end <= now].reset_index(drop=True)
@@ -155,14 +153,47 @@ def audit(
     }
 
 
-
 def plot_audit(frame: pd.DataFrame, result: dict, output_path: Path) -> None:
-    """Render recent BTC candles, anchored candidates, and each counted wick contact."""
+    """Plot a small, deduplicated set of recent lines near price, plus their real wick contacts."""
     import matplotlib.dates as mdates
     import matplotlib.pyplot as plt
 
     cutoff = frame["timestamp"].iloc[-1] - pd.Timedelta(days=30)
+    cutoff_index = int(frame["timestamp"].searchsorted(cutoff))
     visible = frame.loc[frame["timestamp"] >= cutoff]
+    last_close = float(frame.iloc[-1]["close"])
+
+    # The full JSON retains historical diagnostics. The chart only shows recent,
+    # price-relevant candidates so stale, distant projections cannot swamp the view.
+    eligible = [
+        row for row in result["lines"]
+        if int(row["start_index"]) >= cutoff_index
+        and int(row["end_index"]) >= cutoff_index
+        and abs(float(row["current_line_price"]) - last_close) / last_close <= 0.06
+    ]
+    eligible.sort(
+        key=lambda row: (
+            -int(row["touch_count"]),
+            abs(float(row["current_line_price"]) - last_close) / last_close,
+            -int(row["end_index"]),
+        )
+    )
+    selected = []
+    for row in eligible:
+        same_kind_too_close = any(
+            existing["kind"] == row["kind"]
+            and abs(float(existing["current_line_price"]) - float(row["current_line_price"]))
+                / last_close < 0.005
+            for existing in selected
+        )
+        if same_kind_too_close:
+            continue
+        selected.append(row)
+        if sum(item["kind"] == row["kind"] for item in selected) >= 3:
+            continue
+        if len(selected) >= 6:
+            break
+
     fig, ax = plt.subplots(figsize=(15, 7))
     for row in visible.itertuples(index=False):
         x = mdates.date2num(row.timestamp.to_pydatetime())
@@ -170,41 +201,37 @@ def plot_audit(frame: pd.DataFrame, result: dict, output_path: Path) -> None:
         ax.vlines(x, row.low, row.high, color=color, linewidth=0.7)
         ax.vlines(x, min(row.open, row.close), max(row.open, row.close), color=color, linewidth=2)
 
-    for line in result["lines"]:
+    for line in selected:
         start_time = pd.Timestamp(line["start_time"])
         end_time = pd.Timestamp(line["end_time"])
-        if start_time < cutoff or end_time < cutoff:
-            continue
-        start_idx = int(line["start_index"])
-        slope = float(line["slope_per_4h_candle"])
-        start_price = float(line["start_wick_price"])
-        projected_price = start_price + slope * (len(frame) - 1 - start_idx)
-        if max(start_price, projected_price) < visible["low"].min() or min(start_price, projected_price) > visible["high"].max():
-            continue
         ax.plot(
             [start_time, frame["timestamp"].iloc[-1]],
-            [start_price, projected_price],
-            linewidth=1.2,
-            alpha=0.8,
+            [line["start_wick_price"], line["current_line_price"]],
+            linewidth=1.5,
+            alpha=0.9,
             label=f'{line["kind"]} · {line["touch_count"]} touches · {line["current_distance_pct"]:.2f}%',
         )
         ax.scatter(
             [start_time, end_time],
             [line["start_wick_price"], line["end_wick_price"]],
-            s=25,
+            s=30,
         )
         for touch in line["touches"]:
             touch_time = pd.Timestamp(touch["time"])
             if touch_time >= cutoff:
-                ax.scatter(touch_time, touch["wick_price"], marker="x", s=18)
+                ax.scatter(touch_time, touch["wick_price"], marker="x", s=30)
 
     ax.set_xlim(cutoff, frame["timestamp"].iloc[-1] + pd.Timedelta(hours=4))
     ax.set_ylim(float(visible["low"].min()) * 0.98, float(visible["high"].max()) * 1.02)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
     ax.grid(True, alpha=0.2)
-    ax.set_title(f'{result["pair"]} {result["interval_minutes"]}m — recent-anchored trendline audit')
+    ax.set_title(
+        f'{result["pair"]} {result["interval_minutes"]}m — recent relevant lines '
+        f'({len(selected)} plotted; full candidates in JSON)'
+    )
     ax.set_ylabel("Price (USD)")
-    ax.legend(loc="upper left", fontsize=7, ncol=2)
+    if selected:
+        ax.legend(loc="upper left", fontsize=8, ncol=2)
     fig.tight_layout()
     fig.savefig(output_path, dpi=150)
     plt.close(fig)
