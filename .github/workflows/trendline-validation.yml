@@ -7,6 +7,7 @@ on:
     paths:
       - "research/**"
       - "tests/**"
+      - "dashboard/**"
       - ".github/workflows/trendline-validation.yml"
 
 permissions:
@@ -48,3 +49,25 @@ jobs:
             results/virtual-strategy-preview/
           if-no-files-found: warn
           retention-days: 14
+
+  dashboard-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Install dashboard dependencies
+        run: npm install
+      - name: Type-check Friday dashboard
+        run: npx tsc --noEmit
+      - name: Build Friday dashboard
+        run: npm run build
