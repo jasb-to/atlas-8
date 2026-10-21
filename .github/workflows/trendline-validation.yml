@@ -43,12 +43,16 @@ jobs:
             --decisions results/strategy-preview/decision_journal.jsonl \
             --trades results/strategy-preview/trade_replay.jsonl \
             --structural-trades results/strategy-preview/structural_target_replay.jsonl \
+            --entry2-trades results/strategy-preview/entry2_trade_replay.jsonl \
+            --entry2-structural-trades results/strategy-preview/entry2_structural_target_replay.jsonl \
             --events results/strategy-preview/break_events.jsonl \
             --output results/strategy-preview/learning_report.json
           python -m research.friday_learning \
             --decisions results/virtual-strategy-preview/decision_journal.jsonl \
             --trades results/virtual-strategy-preview/trade_replay.jsonl \
             --structural-trades results/virtual-strategy-preview/structural_target_replay.jsonl \
+            --entry2-trades results/virtual-strategy-preview/entry2_trade_replay.jsonl \
+            --entry2-structural-trades results/virtual-strategy-preview/entry2_structural_target_replay.jsonl \
             --events results/virtual-strategy-preview/break_events.jsonl \
             --output results/virtual-strategy-preview/learning_report.json
       - name: Upload live data, geometry, tests and strategy previews
