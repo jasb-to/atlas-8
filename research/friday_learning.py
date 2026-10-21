@@ -79,7 +79,7 @@ def _counts(values: Iterable[Any]) -> dict[str, int]:
     return dict(sorted(result.items()))
 
 
-def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str, Any]]) -> dict[str, Any]:
+def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str, Any]],\n                         events: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     statuses = _counts(row.get("status", "unknown") for row in decisions)
     blockers = _counts(blocker for row in decisions for blocker in (row.get("blockers") or []))
     model_statuses = _counts((row.get("model") or {}).get("status", "unknown") for row in decisions)
@@ -119,10 +119,10 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--decisions", default="results/strategy-preview/decision_journal.jsonl")
-    parser.add_argument("--trades", default=None, help="JSONL replay rows; omit for decision-only report")
+    parser.add_argument("--trades", default=None, help="JSONL replay rows with net equity return / exit fields")\n    parser.add_argument("--events", default=None, help="JSONL breakout lifecycle events with forward-return diagnostics")
     parser.add_argument("--output", default="results/friday-learning-report.json")
     args = parser.parse_args()
-    report = build_learning_report(read_jsonl(args.decisions), read_jsonl(args.trades))
+    report = build_learning_report(read_jsonl(args.decisions), read_jsonl(args.trades), read_jsonl(args.events))
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
