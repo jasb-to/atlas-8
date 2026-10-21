@@ -74,8 +74,8 @@ class StrategyPreviewTests(unittest.TestCase):
             "close": [100.5 + i * 0.1 for i in range(n)],
             "volume": [1000.0] * n,
         })
-        with patch("research.strategy_preview.find_wick_pivots", return_value=[]), \\
-             patch("research.strategy_preview.fit_touch_trendlines", return_value=[]):
+        with (patch("research.strategy_preview.find_wick_pivots", return_value=[]),
+              patch("research.strategy_preview.fit_touch_trendlines", return_value=[])):
             _, status, enriched = causal_replay(frame)
         self.assertEqual(status["state"], "no_qualifying_line")
         self.assertEqual(status["last_closed_candle"], enriched.iloc[-1].timestamp.isoformat())
