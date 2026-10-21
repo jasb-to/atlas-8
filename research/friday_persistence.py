@@ -16,6 +16,7 @@ import requests
 TRADES_TABLE = "friday_trade_events"
 RUNS_TABLE = "friday_cron_runs"
 ALERTS_TABLE = "friday_alert_deliveries"
+ARCHIVE_TABLE = "friday_research_archive"
 
 
 def utc_now() -> str:
@@ -75,6 +76,14 @@ class SupabaseFridayStore:
             payload=payload, prefer="resolution=merge-duplicates,return=representation",
         )
         return {"persisted": True, "table": TRADES_TABLE, "result": result}
+
+    def record_archive(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        """Upsert a durable research snapshot; this table is not subject to last-50 pruning."""
+        result = self._request(
+            "POST", ARCHIVE_TABLE, params={"on_conflict": "record_key"},
+            payload=dict(record), prefer="resolution=merge-duplicates,return=minimal",
+        )
+        return {"persisted": True, "table": ARCHIVE_TABLE, "result": result}
 
     def recent_50_trades(self) -> list[dict[str, Any]]:
         result = self._request(
@@ -160,4 +169,21 @@ def make_cron_run(*, run_id: str, status: str, pair_results: list[Mapping[str, A
         "pairs_checked": len(pair_results),
         "pair_results": list(pair_results),
         "error": error,
+    }
+
+
+
+def make_archive_record(*, record_key: str, record_type: str, pair: str,
+                        timeframe: str, signal_time: str | None,
+                        payload: Mapping[str, Any],
+                        strategy_version: str = "friday-price-action-v1") -> dict[str, Any]:
+    """Build a JSON-safe, idempotent long-horizon research archive row."""
+    return {
+        "record_key": record_key,
+        "record_type": record_type,
+        "pair": pair.upper(),
+        "timeframe": timeframe,
+        "strategy_version": strategy_version,
+        "signal_time": signal_time,
+        "payload": dict(payload),
     }
