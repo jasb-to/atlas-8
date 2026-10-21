@@ -1,31 +1,26 @@
-# Trendline geometry prototype
+# Atlas-8 trendline-break strategy preview
 
-This is an isolated research module. It is not connected to live alerts, the production CX Switch strategy, or an order-execution path.
+Research-only. This prototype is isolated from production CX Switch and never places orders.
 
-## What it does
+## Strategy concept
 
-- Finds strict wick-high and wick-low pivots from completed OHLC candles.
-- Records the candle index where each pivot becomes confirmed (confirmed_at).
-- Builds support/resistance candidates through actual wick prices.
-- Counts distinct wick contacts within a configurable price tolerance.
-- Rejects a candidate if candles between its anchor points materially penetrate the line.
-- Classifies a selected line's current closed-candle state as approaching, watch, breakout, or breakdown, and exposes a preliminary retest flag.
+- BTC/USD spot, completed 4-hour candles.
+- Trendlines must pass through actual same-side wick pivots, with at least three independent contacts and no material penetration between anchors.
+- Each replay decision rebuilds lines from only the candles then available. Pivots are eligible only after their right-hand confirmation candles have closed.
+- Probe: a 4H candle closes at least 0.15% through resistance (long) or support (short); the prior close must not already be beyond the threshold.
+- Add: after the break, price has up to 18 completed 4H candles (72 hours) to revisit the line within 0.30% and close holding the breakout side.
+- Failure: a close crosses back through the line by 0.30%.
+- Context is reported, not hard-gated: completed UTC daily EMA 8/21 bias (lagged one completed day), 4H EMA 8/21, Stoch RSI K/D and ATR.
+- Outcomes report directional close-to-close returns after 3/6/12/18 bars (12/24/48/72 hours), excluding fees, slippage, stops and sizing.
 
-## Minimal example
+## Run
 
-    from research.trendlines import find_wick_pivots, fit_touch_trendlines, classify_line_state
-    pivots = find_wick_pivots(ohlcv, left_bars=3, right_bars=3)
-    supports = fit_touch_trendlines(ohlcv, pivots, kind="support", min_touches=3, tolerance_pct=0.0015)
-    if supports:
-        print(supports[0].as_dict())
-        print(classify_line_state(ohlcv, supports[0]))
+```bash
+python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
+```
 
-ohlcv must be a chronologically ordered pandas DataFrame with high, low, and close columns. tolerance_pct=0.0015 means 0.15% of the line price.
+Outputs `strategy_preview.json` and `strategy_preview.md`. The GitHub Actions workflow fetches fresh completed Kraken candles and uploads the preview artifact.
 
-## Important research constraints
+## Validation boundary
 
-1. A pivot is not knowable until confirmed_at; never backtest a signal as if the pivot were known at its historical wick candle.
-2. Lines are validated between their anchors. Later breaks must remain visible rather than causing the historical line to disappear.
-3. Retest classification is a first-pass diagnostic, not a complete trade rule. It must be tested against chart examples and historical replay before strategy integration.
-4. This module deliberately does not decide trade direction, calculate size, or place orders.
-5. The next validation step is to render anchor wicks, every counted touch, line price, and distance-to-line on representative BTC 4H charts and manually verify them.
+This is a live-data snapshot and causal event replay, not a continuously running alert service or profitability claim. Stops, ATR-based sizing, portfolio risk caps, fees, slippage, intrabar stop/target ordering and sustained-trend exits remain to be tested before production integration.
