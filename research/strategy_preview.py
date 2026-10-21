@@ -252,7 +252,9 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     setups=consolidate_setups(events,frame)
     trades=replay_trades(setups,frame)
     last=frame.iloc[-1]
+    setup_state=latest_setup_state(events, last.timestamp)
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
+        "latest_setup_state":setup_state,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"last_close":float(last.close),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
@@ -285,6 +287,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         f"- Daily bias (lagged): {last.daily_bias}",f"- 4H EMA 8/21: {_num(last.ema8_4h)} / {_num(last.ema21_4h)}",
         f"- Stoch RSI K/D: {_num(last.stoch_k)} / {_num(last.stoch_d)}","","## Current preview",
         f"- State: {status.get('state')}",f"- Line: {status.get('line_kind','none')} at {status.get('line_price','n/a')}",
+        f"- Latest setup lifecycle: {setup_state.get('state')} — {setup_state.get('message')}",
         f"- Distance: {status.get('distance_pct','n/a')}%",f"- Wick contacts: {status.get('touch_count','n/a')}",
         f"- Anchors: {status.get('anchor_start_time','n/a')} → {status.get('anchor_end_time','n/a')}","","## Replay summary",
         f"- Break-close events: {len(events)}"]+[f"- {k}: {v}" for k,v in result["event_summary"].items()]
