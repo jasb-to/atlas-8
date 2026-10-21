@@ -51,8 +51,8 @@ class StrategyPreviewTests(unittest.TestCase):
     def test_momentum_context_reports_stoch_recross_and_macd(self):
         frame = pd.DataFrame({
             "close": [90, 91, 92, 93, 94, 95, 96, 97, 98, 99],
-            "stoch_k": [10, 12, 15, 20, 25, 30, 35, 30, 55, 70],
-            "stoch_d": [12, 13, 14, 18, 22, 27, 32, 35, 45, 60],
+            "stoch_k": [10, 12, 15, 20, 25, 30, 35, 30, 30, 70],
+            "stoch_d": [12, 13, 14, 18, 22, 27, 32, 35, 35, 60],
         })
         context = momentum_context(frame, len(frame)-1)
         self.assertTrue(context["stoch_bullish_cross"])
