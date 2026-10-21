@@ -1,7 +1,11 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
+
 import pandas as pd
 
-from research.strategy_preview import latest_setup_state
+from research.strategy_preview import latest_setup_state, write_jsonl
 
 
 class FridayLifecycleStateTests(unittest.TestCase):
@@ -37,6 +41,16 @@ class FridayLifecycleStateTests(unittest.TestCase):
         result = latest_setup_state([event], pd.Timestamp("2026-01-02T00:00:00Z"))
         self.assertEqual(result["state"], "EXPIRED")
         self.assertIn("no continuation", result["message"].lower())
+
+
+    def test_jsonl_writer_uses_one_physical_line_per_record(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "nested" / "events.jsonl"
+            rows = [{"event": "break", "n": 1}, {"event": "retest", "n": 2}]
+            write_jsonl(path, rows)
+            physical_lines = path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(physical_lines), 2)
+            self.assertEqual([json.loads(line) for line in physical_lines], rows)
 
     def test_failed_break_is_not_shown_as_waiting_entry(self):
         event = self.event("failed_break", failure_time="2026-01-01T08:00:00+00:00")
