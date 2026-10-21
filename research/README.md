@@ -11,16 +11,16 @@ Research-only. This prototype is isolated from production CX Switch and never pl
 - Add: after the break, price has up to 18 completed 4H candles (72 hours) to revisit the line within 0.30% and close holding the breakout side.
 - Failure: a close crosses back through the line by 0.30%.
 - Context is reported, not hard-gated: completed UTC daily EMA 8/21 bias (lagged one completed day), 4H EMA 8/21, Stoch RSI K/D and ATR.
-- Outcomes report directional close-to-close returns after 3/6/12/18 bars (12/24/48/72 hours), excluding fees, slippage, stops and sizing.
+- A trade-level diagnostic consolidates nearby same-direction break events, enters at the next 4H open, sizes to 0.5% account risk at a 1 ATR stop, targets 2R, and assumes 8 bps fee + 5 bps slippage per side. If stop and target are both inside one candle, stop is assumed first.\n- Stoch RSI bullish recross and positive/rising MACD expansion are soft context, not mandatory gates. A post-break retest is the preferred add signal; no impulse chasing.
 
 ## Run
 
 ```bash
-python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
+python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview\npytest -q
 ```
 
 Outputs `strategy_preview.json` and `strategy_preview.md`. The GitHub Actions workflow fetches fresh completed Kraken candles and uploads the preview artifact.
 
 ## Validation boundary
 
-This is a live-data snapshot and causal event replay, not a continuously running alert service or profitability claim. Stops, ATR-based sizing, portfolio risk caps, fees, slippage, intrabar stop/target ordering and sustained-trend exits remain to be tested before production integration.
+This is a live-data snapshot and causal replay, not a continuously running alert service or profitability claim. Trade replay is a first-pass OHLC approximation: it does not model concurrent positions, portfolio-wide exposure, partial fills, funding, spread variation, stop gaps, or realistic intrabar sequencing. The 720-candle sample is too short to validate an edge; walk-forward and multi-regime tests are required before production integration.
