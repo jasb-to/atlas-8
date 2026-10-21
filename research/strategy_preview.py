@@ -137,6 +137,10 @@ def causal_replay(raw):
                 "anchor_end_time":prefix.iloc[line.end.index].timestamp.isoformat(),
                 "anchor_start_wick":float(line.start.price),"anchor_end_wick":float(line.end.price),
                 "converging_wedge":wedge,
+                "structure_state": ("above_converging_resistance" if wedge and close > wedge["resistance_price"]*(1+BREAK_BUFFER)
+                    else "inside_converging_structure" if wedge and wedge["support_price"] <= close <= wedge["resistance_price"]
+                    else "below_converging_support" if wedge and close < wedge["support_price"]*(1-BREAK_BUFFER)
+                    else "no_active_converging_break"),
                 "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
             for break_line in candidates:
                 if not break_crossed(prefix,break_line,len(prefix)-1):
@@ -159,7 +163,7 @@ def causal_replay(raw):
                 seen_keys={(e["line_kind"],e.get("anchor_start_time"),e.get("anchor_end_time")) for e in events}
                 if duplicate_key not in seen_keys:
                     events.append(event); active.append({"event":event,"line":break_line,"origin":start,"break_i":i})
-                    if i == len(frame)-1:
+                    if i == len(frame)-1 and break_line.kind == line.kind and break_line.start.index == line.start.index and break_line.end.index == line.end.index:
                         status["state"]="break_close_probe"
         # Manage each break against its original line coordinates; only future candles are outcomes.
         for a in list(active):
