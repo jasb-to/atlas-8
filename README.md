@@ -71,6 +71,9 @@ Use a dedicated research Supabase project, not the production CX Switch database
 - `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` (server-side secret only)
 - `FRIDAY_TELEGRAM_BOT_TOKEN`
 - `FRIDAY_TELEGRAM_CHAT_ID`
+- `HUGGINGFACE_API_KEY` (optional; never put it in code or logs)
+
+Set repository variable `FRIDAY_HF_MODEL_ID` to the Hugging Face router-supported model ID to enable shadow review. Optional repository variable `FRIDAY_HF_ENDPOINT` overrides the default router endpoint. Friday remains rule-led if these are absent.
 
 The workflow maps these to runtime environment variables. Without Supabase persistence, the monitor refuses to send Telegram alerts so it cannot claim reliable deduplication. Run logs and snapshots are still uploaded as GitHub Actions artifacts, retained for 30 days.
 
