@@ -14,12 +14,19 @@ class FridayLearningReportTests(unittest.TestCase):
             {"direction": "short", "net_equity_return_pct": -0.5, "exit_reason": "stop", "target_type": "fib_1.272_extension", "strategy_version": "v1"},
         ]
         structural = [{"direction": "long", "net_equity_return_pct": 0.25, "exit_reason": "target", "target_type": "prior_structure", "strategy_version": "v2"}]
-        report = build_learning_report(decisions, trades, [{"forward_3_bar_return_pct": 2.0}], structural)
+        entry2 = [{"direction": "long", "net_equity_return_pct": 0.5, "exit_reason": "target", "target_type": "fixed_r", "strategy_version": "v2"}]
+        entry2_structural = [{"direction": "long", "net_equity_return_pct": 0.75, "exit_reason": "target", "target_type": "prior_structure", "strategy_version": "v2"}]
+        report = build_learning_report(
+            decisions, trades, [{"forward_3_bar_return_pct": 2.0}],
+            structural, entry2, entry2_structural,
+        )
         self.assertEqual(report["decision_count"], 2)
         self.assertEqual(report["no_trade_count"], 1)
         self.assertEqual(report["replay"]["trades"], 2)
         self.assertEqual(report["structural_target_replay"]["trades"], 1)
         self.assertEqual(report["structural_target_replay"]["mean_net_equity_return_pct"], 0.25)
+        self.assertEqual(report["entry2_replay"]["trades"], 1)
+        self.assertEqual(report["entry2_structural_target_replay"]["mean_net_equity_return_pct"], 0.75)
         self.assertEqual(report["replay"]["win_rate_pct"], 50.0)
         self.assertEqual(report["replay"]["exit_reasons"], {"stop": 1, "target": 1})
         self.assertFalse(report["learning_policy"]["automatic_parameter_changes"])
