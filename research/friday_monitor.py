@@ -40,6 +40,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
         pair_started = utc_now()
         try:
             pair_dir = out / pair.lower()
+            pair_dir.mkdir(parents=True, exist_ok=True)
             result = build_preview(pair=pair, interval=240, output_dir=str(pair_dir))
             latest = _utc(result["last_completed_candle_utc"])
             row = {
