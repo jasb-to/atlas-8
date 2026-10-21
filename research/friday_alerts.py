@@ -16,24 +16,26 @@ def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = 
     if direction not in {"LONG", "SHORT"}:
         raise ValueError("event direction must be long or short")
     kind = event.get("event")
-    if kind == "BREAK_CLOSE_PROBE":
+    if event.get("event_add") == "CONTINUATION_ADD_CONFIRMED":
+        title = "ENTRY 2 — CONTINUATION CONFIRMED"
+        entry = event.get("continuation_add_close")
+        line = event.get("line_price_at_break")
+        signal_time = event.get("continuation_add_time")
+        why = [
+            "Breakout retest held on a closed candle.",
+            f"Price then closed beyond the retest reaction extreme ({event.get('continuation_trigger')}).",
+            "This is a research alert, not an order.",
+        ]
+    elif kind == "BREAK_CLOSE_PROBE":
         title = "ENTRY 1 — TRENDLINE BREAK"
         entry = event.get("close_at_break")
         line = event.get("line_price_at_break")
+        signal_time = event.get("signal_time")
         why = [
             f"Closed candle broke {event.get('line_kind')} with {event.get('touch_count')} line touches.",
             f"Daily bias: {event.get('daily_bias', 'unknown')}; EMA aligned: {event.get('ema_aligned', 'unknown')}.",
             f"Momentum context: {event.get('momentum_context', {})}.",
             "Next: monitor for retest; no automatic add on line contact.",
-        ]
-    elif event.get("event_add") == "CONTINUATION_ADD_CONFIRMED":
-        title = "ENTRY 2 — CONTINUATION CONFIRMED"
-        entry = event.get("continuation_add_close")
-        line = event.get("line_price_at_break")
-        why = [
-            "Breakout retest held on a closed candle.",
-            f"Price then closed beyond the retest reaction extreme ({event.get('continuation_trigger')}).",
-            "This is a research alert, not an order.",
         ]
     else:
         raise ValueError("event is not an alertable Entry 1 or Entry 2 event")
@@ -41,7 +43,7 @@ def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = 
     lines = [
         f"FRIDAY | {title}",
         f"Market: {pair} · Timeframe: {timeframe} · Direction: {direction}",
-        f"Signal candle: {event.get('signal_time') or event.get('continuation_add_time')}",
+        f"Signal candle: {signal_time}",
         f"Reference close: {entry}",
         f"Trendline at break: {line}",
         *[f"• {item}" for item in why],
