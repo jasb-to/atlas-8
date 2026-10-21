@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from research.strategy_preview import latest_setup_state, write_jsonl
+from research.strategy_preview import entry2_replay_events, latest_setup_state, write_jsonl
 
 
 class FridayLifecycleStateTests(unittest.TestCase):
@@ -42,6 +42,19 @@ class FridayLifecycleStateTests(unittest.TestCase):
         self.assertEqual(result["state"], "EXPIRED")
         self.assertIn("no continuation", result["message"].lower())
 
+
+
+    def test_entry2_replay_uses_only_confirmed_continuation_timestamp(self):
+        events = [
+            {"signal_time": "2026-01-01T00:00:00Z", "continuation_add_time": "2026-01-01T08:00:00Z", "outcome": "continuation_add_confirmed", "direction": "long"},
+            {"signal_time": "2026-01-01T04:00:00Z", "outcome": "failed_break", "direction": "short"},
+            {"signal_time": "2026-01-01T12:00:00Z", "continuation_add_time": None, "outcome": "pending", "direction": "long"},
+        ]
+        result = entry2_replay_events(events)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["break_signal_time"], "2026-01-01T00:00:00Z")
+        self.assertEqual(result[0]["signal_time"], "2026-01-01T08:00:00Z")
+        self.assertEqual(result[0]["entry_type"], "ENTRY_2_CONTINUATION")
 
     def test_jsonl_writer_uses_one_physical_line_per_record(self):
         with tempfile.TemporaryDirectory() as temp_dir:
