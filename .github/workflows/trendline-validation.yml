@@ -46,6 +46,7 @@ jobs:
             --entry2-trades results/strategy-preview/entry2_trade_replay.jsonl \
             --entry2-structural-trades results/strategy-preview/entry2_structural_target_replay.jsonl \
             --events results/strategy-preview/break_events.jsonl \
+            --split-time "$BTC_SPLIT" --last-candle-time "$BTC_LAST" \
             --output results/strategy-preview/learning_report.json
           python -m research.friday_learning \
             --decisions results/virtual-strategy-preview/decision_journal.jsonl \
@@ -54,6 +55,7 @@ jobs:
             --entry2-trades results/virtual-strategy-preview/entry2_trade_replay.jsonl \
             --entry2-structural-trades results/virtual-strategy-preview/entry2_structural_target_replay.jsonl \
             --events results/virtual-strategy-preview/break_events.jsonl \
+            --split-time "$VIRTUAL_SPLIT" --last-candle-time "$VIRTUAL_LAST" \
             --output results/virtual-strategy-preview/learning_report.json
       - name: Upload live data, geometry, tests and strategy previews
         if: always()
