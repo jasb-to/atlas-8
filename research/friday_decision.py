@@ -14,6 +14,7 @@ import pandas as pd
 from research.entry_confluence import evaluate_entry1_confluence
 from research.fib_entries import fib_entry_plan
 from research.fib_swings import latest_impulse_leg, retracement_levels
+from research.fib_bounce_ranking import rank_fib_bounce_levels
 
 
 def evaluate_friday_decision(
@@ -62,6 +63,8 @@ def evaluate_friday_decision(
     plan = fib_entry_plan(direction, origin, impulse_extreme=extreme)
     levels = retracement_levels(leg)
     tolerance = fib_tolerance_pct
+    ranked_levels = rank_fib_bounce_levels(direction, levels, prior, atr=atr, current_price=close, tolerance_pct=tolerance)
+    rank_by_fib = {round(item["fib"], 3): item for item in ranked_levels}
     candidates = []
     for level in levels:
         price = float(level["price"])
@@ -81,7 +84,7 @@ def evaluate_friday_decision(
         reaction = close > price if direction == "long" else close < price
         eligible = bool(touched and reaction and evidence["entry1_candidate"] and risk_ok)
         candidates.append({
-            "fib": level["fib"], "price": price, "touched": touched,
+            "fib": level["fib"], "price": price, "bounce_ranking": rank_by_fib.get(round(level["fib"], 3)), "touched": touched,
             "reaction": reaction, "invalidation": stop, "risk_pct": risk_pct,
             "risk_ok": risk_ok, "evidence": evidence, "eligible": eligible,
         })
@@ -91,7 +94,7 @@ def evaluate_friday_decision(
         "decision_time": pd.Timestamp(current.timestamp).isoformat(),
         "direction": direction, "impulse_origin": leg["origin"],
         "impulse_extreme": leg["extreme"], "fib_entry_plan": plan,
-        "retracement_levels": candidates,
+        "retracement_levels": candidates, "bounce_level_ranking": ranked_levels,
         "execution": "paper/research only; no order submitted",
     }
     if eligible:
