@@ -15,6 +15,7 @@ import requests
 
 TRADES_TABLE = "friday_trade_events"
 RUNS_TABLE = "friday_cron_runs"
+ALERTS_TABLE = "friday_alert_deliveries"
 
 
 def utc_now() -> str:
@@ -88,6 +89,41 @@ class SupabaseFridayStore:
         payload.setdefault("started_at", utc_now())
         result = self._request("POST", RUNS_TABLE, payload=payload, prefer="return=representation")
         return {"persisted": True, "table": RUNS_TABLE, "result": result}
+
+    def claim_alert(self, *, alert_key: str, pair: str, alert_type: str,
+                    signal_time: str | None) -> bool:
+        """Claim a notification once; completed sends are never sent twice."""
+        existing = self._request("GET", ALERTS_TABLE, params={
+            "select": "alert_key,status", "alert_key": f"eq.{alert_key}", "limit": "1"
+        })
+        if existing:
+            if existing[0].get("status") == "sent":
+                return False
+            self._request("PATCH", ALERTS_TABLE,
+                params={"alert_key": f"eq.{alert_key}"},
+                payload={"status": "sending", "error": None, "updated_at": utc_now()},
+                prefer="return=minimal")
+            return True
+        try:
+            self._request("POST", ALERTS_TABLE, payload={
+                "alert_key": alert_key, "pair": pair, "alert_type": alert_type,
+                "signal_time": signal_time, "status": "sending",
+            }, prefer="return=minimal")
+            return True
+        except requests.HTTPError as exc:
+            # A concurrent run may have inserted the unique key between GET and POST.
+            if exc.response is not None and exc.response.status_code == 409:
+                existing = self._request("GET", ALERTS_TABLE, params={
+                    "select": "alert_key,status", "alert_key": f"eq.{alert_key}", "limit": "1"
+                })
+                return bool(existing and existing[0].get("status") != "sent")
+            raise
+
+    def finish_alert(self, alert_key: str, *, status: str,
+                     message_id: int | None = None, error: str | None = None) -> None:
+        self._request("PATCH", ALERTS_TABLE, params={"alert_key": f"eq.{alert_key}"},
+            payload={"status": status, "telegram_message_id": message_id,
+                     "error": error, "updated_at": utc_now()}, prefer="return=minimal")
 
 
 def make_trade_event(*, pair: str, timeframe: str, event: Mapping[str, Any],
