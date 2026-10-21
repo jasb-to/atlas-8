@@ -351,7 +351,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     journal_record = build_decision_record(
         pair=pair, timeframe=f"{interval}m",
         candle_timestamp=int(pd.Timestamp(last.timestamp).timestamp()),
-        strategy_version="friday-price-action-v1",
+        strategy_version="friday-price-action-v2",
         status=str(friday_decision.get("state", "NO_TRADE")),
         direction=decision_direction,
         entry=friday_decision.get("entry_reference_close"),
