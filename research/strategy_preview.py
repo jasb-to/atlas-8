@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
 from research.validate_kraken_trendlines import fetch_ohlc
+from research.sheldon_strategy import consolidate_setups, replay_trades
 
 LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
@@ -206,6 +207,8 @@ def causal_replay(raw):
 def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-preview"):
     raw=fetch_ohlc(pair=pair,interval=interval)
     events,status,frame=causal_replay(raw)
+    setups=consolidate_setups(events,frame)
+    trades=replay_trades(setups,frame)
     last=frame.iloc[-1]
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
@@ -213,12 +216,22 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"break_events":events,"event_count":len(events),
+        "consolidated_setups":setups,"consolidated_setup_count":len(setups),
+        "trade_replay":trades,"trade_replay_summary":{
+            "trades":len(trades),"wins":sum(t["net_equity_return_pct"]>0 for t in trades),
+            "losses":sum(t["net_equity_return_pct"]<=0 for t in trades),
+            "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades),4),
+            "mean_net_r":round(float(np.mean([t["net_r_multiple"] for t in trades])),4) if trades else None,
+            "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades) for name in ("target","stop","time_exit")}},
         "latest_momentum_context":momentum_context(frame,len(frame)-1),
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
             ("retest_held","failed_break","no_retest_within_window","pending")},
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
             "add":"post-break retest within 18 bars / 72h, close holds breakout side",
             "failure":"close crosses back through line by 0.30%","daily_bias_and_ema":"shown, not hard gates"},
+        "trade_replay_rules":{"entry":"next 4H open after break signal","stop":"1.0 ATR from entry","target":"2R","risk_per_trade_pct":0.5,
+            "max_hold_bars":18,"costs_bps_per_side":{"fee":8,"slippage":5},
+            "same_candle_stop_target":"stop assumed first; conservative OHLC approximation"},
         "limitations":["Kraken supplies at most 720 recent candles.","Walk-forward signals use only the prefix available at each candle.",
             "Daily bias is lagged one full UTC day; pivots must be confirmed before use.",
             "Forward returns are descriptive, not fee-aware. No stops, sizing, fees, slippage or orders.",
