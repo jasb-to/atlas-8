@@ -363,7 +363,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         ("trade_replay.jsonl", trades),
         ("structural_target_replay.jsonl", trades_structural),
     ):
-        payload = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\\n" for row in rows)
+        payload = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows)
         (out / filename).write_text(payload, encoding="utf-8")
     md=["# 4H Break Strategy Preview — "+pair,"",f"- Generated: {result['generated_at_utc']}",
         f"- Last completed candle: {last.timestamp.isoformat()}",f"- Last close: {float(last.close):.6f}",
