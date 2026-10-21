@@ -12,6 +12,7 @@ from research.structure_lifecycle import evaluate_structure
 from research.friday_decision import evaluate_friday_decision
 from research.signal_journal import append_decision, build_decision_record
 from research.friday_huggingface import review_decision
+from research.friday_reversal import reversal_context
 
 LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
@@ -286,7 +287,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"last_close":float(last.close),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
-        "live_preview":status,"friday_decision":friday_decision,"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
+        "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
         "consolidated_setups":setups,"consolidated_setup_count":len(setups),
         "trade_replay":trades,"structural_target_replay":trades_structural,"structural_target_replay_summary":{
             "target_policy":"nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",
