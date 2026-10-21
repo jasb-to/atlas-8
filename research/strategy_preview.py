@@ -191,10 +191,23 @@ def causal_replay(raw):
             else:
                 contact=float(row.high)>=lv-tol; held=close_i<=lv
                 invalid=close_i>lv+abs(lv)*0.003
-            if age<=RETEST_BARS and contact and held:
-                e.update({"event_add":"RETEST_HOLD_ADD","add_signal_time":row.timestamp.isoformat(),
-                    "add_close":close_i,"outcome":"retest_held","outcome_bars":age})
-                active.remove(a); continue
+            # Entry 2: confirm the retest, but do not add merely because price
+            # touched the line. Save the retest candle's extreme and wait for
+            # Entry 3 continuation through that reaction structure.
+            if age<=RETEST_BARS and contact and held and not e.get("retest_confirmed"):
+                e.update({"retest_confirmed":True,"retest_confirmed_time":row.timestamp.isoformat(),
+                    "retest_close":close_i,"retest_high":float(row.high),"retest_low":float(row.low),
+                    "outcome":"retest_held_waiting_continuation","outcome_bars":age})
+                continue
+            if e.get("retest_confirmed") and not e.get("continuation_add_time"):
+                trigger = float(e["retest_high"]) if e["direction"]=="long" else float(e["retest_low"])
+                continued = float(row.close)>trigger if e["direction"]=="long" else float(row.close)<trigger
+                if continued:
+                    e.update({"event_add":"CONTINUATION_ADD_CONFIRMED",
+                        "continuation_add_time":row.timestamp.isoformat(),
+                        "continuation_add_close":close_i,"continuation_trigger":trigger,
+                        "outcome":"continuation_add_confirmed","outcome_bars":age})
+                    active.remove(a); continue
             if invalid:
                 e.update({"outcome":"failed_break","outcome_bars":age,"failure_time":row.timestamp.isoformat()})
                 active.remove(a); continue
@@ -240,10 +253,13 @@ def latest_setup_state(events, last_closed_candle):
         return {**base, "state": "INVALIDATED", "message": "The breakout failed its close-based invalidation rule."}
     if latest.get("outcome") == "no_retest_within_window":
         return {**base, "state": "EXPIRED", "message": "No qualifying retest held within 72 hours."}
-    if latest.get("outcome") == "retest_held":
-        return {**base, "state": "RETEST_ADD_CONFIRMED", "add_signal_time": latest.get("add_signal_time"),
-                "add_close": latest.get("add_close"),
-                "message": "A post-break retest held on a closed 4H candle; add confirmation is historical, not an order."}
+    if latest.get("outcome") == "continuation_add_confirmed":
+        return {**base, "state": "CONTINUATION_ADD_CONFIRMED", "retest_confirmed_time": latest.get("retest_confirmed_time"),
+                "add_signal_time": latest.get("continuation_add_time"), "add_close": latest.get("continuation_add_close"),
+                "message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order."}
+    if latest.get("retest_confirmed"):
+        return {**base, "state": "RETEST_HELD_WAITING_CONTINUATION", "retest_confirmed_time": latest.get("retest_confirmed_time"),
+                "message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add."}
     return {**base, "state": "ENTRY_PROBE_WAITING_RETEST",
             "retest_deadline": latest.get("retest_deadline"),
             "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
@@ -286,9 +302,10 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades) for name in ("target","stop","time_exit")}},
         "latest_momentum_context":momentum_context(frame,len(frame)-1),
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
-            ("retest_held","failed_break","no_retest_within_window","pending")},
+            ("retest_held_waiting_continuation","continuation_add_confirmed","failed_break","no_retest_within_window","pending")},
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
-            "add":"post-break retest within 18 bars / 72h, close holds breakout side",
+            "entry_2":"post-break retest within 18 bars / 72h, close holds breakout side; wait, do not add yet",
+            "add":"Entry 2 add only after a later closed candle breaks the retest reaction high/low in breakout direction",
             "failure":"close crosses back through line by 0.30%","daily_bias_and_ema":"shown, not hard gates"},
         "trade_replay_rules":{"entry":"next 4H open after break signal","stop":"1.0 ATR from entry","baseline_target":"2R for comparison","alternative_target":"nearest prior structural level, otherwise 1.272 Fib extension of prior range","risk_per_trade_pct":0.5,
             "max_hold_bars":18,"costs_bps_per_side":{"fee":8,"slippage":5},
@@ -326,6 +343,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         f"- State: {status.get('state')}",f"- Line: {status.get('line_kind','none')} at {status.get('line_price','n/a')}",
         f"- Latest setup lifecycle: {setup_state.get('state')} — {setup_state.get('message')}",
         f"- Friday decision: {friday_decision.get('state')} — {friday_decision.get('reason')}",
+        f"- Fib bounce ranking: {friday_decision.get('bounce_level_ranking', [])}",
         f"- Distance: {status.get('distance_pct','n/a')}%",f"- Wick contacts: {status.get('touch_count','n/a')}",
         f"- Anchors: {status.get('anchor_start_time','n/a')} → {status.get('anchor_end_time','n/a')}","","## Replay summary",
         f"- Break-close events: {len(events)}"]+[f"- {k}: {v}" for k,v in result["event_summary"].items()]
