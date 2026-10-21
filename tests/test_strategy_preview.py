@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from research.strategy_preview import break_crossed, causal_replay, line_retest, momentum_context
+from research.strategy_preview import break_crossed, causal_replay, latest_setup_state, line_retest, momentum_context
 from research.trendlines import Pivot, Trendline
 
 
@@ -58,6 +58,26 @@ class StrategyPreviewTests(unittest.TestCase):
         context = momentum_context(frame, len(frame)-1)
         self.assertTrue(context["stoch_bullish_cross"])
         self.assertIn("macd_bullish_expansion", context)
+
+    def test_latest_setup_state_waits_for_retest_after_break_probe(self):
+        now = pd.Timestamp("2026-10-21T12:00:00Z")
+        events = [{
+            "signal_time": "2026-10-21T04:00:00Z", "direction": "long",
+            "line_kind": "resistance", "line_price_at_break": 1.25,
+            "touch_count": 3, "daily_bias": "bearish", "ema_aligned": True,
+            "outcome": "pending", "retest_deadline": "2026-10-24T04:00:00Z",
+        }]
+        state = latest_setup_state(events, now)
+        self.assertEqual(state["state"], "ENTRY_PROBE_WAITING_RETEST")
+
+    def test_latest_setup_state_marks_failed_break_invalidated(self):
+        events = [{
+            "signal_time": "2026-10-21T04:00:00Z", "direction": "short",
+            "line_kind": "support", "line_price_at_break": 1.25,
+            "touch_count": 3, "outcome": "failed_break",
+        }]
+        state = latest_setup_state(events, "2026-10-21T12:00:00Z")
+        self.assertEqual(state["state"], "INVALIDATED")
 
     def test_retest_window_allows_multiple_days(self):
         from research.strategy_preview import RETEST_BARS
