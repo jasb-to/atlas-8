@@ -6,7 +6,7 @@ type Row = Record<string, any>;
 type Payload = { connected: boolean; status: string; message: string; snapshots: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; fetched_at?: string };
 const empty: Payload = { connected: false, status: "loading", message: "Checking the research data connection…", snapshots: [], events: [], runs: [], alerts: [] };
 const fmtTime = (value?: string) => value ? new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "—";
-const fmtPrice = (value: unknown) => typeof value === "number" ? value.toLocaleString(undefined, { maximumFractionDigits: 6 }) : value ?? "—";
+const fmtPrice = (value: unknown): string => typeof value === "number" ? value.toLocaleString(undefined, { maximumFractionDigits: 6 }) : typeof value === "string" ? value : "—";
 const payloadOf = (row: Row) => row.payload && typeof row.payload === "object" ? row.payload : {};
 
 export default function Home() {
