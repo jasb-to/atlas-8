@@ -64,17 +64,41 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
                 if fresh_entry1 or fresh_entry2:
+                    alert_type = "ENTRY_2" if fresh_entry2 else "ENTRY_1"
+                    if not store.configured:
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": False, "status": "persistence_not_configured",
+                            "reason": "Persistent deduplication is required before alerts are sent.",
+                        })
+                        continue
+                    alert_key = row_event["event_key"] + ":telegram"
+                    claimed = store.claim_alert(
+                        alert_key=alert_key, pair=pair, alert_type=alert_type,
+                        signal_time=(event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
+                    )
+                    if not claimed:
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": False, "status": "duplicate_suppressed",
+                        })
+                        continue
                     alert_event = dict(event)
                     if fresh_entry2:
                         alert_event["event_add"] = "CONTINUATION_ADD_CONFIRMED"
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
                     message = build_signal_alert(alert_event, pair=pair, timeframe="4H")
-                    alert = send_telegram_alert(message)
-                    row["alert_results"].append({
-                        "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1",
-                        "sent": alert.get("sent", False), "status": alert.get("status"),
-                        "reason": alert.get("reason"),
-                    })
+                    try:
+                        alert = send_telegram_alert(message)
+                        if alert.get("sent"):
+                            store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
+                        else:
+                            store.finish_alert(alert_key, status="failed", error=alert.get("reason"))
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": alert.get("sent", False), "status": alert.get("status"),
+                            "reason": alert.get("reason"),
+                        })
+                    except Exception as alert_exc:
+                        store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                        raise
             (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
         except Exception as exc:
