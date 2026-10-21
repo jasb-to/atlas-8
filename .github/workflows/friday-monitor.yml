@@ -50,6 +50,8 @@ jobs:
           if [ -d results/friday-monitor ]; then
             find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0 | while IFS= read -r -d "" preview; do
               pair_dir="$(dirname "$preview")"
+              split_time="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["walk_forward_split_time"])' "$preview")"
+              last_candle_time="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["last_completed_candle_utc"])' "$preview")"
               python -m research.friday_learning \
                 --decisions "$pair_dir/decision_journal.jsonl" \
                 --trades "$pair_dir/trade_replay.jsonl" \
@@ -57,6 +59,7 @@ jobs:
                 --entry2-trades "$pair_dir/entry2_trade_replay.jsonl" \
                 --entry2-structural-trades "$pair_dir/entry2_structural_target_replay.jsonl" \
                 --events "$pair_dir/break_events.jsonl" \
+                --split-time "$split_time" --last-candle-time "$last_candle_time" \
                 --output "$pair_dir/learning_report.json"
             done
           fi
