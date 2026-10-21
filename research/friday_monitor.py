@@ -71,7 +71,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             "reason": "Persistent deduplication is required before alerts are sent.",
                         })
                         continue
-                    alert_key = row_event["event_key"] + ":telegram"
+                    alert_timestamp = event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")
+                    alert_key = row_event["event_key"] + f":telegram:{alert_type}:{alert_timestamp}"
                     claimed = store.claim_alert(
                         alert_key=alert_key, pair=pair, alert_type=alert_type,
                         signal_time=(event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
