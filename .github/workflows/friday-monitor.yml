@@ -38,6 +38,9 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.FRIDAY_SUPABASE_SERVICE_ROLE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.FRIDAY_TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
+          HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+          FRIDAY_HF_MODEL_ID: ${{ vars.FRIDAY_HF_MODEL_ID }}
+          FRIDAY_HF_ENDPOINT: ${{ vars.FRIDAY_HF_ENDPOINT }}
         run: |
           PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,VIRTUALUSD' }}"
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
