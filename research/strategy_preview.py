@@ -258,16 +258,20 @@ def latest_setup_state(events, last_closed_candle):
         "age_hours": round(age_hours, 2),
         "outcome": latest.get("outcome", "pending"),
     }
-    if age_hours > RETEST_BARS * 4:
-        return {**base, "state": "EXPIRED", "message": "The 72-hour retest window has elapsed; this is not a current entry."}
+    # Terminal outcomes take precedence over signal age: an old, completed
+    # continuation is historical evidence, not an expired pending setup.
     if latest.get("outcome") == "failed_break":
         return {**base, "state": "INVALIDATED", "message": "The breakout failed its close-based invalidation rule."}
     if latest.get("outcome") == "no_retest_within_window":
         return {**base, "state": "EXPIRED", "message": "No qualifying retest held within 72 hours."}
+    if latest.get("outcome") == "no_continuation_within_window":
+        return {**base, "state": "EXPIRED", "message": "The retest held, but no continuation close broke its reaction extreme within the following 24 hours."}
     if latest.get("outcome") == "continuation_add_confirmed":
         return {**base, "state": "CONTINUATION_ADD_CONFIRMED", "retest_confirmed_time": latest.get("retest_confirmed_time"),
                 "add_signal_time": latest.get("continuation_add_time"), "add_close": latest.get("continuation_add_close"),
                 "message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order."}
+    if age_hours > RETEST_BARS * 4:
+        return {**base, "state": "EXPIRED", "message": "The 72-hour retest window has elapsed; this is not a current entry."}
     if latest.get("retest_confirmed"):
         return {**base, "state": "RETEST_HELD_WAITING_CONTINUATION", "retest_confirmed_time": latest.get("retest_confirmed_time"),
                 "message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add."}
