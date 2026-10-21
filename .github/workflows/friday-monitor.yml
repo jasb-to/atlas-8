@@ -54,6 +54,8 @@ jobs:
                 --decisions "$pair_dir/decision_journal.jsonl" \
                 --trades "$pair_dir/trade_replay.jsonl" \
                 --structural-trades "$pair_dir/structural_target_replay.jsonl" \
+                --entry2-trades "$pair_dir/entry2_trade_replay.jsonl" \
+                --entry2-structural-trades "$pair_dir/entry2_structural_target_replay.jsonl" \
                 --events "$pair_dir/break_events.jsonl" \
                 --output "$pair_dir/learning_report.json"
             done
