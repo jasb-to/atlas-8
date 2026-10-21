@@ -51,3 +51,35 @@ The research repository uses public exchange candle data. Each validation output
 ## Scope control
 
 Current priority: **make the setup detection, entry timing, invalidation, and trade-quality assessment reliable**. Telegram alerts, a richer UI, autonomous trading, and other extras come later.
+
+
+## Friday monitoring, persistence, and run logs
+
+The monitor is research/paper-only and does not place exchange orders.
+
+- Manual/scheduled runner: `.github/workflows/friday-monitor.yml`
+- Runtime: `python -m research.friday_monitor --pairs XBTUSD,VIRTUALUSD`
+- Telegram formatter/sender: `research/friday_alerts.py`
+- Persistence adapter: `research/friday_persistence.py`
+- Dedicated research schema: `supabase/friday_research_schema.sql`
+
+### Persistence model
+
+Use a dedicated research Supabase project, not the production CX Switch database or its KV namespace. Apply `supabase/friday_research_schema.sql` manually only after confirming the target project. Configure GitHub Actions secrets:
+
+- `FRIDAY_SUPABASE_URL`
+- `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` (server-side secret only)
+- `FRIDAY_TELEGRAM_BOT_TOKEN`
+- `FRIDAY_TELEGRAM_CHAT_ID`
+
+The workflow maps these to runtime environment variables. Without Supabase persistence, the monitor refuses to send Telegram alerts so it cannot claim reliable deduplication. Run logs and snapshots are still uploaded as GitHub Actions artifacts, retained for 30 days.
+
+### Last 50 trades/setups
+
+`friday_trade_events` is the bounded recent setup ledger: one idempotent row per Entry 1 setup, updated as retest, continuation add, failure, and outcome evidence becomes available. A database trigger retains the latest 50 records. Entry 1 and Entry 2 notifications have separate idempotency keys in `friday_alert_deliveries`, so a workflow retry does not resend a completed alert. `friday_cron_runs` retains the latest 500 run summaries with per-pair status, candle timestamp, event counts, persistence status, and errors.
+
+The 50-row table is the operational recent-history view, not the complete backtest archive. Long-run performance analysis belongs in versioned artifacts/backtest datasets.
+
+### Cron and validation
+
+GitHub Actions run logs are the first-level cron diagnostics; the artifact contains the per-pair JSON previews and `cron_run.json`. Supabase stores compact persistent run summaries. Schedule triggers run only from the repository's default branch, so while this work remains on `feature/price-touch-trendlines`, use `workflow_dispatch` to test it; do not merge into production/default branch just to activate the schedule. Validate a manual run and alert dedupe before enabling a recurring schedule.
