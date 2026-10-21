@@ -1,7 +1,8 @@
 """Optional Hugging Face shadow reviewer for Friday's frozen rule evidence.
 
 Advisory only: it cannot create or veto signals, alter stops/targets, or place orders.
-Configure HUGGINGFACE_API_KEY and FRIDAY_HF_MODEL_ID to enable. No secrets are logged.
+Set HUGGINGFACE_API_KEY to enable; the model and endpoint have safe defaults.
+No secrets are logged.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from typing import Any, Mapping
 import requests
 
 DEFAULT_ENDPOINT = "https://router.huggingface.co/v1/chat/completions"
+DEFAULT_MODEL_ID = "openai/gpt-oss-120b:cheapest"
 
 
 def review_decision(
@@ -25,8 +27,8 @@ def review_decision(
     session=requests,
 ) -> dict[str, Any]:
     api_token = token or os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
-    model = model_id or os.getenv("FRIDAY_HF_MODEL_ID")
-    if not api_token or not model:
+    model = model_id or os.getenv("FRIDAY_HF_MODEL_ID") or DEFAULT_MODEL_ID
+    if not api_token:
         return {
             "status": "not_configured", "provider": "huggingface", "model_id": model,
             "response": None, "latency_ms": None, "error": None,
