@@ -117,17 +117,3 @@ def evaluate_friday_decision(
                    if touched else "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."),
         "execution": "no trade; no order submitted",
     }
-
-    best = max(candidates, key=lambda c: c["evidence"]["confluence_score"])
-    return {
-        "state": "WATCHING" if any(c["evidence"]["fib_area_touched"] for c in candidates) else "NO_TRADE",
-        "decision_time": pd.Timestamp(current.timestamp).isoformat(),
-        "direction_watch": best["direction"],
-        "close": close,
-        "candidate_origins": {"long_0_fib": long_origin, "short_0_fib": short_origin},
-        "candidate_evidence": [c["evidence"] for c in candidates],
-        "reason": ("Fib origin touched but structural/reaction evidence is incomplete."
-                   if any(c["evidence"]["fib_area_touched"] for c in candidates)
-                   else "No qualified 0-Fib reaction on the latest closed candle; wait for price to reach a meaningful origin."),
-        "execution": "no trade; no order submitted",
-    }
