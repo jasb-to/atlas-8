@@ -253,6 +253,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     events,status,frame=causal_replay(raw)
     setups=consolidate_setups(events,frame)
     trades=replay_trades(setups,frame)
+    trades_structural=replay_trades(setups,frame,target_mode="structure_fib")
     last=frame.iloc[-1]
     setup_state=latest_setup_state(events, last.timestamp)
     structure=evaluate_structure(raw, lookback=LOOKBACK, min_touches=3, break_buffer_pct=BREAK_BUFFER)
@@ -269,7 +270,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
         "consolidated_setups":setups,"consolidated_setup_count":len(setups),
-        "trade_replay":trades,"trade_replay_summary":{
+        "trade_replay":trades,"structural_target_replay":trades_structural,"structural_target_replay_summary":{\n            "target_policy":"nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",\n            "trades":len(trades_structural),"wins":sum(t["net_equity_return_pct"]>0 for t in trades_structural),\n            "losses":sum(t["net_equity_return_pct"]<=0 for t in trades_structural),\n            "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades_structural),4),\n            "mean_net_r":round(float(np.mean([t["net_r_multiple"] for t in trades_structural])),4) if trades_structural else None,\n            "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades_structural) for name in ("target","stop","time_exit")}},\n        "trade_replay_summary":{
             "trades":len(trades),"wins":sum(t["net_equity_return_pct"]>0 for t in trades),
             "losses":sum(t["net_equity_return_pct"]<=0 for t in trades),
             "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades),4),
@@ -281,7 +282,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
             "add":"post-break retest within 18 bars / 72h, close holds breakout side",
             "failure":"close crosses back through line by 0.30%","daily_bias_and_ema":"shown, not hard gates"},
-        "trade_replay_rules":{"entry":"next 4H open after break signal","stop":"1.0 ATR from entry","target":"2R","risk_per_trade_pct":0.5,
+        "trade_replay_rules":{"entry":"next 4H open after break signal","stop":"1.0 ATR from entry","baseline_target":"2R for comparison","alternative_target":"nearest prior structural level, otherwise 1.272 Fib extension of prior range","risk_per_trade_pct":0.5,
             "max_hold_bars":18,"costs_bps_per_side":{"fee":8,"slippage":5},
             "same_candle_stop_target":"stop assumed first; conservative OHLC approximation"},
         "limitations":["Kraken supplies at most 720 recent candles.","Walk-forward signals use only the prefix available at each candle.",
