@@ -152,9 +152,14 @@ def causal_replay(raw):
                     "entry_plan":"small probe after closed-candle break; momentum/context are visible, not hard gates",
                     "retest_deadline":(row.timestamp+pd.Timedelta(hours=72)).isoformat(),
                     "outcome":"pending","forward_bars_checked":0}
-                if not any(e["signal_time"]==event["signal_time"] and e["line_kind"]==event["line_kind"] for e in events):
+                event["anchor_start_time"]=prefix.iloc[break_line.start.index].timestamp.isoformat()
+                event["anchor_end_time"]=prefix.iloc[break_line.end.index].timestamp.isoformat()
+                duplicate_key=(event["line_kind"],event["anchor_start_time"],event["anchor_end_time"])
+                seen_keys={(e["line_kind"],e.get("anchor_start_time"),e.get("anchor_end_time")) for e in events}
+                if duplicate_key not in seen_keys:
                     events.append(event); active.append({"event":event,"line":break_line,"origin":start,"break_i":i})
-                    status["state"]="break_close_probe"
+                    if i == len(frame)-1:
+                        status["state"]="break_close_probe"
         # Manage each break against its original line coordinates; only future candles are outcomes.
         for a in list(active):
             age=i-a["break_i"]
