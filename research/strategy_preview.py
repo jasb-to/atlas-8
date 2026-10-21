@@ -89,7 +89,7 @@ def structure_snapshot(prefix, candidates):
             denom = sup.slope_per_bar - res.slope_per_bar
             if denom <= 0:
                 continue
-            cross_i = (res.start.price - sup.start.price + res.slope_per_bar*res.start.index - sup.slope_per_bar*sup.start.index) / denom
+            cross_i = (res.start.price - sup.start.price + sup.slope_per_bar*sup.start.index - res.slope_per_bar*res.start.index) / denom
             bars_to_apex = cross_i - i
             if 0 < bars_to_apex <= 72:
                 sv, rv = sup.value_at(i), res.value_at(i)
