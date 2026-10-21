@@ -62,6 +62,46 @@ def line_retest(frame, line, break_i, i):
         if contact: return True, j, held
     return False, None, False
 
+def momentum_context(frame, i):
+    """Causal momentum confirmation: Stoch RSI recross and positive/rising MACD."""
+    if i < 2:
+        return {"stoch_bullish_cross": False, "macd_bullish_expansion": False}
+    row, prev = frame.iloc[i], frame.iloc[i-1]
+    k, d, pk, pd_ = row.stoch_k, row.stoch_d, prev.stoch_k, prev.stoch_d
+    cross = all(np.isfinite(x) for x in (k, d, pk, pd_)) and pk <= pd_ and k > d
+    close = frame.close.astype(float)
+    macd = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
+    signal = macd.ewm(span=9, adjust=False).mean()
+    hist = macd - signal
+    expansion = hist.iloc[i] > 0 and hist.iloc[i] > hist.iloc[i-1] and macd.iloc[i] > signal.iloc[i]
+    return {"stoch_bullish_cross": bool(cross), "macd_bullish_expansion": bool(expansion),
+            "macd_histogram": _num(hist.iloc[i]), "macd_histogram_previous": _num(hist.iloc[i-1])}
+
+
+def structure_snapshot(prefix, candidates):
+    """Find descending resistance + rising support whose projected apex is within 72 bars."""
+    i = len(prefix)-1
+    supports = [x for x in candidates if x.kind == "support" and x.slope_per_bar > 0]
+    resistances = [x for x in candidates if x.kind == "resistance" and x.slope_per_bar < 0]
+    pairs = []
+    for sup in supports:
+        for res in resistances:
+            denom = sup.slope_per_bar - res.slope_per_bar
+            if denom <= 0:
+                continue
+            cross_i = (res.start.price - sup.start.price + res.slope_per_bar*res.start.index - sup.slope_per_bar*sup.start.index) / denom
+            bars_to_apex = cross_i - i
+            if 0 < bars_to_apex <= 72:
+                sv, rv = sup.value_at(i), res.value_at(i)
+                if sv < rv and (rv-sv)/max(abs(float(prefix.iloc[-1].close)),1e-9) <= 0.08:
+                    pairs.append({"support_price": float(sv), "resistance_price": float(rv),
+                        "support_touches": len(sup.touch_indices), "resistance_touches": len(res.touch_indices),
+                        "bars_to_apex": float(bars_to_apex),
+                        "apex_time_estimate": (prefix.iloc[-1].timestamp + pd.Timedelta(hours=4*bars_to_apex)).isoformat()})
+    pairs.sort(key=lambda x: (x["bars_to_apex"], -(x["support_touches"]+x["resistance_touches"])))
+    return pairs[0] if pairs else None
+
+
 def _num(x):
     try:
         v=float(x)
@@ -86,6 +126,8 @@ def causal_replay(raw):
             and abs(line.value_at(len(prefix)-1)-close)/close <= MAX_DISTANCE]
         candidates.sort(key=lambda line:(abs(line.value_at(len(prefix)-1)-close)/close,
             -len(line.touch_indices),-line.end.confirmed_at))
+        # Dashboard state uses nearest line, but break detection scans all valid lines.
+        wedge = structure_snapshot(prefix, candidates)
         if candidates:
             line=candidates[0]; lv=float(line.value_at(len(prefix)-1))
             status={"state":"watching_resistance" if line.kind=="resistance" else "watching_support",
@@ -95,19 +137,23 @@ def causal_replay(raw):
                 "anchor_end_time":prefix.iloc[line.end.index].timestamp.isoformat(),
                 "anchor_start_wick":float(line.start.price),"anchor_end_wick":float(line.end.price),
                 "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
-            if break_crossed(prefix,line,len(prefix)-1):
-                direction="long" if line.kind=="resistance" else "short"
+            for break_line in candidates:
+                if not break_crossed(prefix,break_line,len(prefix)-1):
+                    continue
+                direction="long" if break_line.kind=="resistance" else "short"
                 row=prefix.iloc[-1]
                 aligned=(float(row.ema8_4h)>float(row.ema21_4h)) if direction=="long" else (float(row.ema8_4h)<float(row.ema21_4h))
+                momentum=momentum_context(prefix,len(prefix)-1)
                 event={"event":"BREAK_CLOSE_PROBE","signal_time":row.timestamp.isoformat(),"direction":direction,
-                    "line_kind":line.kind,"line_price_at_break":lv,"close_at_break":close,
-                    "touch_count":len(line.touch_indices),"daily_bias":str(row.daily_bias),
+                    "line_kind":break_line.kind,"line_price_at_break":float(break_line.value_at(len(prefix)-1)),
+                    "close_at_break":close,"touch_count":len(break_line.touch_indices),"daily_bias":str(row.daily_bias),
                     "ema_aligned":bool(aligned),"stoch_k":_num(row.stoch_k),"stoch_d":_num(row.stoch_d),
-                    "entry_plan":"small probe after closed-candle break; context is visible, not a hard gate",
+                    "momentum_context":momentum,"converging_wedge":wedge,
+                    "entry_plan":"small probe after closed-candle break; momentum/context are visible, not hard gates",
                     "retest_deadline":(row.timestamp+pd.Timedelta(hours=72)).isoformat(),
                     "outcome":"pending","forward_bars_checked":0}
                 if not any(e["signal_time"]==event["signal_time"] and e["line_kind"]==event["line_kind"] for e in events):
-                    events.append(event); active.append({"event":event,"line":line,"origin":start,"break_i":i})
+                    events.append(event); active.append({"event":event,"line":break_line,"origin":start,"break_i":i})
                     status["state"]="break_close_probe"
         # Manage each break against its original line coordinates; only future candles are outcomes.
         for a in list(active):
@@ -157,6 +203,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"break_events":events,"event_count":len(events),
+        "latest_momentum_context":momentum_context(frame,len(frame)-1),
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
             ("retest_held","failed_break","no_retest_within_window","pending")},
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
