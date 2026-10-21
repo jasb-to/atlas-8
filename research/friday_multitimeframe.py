@@ -159,7 +159,7 @@ def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.Dat
         "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
         "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
         "limitations": [
-            "Research signal only; no exchange orders are placed.",
+            "Research signal only; it never executes trades.",
             "Indicator confluence is evidence, not a calibrated probability.",
             "Trendlines are algorithmic candidates and need walk-forward validation.",
             "Daily context uses only the latest completed daily candle.",
