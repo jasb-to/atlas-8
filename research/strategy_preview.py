@@ -211,6 +211,41 @@ def causal_replay(raw):
         e["forward_returns_note"]="Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     return events,status,frame
 
+def latest_setup_state(events, last_closed_candle):
+    """Summarise the newest recent probe/add lifecycle for monitoring output."""
+    if not events:
+        return {"state": "NO_SETUP", "message": "No confirmed break setup in the available replay."}
+    now = pd.Timestamp(last_closed_candle)
+    latest = max(events, key=lambda e: pd.Timestamp(e["signal_time"]))
+    signal_time = pd.Timestamp(latest["signal_time"])
+    age_hours = max(0.0, (now - signal_time).total_seconds() / 3600)
+    base = {
+        "direction": latest["direction"],
+        "signal_time": latest["signal_time"],
+        "line_kind": latest["line_kind"],
+        "line_price_at_break": _num(latest["line_price_at_break"]),
+        "touch_count": latest["touch_count"],
+        "daily_bias": latest.get("daily_bias"),
+        "ema_aligned": latest.get("ema_aligned"),
+        "momentum_context": latest.get("momentum_context", {}),
+        "age_hours": round(age_hours, 2),
+        "outcome": latest.get("outcome", "pending"),
+    }
+    if latest.get("outcome") == "failed_break":
+        return {**base, "state": "INVALIDATED", "message": "The breakout failed its close-based invalidation rule."}
+    if latest.get("outcome") == "no_retest_within_window":
+        return {**base, "state": "EXPIRED", "message": "No qualifying retest held within 72 hours."}
+    if latest.get("outcome") == "retest_held":
+        return {**base, "state": "RETEST_ADD_CONFIRMED", "add_signal_time": latest.get("add_signal_time"),
+                "add_close": latest.get("add_close"),
+                "message": "A post-break retest held on a closed 4H candle; add confirmation is historical, not an order."}
+    if age_hours <= RETEST_BARS * 4:
+        return {**base, "state": "ENTRY_PROBE_WAITING_RETEST",
+                "retest_deadline": latest.get("retest_deadline"),
+                "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
+    return {**base, "state": "EXPIRED", "message": "The 72-hour retest window has elapsed."}
+
+
 def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-preview"):
     raw=fetch_ohlc(pair=pair,interval=interval)
     events,status,frame=causal_replay(raw)
