@@ -3,7 +3,7 @@ import unittest
 
 import pandas as pd
 
-from research.strategy_preview import break_crossed, line_retest
+from research.strategy_preview import break_crossed, line_retest, momentum_context
 from research.trendlines import Pivot, Trendline
 
 
@@ -46,6 +46,17 @@ class StrategyPreviewTests(unittest.TestCase):
         self.assertTrue(found)
         self.assertEqual(index, 2)
         self.assertTrue(held)
+
+
+    def test_momentum_context_reports_stoch_recross_and_macd(self):
+        frame = pd.DataFrame({
+            "close": [90, 91, 92, 93, 94, 95, 96, 97, 98, 99],
+            "stoch_k": [10, 12, 15, 20, 25, 30, 35, 40, 55, 70],
+            "stoch_d": [12, 13, 14, 18, 22, 27, 32, 38, 45, 60],
+        })
+        context = momentum_context(frame, len(frame)-1)
+        self.assertTrue(context["stoch_bullish_cross"])
+        self.assertIn("macd_bullish_expansion", context)
 
     def test_retest_window_allows_multiple_days(self):
         from research.strategy_preview import RETEST_BARS
