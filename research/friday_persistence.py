@@ -31,7 +31,6 @@ def event_key(pair: str, timeframe: str, event: Mapping[str, Any]) -> str:
         "line_kind": event.get("line_kind"),
         "anchor_start_time": event.get("anchor_start_time"),
         "anchor_end_time": event.get("anchor_end_time"),
-        "event_type": event.get("event_add") or event.get("event"),
     }
     return hashlib.sha256(json.dumps(stable, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
@@ -134,7 +133,7 @@ def make_trade_event(*, pair: str, timeframe: str, event: Mapping[str, Any],
         "pair": pair.upper(),
         "timeframe": timeframe,
         "strategy_version": strategy_version,
-        "event_type": event.get("event_add") or event.get("event") or "UNKNOWN",
+        "event_type": event.get("event") or "UNKNOWN",
         "direction": str(event.get("direction", "")).upper() or None,
         "signal_time": event.get("signal_time") or event.get("continuation_add_time"),
         "entry_reference": event.get("continuation_add_close") or event.get("close_at_break"),
