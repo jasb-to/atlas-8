@@ -193,6 +193,7 @@ def main() -> int:
         "entry1_structural_targets": report["structural_target_replay"],
         "entry2_fixed_r": report["entry2_replay"],
         "entry2_structural_targets": report["entry2_structural_target_replay"],
+        "walk_forward": report["walk_forward"],
         "no_trade": report["no_trade_count"],
     }))
     return 0
