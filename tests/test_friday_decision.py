@@ -11,6 +11,7 @@ class FridayDecisionTests(unittest.TestCase):
             base = 100 + (i % 5) * 0.1
             rows.append({"timestamp": pd.Timestamp("2026-01-01", tz="UTC") + pd.Timedelta(hours=4*i),
                          "open": base, "high": base + 1, "low": base - 1, "close": base + 0.2})
+        rows[-1].update({"open": 101.8, "high": 102.5, "low": 101.5, "close": 102.2})
         result = evaluate_friday_decision(pd.DataFrame(rows))
         self.assertIn(result["state"], {"NO_TRADE", "WATCHING"})
         self.assertIn("reason", result)
