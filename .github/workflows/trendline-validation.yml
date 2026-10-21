@@ -39,6 +39,10 @@ jobs:
         run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual-strategy-preview
       - name: Validate learning reports from fresh replay exports
         run: |
+          BTC_SPLIT="$(python -c 'import json; print(json.load(open("results/strategy-preview/strategy_preview.json"))["walk_forward_split_time"])')"
+          BTC_LAST="$(python -c 'import json; print(json.load(open("results/strategy-preview/strategy_preview.json"))["last_completed_candle_utc"])')"
+          VIRTUAL_SPLIT="$(python -c 'import json; print(json.load(open("results/virtual-strategy-preview/strategy_preview.json"))["walk_forward_split_time"])')"
+          VIRTUAL_LAST="$(python -c 'import json; print(json.load(open("results/virtual-strategy-preview/strategy_preview.json"))["last_completed_candle_utc"])')"
           python -m research.friday_learning \
             --decisions results/strategy-preview/decision_journal.jsonl \
             --trades results/strategy-preview/trade_replay.jsonl \
