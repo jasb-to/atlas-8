@@ -54,7 +54,7 @@ jobs:
                   ""
               ]
           summary.parent.mkdir(parents=True, exist_ok=True)
-          summary.write_text("\\n".join(lines) + "\\n")
+          summary.write_text("\n".join(lines) + "\n")
           print(summary.read_text())
           with Path(__import__("os").environ["GITHUB_STEP_SUMMARY"]).open("a") as f:
               f.write(summary.read_text())
