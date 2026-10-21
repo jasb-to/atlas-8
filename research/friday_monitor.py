@@ -18,6 +18,7 @@ from research.friday_persistence import (
     SupabaseFridayStore, make_archive_record, make_cron_run, make_trade_event, utc_now,
 )
 from research.strategy_preview import build_preview
+from research.friday_multitimeframe import analyse_pair
 
 
 def _utc(value) -> pd.Timestamp:
@@ -43,11 +44,16 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             pair_dir = out / pair.lower()
             pair_dir.mkdir(parents=True, exist_ok=True)
             result = build_preview(pair=pair, interval=240, output_dir=str(pair_dir))
+            # Daily thesis + 4H execution scan uses completed candles from Kraken.
+            mtf = analyse_pair(pair=pair)
+            (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
             row = {
                 "pair": pair, "status": "ok", "last_completed_candle_utc": latest.isoformat(),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
                 "friday_decision": result["friday_decision"].get("state"),
+                "multitimeframe_state": mtf.get("state"),
+                "multitimeframe_direction": mtf.get("thesis_direction"),
                 "reversal_context": result.get("reversal_context", {}).get("state", "unavailable"),
                 "break_event_count": result["event_count"],
                 "persistence": "configured" if store.configured else "not_configured",
@@ -65,7 +71,16 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         "current_indicators": result.get("current_indicators"),
                         "structure_lifecycle": result.get("structure_lifecycle"),
                         "model_review": result.get("model_review"),
+                        "multitimeframe_scan": mtf,
                     },
+                ))
+            # Persist the cross-timeframe thesis independently of 4H lifecycle events.
+            if store.configured:
+                mtf_key = hashlib.sha256(f"{pair}|1D-4H|{mtf.get('generated_at_utc')}|thesis".encode()).hexdigest()
+                store.record_archive(make_archive_record(
+                    record_key=mtf_key, record_type="multitimeframe_thesis", pair=pair,
+                    timeframe="1D+4H", signal_time=mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
+                    payload=mtf,
                 ))
             # Persist the lifecycle ledger idempotently. Only alert events that
             # first become actionable on the latest closed candle.
