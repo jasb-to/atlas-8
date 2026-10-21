@@ -7,7 +7,9 @@ on:
     paths:
       - "research/trendlines.py"
       - "research/validate_kraken_trendlines.py"
+      - "research/strategy_preview.py"
       - "tests/test_trendlines.py"
+      - "tests/test_strategy_preview.py"
       - ".github/workflows/trendline-validation.yml"
 
 permissions:
@@ -16,7 +18,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,17 +27,23 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install audit dependencies
+      - name: Install research dependencies
         run: python -m pip install --upgrade pip pandas numpy requests matplotlib
-      - name: Run geometry regression tests
+      - name: Run trendline geometry regression tests
         run: python -m unittest discover -s tests -p 'test_trendlines.py' -v
-      - name: Fetch Kraken completed BTC/USD 4H candles and audit geometry
+      - name: Run causal strategy regression tests
+        run: python -m unittest discover -s tests -p 'test_strategy_preview.py' -v
+      - name: Fetch Kraken BTC/USD 4H data and audit geometry
         run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
-      - name: Upload raw candles and audit report
+      - name: Replay 4H break strategy and build current preview
+        run: python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
+      - name: Upload live data, geometry and strategy preview
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kraken-trendline-audit
-          path: results/trendline-audit/
+          name: atlas-8-btc-4h-strategy-preview
+          path: |
+            results/trendline-audit/
+            results/strategy-preview/
           if-no-files-found: warn
           retention-days: 14
