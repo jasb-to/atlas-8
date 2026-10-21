@@ -255,7 +255,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
 
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument("--pair",default="XBTUSD",choices=["XBTUSD","ETHUSD","SOLUSD"])
+    p.add_argument("--pair",default="XBTUSD",choices=["XBTUSD","ETHUSD","SOLUSD","VIRTUALUSD"])
     p.add_argument("--interval",type=int,default=240)
     p.add_argument("--output-dir",default="results/strategy-preview")
     a=p.parse_args(); r=build_preview(a.pair,a.interval,a.output_dir)
