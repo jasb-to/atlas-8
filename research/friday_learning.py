@@ -162,6 +162,7 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
             "automatic_parameter_changes": False,
             "model_is_advisory_until_walk_forward_validation": True,
             "warning": "Forward-return diagnostics are not equivalent to executable, fee-aware trade outcomes.",
+            "equity_curve_assumption": "Sequential trade-level compounding ignores overlapping positions and portfolio exposure; not a portfolio backtest.",
         },
     }
 
