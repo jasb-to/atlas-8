@@ -143,8 +143,15 @@ def main() -> int:
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(destination), "decisions": report["decision_count"],
-                      "trades": report["replay"]["trades"], "no_trade": report["no_trade_count"]}))
+    print(json.dumps({
+        "output": str(destination),
+        "decisions": report["decision_count"],
+        "entry1_fixed_r_trades": report["replay"]["trades"],
+        "entry1_structural_trades": report["structural_target_replay"]["trades"],
+        "entry2_fixed_r_trades": report["entry2_replay"]["trades"],
+        "entry2_structural_trades": report["entry2_structural_target_replay"]["trades"],
+        "no_trade": report["no_trade_count"],
+    }))
     return 0
 
 
