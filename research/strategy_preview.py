@@ -270,7 +270,14 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
         "consolidated_setups":setups,"consolidated_setup_count":len(setups),
-        "trade_replay":trades,"structural_target_replay":trades_structural,"structural_target_replay_summary":{\n            "target_policy":"nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",\n            "trades":len(trades_structural),"wins":sum(t["net_equity_return_pct"]>0 for t in trades_structural),\n            "losses":sum(t["net_equity_return_pct"]<=0 for t in trades_structural),\n            "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades_structural),4),\n            "mean_net_r":round(float(np.mean([t["net_r_multiple"] for t in trades_structural])),4) if trades_structural else None,\n            "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades_structural) for name in ("target","stop","time_exit")}},\n        "trade_replay_summary":{
+        "trade_replay":trades,"structural_target_replay":trades_structural,"structural_target_replay_summary":{
+            "target_policy":"nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",
+            "trades":len(trades_structural),"wins":sum(t["net_equity_return_pct"]>0 for t in trades_structural),
+            "losses":sum(t["net_equity_return_pct"]<=0 for t in trades_structural),
+            "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades_structural),4),
+            "mean_net_r":round(float(np.mean([t["net_r_multiple"] for t in trades_structural])),4) if trades_structural else None,
+            "exit_reasons":{name:sum(t["exit_reason"]==name for t in trades_structural) for name in ("target","stop","time_exit")}},
+        "trade_replay_summary":{
             "trades":len(trades),"wins":sum(t["net_equity_return_pct"]>0 for t in trades),
             "losses":sum(t["net_equity_return_pct"]<=0 for t in trades),
             "net_equity_return_pct":round(sum(t["net_equity_return_pct"] for t in trades),4),
