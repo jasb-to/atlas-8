@@ -48,7 +48,7 @@ class StrategyPreviewTests(unittest.TestCase):
         self.assertTrue(held)
 
     def test_retest_window_allows_multiple_days(self):
-        from research.strategy_preview import RETEST_WINDOW_BARS
+        from research.strategy_preview import RETEST_BARS
         self.assertEqual(RETEST_WINDOW_BARS * 4, 72)
 
 
