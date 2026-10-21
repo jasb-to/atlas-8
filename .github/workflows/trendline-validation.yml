@@ -8,8 +8,10 @@ on:
       - "research/trendlines.py"
       - "research/validate_kraken_trendlines.py"
       - "research/strategy_preview.py"
+      - "research/sheldon_strategy.py"
       - "tests/test_trendlines.py"
       - "tests/test_strategy_preview.py"
+      - "tests/test_sheldon_strategy.py"
       - ".github/workflows/trendline-validation.yml"
 
 permissions:
@@ -33,6 +35,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_trendlines.py' -v
       - name: Run causal strategy regression tests
         run: python -m unittest discover -s tests -p 'test_strategy_preview.py' -v
+      - name: Run Sheldon setup and trade replay tests
+        run: python -m unittest discover -s tests -p 'test_sheldon_strategy.py' -v
       - name: Fetch Kraken BTC/USD 4H data and audit geometry
         run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
       - name: Replay 4H break strategy and build current preview
