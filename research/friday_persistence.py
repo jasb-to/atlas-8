@@ -137,7 +137,7 @@ class SupabaseFridayStore:
 
 
 def make_trade_event(*, pair: str, timeframe: str, event: Mapping[str, Any],
-                     run_id: str, strategy_version: str = "friday-price-action-v1") -> dict[str, Any]:
+                     run_id: str, strategy_version: str = "friday-price-action-v2") -> dict[str, Any]:
     """Normalize a detected event into an idempotent row."""
     return _json_safe({
         "event_key": event_key(pair, timeframe, event),
@@ -178,7 +178,7 @@ def make_cron_run(*, run_id: str, status: str, pair_results: list[Mapping[str, A
 def make_archive_record(*, record_key: str, record_type: str, pair: str,
                         timeframe: str, signal_time: str | None,
                         payload: Mapping[str, Any],
-                        strategy_version: str = "friday-price-action-v1") -> dict[str, Any]:
+                        strategy_version: str = "friday-price-action-v2") -> dict[str, Any]:
     """Build a JSON-safe, idempotent long-horizon research archive row."""
     return _json_safe({
         "record_key": record_key,
