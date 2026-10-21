@@ -342,6 +342,15 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     )
     append_decision(out/"decision_journal.jsonl", journal_record)
     (out/"strategy_preview.json").write_text(json.dumps(result,indent=2,allow_nan=False))
+    # Snapshot JSONL datasets make the learning report reproducible from the same
+    # candle window. The durable archive in Supabase retains lifecycle history.
+    for filename, rows in (
+        ("break_events.jsonl", events),
+        ("trade_replay.jsonl", trades),
+        ("structural_target_replay.jsonl", trades_structural),
+    ):
+        payload = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\\n" for row in rows)
+        (out / filename).write_text(payload, encoding="utf-8")
     md=["# 4H Break Strategy Preview — "+pair,"",f"- Generated: {result['generated_at_utc']}",
         f"- Last completed candle: {last.timestamp.isoformat()}",f"- Last close: {float(last.close):.6f}",
         f"- Daily bias (lagged): {last.daily_bias}",f"- 4H EMA 8/21: {_num(last.ema8_4h)} / {_num(last.ema21_4h)}",
