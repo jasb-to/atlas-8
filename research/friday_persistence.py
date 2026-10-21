@@ -68,7 +68,8 @@ class SupabaseFridayStore:
 
     def record_trade_event(self, record: Mapping[str, Any]) -> dict[str, Any]:
         payload = dict(record)
-        payload.setdefault("created_at", utc_now())
+        # Let the database assign created_at on insert; preserving it on upsert
+        # keeps the 50-row retention window ordered by first observation.
         result = self._request(
             "POST", TRADES_TABLE, params={"on_conflict": "event_key"},
             payload=payload, prefer="resolution=merge-duplicates,return=representation",
