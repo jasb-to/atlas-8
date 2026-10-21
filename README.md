@@ -83,3 +83,13 @@ The 50-row table is the operational recent-history view, not the complete backte
 ### Cron and validation
 
 GitHub Actions run logs are the first-level cron diagnostics; the artifact contains the per-pair JSON previews and `cron_run.json`. Supabase stores compact persistent run summaries. Schedule triggers run only from the repository's default branch, so while this work remains on `feature/price-touch-trendlines`, use `workflow_dispatch` to test it; do not merge into production/default branch just to activate the schedule. Validate a manual run and alert dedupe before enabling a recurring schedule.
+
+
+## Friday learning loop and optional model review
+
+- `research/friday_learning.py` builds a repeatable JSON report from decision-journal JSONL and replay-result JSONL. It tracks NO_TRADE frequency, common blockers, model status, win rate, compounded net return, profit factor, drawdown, exits, target types, direction splits, and available forward-return diagnostics.
+- Example: `python -m research.friday_learning --decisions results/strategy-preview/decision_journal.jsonl --trades results/replay-trades.jsonl --output results/friday-learning-report.json`. The trade input must be JSONL replay rows; absent inputs are treated as empty.
+- Reports do not automatically tune or promote strategy rules. Candidate changes must beat the baseline in chronological walk-forward testing, with fees/slippage, and must be checked for drawdown and 10%/20% directional-move capture.
+- `research/friday_huggingface.py` is an optional Hugging Face shadow reviewer, wired into the preview journal. It reads `HUGGINGFACE_API_KEY` (or `HF_TOKEN`) and `FRIDAY_HF_MODEL_ID`. Optional endpoint override: `FRIDAY_HF_ENDPOINT`. It uses the Hugging Face router's OpenAI-compatible chat-completions interface, validates the response schema, records status/model/latency/errors, and fails soft.
+- If credentials/model ID are absent, the journal explicitly records `not_configured`. The model can review but cannot change the rule-engine decision, invent a setup, or trigger an order. Model output stays advisory until it demonstrates out-of-sample value.
+- Tests: `python -m unittest discover -s tests -p 'test_*.py' -v`.
