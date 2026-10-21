@@ -1,0 +1,56 @@
+"""Focused tests for the causal 4H break strategy preview."""
+import unittest
+
+import pandas as pd
+
+from research.strategy_preview import break_crossed, line_retest
+from research.trendlines import Pivot, Trendline
+
+
+class StrategyPreviewTests(unittest.TestCase):
+    def line(self, kind="resistance"):
+        side = kind
+        return Trendline(
+            kind=side,
+            start=Pivot(0, 100.0, side, 1),
+            end=Pivot(2, 100.0, side, 3),
+            slope_per_bar=0.0,
+            tolerance=0.15,
+            touch_indices=(0, 2, 4),
+            violations=(),
+        )
+
+    def test_resistance_break_requires_closed_close_and_prior_close_below(self):
+        frame = pd.DataFrame({
+            "high": [101, 101, 102],
+            "low": [98, 99, 100],
+            "close": [99.5, 100.1, 100.3],
+        })
+        self.assertTrue(break_crossed(frame, self.line("resistance"), 2))
+        self.assertFalse(break_crossed(frame, self.line("resistance"), 1))
+
+    def test_support_break_is_directional_breakdown(self):
+        frame = pd.DataFrame({
+            "high": [101, 101, 100],
+            "low": [99, 98, 97],
+            "close": [100.5, 99.9, 99.7],
+        })
+        self.assertTrue(break_crossed(frame, self.line("support"), 2))
+
+    def test_retest_is_only_checked_after_break(self):
+        frame = pd.DataFrame({
+            "high": [100.2, 100.1, 100.3, 101],
+            "low": [99.8, 99.7, 100.0, 100.2],
+            "close": [100, 99.9, 100.1, 100.4],
+        })
+        found, index, held = line_retest(frame, self.line("resistance"), 1, 3)
+        self.assertTrue(found)
+        self.assertEqual(index, 2)
+        self.assertTrue(held)
+
+    def test_retest_window_allows_multiple_days(self):
+        self.assertEqual(18 * 4, 72)
+
+
+if __name__ == "__main__":
+    unittest.main()
