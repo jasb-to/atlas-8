@@ -76,7 +76,7 @@ The workflow maps these to runtime environment variables. Without Supabase persi
 
 ### Last 50 trades/setups
 
-`friday_trade_events` is the bounded recent setup ledger: one idempotent row per Entry 1 setup, updated as retest, continuation add, failure, and outcome evidence becomes available. A database trigger retains the latest 50 records. Entry 1 and Entry 2 notifications have separate idempotency keys in `friday_alert_deliveries`, so a workflow retry does not resend a completed alert. `friday_cron_runs` retains the latest 500 run summaries with per-pair status, candle timestamp, event counts, persistence status, and errors.
+`friday_trade_events` is the bounded recent setup ledger: one idempotent row per Entry 1 setup, updated as retest, continuation add, failure, and outcome evidence becomes available. A database trigger retains the latest 50 records. Entry 1 and Entry 2 notifications have separate idempotency keys in `friday_alert_deliveries`, so a workflow retry does not resend a completed alert. `friday_cron_runs` retains the latest 500 run summaries with per-pair status, candle timestamp, event counts, persistence status, and errors. `friday_research_archive` stores idempotent per-candle decision snapshots and setup lifecycle payloads without the 50-row pruning limit; it is the durable research record for later analysis.
 
 The 50-row table is the operational recent-history view, not the complete backtest archive. Long-run performance analysis belongs in versioned artifacts/backtest datasets.
 
@@ -88,7 +88,7 @@ GitHub Actions run logs are the first-level cron diagnostics; the artifact conta
 ## Friday learning loop and optional model review
 
 - `research/friday_learning.py` builds a repeatable JSON report from decision-journal JSONL and replay-result JSONL. It tracks NO_TRADE frequency, common blockers, model status, win rate, compounded net return, profit factor, drawdown, exits, target types, direction splits, and available forward-return diagnostics.
-- Example: `python -m research.friday_learning --decisions results/strategy-preview/decision_journal.jsonl --trades results/replay-trades.jsonl --output results/friday-learning-report.json`. The trade input must be JSONL replay rows; absent inputs are treated as empty.
+- Example: `python -m research.friday_learning --decisions results/strategy-preview/decision_journal.jsonl --trades results/replay-trades.jsonl --events results/break-events.jsonl --output results/friday-learning-report.json`. The trade input must be JSONL replay rows; `--events` accepts lifecycle events containing forward-return diagnostics. Absent inputs are treated as empty.
 - Reports do not automatically tune or promote strategy rules. Candidate changes must beat the baseline in chronological walk-forward testing, with fees/slippage, and must be checked for drawdown and 10%/20% directional-move capture.
 - `research/friday_huggingface.py` is an optional Hugging Face shadow reviewer, wired into the preview journal. It reads `HUGGINGFACE_API_KEY` (or `HF_TOKEN`) and `FRIDAY_HF_MODEL_ID`. Optional endpoint override: `FRIDAY_HF_ENDPOINT`. It uses the Hugging Face router's OpenAI-compatible chat-completions interface, validates the response schema, records status/model/latency/errors, and fails soft.
 - If credentials/model ID are absent, the journal explicitly records `not_configured`. The model can review but cannot change the rule-engine decision, invent a setup, or trigger an order. Model output stays advisory until it demonstrates out-of-sample value.
