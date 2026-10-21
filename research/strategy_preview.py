@@ -310,6 +310,8 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     entry2_trades=replay_trades(entry2_setups,frame)
     entry2_trades_structural=replay_trades(entry2_setups,frame,target_mode="structure_fib")
     last=frame.iloc[-1]
+    split_index=min(max(int(len(frame)*0.7),1),len(frame)-1)
+    walk_forward_split_time=frame.iloc[split_index].timestamp.isoformat()
     setup_state=latest_setup_state(events, last.timestamp)
     structure=evaluate_structure(raw, lookback=LOOKBACK, min_touches=3, break_buffer_pct=BREAK_BUFFER)
     friday_decision=evaluate_friday_decision(frame)
@@ -320,7 +322,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
         "latest_setup_state":setup_state,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
-        "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"last_close":float(last.close),
+        "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"walk_forward_split_time":walk_forward_split_time,"last_close":float(last.close),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
