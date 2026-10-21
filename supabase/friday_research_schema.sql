@@ -99,3 +99,24 @@ create table if not exists public.friday_alert_deliveries (
 );
 alter table public.friday_alert_deliveries enable row level security;
 revoke all on public.friday_alert_deliveries from anon, authenticated;
+
+
+-- Long-horizon archive: unlike the operational ledger, this table is not pruned.
+-- One row per setup lifecycle or per candle's Friday decision snapshot.
+create table if not exists public.friday_research_archive (
+  record_key text primary key,
+  record_type text not null,
+  pair text not null,
+  timeframe text not null,
+  strategy_version text not null,
+  signal_time timestamptz,
+  payload jsonb not null default '{}'::jsonb,
+  first_seen_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists friday_research_archive_pair_time_idx
+  on public.friday_research_archive (pair, signal_time desc);
+create index if not exists friday_research_archive_type_idx
+  on public.friday_research_archive (record_type, signal_time desc);
+alter table public.friday_research_archive enable row level security;
+revoke all on public.friday_research_archive from anon, authenticated;
