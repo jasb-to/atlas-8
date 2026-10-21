@@ -1,0 +1,72 @@
+name: Friday setup monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */4 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Build current BTC 4H preview
+        run: python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/btc
+      - name: Build current VIRTUAL 4H preview
+        run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual
+      - name: Report Friday states
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          summary = Path("results/friday-monitor-summary.md")
+          lines = ["# Friday 4H setup monitor", "", "Research-only; no orders are placed.", ""]
+          for label, path in (("BTC/USD", "results/btc/strategy_preview.json"),
+                              ("VIRTUAL/USD", "results/virtual/strategy_preview.json")):
+              p = Path(path)
+              lines += [f"## {label}"]
+              if not p.exists():
+                  lines += ["Preview unavailable; inspect the failed workflow step.", ""]
+                  continue
+              data = json.loads(p.read_text())
+              setup = data.get("latest_setup_state", {})
+              live = data.get("live_preview", {})
+              lines += [
+                  f"- Last completed 4H candle: {data.get('last_completed_candle_utc')}",
+                  f"- Close: {data.get('last_close')}",
+                  f"- Setup lifecycle: **{setup.get('state', 'UNKNOWN')}**",
+                  f"- Detail: {setup.get('message', 'No detail returned.')}",
+                  f"- Live structure: {live.get('state', 'UNKNOWN')}",
+                  f"- Direction: {setup.get('direction', '—')}",
+                  f"- Break candle: {setup.get('signal_time', '—')}",
+                  f"- Retest deadline: {setup.get('retest_deadline', '—')}",
+                  ""
+              ]
+          summary.parent.mkdir(parents=True, exist_ok=True)
+          summary.write_text("\\n".join(lines) + "\\n")
+          print(summary.read_text())
+          with Path(__import__("os").environ["GITHUB_STEP_SUMMARY"]).open("a") as f:
+              f.write(summary.read_text())
+          PY
+      - name: Upload Friday monitor snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: friday-setup-monitor
+          path: |
+            results/btc/
+            results/virtual/
+            results/friday-monitor-summary.md
+          if-no-files-found: warn
+          retention-days: 14
