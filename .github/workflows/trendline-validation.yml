@@ -41,6 +41,10 @@ jobs:
         run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
       - name: Replay 4H break strategy and build current preview
         run: python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
+      - name: Fetch Kraken VIRTUAL/USD 4H data and audit geometry
+        run: python -m research.validate_kraken_trendlines --pair VIRTUALUSD --interval 240 --output-dir results/virtual-trendline-audit
+      - name: Replay VIRTUAL/USD 4H strategy and build current preview
+        run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual-strategy-preview
       - name: Upload live data, geometry and strategy preview
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,5 +53,7 @@ jobs:
           path: |
             results/trendline-audit/
             results/strategy-preview/
+            results/virtual-trendline-audit/
+            results/virtual-strategy-preview/
           if-no-files-found: warn
           retention-days: 14
