@@ -136,6 +136,7 @@ def causal_replay(raw):
                 "anchor_start_time":prefix.iloc[line.start.index].timestamp.isoformat(),
                 "anchor_end_time":prefix.iloc[line.end.index].timestamp.isoformat(),
                 "anchor_start_wick":float(line.start.price),"anchor_end_wick":float(line.end.price),
+                "converging_wedge":wedge,
                 "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
             for break_line in candidates:
                 if not break_crossed(prefix,break_line,len(prefix)-1):
