@@ -44,6 +44,19 @@ jobs:
         run: |
           PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,VIRTUALUSD' }}"
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
+      - name: Generate per-pair learning reports
+        if: always()
+        run: |
+          if [ -d results/friday-monitor ]; then
+            find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0 | while IFS= read -r -d "" preview; do
+              pair_dir="$(dirname "$preview")"
+              python -m research.friday_learning \
+                --decisions "$pair_dir/decision_journal.jsonl" \
+                --trades "$pair_dir/trade_replay.jsonl" \
+                --events "$pair_dir/break_events.jsonl" \
+                --output "$pair_dir/learning_report.json"
+            done
+          fi
       - name: Upload Friday run logs and market snapshots
         if: always()
         uses: actions/upload-artifact@v4
