@@ -84,3 +84,18 @@ drop trigger if exists friday_cron_runs_keep_500 on public.friday_cron_runs;
 create trigger friday_cron_runs_keep_500
 after insert on public.friday_cron_runs
 for each statement execute function public.friday_prune_cron_runs();
+
+
+create table if not exists public.friday_alert_deliveries (
+  alert_key text primary key,
+  pair text not null,
+  alert_type text not null,
+  signal_time timestamptz,
+  status text not null default 'sending',
+  telegram_message_id bigint,
+  error text,
+  updated_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+alter table public.friday_alert_deliveries enable row level security;
+revoke all on public.friday_alert_deliveries from anon, authenticated;
