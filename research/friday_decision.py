@@ -1,6 +1,6 @@
 """Friday's causal price-action decision layer (research-only).
 
-This module emits a transparent WATCH/ENTRY_CANDIDATE/NO_TRADE decision.
+This module emits Fibonacci reaction context, not the primary break/retest entry trigger.
 It does not place orders. All swing references are derived from prior candles;
 the current candle is used only for its own touch/reaction evidence.
 """
@@ -102,13 +102,14 @@ def evaluate_friday_decision(
         # Targets are the prior visible swing/structure in the trade direction.
         target = extreme
         return {
-            **common, "state": "ENTRY_2_CANDIDATE",
+            **common, "state": "FIB_REACTION_CANDIDATE", "is_actionable": False,
+            "trigger_type": "fibonacci_reaction_context_only",
             "entry_reference_close": close, "entry_fib": chosen["fib"],
             "entry_level": chosen["price"], "invalidation": chosen["invalidation"],
             "risk_pct": chosen["risk_pct"],
             "target_candidates": [{"type": "prior_impulse_extreme", "price": target}],
             "evidence": chosen["evidence"],
-            "reason": f"Confirmed {direction} impulse; {chosen['fib']:.3f} retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation.",
+            "reason": f"Confirmed {direction} impulse; {chosen['fib']:.3f} retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break → retest → continuation lifecycle must confirm any actionable entry.",
         }
 
     touched = [candidate for candidate in candidates if candidate["touched"]]
