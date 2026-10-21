@@ -48,6 +48,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 "pair": pair, "status": "ok", "last_completed_candle_utc": latest.isoformat(),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
                 "friday_decision": result["friday_decision"].get("state"),
+                "reversal_context": result.get("reversal_context", {}).get("state", "unavailable"),
                 "break_event_count": result["event_count"],
                 "persistence": "configured" if store.configured else "not_configured",
                 "alert_results": [],
@@ -60,6 +61,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     payload={
                         "latest_setup_state": result.get("latest_setup_state"),
                         "friday_decision": result.get("friday_decision"),
+                        "reversal_context": result.get("reversal_context"),
                         "current_indicators": result.get("current_indicators"),
                         "structure_lifecycle": result.get("structure_lifecycle"),
                         "model_review": result.get("model_review"),
