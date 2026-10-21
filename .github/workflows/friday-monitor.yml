@@ -1,0 +1,51 @@
+name: Friday research monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: Comma-separated Kraken pairs
+        required: false
+        default: XBTUSD,VIRTUALUSD
+  schedule:
+    # Intended cadence: after a 4H candle has time to close.
+    - cron: "13 */4 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: friday-research-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Run Friday monitor
+        env:
+          SUPABASE_URL: ${{ secrets.FRIDAY_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.FRIDAY_SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.FRIDAY_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
+        run: |
+          PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,VIRTUALUSD' }}"
+          python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
+      - name: Upload Friday run logs and market snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: friday-monitor-${{ github.run_id }}
+          path: results/friday-monitor/
+          if-no-files-found: warn
+          retention-days: 30
