@@ -113,7 +113,7 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
         "structural_target_replay": _trade_stats(structural_trades or []),
         "entry2_replay": _trade_stats(entry2_trades or []),
         "entry2_structural_target_replay": _trade_stats(entry2_structural_trades or []),
-        "replay_comparison_note": "Baseline fixed-R and structural-target replay are separate simulations; compare only with matched periods, assumptions, and sample sizes.",
+        "replay_comparison_note": "Entry 1 probe and Entry 2 continuation replays, each with fixed-R and structural targets, are separate samples; compare only with matched periods, assumptions, and sample sizes.",
         "by_strategy_version": {key: _trade_stats(value) for key, value in sorted(by_version.items())},
         "by_direction": {key: _trade_stats(value) for key, value in sorted(by_direction.items())},
         "directional_forward_returns": movement,
