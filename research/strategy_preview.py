@@ -10,6 +10,7 @@ from research.validate_kraken_trendlines import fetch_ohlc
 from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.structure_lifecycle import evaluate_structure
 from research.friday_decision import evaluate_friday_decision
+from research.signal_journal import append_decision, build_decision_record
 
 LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
@@ -297,6 +298,26 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "Forward returns are descriptive, not fee-aware. No stops, sizing, fees, slippage or orders.",
             "This is a fresh-data snapshot, not a continuously running alert service."]}
     out=Path(output_dir); out.mkdir(parents=True,exist_ok=True)
+    decision_direction = {"long": "LONG", "short": "SHORT"}.get(friday_decision.get("direction"))
+    decision_targets = friday_decision.get("target_candidates", [])
+    journal_record = build_decision_record(
+        pair=pair, timeframe=f"{interval}m",
+        candle_timestamp=int(pd.Timestamp(last.timestamp).timestamp()),
+        strategy_version="friday-price-action-v1",
+        status=str(friday_decision.get("state", "NO_TRADE")),
+        direction=decision_direction,
+        entry=friday_decision.get("entry_reference_close"),
+        stop=friday_decision.get("invalidation"),
+        targets=decision_targets,
+        evidence=friday_decision.get("evidence", {
+            "candidate_origins": friday_decision.get("candidate_origins"),
+            "candidate_evidence": friday_decision.get("candidate_evidence"),
+        }),
+        blockers=[str(friday_decision.get("reason", "No reason supplied"))],
+        model={"status":"not_configured","provider":None,"model_id":None,
+               "response":None,"error":None},
+    )
+    append_decision(out/"decision_journal.jsonl", journal_record)
     (out/"strategy_preview.json").write_text(json.dumps(result,indent=2,allow_nan=False))
     md=["# 4H Break Strategy Preview — "+pair,"",f"- Generated: {result['generated_at_utc']}",
         f"- Last completed candle: {last.timestamp.isoformat()}",f"- Last close: {float(last.close):.6f}",
