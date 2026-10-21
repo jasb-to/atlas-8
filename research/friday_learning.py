@@ -81,7 +81,9 @@ def _counts(values: Iterable[Any]) -> dict[str, int]:
 
 def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str, Any]],
                          events: list[dict[str, Any]] | None = None,
-                         structural_trades: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+                         structural_trades: list[dict[str, Any]] | None = None,
+                         entry2_trades: list[dict[str, Any]] | None = None,
+                         entry2_structural_trades: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     statuses = _counts(row.get("status", "unknown") for row in decisions)
     blockers = _counts(blocker for row in decisions for blocker in (row.get("blockers") or []))
     model_statuses = _counts((row.get("model") or {}).get("status", "unknown") for row in decisions)
@@ -109,6 +111,8 @@ def build_learning_report(decisions: list[dict[str, Any]], trades: list[dict[str
         "model_statuses": model_statuses,
         "replay": _trade_stats(trades),
         "structural_target_replay": _trade_stats(structural_trades or []),
+        "entry2_replay": _trade_stats(entry2_trades or []),
+        "entry2_structural_target_replay": _trade_stats(entry2_structural_trades or []),
         "replay_comparison_note": "Baseline fixed-R and structural-target replay are separate simulations; compare only with matched periods, assumptions, and sample sizes.",
         "by_strategy_version": {key: _trade_stats(value) for key, value in sorted(by_version.items())},
         "by_direction": {key: _trade_stats(value) for key, value in sorted(by_direction.items())},
@@ -126,12 +130,15 @@ def main() -> int:
     parser.add_argument("--decisions", default="results/strategy-preview/decision_journal.jsonl")
     parser.add_argument("--trades", default=None, help="JSONL replay rows with net equity return / exit fields")
     parser.add_argument("--events", default=None, help="JSONL breakout lifecycle events with forward-return diagnostics")
-    parser.add_argument("--structural-trades", default=None, help="JSONL replay rows using prior-structure/Fibonacci-extension targets")
+    parser.add_argument("--structural-trades", default=None, help="JSONL Entry 1 replay using prior-structure/Fibonacci-extension targets")
+    parser.add_argument("--entry2-trades", default=None, help="JSONL replay for confirmed Entry 2 continuation triggers")
+    parser.add_argument("--entry2-structural-trades", default=None, help="JSONL Entry 2 replay using prior-structure/Fibonacci-extension targets")
     parser.add_argument("--output", default="results/friday-learning-report.json")
     args = parser.parse_args()
     report = build_learning_report(
         read_jsonl(args.decisions), read_jsonl(args.trades), read_jsonl(args.events),
-        read_jsonl(args.structural_trades),
+        read_jsonl(args.structural_trades), read_jsonl(args.entry2_trades),
+        read_jsonl(args.entry2_structural_trades),
     )
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
