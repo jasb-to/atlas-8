@@ -122,6 +122,13 @@ def causal_replay(raw):
             candidates += fit_touch_trendlines(prefix,pivots,kind=kind,min_touches=3,
                 tolerance_pct=LINE_TOL,max_penetration_pct=0.003,max_lines=12)
         close=float(prefix.iloc[-1].close)
+        # Always refresh the dashboard state for this candle. Otherwise the last
+        # valid line survives when the newest candles have no qualifying line,
+        # making the "live" preview silently stale.
+        status={"state":"no_qualifying_line",
+            "message":"No recent three-touch line within 2.5% of the latest close.",
+            "close":round(close,6),
+            "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
         candidates=[line for line in candidates
             if len(prefix)-1-line.end.confirmed_at <= MAX_LINE_AGE
             and abs(line.value_at(len(prefix)-1)-close)/close <= MAX_DISTANCE]
