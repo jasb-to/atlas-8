@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -14,7 +15,7 @@ import pandas as pd
 
 from research.friday_alerts import build_signal_alert, send_telegram_alert
 from research.friday_persistence import (
-    SupabaseFridayStore, make_cron_run, make_trade_event, utc_now,
+    SupabaseFridayStore, make_archive_record, make_cron_run, make_trade_event, utc_now,
 )
 from research.strategy_preview import build_preview
 
@@ -51,6 +52,19 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 "persistence": "configured" if store.configured else "not_configured",
                 "alert_results": [],
             }
+            if store.configured:
+                decision_key = hashlib.sha256(f"{pair}|4H|friday-price-action-v1|{latest.isoformat()}|decision".encode()).hexdigest()
+                store.record_archive(make_archive_record(
+                    record_key=decision_key, record_type="decision_snapshot", pair=pair,
+                    timeframe="4H", signal_time=latest.isoformat(),
+                    payload={
+                        "latest_setup_state": result.get("latest_setup_state"),
+                        "friday_decision": result.get("friday_decision"),
+                        "current_indicators": result.get("current_indicators"),
+                        "structure_lifecycle": result.get("structure_lifecycle"),
+                        "model_review": result.get("model_review"),
+                    },
+                ))
             # Persist the lifecycle ledger idempotently. Only alert events that
             # first become actionable on the latest closed candle.
             for event in result.get("break_events", []):
@@ -61,6 +75,11 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 all_rows.append(row_event)
                 if store.configured:
                     store.record_trade_event(row_event)
+                    store.record_archive(make_archive_record(
+                        record_key=row_event["event_key"], record_type="setup_lifecycle",
+                        pair=pair, timeframe="4H", signal_time=row_event.get("signal_time"),
+                        payload=normalized,
+                    ))
 
                 fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
