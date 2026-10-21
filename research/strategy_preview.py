@@ -203,9 +203,8 @@ def causal_replay(raw):
             else:
                 contact=float(row.high)>=lv-tol; held=close_i<=lv
                 invalid=close_i>lv+abs(lv)*0.003
-            # Entry 2: confirm the retest, but do not add merely because price
-            # touched the line. Save the retest candle's extreme and wait for
-            # Entry 3 continuation through that reaction structure.
+            # A retest is a prerequisite, not an entry. Save its reaction extreme;
+            # Entry 2 is valid only after a later closed candle breaks that extreme.
             if age<=RETEST_BARS and contact and held and not e.get("retest_confirmed"):
                 e.update({"retest_confirmed":True,"retest_confirmed_time":row.timestamp.isoformat(),
                     "retest_confirmed_bar_index":i,
@@ -328,8 +327,10 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
             ("retest_held_waiting_continuation","continuation_add_confirmed","failed_break","no_retest_within_window","pending","no_continuation_within_window")},
         "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
-            "entry_2":"post-break retest within 18 bars / 72h, close holds breakout side; wait, do not add yet",
-            "add":"Entry 2 add only after a later closed candle breaks the retest reaction high/low in breakout direction",
+            "entry_1":"small research probe candidate after a meaningful closed-candle trendline break; no live order",
+            "retest":"within 18 bars / 72h, price revisits the broken line and closes on the breakout side",
+            "entry_2":"only after a subsequent closed candle breaks the retest reaction high/low in breakout direction",
+            "expiry":"if the retest does not happen in 72h, expire; if continuation does not confirm within 24h after retest, expire",
             "failure":"close crosses back through line by 0.30%","daily_bias_and_ema":"shown, not hard gates"},
         "trade_replay_rules":{"entry":"next 4H open after break signal","stop":"1.0 ATR from entry","baseline_target":"2R for comparison","alternative_target":"nearest prior structural level, otherwise 1.272 Fib extension of prior range","risk_per_trade_pct":0.5,
             "max_hold_bars":18,"costs_bps_per_side":{"fee":8,"slippage":5},
