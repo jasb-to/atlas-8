@@ -294,6 +294,16 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     setups=consolidate_setups(events,frame)
     trades=replay_trades(setups,frame)
     trades_structural=replay_trades(setups,frame,target_mode="structure_fib")
+    # Entry 2 replay enters only after the retest reaction extreme is broken by
+    # a later closed candle. This is a separate sample from the Entry 1 probe.
+    entry2_setups=[
+        {**event, "break_signal_time": event["signal_time"],
+         "signal_time": event["continuation_add_time"]}
+        for event in setups
+        if event.get("outcome") == "continuation_add_confirmed" and event.get("continuation_add_time")
+    ]
+    entry2_trades=replay_trades(entry2_setups,frame)
+    entry2_trades_structural=replay_trades(entry2_setups,frame,target_mode="structure_fib")
     last=frame.iloc[-1]
     setup_state=latest_setup_state(events, last.timestamp)
     structure=evaluate_structure(raw, lookback=LOOKBACK, min_touches=3, break_buffer_pct=BREAK_BUFFER)
@@ -310,7 +320,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
         "consolidated_setups":setups,"consolidated_setup_count":len(setups),
-        "trade_replay":trades,"structural_target_replay":trades_structural,"structural_target_replay_summary":{
+        "trade_replay":trades,"structural_target_replay":trades_structural,"entry2_trade_replay":entry2_trades,"entry2_structural_target_replay":entry2_trades_structural,"structural_target_replay_summary":{
             "target_policy":"nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",
             "trades":len(trades_structural),"wins":sum(t["net_equity_return_pct"]>0 for t in trades_structural),
             "losses":sum(t["net_equity_return_pct"]<=0 for t in trades_structural),
@@ -372,6 +382,8 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         ("break_events.jsonl", events),
         ("trade_replay.jsonl", trades),
         ("structural_target_replay.jsonl", trades_structural),
+        ("entry2_trade_replay.jsonl", entry2_trades),
+        ("entry2_structural_target_replay.jsonl", entry2_trades_structural),
     ):
         write_jsonl(out / filename, rows)
     md=["# 4H Break Strategy Preview — "+pair,"",f"- Generated: {result['generated_at_utc']}",
