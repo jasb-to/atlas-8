@@ -146,10 +146,10 @@ def main() -> int:
     print(json.dumps({
         "output": str(destination),
         "decisions": report["decision_count"],
-        "entry1_fixed_r_trades": report["replay"]["trades"],
-        "entry1_structural_trades": report["structural_target_replay"]["trades"],
-        "entry2_fixed_r_trades": report["entry2_replay"]["trades"],
-        "entry2_structural_trades": report["entry2_structural_target_replay"]["trades"],
+        "entry1_fixed_r": report["replay"],
+        "entry1_structural_targets": report["structural_target_replay"],
+        "entry2_fixed_r": report["entry2_replay"],
+        "entry2_structural_targets": report["entry2_structural_target_replay"],
         "no_trade": report["no_trade_count"],
     }))
     return 0
