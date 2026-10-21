@@ -108,7 +108,7 @@ def replay_trades(events: Iterable[dict], candles: pd.DataFrame, *, risk_fractio
         unit_return = side*(exit_fill-entry)/entry
         position_fraction = risk_fraction*entry/abs(entry-stop)
         equity_pct = unit_return*position_fraction*100
-        out.append({"signal_time":event["signal_time"],"direction":event["direction"],
+        out.append({"signal_time":event["signal_time"],"direction":event["direction"],"strategy_version":"friday-price-action-v2",
             "entry_time":candles.iloc[ei].timestamp.isoformat(),"entry_price":entry,
             "stop_price":stop,"target_price":target,"target_type":target_type,"target_mode":target_mode,"exit_time":candles.iloc[exit_i].timestamp.isoformat(),
             "exit_price":exit_fill,"exit_reason":reason,"bars_held":exit_i-ei+1,
