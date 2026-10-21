@@ -231,6 +231,8 @@ def latest_setup_state(events, last_closed_candle):
         "age_hours": round(age_hours, 2),
         "outcome": latest.get("outcome", "pending"),
     }
+    if age_hours > RETEST_BARS * 4:
+        return {**base, "state": "EXPIRED", "message": "The 72-hour retest window has elapsed; this is not a current entry."}
     if latest.get("outcome") == "failed_break":
         return {**base, "state": "INVALIDATED", "message": "The breakout failed its close-based invalidation rule."}
     if latest.get("outcome") == "no_retest_within_window":
@@ -239,11 +241,9 @@ def latest_setup_state(events, last_closed_candle):
         return {**base, "state": "RETEST_ADD_CONFIRMED", "add_signal_time": latest.get("add_signal_time"),
                 "add_close": latest.get("add_close"),
                 "message": "A post-break retest held on a closed 4H candle; add confirmation is historical, not an order."}
-    if age_hours <= RETEST_BARS * 4:
-        return {**base, "state": "ENTRY_PROBE_WAITING_RETEST",
-                "retest_deadline": latest.get("retest_deadline"),
-                "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
-    return {**base, "state": "EXPIRED", "message": "The 72-hour retest window has elapsed."}
+    return {**base, "state": "ENTRY_PROBE_WAITING_RETEST",
+            "retest_deadline": latest.get("retest_deadline"),
+            "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
 
 
 def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-preview"):
