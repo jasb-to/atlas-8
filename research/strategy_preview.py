@@ -8,6 +8,7 @@ import pandas as pd
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
 from research.validate_kraken_trendlines import fetch_ohlc
 from research.sheldon_strategy import consolidate_setups, replay_trades
+from research.structure_lifecycle import evaluate_structure
 
 LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
@@ -253,13 +254,18 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
     trades=replay_trades(setups,frame)
     last=frame.iloc[-1]
     setup_state=latest_setup_state(events, last.timestamp)
+    structure=evaluate_structure(raw, lookback=LOOKBACK, min_touches=3, break_buffer_pct=BREAK_BUFFER)
+    structure_payload={"as_of":structure.as_of,
+        "active_lines":list(structure.active_lines), "broken_lines":list(structure.broken_lines),
+        "latest_support":structure.latest_support, "latest_resistance":structure.latest_resistance,
+        "rebuild_policy":"recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"}
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
         "latest_setup_state":setup_state,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"last_close":float(last.close),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
-        "live_preview":status,"break_events":events,"event_count":len(events),
+        "live_preview":status,"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
         "consolidated_setups":setups,"consolidated_setup_count":len(setups),
         "trade_replay":trades,"trade_replay_summary":{
             "trades":len(trades),"wins":sum(t["net_equity_return_pct"]>0 for t in trades),
