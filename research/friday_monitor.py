@@ -54,7 +54,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 "alert_results": [],
             }
             if store.configured:
-                decision_key = hashlib.sha256(f"{pair}|4H|friday-price-action-v1|{latest.isoformat()}|decision".encode()).hexdigest()
+                decision_key = hashlib.sha256(f"{pair}|4H|friday-price-action-v2|{latest.isoformat()}|decision".encode()).hexdigest()
                 store.record_archive(make_archive_record(
                     record_key=decision_key, record_type="decision_snapshot", pair=pair,
                     timeframe="4H", signal_time=latest.isoformat(),
