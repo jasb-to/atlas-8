@@ -309,10 +309,98 @@ class UpstashFridayStore:
         return self._recent_json("FRIDAY:alerts")[:limit]
 
 
-def create_friday_store():
-    """Use Supabase as the single persistence backend during the FRIDAY proof of concept.
 
-    Upstash remains available as a future migration option, but its presence in the
-    environment must not silently divert writes away from the agreed Supabase store.
-    """
-    return SupabaseFridayStore()
+class RepoFolderFridayStore:
+    """Temporary JSON-file store committed by GitHub Actions for low-volume testing."""
+    def __init__(self, root: str | None = None):
+        from pathlib import Path
+        self.root = Path(root or os.getenv("FRIDAY_REPO_DATA_DIR", "testing/friday/data"))
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def configured(self) -> bool:
+        return True
+
+    def _read(self, name: str) -> list[dict[str, Any]]:
+        path = self.root / name
+        if not path.exists():
+            return []
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+            return value if isinstance(value, list) else []
+        except (OSError, json.JSONDecodeError):
+            return []
+
+    def _write(self, name: str, rows: list[dict[str, Any]]) -> None:
+        path = self.root / name
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        temporary.write_text(json.dumps(_json_safe(rows), indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        temporary.replace(path)
+
+    def _refresh_dashboard(self) -> None:
+        snapshots = [r for r in self._read("archive.json") if r.get("record_type") == "decision_snapshot"][:12]
+        payload = {
+            "connected": True, "status": "connected",
+            "message": "Connected to FRIDAY's temporary Git repository research store.",
+            "storage_backend": "github_repository_folder",
+            "snapshots": snapshots, "events": self._read("events.json")[:50],
+            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],
+            "fetched_at": utc_now(),
+        }
+        target = self.root / "dashboard.json"
+        temporary = target.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(_json_safe(payload), indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        temporary.replace(target)
+
+    def record_trade_event(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        rows = [r for r in self._read("events.json") if r.get("event_key") != record.get("event_key")]
+        rows.insert(0, dict(record))
+        self._write("events.json", rows[:50])
+        self._refresh_dashboard()
+        return {"persisted": True, "table": "events.json"}
+
+    def recent_50_trades(self) -> list[dict[str, Any]]:
+        return self._read("events.json")[:50]
+
+    def record_archive(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        rows = [r for r in self._read("archive.json") if r.get("record_key") != record.get("record_key")]
+        rows.insert(0, dict(record))
+        self._write("archive.json", rows[:1000])
+        self._refresh_dashboard()
+        return {"persisted": True, "table": "archive.json"}
+
+    def record_cron_run(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        rows = [r for r in self._read("runs.json") if r.get("run_id") != record.get("run_id")]
+        rows.insert(0, dict(record))
+        self._write("runs.json", rows[:500])
+        self._refresh_dashboard()
+        return {"persisted": True, "table": "runs.json"}
+
+    def claim_alert(self, *, alert_key: str, pair: str, alert_type: str, signal_time: str | None) -> bool:
+        rows = self._read("alerts.json")
+        if any(r.get("alert_key") == alert_key and r.get("status") == "sent" for r in rows):
+            return False
+        if not any(r.get("alert_key") == alert_key for r in rows):
+            rows.insert(0, {"alert_key": alert_key, "pair": pair, "alert_type": alert_type,
+                            "signal_time": signal_time, "status": "sending", "updated_at": utc_now()})
+            self._write("alerts.json", rows[:10])
+        self._refresh_dashboard()
+        return True
+
+    def finish_alert(self, alert_key: str, *, status: str, message_id: int | None = None, error: str | None = None) -> None:
+        rows = self._read("alerts.json")
+        for row in rows:
+            if row.get("alert_key") == alert_key:
+                row.update({"status": status, "telegram_message_id": message_id, "error": error, "updated_at": utc_now()})
+        self._write("alerts.json", rows[:10])
+        self._refresh_dashboard()
+
+
+def create_friday_store():
+    """Select the configured FRIDAY persistence backend."""
+    backend = os.getenv("FRIDAY_STORAGE_BACKEND", "supabase").strip().lower()
+    if backend in {"repo", "repository", "file"}:
+        return RepoFolderFridayStore()
+    if backend == "supabase":
+        return SupabaseFridayStore()
+    raise ValueError(f"Unsupported FRIDAY_STORAGE_BACKEND: {backend}")
