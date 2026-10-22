@@ -12,19 +12,21 @@ Friday's dashboard lives in `dashboard/` in the `jasb-to/atlas-8` repository. Ke
 
 ## Environment variables
 
-Add these under Project → Settings → Environment Variables. Apply to **Preview** and **Development** first; add **Production** only when intentionally releasing Friday.
+The current proof-of-concept persistence backend is **Supabase** (not Upstash). Apply `supabase/friday_research_schema.sql` only to a dedicated FRIDAY research project. Do not reuse the CX Switch database.
 
-| Variable | Required? | Value |
+| Variable | Required? | Where it is used |
 | --- | --- | --- |
-| `UPSTASH_REDIS_REST_URL` | Yes for persistence/dashboard | Upstash database REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes for persistence/dashboard | Upstash REST token; mark encrypted/sensitive |
-| `HUGGINGFACE_API_KEY` | Optional | Hugging Face token for advisory-only review |
-| `TELEGRAM_BOT_TOKEN` | Optional | Telegram bot token for research alerts |
-| `TELEGRAM_CHAT_ID` | Optional | Destination chat ID for research alerts |
+| `FRIDAY_SUPABASE_URL` | Yes | Vercel dashboard API and GitHub Actions monitor |
+| `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-side Vercel API and GitHub Actions monitor; sensitive service-role secret |
+| `FRIDAY_CRON_SECRET` | Required for cron endpoint | Vercel Production only; authenticates cron-job.org |
+| `FRIDAY_GITHUB_TOKEN` | Required for cron dispatch route | Vercel Production only; GitHub Actions workflow-dispatch permission |
+| `FRIDAY_TELEGRAM_BOT_TOKEN` | Optional | GitHub Actions research alerts |
+| `FRIDAY_TELEGRAM_CHAT_ID` | Optional | GitHub Actions research alerts |
+| `HUGGINGFACE_API_KEY` | Optional | Advisory-only model review |
 
 Never use `NEXT_PUBLIC_` on secrets. Never paste tokens into chat or commit them to Git. Friday must remain research-only; do not configure exchange API keys.
 
-The GitHub Actions workflow separately needs repository Actions secrets `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to run the scheduled monitor. If Telegram alerts are wanted, add `FRIDAY_TELEGRAM_BOT_TOKEN` and `FRIDAY_TELEGRAM_CHAT_ID` as GitHub secrets (workflow maps them to `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`). Add `HUGGINGFACE_API_KEY` as a GitHub secret only after rotating the exposed token. Do not configure paid inference or buy credits if zero spend is required.
+**Important:** Vercel Production environment variables and GitHub repository Actions secrets are separate stores. Configure `FRIDAY_SUPABASE_URL` and `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` in both places. The GitHub workflow also accepts `FRIDAY_HF_MODEL_ID` and `FRIDAY_HF_ENDPOINT` as repository variables. Telegram credentials are optional. Do not configure paid inference or buy credits if zero spend is required.
 
 ## Verify the preview
 
@@ -36,4 +38,4 @@ The GitHub Actions workflow separately needs repository Actions secrets `UPSTASH
 
 ## Current limitation
 
-Creating the Vercel project through the connected Vercel account was denied with HTTP 403 (permission denied). Create/link the project in the Vercel dashboard using an account/team with project-creation permission. This repository contains the project settings checklist; no CX Switch project was changed.
+The connected Vercel API has returned HTTP 403 for deployment inspection. Production deployment state and runtime logs must be verified with an account/team that has permission. No CX Switch project was changed.
