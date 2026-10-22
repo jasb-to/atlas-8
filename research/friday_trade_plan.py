@@ -68,25 +68,41 @@ def build_trade_plan(frame: pd.DataFrame, direction: str, entry: float | None = 
         blockers.append("non_positive_risk")
         risk = None
 
-    # Target is the nearest confirmed opposing structure beyond entry; otherwise
-    # use the 1.272 extension of the most recent confirmed swing as a labelled fallback.
+    # Prefer the nearest confirmed opposing structure only if it clears the
+    # required reward/risk. A tiny nearby pivot must not hide a usable extension.
     if direction == "long":
         targets = sorted(float(p.price) for p in highs if p.price > entry_price)
         fallback = fib.get("extensions", {}).get("1.272")
-        target = targets[0] if targets else (float(fallback) if fallback and fallback > entry_price else None)
+        candidates = [(price, "confirmed_structure") for price in targets]
+        if fallback is not None and fallback > entry_price:
+            candidates.append((float(fallback), "fib_1.272_fallback"))
     else:
         targets = sorted((float(p.price) for p in lows if p.price < entry_price), reverse=True)
         fallback = fib.get("extensions", {}).get("1.272")
-        target = targets[0] if targets else (float(fallback) if fallback and fallback < entry_price else None)
-    target_source = "confirmed_structure" if targets else ("fib_1.272_fallback" if target is not None else None)
+        candidates = [(price, "confirmed_structure") for price in targets]
+        if fallback is not None and fallback < entry_price:
+            candidates.append((float(fallback), "fib_1.272_fallback"))
+
+    target, target_source, reward, rr = None, None, None, None
+    for candidate_price, candidate_source in candidates:
+        candidate_reward = (candidate_price-entry_price if direction == "long"
+                            else entry_price-candidate_price)
+        candidate_rr = candidate_reward/risk if risk is not None and risk > 0 else None
+        if candidate_reward > 0 and candidate_rr is not None and candidate_rr >= min_reward_risk:
+            target, target_source = candidate_price, candidate_source
+            reward, rr = candidate_reward, candidate_rr
+            break
+    if target is None:
+        if candidates:
+            target, target_source = candidates[0]
+            reward = (target-entry_price if direction == "long" else entry_price-target)
+            rr = reward/risk if reward is not None and risk is not None and risk > 0 else None
+        blockers.append("no_target_meets_minimum_reward_risk")
     if target is None:
         blockers.append("no_forward_structural_or_fibonacci_target")
-
-    reward = (target-entry_price if direction == "long" else entry_price-target) if target is not None else None
-    rr = reward/risk if reward is not None and risk is not None and risk > 0 else None
     if reward is not None and reward <= 0:
         blockers.append("target_not_in_trade_direction")
-    if rr is None or rr < min_reward_risk:
+    if target is not None and (rr is None or rr < min_reward_risk):
         blockers.append("reward_risk_below_minimum")
 
     return {
