@@ -1,4 +1,4 @@
-# Friday Vercel setup (preview-first)
+# Friday Vercel setup (temporary repository-backed trial)
 
 Friday's dashboard lives in `dashboard/` in the `jasb-to/atlas-8` repository. Keep it separate from the CX Switch Vercel project.
 
@@ -7,35 +7,37 @@ Friday's dashboard lives in `dashboard/` in the `jasb-to/atlas-8` repository. Ke
 1. Open the Vercel dashboard and select the intended team.
 2. Add New → Project, import `jasb-to/atlas-8`, and name it `friday-research`.
 3. Set **Root Directory** to `dashboard`; framework should be detected as Next.js.
-4. Set the production branch to `main`. Keep Friday changes on `feature/price-touch-trendlines` until reviewed; its Git deployment should be a preview.
+4. Set the production branch to `main`.
 5. Do not connect the CX Switch project, reuse its environment variables, or enable any live-trading integration.
 
-## Environment variables
+## Temporary persistence
 
-The current proof-of-concept persistence backend is **Supabase** (not Upstash). Apply `supabase/friday_research_schema.sql` only to a dedicated FRIDAY research project. Do not reuse the CX Switch database.
+For the two-week proof-of-concept trial, FRIDAY uses JSON files committed under `testing/friday/data/` rather than Supabase. The scheduled GitHub Actions monitor sets `FRIDAY_STORAGE_BACKEND=repo` and commits its rolling dashboard state plus per-run research artifacts.
 
 | Variable | Required? | Where it is used |
 | --- | --- | --- |
-| `FRIDAY_SUPABASE_URL` | Yes | Vercel dashboard API and GitHub Actions monitor |
-| `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-side Vercel API and GitHub Actions monitor; sensitive service-role secret |
+| `FRIDAY_GITHUB_TOKEN` | Yes | Vercel Production dashboard API reads repository contents; also used by the scan-dispatch route |
+| `FRIDAY_GITHUB_REPOSITORY` | Optional | Override for the repository containing the FRIDAY data; defaults to `jasb-to/atlas-8` |
+| `FRIDAY_GITHUB_DATA_BRANCH` | Optional | Data branch; defaults to `main` |
 | `FRIDAY_CRON_SECRET` | Required for cron endpoint | Vercel Production only; authenticates cron-job.org |
-| `FRIDAY_GITHUB_TOKEN` | Required for cron dispatch route | Vercel Production only; GitHub Actions workflow-dispatch permission |
 | `FRIDAY_TELEGRAM_BOT_TOKEN` | Optional | GitHub Actions research alerts |
 | `FRIDAY_TELEGRAM_CHAT_ID` | Optional | GitHub Actions research alerts |
 | `HUGGINGFACE_API_KEY` | Optional | Advisory-only model review |
 
-Never use `NEXT_PUBLIC_` on secrets. Never paste tokens into chat or commit them to Git. Friday must remain research-only; do not configure exchange API keys.
+The token must have permission to read repository contents. To trigger Actions through the existing `/api/friday/scan` route, it also needs permission to dispatch workflows. Do not paste tokens into chat or commit them to Git. Never use `NEXT_PUBLIC_` on secrets. Friday must remain research-only; do not configure exchange API keys.
 
-**Important:** Vercel Production environment variables and GitHub repository Actions secrets are separate stores. Configure `FRIDAY_SUPABASE_URL` and `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` in both places. The GitHub workflow also accepts `FRIDAY_HF_MODEL_ID` and `FRIDAY_HF_ENDPOINT` as repository variables. Telegram credentials are optional. Do not configure paid inference or buy credits if zero spend is required.
+**Important:** the GitHub Actions monitor is the writer; the Vercel dashboard API is a reader. GitHub Actions commits are not instantaneous database writes, and the dashboard reflects the latest committed state. Each scan creates a commit, so this is intentionally a temporary, low-volume approach. The repository is public: only commit research data that is safe to be public. Do not store credentials, private user data, or exchange keys.
 
-## Verify the preview
+## Verify the trial
 
-1. Wait for the feature-branch preview build to finish.
-2. Open `/api/friday`; with valid Upstash credentials it should return `connected: true`. Without credentials it should clearly return `not_configured`, not leak secrets.
-3. Open the dashboard page and verify recent snapshots, up to 50 setup events, cron runs, and alert states.
-4. Trigger the GitHub Actions workflow manually after adding Upstash GitHub secrets. Confirm the run and `cron_run.json` report successful persistence.
-5. Only promote/release after the preview is verified. This project does not place exchange orders.
+1. Run `Friday research monitor` manually from GitHub Actions.
+2. Confirm the run scanned both configured pairs and produced `testing/friday/data/dashboard.json`.
+3. Confirm the workflow committed files under `testing/friday/data/` and `testing/friday/runs/`.
+4. Open `/api/friday` on the dashboard deployment; it should return `connected: true` and `storage_backend: github_repository_folder`.
+5. Verify the radar, setup queue, run history and diagnostics show those saved records.
+6. Confirm the scheduled monitor runs successfully before relying on the cadence. A successful legacy preview workflow is not enough.
+7. Do not promote any setup to “tradeable” until the trade-plan builder is wired into the scan and validates stops, targets and reward/risk.
 
 ## Current limitation
 
-The connected Vercel API has returned HTTP 403 for deployment inspection. Production deployment state and runtime logs must be verified with an account/team that has permission. No CX Switch project was changed.
+Vercel deployment/runtime inspection previously returned HTTP 403. Production deployment state and runtime logs must be verified with an account/team that has permission. No CX Switch project or Supabase schema was changed by this storage migration.
