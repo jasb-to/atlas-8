@@ -1,6 +1,8 @@
 name: Friday research monitor
 
 on:
+  schedule:
+    - cron: "17 */4 * * *"
   workflow_dispatch:
     inputs:
       pairs:
