@@ -50,7 +50,7 @@ def review_decision(
     started = time.monotonic()
     try:
         response = session.post(
-            endpoint or os.getenv("FRIDAY_HF_ENDPOINT", DEFAULT_ENDPOINT),
+            endpoint or os.getenv("FRIDAY_HF_ENDPOINT") or DEFAULT_ENDPOINT,
             headers={"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"},
             json={
                 "model": model,
