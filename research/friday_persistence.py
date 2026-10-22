@@ -280,12 +280,14 @@ class UpstashFridayStore:
 
     def claim_alert(self, *, alert_key: str, pair: str, alert_type: str,
                     signal_time: str | None) -> bool:
-        result = self._command("SET", f"FRIDAY:alert:{alert_key}",
-                               self._json({"alert_key": alert_key, "pair": pair,
-                                           "alert_type": alert_type, "signal_time": signal_time,
-                                           "status": "sending", "updated_at": utc_now()}),
-                               "NX", "EX", "604800")
-        return result == "OK"
+        row = {"alert_key": alert_key, "pair": pair, "alert_type": alert_type,
+               "signal_time": signal_time, "status": "sending", "updated_at": utc_now()}
+        result = self._command("SET", f"FRIDAY:alert:{alert_key}", self._json(row), "NX", "EX", "604800")
+        if result == "OK":
+            self._command("LPUSH", "FRIDAY:alerts", self._json(row))
+            self._command("LTRIM", "FRIDAY:alerts", "0", "9")
+            return True
+        return False
 
     def finish_alert(self, alert_key: str, *, status: str,
                      message_id: int | None = None, error: str | None = None) -> None:
@@ -295,6 +297,12 @@ class UpstashFridayStore:
         row.update({"status": status, "telegram_message_id": message_id,
                     "error": error, "updated_at": utc_now()})
         self._command("SET", key, self._json(row), "EX", "604800")
+        alerts = self._recent_json("FRIDAY:alerts")
+        alerts = [x for x in alerts if x.get("alert_key") != alert_key]
+        alerts.insert(0, row)
+        self._command("DEL", "FRIDAY:alerts")
+        if alerts:
+            self._command("RPUSH", "FRIDAY:alerts", *[self._json(x) for x in alerts[:10]])
 
     def recent_alerts(self, limit: int = 10) -> list[dict[str, Any]]:
         # Keep a compact alert index for dashboard visibility; alert claims remain atomic.
