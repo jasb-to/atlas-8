@@ -1,0 +1,95 @@
+name: Trendline research validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "research/**"
+      - "tests/**"
+      - "dashboard/**"
+      - ".github/workflows/trendline-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Run all causal research regression tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Fetch Kraken BTC/USD 4H data and audit geometry
+        run: python -m research.validate_kraken_trendlines --pair XBTUSD --interval 240 --output-dir results/trendline-audit
+      - name: Replay 4H strategy and build BTC preview
+        run: python -m research.strategy_preview --pair XBTUSD --interval 240 --output-dir results/strategy-preview
+      - name: Fetch Kraken VIRTUAL/USD 4H data and audit geometry
+        run: python -m research.validate_kraken_trendlines --pair VIRTUALUSD --interval 240 --output-dir results/virtual-trendline-audit
+      - name: Replay 4H strategy and build VIRTUAL preview
+        run: python -m research.strategy_preview --pair VIRTUALUSD --interval 240 --output-dir results/virtual-strategy-preview
+      - name: Validate learning reports from fresh replay exports
+        run: |
+          BTC_SPLIT="$(python -c 'import json; print(json.load(open("results/strategy-preview/strategy_preview.json"))["walk_forward_split_time"])')"
+          BTC_LAST="$(python -c 'import json; print(json.load(open("results/strategy-preview/strategy_preview.json"))["last_completed_candle_utc"])')"
+          VIRTUAL_SPLIT="$(python -c 'import json; print(json.load(open("results/virtual-strategy-preview/strategy_preview.json"))["walk_forward_split_time"])')"
+          VIRTUAL_LAST="$(python -c 'import json; print(json.load(open("results/virtual-strategy-preview/strategy_preview.json"))["last_completed_candle_utc"])')"
+          python -m research.friday_learning \
+            --decisions results/strategy-preview/decision_journal.jsonl \
+            --trades results/strategy-preview/trade_replay.jsonl \
+            --structural-trades results/strategy-preview/structural_target_replay.jsonl \
+            --entry2-trades results/strategy-preview/entry2_trade_replay.jsonl \
+            --entry2-structural-trades results/strategy-preview/entry2_structural_target_replay.jsonl \
+            --events results/strategy-preview/break_events.jsonl \
+            --split-time "$BTC_SPLIT" --last-candle-time "$BTC_LAST" \
+            --output results/strategy-preview/learning_report.json
+          python -m research.friday_learning \
+            --decisions results/virtual-strategy-preview/decision_journal.jsonl \
+            --trades results/virtual-strategy-preview/trade_replay.jsonl \
+            --structural-trades results/virtual-strategy-preview/structural_target_replay.jsonl \
+            --entry2-trades results/virtual-strategy-preview/entry2_trade_replay.jsonl \
+            --entry2-structural-trades results/virtual-strategy-preview/entry2_structural_target_replay.jsonl \
+            --events results/virtual-strategy-preview/break_events.jsonl \
+            --split-time "$VIRTUAL_SPLIT" --last-candle-time "$VIRTUAL_LAST" \
+            --output results/virtual-strategy-preview/learning_report.json
+      - name: Upload live data, geometry, tests and strategy previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-8-btc-virtual-4h-research-preview
+          path: |
+            results/trendline-audit/
+            results/strategy-preview/
+            results/virtual-trendline-audit/
+            results/virtual-strategy-preview/
+          if-no-files-found: warn
+          retention-days: 14
+
+  dashboard-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dashboard dependencies
+        run: npm install
+      - name: Type-check Friday dashboard
+        run: npx tsc --noEmit
+      - name: Build Friday dashboard
+        run: npm run build

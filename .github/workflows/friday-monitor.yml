@@ -1,0 +1,122 @@
+name: Friday research monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: Comma-separated Kraken pairs
+        required: false
+        default: XBTUSD,VIRTUALUSD
+  schedule:
+    # Intended cadence: after a 4H candle has time to close.
+    - cron: "13 */4 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: friday-research-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Run Friday monitor
+        env:
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.FRIDAY_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
+          HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+          FRIDAY_HF_MODEL_ID: ${{ vars.FRIDAY_HF_MODEL_ID }}
+          FRIDAY_HF_ENDPOINT: ${{ vars.FRIDAY_HF_ENDPOINT }}
+        run: |
+          PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,VIRTUALUSD' }}"
+          python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
+      - name: Generate per-pair learning reports
+        if: always()
+        run: |
+          if [ -d results/friday-monitor ]; then
+            find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0 | while IFS= read -r -d "" preview; do
+              pair_dir="$(dirname "$preview")"
+              split_time="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["walk_forward_split_time"])' "$preview")"
+              last_candle_time="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["last_completed_candle_utc"])' "$preview")"
+              python -m research.friday_learning \
+                --decisions "$pair_dir/decision_journal.jsonl" \
+                --trades "$pair_dir/trade_replay.jsonl" \
+                --structural-trades "$pair_dir/structural_target_replay.jsonl" \
+                --entry2-trades "$pair_dir/entry2_trade_replay.jsonl" \
+                --entry2-structural-trades "$pair_dir/entry2_structural_target_replay.jsonl" \
+                --events "$pair_dir/break_events.jsonl" \
+                --split-time "$split_time" --last-candle-time "$last_candle_time" \
+                --output "$pair_dir/learning_report.json"
+            done
+          fi
+      - name: Archive research records in the testing-only repo folder
+        if: always() && github.ref == 'refs/heads/main'
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          if [ ! -d results/friday-monitor ]; then
+            echo "No Friday output directory exists; nothing to archive."
+            exit 0
+          fi
+          RUN_DATE="$(date -u +%F)"
+          ARCHIVE_ROOT="testing/friday/runs/$RUN_DATE/run-$RUN_ID-attempt-$RUN_ATTEMPT"
+          mkdir -p "$ARCHIVE_ROOT"
+          copied=0
+          while IFS= read -r -d "" source; do
+            pair_dir="$(dirname "$source")"
+            pair="$(basename "$pair_dir")"
+            dest="$ARCHIVE_ROOT/$pair"
+            mkdir -p "$dest"
+            for file in strategy_preview.json decision_journal.jsonl trade_replay.jsonl structural_target_replay.jsonl entry2_trade_replay.jsonl entry2_structural_target_replay.jsonl break_events.jsonl learning_report.json; do
+              if [ -f "$pair_dir/$file" ]; then
+                cp "$pair_dir/$file" "$dest/$file"
+                copied=$((copied + 1))
+              fi
+            done
+          done < <(find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0)
+          if [ "$copied" -eq 0 ]; then
+            echo "No per-pair strategy previews found; nothing to commit."
+            exit 0
+          fi
+          cat > "$ARCHIVE_ROOT/README.md" <<EOF
+          # Friday research run $RUN_ID
+
+          - UTC date: $RUN_DATE
+          - Workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID
+          - Purpose: research and paper-testing only
+          - Contains replay outputs and candidate/setup records, not exchange orders.
+          - Treat all candidates as hypothetical; this archive is not a record of executed trades.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ARCHIVE_ROOT"
+          if git diff --cached --quiet; then
+            echo "No new archive records to commit."
+            exit 0
+          fi
+          git commit -m "test(friday): archive research run $RUN_ID"
+          git push origin HEAD:main
+      - name: Upload Friday run logs and market snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: friday-monitor-${{ github.run_id }}
+          path: results/friday-monitor/
+          if-no-files-found: warn
+          retention-days: 30
