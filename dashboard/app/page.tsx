@@ -4,52 +4,108 @@ import { useEffect, useMemo, useState } from "react";
 
 type Row = Record<string, any>;
 type Payload = { connected: boolean; status: string; message: string; snapshots: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; fetched_at?: string };
-const empty: Payload = { connected: false, status: "loading", message: "Checking the research data connection…", snapshots: [], events: [], runs: [], alerts: [] };
-const fmtTime = (value?: string) => value ? new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "—";
-const fmtPrice = (value: unknown): string => typeof value === "number" ? value.toLocaleString(undefined, { maximumFractionDigits: 6 }) : typeof value === "string" ? value : "—";
-const payloadOf = (row: Row) => row.payload && typeof row.payload === "object" ? row.payload : {};
+const empty: Payload = { connected: false, status: "loading", message: "Checking FRIDAY's data link…", snapshots: [], events: [], runs: [], alerts: [] };
+const fmtTime = (v?: string) => v ? new Date(v).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "—";
+const fmtPrice = (v: unknown) => typeof v === "number" ? v.toLocaleString(undefined, { maximumFractionDigits: 6 }) : typeof v === "string" ? v : "—";
+const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object" ? row.payload : {};
+const clean = (v: unknown) => String(v ?? "unknown").replaceAll("_", " ");
 
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
   const [busy, setBusy] = useState(false);
   const [selectedPair, setSelectedPair] = useState("ALL");
+
   async function refresh() {
     setBusy(true);
-    try { const res = await fetch("/api/friday", { cache: "no-store" }); setData(await res.json()); }
-    catch { setData({ ...empty, status: "unreachable", message: "Dashboard API could not be reached. Check the deployment logs." }); }
-    finally { setBusy(false); }
+    try {
+      const res = await fetch("/api/friday", { cache: "no-store" });
+      const body = await res.json();
+      setData({ ...empty, ...body });
+    } catch {
+      setData({ ...empty, status: "unreachable", message: "Dashboard API could not be reached." });
+    } finally { setBusy(false); }
   }
-  useEffect(() => { void refresh(); const timer = window.setInterval(() => void refresh(), 30000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => {
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
-  const pairs = useMemo(() => ["ALL", ...Array.from(new Set(data.events.map((x) => x.pair).filter(Boolean)))], [data.events]);
-  const events = useMemo(() => selectedPair === "ALL" ? data.events : data.events.filter((x) => x.pair === selectedPair), [data.events, selectedPair]);
-  const latestSnapshot = data.snapshots[0];
-  const snapshotPayload = latestSnapshot ? payloadOf(latestSnapshot) : {};
-  const reversal = snapshotPayload.reversal_context ?? {};
+  const pairs = useMemo(() => ["ALL", ...Array.from(new Set(data.events.map(x => x.pair).filter(Boolean)))], [data.events]);
+  const events = useMemo(() => selectedPair === "ALL" ? data.events : data.events.filter(x => x.pair === selectedPair), [data.events, selectedPair]);
+  const snapshot = data.snapshots[0];
+  const snapshotData = payloadOf(snapshot);
   const latestRun = data.runs[0];
-  const actionable = events.filter((x) => ["pending", "retest_held_waiting_continuation", "continuation_add_confirmed"].includes(String(x.outcome).toLowerCase()));
-  const entry1 = events.filter((x) => x.event_type === "BREAK_CLOSE_PROBE" || x.event_type === "ENTRY_1").length;
-  const entry2 = events.filter((x) => x.continuation_add_time).length;
-  const failed = events.filter((x) => String(x.outcome).toLowerCase() === "failed_break").length;
+  const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
+  const candidates = events.filter(x => x.event_type === "BREAK_CLOSE_PROBE" || x.event_type === "ENTRY_1" || x.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED");
+  const latestEvents = events.slice(0, 50);
+  const engineOk = latestRun?.status === "success" && data.connected;
+  const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
+  const latestDecision = snapshotData.friday_decision ?? {};
+  const latestSetup = snapshotData.latest_setup_state ?? {};
 
   return <main className="shell">
     <header className="topbar"><a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH INTELLIGENCE</span></span></a><div className="top-actions"><span className="mode-chip"><i /> RESEARCH ONLY · NO LIVE ORDERS</span><button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button></div></header>
-    <section className="hero"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-line" /> THE MARKET TURN, FOUND EARLY</div><h1>Let the structure<br/><em>tell the story.</em></h1><p>Friday watches the break, reads the retest, measures exhaustion, and records what happens next. One decision at a time. No black-box entries.</p><div className="hero-tags"><span>01 / STRUCTURE</span><span>02 / MOMENTUM</span><span>03 / CONFIRMATION</span></div></div><div className="hero-orbit" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="orbit-core"><span>F</span><small>FRIDAY</small></div><span className="orbit-node node-a">BREAK</span><span className="orbit-node node-b">RETEST</span><span className="orbit-node node-c">LEARN</span></div></section>
-    <section className="status-strip"><div className="status-led"><span className={data.connected ? "led on" : "led"} /> <div><b>{data.connected ? "DATA LINK CONNECTED" : data.status === "loading" ? "CONNECTING TO FRIDAY" : "AWAITING DATA CONNECTION"}</b><small>{data.message}</small></div></div><div className="status-right"><span>LAST REFRESH</span><b>{fmtTime(data.fetched_at)}</b></div></section>
-    {!data.connected && <section className="setup-note"><div className="setup-icon">i</div><div><b>The control room is built; the data link is not configured yet.</b><p>Deploy with <code>FRIDAY_SUPABASE_URL</code> and <code>FRIDAY_SUPABASE_SERVICE_ROLE_KEY</code> set as server-only environment variables, then apply <code>supabase/friday_research_schema.sql</code> to the dedicated research database. Never expose the service-role key in browser code.</p></div></section>}
-    <section className="section-head"><div><span className="section-kicker">01 / MARKET PULSE</span><h2>What Friday sees</h2></div><span className="muted-note">Completed-candle context · no hindsight triggers</span></section>
-    <section className="metrics-grid"><Metric label="LATEST SNAPSHOT" value={latestSnapshot?.pair ?? "—"} sub={latestSnapshot ? fmtTime(latestSnapshot.signal_time) : "No persisted snapshot yet"} /><Metric label="POTENTIAL SETUPS" value={actionable.length} sub="Recent lifecycle records" /><Metric label="ENTRY 1 / BREAKS" value={entry1} sub="Recorded break-close probes" /><Metric label="ENTRY 2 / ADDS" value={entry2} sub="Retest + continuation records" /></section>
-    <section className="two-col"><article className="panel"><div className="panel-head"><div><span className="section-kicker">REVERSAL / EXHAUSTION</span><h3>Early-turn evidence</h3></div><span className="tiny-tag">ADVISORY CONTEXT</span></div>{reversal.state ? <><div className="signal-state">{String(reversal.state).replaceAll("_", " ")}</div><div className="score-row"><Score label="Bullish evidence" value={reversal.long_reversal_score ?? 0}/><Score label="Bearish evidence" value={reversal.short_reversal_score ?? 0}/></div><div className="evidence-columns"><Evidence title="BULLISH" items={reversal.evidence?.bullish ?? []}/><Evidence title="BEARISH" items={reversal.evidence?.bearish ?? []}/></div><p className="footnote">Evidence counts are not probabilities. Structure must still confirm the setup.</p></> : <Empty title="Waiting for Friday’s first snapshot" body="Once the monitor writes a decision snapshot, this panel will show the reversal evidence it recorded."/>}</article>
-    <article className="panel"><div className="panel-head"><div><span className="section-kicker">ENGINE HEALTH</span><h3>Monitor & persistence</h3></div><span className={latestRun?.status === "success" ? "tiny-tag good" : "tiny-tag"}>{latestRun?.status ?? "NO RUN DATA"}</span></div><div className="health-list"><Health label="Last monitor run" value={fmtTime(latestRun?.started_at)}/><Health label="Pairs checked" value={latestRun?.pairs_checked ?? "—"}/><Health label="Last run finished" value={fmtTime(latestRun?.finished_at)}/><Health label="Alert delivery records" value={data.alerts.length}/></div>{latestRun?.error && <p className="error-text">{latestRun.error}</p>}<p className="footnote">A missing run is shown as missing—not treated as a healthy run.</p></article></section>
-    <section className="section-head"><div><span className="section-kicker">02 / SETUP LIFECYCLE</span><h2>Break → retest → continuation</h2></div><label className="filter-label">MARKET <select value={selectedPair} onChange={(e) => setSelectedPair(e.target.value)}>{pairs.map((p) => <option key={p}>{p}</option>)}</select></label></section>
-    <section className="panel table-panel"><div className="table-scroll"><table><thead><tr><th>MARKET / TIME</th><th>DIRECTION</th><th>STATE</th><th>REFERENCE</th><th>RETEST</th><th>CONTINUATION</th></tr></thead><tbody>{events.length ? events.slice(0, 20).map((event, i) => <tr key={event.event_key ?? i}><td><b>{event.pair}</b><small>{fmtTime(event.signal_time)}</small></td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{String(event.outcome ?? "unknown").replaceAll("_", " ")}</span></td><td><b>{fmtPrice(event.line_price ?? event.entry_reference)}</b><small>{event.line_kind ?? "structural level"}</small></td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{event.continuation_add_time ? fmtTime(event.continuation_add_time) : "Waiting / none"}</td></tr>) : <tr><td colSpan={6}><Empty title="No lifecycle records yet" body="Friday will populate this table as the research monitor persists closed-candle events."/></td></tr>}</tbody></table></div><div className="table-foot"><span>{events.length} records loaded · maximum 50 operational events</span><span>{failed} failed breaks in current selection</span></div></section>
-    <section className="section-head"><div><span className="section-kicker">03 / LEARNING LOOP</span><h2>Evidence over opinions</h2></div></section><section className="learning-grid"><div className="learning-card"><span className="learning-num">01</span><b>Capture</b><p>Freeze the decision, evidence, model review and structure at candle close.</p></div><div className="learning-card"><span className="learning-num">02</span><b>Replay</b><p>Measure structural targets, invalidations, fees and missed moves separately.</p></div><div className="learning-card"><span className="learning-num">03</span><b>Compare</b><p>Run walk-forward tests against a baseline before changing strategy rules.</p></div><div className="learning-card"><span className="learning-num">04</span><b>Promote carefully</b><p>No automatic rule changes. Better performance must survive out-of-sample testing.</p></div></section>
+
+    <section className="command-bar">
+      <div><span className="section-kicker">LIVE MARKET RADAR</span><h1>Find the setup. <em>Prove the edge.</em></h1><p>Closed-candle scans · structure first · paper research only</p></div>
+      <div className="link-state"><span className={engineOk ? "led on" : "led"} /><div><b>{engineOk ? "ENGINE HEALTHY" : data.status === "loading" ? "CONNECTING" : "ENGINE NOT VERIFIED"}</b><small>{data.message}</small></div></div>
+    </section>
+
+    <section className="radar-layout">
+      <article className="radar-panel">
+        <div className="panel-head"><div><span className="section-kicker">01 / SCANNER</span><h2>FRIDAY radar</h2></div><span className={engineOk ? "status-pill good" : "status-pill"}>{engineOk ? "RUN CONFIRMED" : "AWAITING PROOF"}</span></div>
+        <div className="radar-stage">
+          <div className="radar-grid"><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
+            <span className="radar-dot dot-btc" /><span className="radar-dot dot-virtual" /><span className="radar-dot dot-ghost" />
+            <div className="radar-core"><b>F</b><small>{engineOk ? "MONITOR OK" : "FRIDAY"}</small></div>
+            <span className="radar-label label-btc">XBTUSD</span><span className="radar-label label-virtual">VIRTUALUSD</span>
+          </div>
+        </div>
+        <div className="radar-foot"><div><span>LAST COMPLETED RUN</span><b>{fmtTime(lastScan)}</b></div><div><span>PAIRS ATTEMPTED</span><b>{latestRun?.pairs_checked ?? "—"}</b></div><div><span>LAST CANDLE</span><b>{fmtTime(snapshot?.signal_time)}</b></div></div>
+        {!data.connected && <div className="notice"><b>Data connection unavailable</b><p>{data.message} FRIDAY needs the correct dedicated Supabase project, schema and server-only credentials.</p></div>}
+        {latestRun?.error && <div className="error-note"><b>Last run error</b><p>{latestRun.error}</p></div>}
+      </article>
+
+      <aside className="candidate-panel">
+        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Tradeable setups</h2></div><span className="count-badge">{candidates.length}</span></div>
+        <p className="panel-intro">Only recorded strategy events appear here. Watch states are not trade signals.</p>
+        <div className="candidate-list">
+          {candidates.length ? candidates.slice(0, 12).map((event, i) => {
+            const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
+            const direction = String(event.direction ?? "").toLowerCase();
+            return <article className="candidate" key={event.event_key ?? i}>
+              <div className="candidate-top"><b>{event.pair}</b><span className={direction === "long" ? "direction long" : direction === "short" ? "direction short" : "direction"}>{direction || "direction pending"}</span></div>
+              <div className="candidate-title">{entry2 ? "ENTRY 2 · CONTINUATION" : "ENTRY 1 · BREAK CLOSE"}</div>
+              <div className="candidate-stats"><div><span>REFERENCE</span><b>{fmtPrice(entry2 ? event.continuation_add_close : event.entry_reference)}</b></div><div><span>STRUCTURE</span><b>{fmtPrice(event.line_price)}</b></div></div>
+              <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(entry2 ? event.continuation_add_time : event.signal_time)}</span></div>
+              <p className="candidate-reason">{event.evidence?.line_kind ? clean(event.evidence.line_kind) + " · " : ""}{event.evidence?.daily_bias ? "Daily bias: " + clean(event.evidence.daily_bias) : "See event evidence before treating this as actionable."}</p>
+            </article>;
+          }) : <div className="empty-state"><span className="empty-orbit">◎</span><b>No qualifying events recorded</b><p>When the engine records a break-close probe or confirmed continuation event, it will appear here. No placeholder trades are shown.</p></div>}
+        </div>
+        <div className="panel-bottom"><span>RESEARCH / PAPER ONLY</span><span>NO EXCHANGE ORDERS</span></div>
+      </aside>
+    </section>
+
+    <section className="feed-section">
+      <div className="section-head"><div><span className="section-kicker">03 / SCAN & TRADE LEDGER</span><h2>What FRIDAY has recorded</h2><p>New records appear after persistence succeeds. Refreshes automatically every 30 seconds.</p></div>
+        <label className="filter-label">PAIR <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}>{pairs.map(p => <option key={p} value={p}>{p}</option>)}</select></label>
+      </div>
+      <div className="feed-table-wrap"><table><thead><tr><th>TIME / MARKET</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th><th>RETEST</th><th>CONTINUATION</th></tr></thead><tbody>
+        {latestEvents.length ? latestEvents.map((event, i) => <tr key={event.event_key ?? i}><td><b>{event.pair}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}</td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{clean(event.outcome)}</span></td><td>{fmtPrice(event.entry_reference)}</td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{fmtTime(event.continuation_add_time)}</td></tr>) : <tr><td colSpan={7}><div className="empty-row">No trade lifecycle events persisted yet.</div></td></tr>}
+      </tbody></table></div>
+      <div className="feed-foot"><span>{latestEvents.length} of up to 50 recent lifecycle events</span><span>Last dashboard refresh: {fmtTime(data.fetched_at)}</span></div>
+    </section>
+
+    <section className="engine-strip">
+      <div><span className="section-kicker">04 / ENGINE DIAGNOSTICS</span><h2>Trust, but verify.</h2></div>
+      <div className="diagnostic-grid">
+        <div><span>DATA LINK</span><b className={data.connected ? "value-good" : "value-bad"}>{data.connected ? "CONNECTED" : clean(data.status).toUpperCase()}</b></div>
+        <div><span>LAST RUN</span><b>{latestRun?.status ? clean(latestRun.status).toUpperCase() : "NO RUN RECORD"}</b></div>
+        <div><span>PAIRS WITH RESULTS</span><b>{pairScans.filter(x => x.status === "ok").length} / {latestRun?.pairs_checked ?? 0}</b></div>
+        <div><span>ALERT RECORDS</span><b>{data.alerts.length}</b></div>
+      </div>
+    </section>
     <footer><span className="footer-brand">FRIDAY<span> / RESEARCH CONTROL ROOM</span></span><span>Built for transparent decisions, not unattended trading.</span><span>REFRESH · 30 SEC</span></footer>
   </main>;
 }
-
-function Metric({ label, value, sub }: { label: string; value: string | number; sub: string }) { return <article className="metric"><span>{label}</span><strong>{value}</strong><small>{sub}</small></article>; }
-function Score({ label, value }: { label: string; value: number }) { return <div className="score"><div><span>{label}</span><b>{value}</b></div><div className="score-track"><i style={{ width: `${Math.min(100, Math.max(0, value * 20))}%` }}/></div></div>; }
-function Evidence({ title, items }: { title: string; items: string[] }) { return <div className="evidence-list"><span>{title}</span>{items.length ? items.map((x) => <small key={x}>↗ {x.replaceAll("_", " ")}</small>) : <small className="quiet">No evidence recorded</small>}</div>; }
-function Health({ label, value }: { label: string; value: string | number }) { return <div className="health-row"><span>{label}</span><b>{value}</b></div>; }
-function Empty({ title, body }: { title: string; body: string }) { return <div className="empty"><span>◌</span><b>{title}</b><p>{body}</p></div>; }
