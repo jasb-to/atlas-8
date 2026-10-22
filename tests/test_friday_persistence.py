@@ -1,10 +1,30 @@
 import unittest
+from unittest.mock import Mock, patch
 from research.friday_persistence import (
-    SupabaseFridayStore, event_key, make_archive_record, make_cron_run, make_trade_event,
+    SupabaseFridayStore, UpstashFridayStore, event_key, make_archive_record, make_cron_run, make_trade_event,
 )
 
 
 class FridayPersistenceTests(unittest.TestCase):
+    def test_upstash_store_uses_atomic_alert_claim(self):
+        session = Mock()
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.json.return_value = {"result": "OK"}
+        session.post.return_value = response
+        store = UpstashFridayStore(url="https://example.upstash.io", token="test-token")
+        with patch("research.friday_persistence.requests.post", session.post):
+            self.assertTrue(store.claim_alert(alert_key="a1", pair="XBTUSD", alert_type="ENTRY_1",
+                                              signal_time="2026-10-21T12:00:00Z"))
+        args = session.post.call_args
+        self.assertEqual(args.kwargs["json"][0], "SET")
+        self.assertIn("NX", args.kwargs["json"])
+        self.assertNotIn("test-token", str(args.kwargs["json"]))
+
+    def test_upstash_missing_credentials_is_not_configured(self):
+        store = UpstashFridayStore(url="", token="")
+        self.assertFalse(store.configured)
+
     def test_event_key_is_idempotent_for_same_signal(self):
         event = {"event":"BREAK_CLOSE_PROBE","signal_time":"2026-10-21T12:00:00Z",
                  "direction":"long","line_kind":"resistance",
