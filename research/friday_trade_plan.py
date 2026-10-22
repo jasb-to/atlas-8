@@ -38,8 +38,8 @@ def build_trade_plan(frame: pd.DataFrame, direction: str, entry: float | None = 
     pivots = find_wick_pivots(data, 3, 3)
     last_i = len(data) - 1
     confirmed = [p for p in pivots if p.confirmed_at <= last_i]
-    highs = [p for p in confirmed if p.kind == "high"]
-    lows = [p for p in confirmed if p.kind == "low"]
+    highs = [p for p in confirmed if p.kind == "resistance"]
+    lows = [p for p in confirmed if p.kind == "support"]
     latest_high = max(highs, key=lambda p: p.index) if highs else None
     latest_low = max(lows, key=lambda p: p.index) if lows else None
     blockers: list[str] = []
@@ -55,7 +55,7 @@ def build_trade_plan(frame: pd.DataFrame, direction: str, entry: float | None = 
                        "extensions": {str(level): lo + swing_range*level for level in FIB_EXTENSIONS}}
             else:
                 fib = {"retracements": {str(level): lo + swing_range*level for level in FIB_RETRACEMENTS},
-                       "extensions": {str(level): hi - swing_range*(level-1) for level in FIB_EXTENSIONS}}
+                       "extensions": {str(level): hi - swing_range*level for level in FIB_EXTENSIONS}}
         if direction == "long" and latest_low.price < entry_price:
             stop = float(latest_low.price) - 0.15*atr
         elif direction == "short" and latest_high.price > entry_price:
