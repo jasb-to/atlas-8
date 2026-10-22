@@ -24,9 +24,10 @@ class FridayMonitorTests(unittest.TestCase):
         }
         with TemporaryDirectory() as tmp:
             with patch("research.friday_monitor.build_preview", return_value=preview):
-                with patch("research.friday_monitor.SupabaseFridayStore") as store_cls:
-                    store_cls.return_value.configured = False
-                    result = run_monitor(["XBTUSD"], tmp)
+                with patch("research.friday_monitor.analyse_pair", return_value={"state": "WATCH_NEUTRAL", "thesis_direction": "neutral", "generated_at_utc": "2026-10-21T12:00:00Z", "four_hour_execution": {"last_closed_candle_utc": "2026-10-21T12:00:00Z"}}):
+                    with patch("research.friday_monitor.create_friday_store") as store_factory:
+                        store_factory.return_value.configured = False
+                        result = run_monitor(["XBTUSD"], tmp)
             self.assertEqual(result["status"], "persistence_not_configured")
             self.assertEqual(result["pair_results"][0]["latest_setup_state"], "NO_SETUP")
             self.assertTrue(Path(tmp, "cron_run.json").exists())
