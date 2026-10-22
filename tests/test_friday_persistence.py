@@ -16,10 +16,10 @@ class FridayPersistenceTests(unittest.TestCase):
         with patch("research.friday_persistence.requests.post", session.post):
             self.assertTrue(store.claim_alert(alert_key="a1", pair="XBTUSD", alert_type="ENTRY_1",
                                               signal_time="2026-10-21T12:00:00Z"))
-        args = session.post.call_args
-        self.assertEqual(args.kwargs["json"][0], "SET")
-        self.assertIn("NX", args.kwargs["json"])
-        self.assertNotIn("test-token", str(args.kwargs["json"]))
+        commands = [call.kwargs["json"] for call in session.post.call_args_list]
+        claim = next(command for command in commands if command[0] == "SET")
+        self.assertIn("NX", claim)
+        self.assertNotIn("test-token", str(commands))
 
     def test_upstash_missing_credentials_is_not_configured(self):
         store = UpstashFridayStore(url="", token="")
