@@ -14,7 +14,7 @@ function safeEqual(left: string, right: string): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export async function POST(request: NextRequest) {
+async function triggerScan(request: NextRequest) {
   const expectedSecret = process.env.FRIDAY_CRON_SECRET;
   const githubToken = process.env.FRIDAY_GITHUB_TOKEN;
 
@@ -30,10 +30,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Support both cron services that can send a Bearer header and URL-based
+  // schedulers. Prefer the header when present; query-string secrets can appear
+  // in scheduler history and request logs, so keep the URL private.
   const authorization = request.headers.get("authorization") ?? "";
-  const suppliedSecret = authorization.startsWith("Bearer ")
+  const headerSecret = authorization.startsWith("Bearer ")
     ? authorization.slice("Bearer ".length)
     : "";
+  const suppliedSecret =
+    headerSecret || request.nextUrl.searchParams.get("secret") || "";
 
   if (!suppliedSecret || !safeEqual(suppliedSecret, expectedSecret)) {
     return NextResponse.json(
@@ -59,7 +64,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (upstream.status !== 204) {
-      // Do not return GitHub's body: it can contain unnecessary implementation detail.
       return NextResponse.json(
         {
           ok: false,
@@ -87,4 +91,12 @@ export async function POST(request: NextRequest) {
       { status: 502, headers: { "Cache-Control": "no-store" } },
     );
   }
+}
+
+export async function GET(request: NextRequest) {
+  return triggerScan(request);
+}
+
+export async function POST(request: NextRequest) {
+  return triggerScan(request);
 }
