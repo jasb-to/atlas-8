@@ -15,7 +15,7 @@ import pandas as pd
 
 from research.friday_alerts import build_signal_alert, send_telegram_alert
 from research.friday_persistence import (
-    SupabaseFridayStore, make_archive_record, make_cron_run, make_trade_event, utc_now,
+    create_friday_store, make_archive_record, make_cron_run, make_trade_event, utc_now,
 )
 from research.strategy_preview import build_preview
 from research.friday_multitimeframe import analyse_pair
@@ -31,7 +31,7 @@ def _utc(value) -> pd.Timestamp:
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_id = f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
-    store = SupabaseFridayStore()
+    store = create_friday_store()
     pair_results = []
     failures = []
     all_rows = []
