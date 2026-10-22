@@ -71,15 +71,18 @@ async function triggerScan(request: NextRequest) {
     });
 
     if (upstream.status !== 204) {
-      // GitHub's response body is deliberately not reflected to the caller;
-      // status codes are enough to distinguish permissions/configuration errors.
+      // GitHub error messages contain actionable diagnostics. Keep only a short
+      // plain-text excerpt; never log or return request headers or token values.
+      const upstreamBody = (await upstream.text()).slice(0, 500);
       console.error("[FRIDAY scan] GitHub workflow dispatch rejected", {
         status: upstream.status,
+        message: upstreamBody,
       });
       return json({
         ok: false,
         error: "workflow_dispatch_failed",
         upstream_status: upstream.status,
+        upstream_message: upstreamBody || "GitHub returned an empty error response.",
         hint:
           upstream.status === 401 || upstream.status === 403
             ? "Check that FRIDAY_GITHUB_TOKEN is valid, scoped to jasb-to/atlas-8, and has Actions: Read and write."
