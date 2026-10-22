@@ -4,79 +4,87 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type JsonRow = Record<string, unknown>;
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, "");
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+const supabaseUrl = (process.env.FRIDAY_SUPABASE_URL ?? "").replace(/\/$/, "");
+const serviceRoleKey = process.env.FRIDAY_SUPABASE_SERVICE_ROLE_KEY;
 
-async function command(...parts: (string | number)[]): Promise<unknown> {
-  if (!redisUrl || !redisToken) throw new Error("Upstash Redis environment variables are not configured.");
-  const response = await fetch(redisUrl, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${redisToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify(parts),
+function response(body: Record<string, unknown>, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
+}
+
+async function selectRows(table: string, query: Record<string, string>): Promise<JsonRow[]> {
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("FRIDAY Supabase environment variables are not configured.");
+  }
+  const params = new URLSearchParams({ select: "*", ...query });
+  const result = await fetch(`${supabaseUrl}/rest/v1/${table}?${params.toString()}`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    },
     cache: "no-store",
   });
-  if (!response.ok) throw new Error(`Upstash returned HTTP ${response.status}`);
-  const body = await response.json();
-  if (body.error) throw new Error("Upstash Redis command failed.");
-  return body.result;
-}
-
-async function listRows(key: string, limit: number): Promise<JsonRow[]> {
-  const result = await command("LRANGE", key, "0", String(limit - 1));
-  if (!Array.isArray(result)) return [];
-  return result.flatMap((value) => {
-    try {
-      const parsed = JSON.parse(String(value));
-      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? [parsed as JsonRow] : [];
-    } catch {
-      return [];
-    }
-  });
-}
-
-async function archiveRows(): Promise<JsonRow[]> {
-  const index = await listRows("FRIDAY:archive_index", 1000);
-  const selected = index.filter((row) => row.record_type === "decision_snapshot").slice(0, 12);
-  const rows: JsonRow[] = [];
-  for (const item of selected) {
-    if (typeof item.record_key !== "string") continue;
-    const value = await command("GET", `FRIDAY:archive:${item.record_key}`);
-    if (typeof value === "string") {
-      try { rows.push(JSON.parse(value) as JsonRow); } catch { /* skip malformed legacy data */ }
-    }
-  }
-  return rows;
-}
-
-async function alertRows(): Promise<JsonRow[]> {
-  return listRows("FRIDAY:alerts", 10);
+  if (!result.ok) throw new Error(`Supabase returned HTTP ${result.status} for ${table}.`);
+  const data: unknown = await result.json();
+  return Array.isArray(data) ? data as JsonRow[] : [];
 }
 
 export async function GET() {
-  if (!redisUrl || !redisToken) {
-    return NextResponse.json({
-      connected: false, status: "not_configured",
-      message: "Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to the Vercel project environment.",
-      snapshots: [], events: [], runs: [], alerts: [],
+  if (!supabaseUrl || !serviceRoleKey) {
+    return response({
+      connected: false,
+      status: "not_configured",
+      message: "Add FRIDAY_SUPABASE_URL and FRIDAY_SUPABASE_SERVICE_ROLE_KEY to the Vercel Production environment, and apply supabase/friday_research_schema.sql to that research database.",
+      snapshots: [],
+      events: [],
+      runs: [],
+      alerts: [],
     });
   }
+
   try {
     const [snapshots, events, runs, alerts] = await Promise.all([
-      archiveRows(),
-      listRows("FRIDAY:trades", 50),
-      listRows("FRIDAY:runs", 10),
-      alertRows(),
+      selectRows("friday_research_archive", {
+        record_type: "eq.decision_snapshot",
+        order: "signal_time.desc",
+        limit: "12",
+      }),
+      selectRows("friday_trade_events", {
+        order: "created_at.desc",
+        limit: "50",
+      }),
+      selectRows("friday_cron_runs", {
+        order: "started_at.desc",
+        limit: "10",
+      }),
+      selectRows("friday_alert_deliveries", {
+        order: "updated_at.desc",
+        limit: "10",
+      }),
     ]);
-    return NextResponse.json({
-      connected: true, status: "connected",
-      message: "Connected to Friday's Upstash research persistence.",
-      snapshots, events, runs, alerts, fetched_at: new Date().toISOString(),
-    }, { headers: { "Cache-Control": "no-store, max-age=0" } });
-  } catch {
-    return NextResponse.json({
-      connected: false, status: "error",
-      message: "Could not read Friday's Upstash research persistence. Check the URL, token and Redis availability.",
-      snapshots: [], events: [], runs: [], alerts: [],
-    }, { status: 503, headers: { "Cache-Control": "no-store, max-age=0" } });
+
+    return response({
+      connected: true,
+      status: "connected",
+      message: "Connected to FRIDAY's Supabase research persistence.",
+      snapshots,
+      events,
+      runs,
+      alerts,
+      fetched_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("[FRIDAY dashboard] Supabase read failed:", error instanceof Error ? error.message : "Unknown error");
+    return response({
+      connected: false,
+      status: "error",
+      message: "Could not read FRIDAY's Supabase research data. Check the Production URL/key and confirm the research schema has been applied.",
+      snapshots: [],
+      events: [],
+      runs: [],
+      alerts: [],
+    }, 503);
   }
 }
