@@ -49,7 +49,7 @@ class FridayTradePlanTests(unittest.TestCase):
 
     def test_no_valid_stop_or_target_blocks_plan(self):
         data = self.frame()
-        pivots = [Pivot(20, 90.0, "support", 23)]
+        pivots = [Pivot(20, 110.0, "support", 23)]
         with patch("research.friday_trade_plan.find_wick_pivots", return_value=pivots):
             result = build_trade_plan(data, "long")
         self.assertFalse(result["eligible"])
