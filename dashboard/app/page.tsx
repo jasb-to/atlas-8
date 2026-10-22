@@ -39,7 +39,8 @@ export default function Home() {
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const candidates = events.filter(x => x.event_type === "BREAK_CLOSE_PROBE" || x.event_type === "ENTRY_1" || x.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED");
   const latestEvents = events.slice(0, 50);
-  const engineOk = latestRun?.status === "success" && data.connected;
+  const runAgeMs = latestRun?.started_at ? Date.now() - new Date(latestRun.started_at).getTime() : Number.POSITIVE_INFINITY;
+  const engineOk = latestRun?.status === "success" && data.connected && runAgeMs >= 0 && runAgeMs < 6 * 60 * 60 * 1000;
   const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
   const latestDecision = snapshotData.friday_decision ?? {};
   const latestSetup = snapshotData.latest_setup_state ?? {};
@@ -49,14 +50,14 @@ export default function Home() {
 
     <section className="command-bar">
       <div><span className="section-kicker">LIVE MARKET RADAR</span><h1>Find the setup. <em>Prove the edge.</em></h1><p>Closed-candle scans · structure first · paper research only</p></div>
-      <div className="link-state"><span className={engineOk ? "led on" : "led"} /><div><b>{engineOk ? "ENGINE HEALTHY" : data.status === "loading" ? "CONNECTING" : "ENGINE NOT VERIFIED"}</b><small>{data.message}</small></div></div>
+      <div className="link-state"><span className={engineOk ? "led on" : "led"} /><div><b>{engineOk ? "ENGINE RECENTLY VERIFIED" : data.status === "loading" ? "CONNECTING" : "ENGINE NOT VERIFIED"}</b><small>{data.message}</small></div></div>
     </section>
 
     <section className="radar-layout">
       <article className="radar-panel">
         <div className="panel-head"><div><span className="section-kicker">01 / SCANNER</span><h2>FRIDAY radar</h2></div><span className={engineOk ? "status-pill good" : "status-pill"}>{engineOk ? "RUN CONFIRMED" : "AWAITING PROOF"}</span></div>
         <div className="radar-stage">
-          <div className="radar-grid"><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
+          <div className={`radar-grid ${engineOk ? "radar-active" : "radar-idle"}`}><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
             <span className="radar-dot dot-btc" /><span className="radar-dot dot-virtual" /><span className="radar-dot dot-ghost" />
             <div className="radar-core"><b>F</b><small>{engineOk ? "MONITOR OK" : "FRIDAY"}</small></div>
             <span className="radar-label label-btc">XBTUSD</span><span className="radar-label label-virtual">VIRTUALUSD</span>
@@ -68,8 +69,8 @@ export default function Home() {
       </article>
 
       <aside className="candidate-panel">
-        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Tradeable setups</h2></div><span className="count-badge">{candidates.length}</span></div>
-        <p className="panel-intro">Only recorded strategy events appear here. Watch states are not trade signals.</p>
+        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Setup signals</h2></div><span className="count-badge">{candidates.length}</span></div>
+        <p className="panel-intro">Recorded Entry 1 / Entry 2 events only. A signal is not a complete trade plan until invalidation, targets and risk/reward are defined.</p>
         <div className="candidate-list">
           {candidates.length ? candidates.slice(0, 12).map((event, i) => {
             const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
