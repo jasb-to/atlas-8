@@ -42,8 +42,8 @@ class SupabaseFridayStore:
     """Minimal REST store; requires a private server-side service-role key."""
 
     def __init__(self, url: str | None = None, key: str | None = None, timeout: int = 8):
-        self.url = (url or os.getenv("SUPABASE_URL", "")).rstrip("/")
-        self.key = key or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        self.url = (url or os.getenv("FRIDAY_SUPABASE_URL") or os.getenv("SUPABASE_URL", "")).rstrip("/")
+        self.key = key or os.getenv("FRIDAY_SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
         self.timeout = timeout
 
     @property
@@ -310,7 +310,9 @@ class UpstashFridayStore:
 
 
 def create_friday_store():
-    """Prefer Upstash for the app; retain Supabase only as an explicit fallback."""
-    if os.getenv("UPSTASH_REDIS_REST_URL") and os.getenv("UPSTASH_REDIS_REST_TOKEN"):
-        return UpstashFridayStore()
+    """Use Supabase as the single persistence backend during the FRIDAY proof of concept.
+
+    Upstash remains available as a future migration option, but its presence in the
+    environment must not silently divert writes away from the agreed Supabase store.
+    """
     return SupabaseFridayStore()
