@@ -61,31 +61,30 @@ The monitor is research/paper-only and does not place exchange orders.
 - Runtime: `python -m research.friday_monitor --pairs XBTUSD,VIRTUALUSD`
 - Telegram formatter/sender: `research/friday_alerts.py`
 - Persistence adapter: `research/friday_persistence.py`
-- Dedicated research schema: `supabase/friday_research_schema.sql`
+- Dashboard API: `dashboard/app/api/friday/route.ts`
 
 ### Persistence model
 
-Use a dedicated research Supabase project, not the production CX Switch database or its KV namespace. Apply `supabase/friday_research_schema.sql` manually only after confirming the target project. Configure GitHub Actions secrets:
+Upstash Redis REST is Friday's primary persistence backend. It is separate from CX Switch production. Configure these GitHub Actions secrets and Vercel server-side environment variables:
 
-- `FRIDAY_SUPABASE_URL`
-- `FRIDAY_SUPABASE_SERVICE_ROLE_KEY` (server-side secret only)
-- `FRIDAY_TELEGRAM_BOT_TOKEN`
-- `FRIDAY_TELEGRAM_CHAT_ID`
-- `HUGGINGFACE_API_KEY` (optional; never put it in code or logs)
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN` (secret; never commit it)
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (optional alert delivery)
+- `HUGGINGFACE_API_KEY` (optional shadow review; never put it in code or logs)
 
 Friday defaults to `openai/gpt-oss-120b:cheapest` on the Hugging Face Router endpoint; you only need `HUGGINGFACE_API_KEY`. You may override `FRIDAY_HF_MODEL_ID` or `FRIDAY_HF_ENDPOINT` for testing. Hugging Face free-account inference availability and credits can change; the router is not a promise of unlimited free inference. Extra usage requires purchasing credits, so do not enable paid billing or buy credits for this research project. Friday remains rule-led if the token is absent.
 
-The workflow maps these to runtime environment variables. Without Supabase persistence, the monitor refuses to send Telegram alerts so it cannot claim reliable deduplication. Run logs and snapshots are still uploaded as GitHub Actions artifacts, retained for 30 days.
+The workflow maps Upstash credentials to runtime environment variables. Without configured persistent storage, the monitor refuses to send Telegram alerts so it cannot claim reliable deduplication. Run logs and snapshots are also uploaded as GitHub Actions artifacts, retained for 30 days. The dashboard reads the same Upstash data using server-side environment variables; never use a `NEXT_PUBLIC_` prefix for credentials.
 
 ### Last 50 trades/setups
 
-`friday_trade_events` is the bounded recent setup ledger: one idempotent row per Entry 1 setup, updated as retest, continuation add, failure, and outcome evidence becomes available. A database trigger retains the latest 50 records. Entry 1 and Entry 2 notifications have separate idempotency keys in `friday_alert_deliveries`, so a workflow retry does not resend a completed alert. `friday_cron_runs` retains the latest 500 run summaries with per-pair status, candle timestamp, event counts, persistence status, and errors. `friday_research_archive` stores idempotent per-candle decision snapshots and setup lifecycle payloads without the 50-row pruning limit; it is the durable research record for later analysis.
+`FRIDAY:trades` retains the latest 50 setup records; `FRIDAY:runs` retains the latest 500 cron summaries; `FRIDAY:alerts` shows the latest 10 alert states; and `FRIDAY:archive:<record_key>` stores idempotent snapshots with a bounded 1,000-key recent index. Alert claims use Redis `SET NX` to suppress duplicate sends across overlapping runs. The bounded trade ledger is the operational recent-history view, not the complete backtest archive.
 
 The 50-row table is the operational recent-history view, not the complete backtest archive. Long-run performance analysis belongs in versioned artifacts/backtest datasets.
 
 ### Cron and validation
 
-GitHub Actions run logs are the first-level cron diagnostics; the artifact contains the per-pair JSON previews and `cron_run.json`. Supabase stores compact persistent run summaries. Schedule triggers run only from the repository's default branch, so while this work remains on `feature/price-touch-trendlines`, use `workflow_dispatch` to test it; do not merge into production/default branch just to activate the schedule. Validate a manual run and alert dedupe before enabling a recurring schedule.
+GitHub Actions run logs are the first-level cron diagnostics; the artifact contains the per-pair JSON previews and `cron_run.json`. Upstash stores compact persistent run summaries. Schedule triggers run only from the repository's default branch, so while this work remains on `feature/price-touch-trendlines`, use `workflow_dispatch` to test it; do not merge into production/default branch just to activate the schedule. Validate a manual run and alert dedupe before enabling a recurring schedule.
 
 
 ## Friday learning loop and optional model review
