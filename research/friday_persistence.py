@@ -189,3 +189,120 @@ def make_archive_record(*, record_key: str, record_type: str, pair: str,
         "signal_time": signal_time,
         "payload": dict(payload),
     })
+
+
+class UpstashFridayStore:
+    """Upstash Redis REST persistence. Secrets are read only from environment variables."""
+
+    def __init__(self, url: str | None = None, token: str | None = None, timeout: int = 8):
+        self.url = (url or os.getenv("UPSTASH_REDIS_REST_URL", "")).rstrip("/")
+        self.token = token or os.getenv("UPSTASH_REDIS_REST_TOKEN", "")
+        self.timeout = timeout
+
+    @property
+    def configured(self) -> bool:
+        return bool(self.url and self.token)
+
+    def _command(self, *parts):
+        if not self.configured:
+            raise RuntimeError("Friday Upstash persistence is not configured")
+        response = requests.post(
+            self.url,
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            json=list(parts), timeout=self.timeout,
+        )
+        response.raise_for_status()
+        body = response.json()
+        if body.get("error"):
+            raise RuntimeError(f"Upstash Redis command failed: {body['error']}")
+        return body.get("result")
+
+    @staticmethod
+    def _json(value):
+        return json.dumps(value, separators=(",", ":"), allow_nan=False)
+
+    def _recent_json(self, key: str) -> list[dict[str, Any]]:
+        values = self._command("LRANGE", key, "0", "-1") or []
+        rows = []
+        for value in values:
+            try:
+                row = json.loads(value)
+                if isinstance(row, dict):
+                    rows.append(row)
+            except (TypeError, json.JSONDecodeError):
+                continue
+        return rows
+
+    def _upsert_recent(self, index: str, record: Mapping[str, Any], identity: str, limit: int):
+        row = dict(record)
+        rows = [x for x in self._recent_json(index) if x.get(identity) != row.get(identity)]
+        rows.insert(0, row)
+        rows = rows[:limit]
+        self._command("DEL", index)
+        if rows:
+            self._command("RPUSH", index, *[self._json(x) for x in rows])
+        return rows
+
+    def record_trade_event(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        self._upsert_recent("FRIDAY:trades", record, "event_key", 50)
+        return {"persisted": True, "table": "FRIDAY:trades"}
+
+    def recent_50_trades(self) -> list[dict[str, Any]]:
+        return self._recent_json("FRIDAY:trades")[:50]
+
+    def record_cron_run(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        self._upsert_recent("FRIDAY:runs", record, "run_id", 500)
+        return {"persisted": True, "table": "FRIDAY:runs"}
+
+    def record_archive(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        row = dict(record)
+        key = f"FRIDAY:archive:{row['record_key']}"
+        self._command("SET", key, self._json(row))
+        self._upsert_recent("FRIDAY:archive_index", {
+            "record_key": row["record_key"], "record_type": row.get("record_type"),
+            "pair": row.get("pair"), "timeframe": row.get("timeframe"),
+            "signal_time": row.get("signal_time"),
+        }, "record_key", 1000)
+        return {"persisted": True, "table": "FRIDAY:archive"}
+
+    def recent_archive(self, record_type: str | None = None, limit: int = 12) -> list[dict[str, Any]]:
+        index = self._recent_json("FRIDAY:archive_index")
+        rows = []
+        for item in index:
+            if record_type and item.get("record_type") != record_type:
+                continue
+            stored = self._command("GET", f"FRIDAY:archive:{item['record_key']}")
+            if stored:
+                rows.append(json.loads(stored))
+            if len(rows) >= limit:
+                break
+        return rows
+
+    def claim_alert(self, *, alert_key: str, pair: str, alert_type: str,
+                    signal_time: str | None) -> bool:
+        result = self._command("SET", f"FRIDAY:alert:{alert_key}",
+                               self._json({"alert_key": alert_key, "pair": pair,
+                                           "alert_type": alert_type, "signal_time": signal_time,
+                                           "status": "sending", "updated_at": utc_now()}),
+                               "NX", "EX", "604800")
+        return result == "OK"
+
+    def finish_alert(self, alert_key: str, *, status: str,
+                     message_id: int | None = None, error: str | None = None) -> None:
+        key = f"FRIDAY:alert:{alert_key}"
+        existing = self._command("GET", key)
+        row = json.loads(existing) if existing else {"alert_key": alert_key}
+        row.update({"status": status, "telegram_message_id": message_id,
+                    "error": error, "updated_at": utc_now()})
+        self._command("SET", key, self._json(row), "EX", "604800")
+
+    def recent_alerts(self, limit: int = 10) -> list[dict[str, Any]]:
+        # Keep a compact alert index for dashboard visibility; alert claims remain atomic.
+        return self._recent_json("FRIDAY:alerts")[:limit]
+
+
+def create_friday_store():
+    """Prefer Upstash for the app; retain Supabase only as an explicit fallback."""
+    if os.getenv("UPSTASH_REDIS_REST_URL") and os.getenv("UPSTASH_REDIS_REST_TOKEN"):
+        return UpstashFridayStore()
+    return SupabaseFridayStore()
