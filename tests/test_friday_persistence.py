@@ -1,7 +1,9 @@
 import unittest
+import json
+import tempfile
 from unittest.mock import Mock, patch
 from research.friday_persistence import (
-    SupabaseFridayStore, UpstashFridayStore, event_key, make_archive_record, make_cron_run, make_trade_event,
+    RepoFolderFridayStore, SupabaseFridayStore, UpstashFridayStore, event_key, make_archive_record, make_cron_run, make_trade_event,
 )
 
 
@@ -55,6 +57,32 @@ class FridayPersistenceTests(unittest.TestCase):
             started_at="2026-10-21T12:00:00Z", error="VIRTUAL timeout")
         self.assertEqual(row["pairs_checked"], 1)
         self.assertEqual(row["error"], "VIRTUAL timeout")
+
+
+    def test_repo_store_persists_and_refreshes_dashboard(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = RepoFolderFridayStore(root=directory)
+            event = make_trade_event(
+                pair="XBTUSD", timeframe="4H",
+                event={"event":"BREAK_CLOSE_PROBE","signal_time":"2026-10-21T12:00:00Z",
+                       "direction":"long","line_kind":"resistance","close_at_break":100},
+                run_id="run-1",
+            )
+            store.record_trade_event(event)
+            store.record_archive(make_archive_record(
+                record_key="snapshot-1", record_type="decision_snapshot", pair="XBTUSD",
+                timeframe="4H", signal_time="2026-10-21T12:00:00Z", payload={"state":"WATCH"},
+            ))
+            store.record_cron_run(make_cron_run(
+                run_id="run-1", status="success", pair_results=[{"pair":"XBTUSD","status":"ok"}],
+                started_at="2026-10-21T12:00:00Z",
+            ))
+            with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
+                dashboard = json.load(handle)
+            self.assertEqual(dashboard["storage_backend"], "github_repository_folder")
+            self.assertEqual(len(dashboard["events"]), 1)
+            self.assertEqual(len(dashboard["snapshots"]), 1)
+            self.assertEqual(dashboard["runs"][0]["run_id"], "run-1")
 
     def test_unconfigured_store_does_not_claim_success(self):
         store = SupabaseFridayStore(url="", key="")
