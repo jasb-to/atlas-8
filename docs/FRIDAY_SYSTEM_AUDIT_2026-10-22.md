@@ -43,8 +43,8 @@ A successful legacy setup monitor is not evidence that the new persistence-enabl
 
 **Effect:** an Entry 1 / Entry 2 event must not be represented as a fully risk-defined trade plan. The redesigned UI therefore labels these as setup signals and explicitly warns about missing risk-plan validation.
 
-### P1 — dashboard CI coverage gap
-The push workflow runs Python backtests, not the Next.js dashboard build/typecheck. A dashboard build can therefore fail independently of a green backtest workflow. The UI commits are not yet confirmed by a dashboard build or live production deployment.
+### P1 — dashboard CI coverage gap (mitigation committed; not yet verified)
+The push workflow runs Python backtests, not the Next.js dashboard build/typecheck. A dedicated `.github/workflows/friday-dashboard-check.yml` has now been added to type-check and build the dashboard on pushes/PRs affecting `dashboard/**`. Its first run has not yet been confirmed successful. The UI commits are also not yet confirmed by a live production deployment.
 
 ### P2 — configuration documentation is inconsistent
 `docs/VERCEL_SETUP.md` still describes Upstash as the required persistence backend, while the current persistence factory explicitly chooses Supabase for the POC. The main README/setup notes should consistently describe the Supabase-first design.
@@ -61,6 +61,7 @@ There are two scheduled workflows: the older `friday-setup-monitor.yml` and the 
 - The queue distinguishes setup events from fully risk-defined trade plans.
 
 Relevant commits:
+- `50911db5` — add dashboard typecheck/build CI workflow.
 - `67aa0eb4` — radar-first dashboard layout.
 - `5e0f1222` — simplified radar styling.
 - `fe3fb65e` — stale run cannot be shown as healthy; queue language clarifies signal vs trade plan.
@@ -75,7 +76,7 @@ Relevant commits:
 5. Confirm the deployed dashboard API reads those same records.
 6. Test the cron-job.org endpoint end to end and capture the HTTP result. If 502 persists, use its `upstream_status` and `upstream_message` to fix the actual GitHub dispatch failure; do not infer it from the fallback schedule.
 7. Wire `build_trade_plan` into the causal scan, persist eligibility/blockers/stop/target/reward-risk, and show only eligible plans in the tradeable panel.
-8. Add a dashboard build/typecheck gate and make one workflow the clearly designated full monitor.
+8. Confirm the new dashboard build/typecheck gate passes and make one workflow the clearly designated full monitor.
 9. Verify the production deployment commit and runtime logs once Vercel access is available.
 
 ## Acceptance criteria
