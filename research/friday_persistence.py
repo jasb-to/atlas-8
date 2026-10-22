@@ -1,7 +1,7 @@
-"""Durable Friday persistence via Supabase REST, with explicit fail-closed semantics.
+"""FRIDAY persistence adapters: Supabase and a temporary Git repository JSON store.
 
-No trading actions. Store signal lifecycle events, a bounded recent-event view,
-and cron-run diagnostics. Secrets are read only from environment variables.
+The repository store is intended only for low-volume testing; no trading actions
+are performed. Secrets are read only from environment variables.
 """
 from __future__ import annotations
 
