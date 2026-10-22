@@ -47,6 +47,20 @@ class FridayTradePlanTests(unittest.TestCase):
         self.assertIsNotNone(result["reward_risk"])
         self.assertTrue(result["research_only"])
 
+    def test_uses_fib_extension_when_nearby_structure_fails_minimum_rr(self):
+        data = self.frame()
+        data.loc[data.index[-1], "close"] = 101.5
+        pivots = [
+            Pivot(10, 103.0, "resistance", 13),
+            Pivot(15, 100.0, "support", 18),
+            Pivot(20, 104.0, "resistance", 23),
+        ]
+        with patch("research.friday_trade_plan.find_wick_pivots", return_value=pivots):
+            result = build_trade_plan(data, "long")
+        self.assertEqual(result["target_source"], "fib_1.272_fallback")
+        self.assertGreaterEqual(result["reward_risk"], 1.5)
+        self.assertTrue(result["eligible"])
+
     def test_no_valid_stop_or_target_blocks_plan(self):
         data = self.frame()
         pivots = [Pivot(20, 110.0, "support", 23)]
