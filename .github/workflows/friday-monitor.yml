@@ -7,9 +7,6 @@ on:
         description: Comma-separated Kraken pairs
         required: false
         default: XBTUSD,VIRTUALUSD
-  schedule:
-    # Intended cadence: after a 4H candle has time to close.
-    - cron: "13 */4 * * *"
 
 permissions:
   contents: write
