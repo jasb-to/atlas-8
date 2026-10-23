@@ -10,3 +10,16 @@
 @keyframes sweep{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.radar-active .radar-sweep{animation:none}}
 @media(max-width:980px){.shell{padding:0 22px}.radar-layout{grid-template-columns:1fr}.candidate-panel{min-height:400px}.radar-grid{width:min(100%,320px)}.engine-strip{grid-template-columns:1fr}.diagnostic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.command-bar{align-items:flex-start;flex-direction:column}.link-state{max-width:none;width:100%}}
 @media(max-width:580px){.shell{padding:0 14px}.topbar{height:68px}.brand{font-size:15px}.brand-mark{width:32px;height:32px}.mode-chip{display:none}.command-bar{padding:22px 0}.command-bar h1{font-size:30px}.radar-panel,.candidate-panel{padding-left:14px;padding-right:14px}.radar-stage{min-height:300px}.radar-grid{width:min(100%,285px)}.radar-foot{grid-template-columns:1fr 1fr;row-gap:16px}.radar-foot>div:last-child{grid-column:1/-1}.section-head{align-items:flex-start;flex-direction:column}.filter-label{align-self:flex-start}.diagnostic-grid{grid-template-columns:1fr 1fr}.feed-foot,footer{flex-direction:column;gap:9px}.panel-bottom{font-size:8px}.candidate-panel{min-width:0}}
+
+/* Live universe cards replace the old three hard-coded radar labels. */
+.scanner-market-grid{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-content:start}
+.scanner-market{min-width:0;border:1px solid var(--line);border-radius:10px;background:rgba(16,21,29,.9);padding:12px;display:flex;flex-direction:column;gap:6px}
+.scanner-market-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.scanner-market-top b{font:600 14px 'Space Grotesk',sans-serif;letter-spacing:.04em}
+.scanner-market-top span{font:10px 'DM Mono',monospace;color:var(--cyan)}
+.scanner-market strong{font:500 16px 'DM Mono',monospace;color:var(--text);overflow-wrap:anywhere}
+.scanner-market small{font:10px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase;overflow-wrap:anywhere}
+.scanner-market-error .scanner-market-top span{color:#ff9b9b}
+.scanner-empty{grid-column:1/-1;padding:24px;color:var(--muted);font:12px 'DM Mono',monospace;text-align:center}
+.radar-stage{height:auto;min-height:240px;padding:12px;align-items:stretch}
+@media(max-width:700px){.scanner-market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.radar-stage{min-height:200px}}
