@@ -73,29 +73,48 @@ export default function Home() {
       </article>
 
       <aside className="candidate-panel">
-        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Setup signals</h2></div><span className="count-badge">{candidateCount}</span></div>
-        <p className="panel-intro">Break/retest events plus a separate Stoch RSI reversal archetype. Only reversal candidates with a structural stop, target and at least 1.5R are eligible; all signals remain research-only.</p>
+        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Best qualified trades</h2></div><span className="count-badge">{data.paper_trades.filter(x => x.status === "OPEN").length}</span></div>
+        <p className="panel-intro">Only risk-defined paper trades that passed the strategy filters appear here. Historical signals and failed setups stay in the ledger below.</p>
         <div className="candidate-list">
-          {(candidates.length || reversalCandidate.eligible) ? <>
-          {reversalCandidate.eligible && <article className="candidate" key={"momentum-reversal-" + reversalCandidate.pair + "-" + reversalCandidate.signal_time}>
-            <div className="candidate-top"><b>{reversalCandidate.pair}</b><span className={reversalCandidate.direction === "long" ? "direction long" : "direction short"}>{String(reversalCandidate.direction ?? "").toUpperCase()}</span></div>
-            <div className="candidate-title">ENTRY CANDIDATE · STOCH RSI REVERSAL</div>
-            <div className="candidate-stats"><div><span>ENTRY</span><b>{fmtPrice(reversalCandidate.entry)}</b></div><div><span>STRUCTURAL STOP</span><b>{fmtPrice(reversalCandidate.stop)}</b></div><div><span>TARGET</span><b>{fmtPrice(reversalCandidate.target)}</b></div><div><span>REWARD / RISK</span><b>{reversalCandidate.reward_risk}R</b></div></div>
-            <div className="candidate-bottom"><span className="state-pill">risk-defined candidate</span><span>{fmtTime(reversalCandidate.signal_time)}</span></div>
-            <p className="candidate-reason">Fresh Stoch RSI cross from an extreme zone with momentum/structure confirmation. Research / paper only.</p>
-          </article>}
-          {candidates.slice(0, 12).map((event, i) => {
-            const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
-            const direction = String(event.direction ?? "").toLowerCase();
-            return <article className="candidate" key={event.event_key ?? i}>
-              <div className="candidate-top"><b>{event.pair}</b><span className={direction === "long" ? "direction long" : direction === "short" ? "direction short" : "direction"}>{direction || "direction pending"}</span></div>
-              <div className="candidate-title">{entry2 ? "ENTRY 2 · CONTINUATION" : "ENTRY 1 · BREAK CLOSE"}</div>
-              <div className="candidate-stats"><div><span>REFERENCE</span><b>{fmtPrice(entry2 ? event.continuation_add_close : event.entry_reference)}</b></div><div><span>STRUCTURE</span><b>{fmtPrice(event.line_price)}</b></div></div>
-              <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(entry2 ? event.continuation_add_time : event.signal_time)}</span></div>
-              <p className="candidate-reason">{event.evidence?.line_kind ? clean(event.evidence.line_kind) + " · " : ""}{event.evidence?.daily_bias ? "Daily bias: " + clean(event.evidence.daily_bias) : "See event evidence before treating this as actionable."}</p>
+          {data.paper_trades.filter(x => x.status === "OPEN").length ? data.paper_trades.filter(x => x.status === "OPEN").slice(0, 5).map((trade, i) => {
+            const risk = Math.abs(Number(trade.entry) - Number(trade.stop_loss));
+            const reward = String(trade.direction).toLowerCase() === "long" ? Number(trade.take_profit) - Number(trade.entry) : Number(trade.entry) - Number(trade.take_profit);
+            const rr = risk > 0 && Number.isFinite(reward) ? reward / risk : Number(trade.reward_risk);
+            return <article className="candidate" key={trade.trade_id ?? i}>
+              <div className="candidate-top"><b>{trade.pair}</b><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(trade.direction).toUpperCase()}</span></div>
+              <div className="candidate-title">QUALIFIED · OPEN PAPER TRADE</div>
+              <div className="candidate-stats"><div><span>ENTRY</span><b>{fmtPrice(trade.entry)}</b></div><div><span>STOP LOSS</span><b>{fmtPrice(trade.stop_loss)}</b></div><div><span>TARGET</span><b>{fmtPrice(trade.take_profit)}</b></div><div><span>REWARD / RISK</span><b>{Number.isFinite(rr) ? rr.toFixed(2) + "R" : "—"}</b></div></div>
+              <div className="candidate-bottom"><span className="state-pill good">filters passed</span><span>{fmtTime(trade.signal_time)}</span></div>
+              <p className="candidate-reason">{clean(trade.strategy)} · AI review: {clean(trade.ai_review_status)}{trade.ai_assessment ? " · " + clean(trade.ai_assessment) : ""}. Paper research only; not a live trade recommendation.</p>
             </article>;
-          })}
-          </> : <div className="empty-state"><span className="empty-orbit">◎</span><b>No qualifying events recorded</b><p>When the engine records a risk-defined reversal candidate, break-close probe or confirmed continuation event, it will appear here. No placeholder trades are shown.</p></div>}
+          }) : <div className="empty-state"><span className="empty-orbit">◎</span><b>No qualified open paper trades</b><p>That is intentional. A setup only earns a place here after the filters pass and a valid structural stop, target and minimum reward/risk are recorded. Watch for new candidates below.</p></div>}
+          {(() => {
+            const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+            const watch = events.filter(event => {
+              const ts = new Date(event.signal_time ?? 0).getTime();
+              const outcome = String(event.outcome ?? "").toLowerCase();
+              return Number.isFinite(ts) && ts >= cutoff && ["pending", "candidate", "active", "open"].includes(outcome);
+            }).filter(event => !data.paper_trades.some(trade => trade.pair === event.pair && trade.status === "OPEN" && trade.signal_time === event.signal_time)).slice(0, 3);
+            return watch.length ? <details className="history-details"><summary>Near-ready watchlist ({watch.length})</summary>{watch.map((event, i) => <article className="candidate" key={event.event_key ?? i}>
+              <div className="candidate-top"><b>{event.pair}</b><span className={String(event.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(event.direction ?? "unknown").toUpperCase()}</span></div>
+              <div className="candidate-title">WATCH · NOT YET QUALIFIED</div>
+              <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(event.signal_time)}</span></div>
+              <p className="candidate-reason">A recent event only. It is not promoted to a qualified trade without a validated structural risk plan and the required filters.</p>
+            </article>)}</details> : null;
+          })()}
+          <details className="history-details"><summary>Historical setup events ({candidates.length + (reversalCandidate.eligible ? 1 : 0)})</summary><p className="panel-intro">Historical break/retest and Stoch RSI events are retained for review, not presented as current opportunities.</p>
+            {candidates.slice(0, 12).map((event, i) => {
+              const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
+              const direction = String(event.direction ?? "").toLowerCase();
+              return <article className="candidate" key={event.event_key ?? i}>
+                <div className="candidate-top"><b>{event.pair}</b><span className={direction === "long" ? "direction long" : direction === "short" ? "direction short" : "direction"}>{direction || "direction pending"}</span></div>
+                <div className="candidate-title">{entry2 ? "ENTRY 2 · CONTINUATION" : "ENTRY 1 · BREAK CLOSE"}</div>
+                <div className="candidate-stats"><div><span>REFERENCE</span><b>{fmtPrice(entry2 ? event.continuation_add_close : event.entry_reference)}</b></div><div><span>STRUCTURE</span><b>{fmtPrice(event.line_price)}</b></div></div>
+                <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(entry2 ? event.continuation_add_time : event.signal_time)}</span></div>
+                <p className="candidate-reason">{event.evidence?.line_kind ? clean(event.evidence.line_kind) + " · " : ""}{event.evidence?.daily_bias ? "Daily bias: " + clean(event.evidence.daily_bias) : "Historical event; inspect the full ledger for evidence."}</p>
+              </article>;
+            })}
+          </details>
         </div>
         <div className="panel-bottom"><span>RESEARCH / PAPER ONLY</span><span>NO EXCHANGE ORDERS</span></div>
       </aside>
