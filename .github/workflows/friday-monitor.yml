@@ -14,7 +14,7 @@ on:
       pairs:
         description: Comma-separated Kraken pairs
         required: false
-        default: XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT
+        default: XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT
 
 permissions:
   contents: write
@@ -46,7 +46,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
           FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
-          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT' }}
+          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT' }}
         run: |
           # Never interpolate workflow_dispatch input into shell source. The Python
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
