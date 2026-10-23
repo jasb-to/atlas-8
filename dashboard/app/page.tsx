@@ -64,7 +64,7 @@ export default function Home() {
           <div className={`radar-grid ${engineOk ? "radar-active" : "radar-idle"}`}><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
             <span className="radar-dot dot-btc" /><span className="radar-dot dot-virtual" /><span className="radar-dot dot-ghost" />
             <div className="radar-core"><b>F</b><small>{engineOk ? "MONITOR OK" : "FRIDAY"}</small></div>
-            <span className="radar-label label-btc">XBTUSD</span><span className="radar-label label-virtual">VIRTUALUSD</span><span className="radar-label label-ghost">HYPEUSD</span>
+            <span className="radar-label label-btc">XBTUSDT</span><span className="radar-label label-virtual">VIRTUALUSDT</span><span className="radar-label label-ghost">HYPEUSDT</span>
           </div>
         </div>
         <div className="radar-foot"><div><span>LAST COMPLETED RUN</span><b>{fmtTime(lastScan)}</b></div><div><span>PAIRS ATTEMPTED</span><b>{latestRun?.pairs_checked ?? "—"}</b></div><div><span>LAST CANDLE</span><b>{fmtTime(snapshot?.signal_time)}</b></div></div>
