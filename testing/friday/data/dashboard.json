@@ -5,6 +5,2698 @@
   "storage_backend": "github_repository_folder",
   "snapshots": [
     {
+      "record_key": "a0d264715c72df973d52b512aef9d2b1b110767ff848c2a2ab51074ddd76b55b",
+      "record_type": "decision_snapshot",
+      "pair": "HYPEUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-23T00:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "short",
+          "signal_time": "2026-10-15T00:00:00+00:00",
+          "line_kind": "support",
+          "line_price_at_break": 78.5506,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": true,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": true,
+            "macd_histogram": -0.2027,
+            "macd_histogram_previous": -0.0712
+          },
+          "age_hours": 192.0,
+          "outcome": "failed_break",
+          "state": "INVALIDATED",
+          "message": "The breakout failed its close-based invalidation rule."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-23T00:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 704,
+            "price": 77.77,
+            "pivot_time": "2026-10-20T12:00:00+00:00",
+            "confirmed_at": "2026-10-21T00:00:00+00:00",
+            "confirmation_index": 707
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 710,
+            "price": 82.45,
+            "pivot_time": "2026-10-21T12:00:00+00:00",
+            "confirmed_at": "2026-10-22T00:00:00+00:00",
+            "confirmation_index": 713
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 77.77,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 80.66224,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 80.11,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 79.55776,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 4.680000000000007,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 80.66224,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 80.66224,
+                "confluence_score": 2.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 5 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.723
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 77.11415500000001,
+              "risk_pct": 1.1863723731419724,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 80.66224,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 80.54,
+                  "touches": 3,
+                  "kind": "support",
+                  "low": 80.53,
+                  "high": 80.56
+                },
+                "liquidity_reference": 76.08,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.5221428571428564,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 80.11,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 80.11,
+                "confluence_score": 4.5,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 7 prior touches",
+                  "overlaps prior confirmed-style swing structure",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.36
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 77.11415500000001,
+              "risk_pct": 1.1863723731419724,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 80.11,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 80.238,
+                  "touches": 5,
+                  "kind": "both",
+                  "low": 80.12,
+                  "high": 80.41
+                },
+                "liquidity_reference": 76.08,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.5221428571428564,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 79.55776,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 79.55776,
+                "confluence_score": 3.5,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 13 prior touches",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.997
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 77.11415500000001,
+              "risk_pct": 1.1863723731419724,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 79.55776,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 79.688,
+                  "touches": 5,
+                  "kind": "both",
+                  "low": 79.54,
+                  "high": 79.87
+                },
+                "liquidity_reference": 76.08,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.5221428571428564,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 80.11,
+              "confluence_score": 4.5,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 7 prior touches",
+                "overlaps prior confirmed-style swing structure",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.36
+            },
+            {
+              "fib": 0.618,
+              "price": 79.55776,
+              "confluence_score": 3.5,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 13 prior touches",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.997
+            },
+            {
+              "fib": 0.382,
+              "price": 80.66224,
+              "confluence_score": 2.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 5 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.723
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "NO_TRADE",
+          "close": 78.04,
+          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "state": "mixed_early_reversal_evidence",
+          "long_reversal_score": 1,
+          "short_reversal_score": 0,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 1.5242605873926947,
+          "rsi14": 43.08106542820979,
+          "ema8": 78.41208690715773,
+          "ema21": 79.10362262118166,
+          "evidence": {
+            "bullish": [
+              "closed_above_previous_candle_high"
+            ],
+            "bearish": []
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 78.4121,
+          "ema21_4h": 79.1036,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 7.1254,
+          "stoch_rsi_d": 3.4561,
+          "atr14": 1.5243
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [
+            {
+              "kind": "support",
+              "line_price": 78.99150943396225,
+              "distance_pct": -1.2045717834493537,
+              "touch_count": 3,
+              "anchor_start_index": 40,
+              "anchor_end_index": 93,
+              "anchor_start_time": "2026-09-29T20:00:00+00:00",
+              "anchor_end_time": "2026-10-08T16:00:00+00:00",
+              "anchor_start_wick": 84.84,
+              "anchor_end_wick": 82.61,
+              "slope_per_bar": -0.042075471698113286,
+              "status": "broken",
+              "break": {
+                "kind": "support",
+                "break_index": 118,
+                "break_time": "2026-10-12T20:00:00+00:00",
+                "line_price": 81.55811320754717,
+                "close": 80.93,
+                "direction": "short",
+                "anchor_start_index": 40,
+                "anchor_end_index": 93,
+                "touch_count": 3
+              }
+            }
+          ],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "not_configured",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": null,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "HYPEUSD",
+          "state": "BLOCKED",
+          "direction": "long",
+          "signal_time": "2026-10-23T00:00:00+00:00",
+          "entry": 78.04,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "exhaustion_filter_not_confirmed"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 7.1254,
+          "stoch_rsi_d": 3.4561,
+          "ema8": 78.4120869072,
+          "ema21": 79.1036226212,
+          "macd_hist": -0.2943765787,
+          "exhaustion_filter": {
+            "state": "mixed_early_reversal_evidence",
+            "aligned_score": 1,
+            "opposing_score": 0,
+            "evidence": {
+              "bullish": [
+                "closed_above_previous_candle_high"
+              ],
+              "bearish": []
+            },
+            "passed": false
+          }
+        },
+        "multitimeframe_scan": {
+          "pair": "HYPEUSD",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-23T04:44:39.252400+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-22T00:00:00+00:00",
+            "close": 77.36,
+            "ema5": 79.210827035794,
+            "ema13": 81.10091855616004,
+            "ema8": 79.8685230112429,
+            "ema21": 82.5886447327086,
+            "ema_5_13_spread_pct": -2.3305,
+            "ema_8_21_spread_pct": -3.2936,
+            "stoch_k": 33.499283,
+            "stoch_d": 30.308489,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -2.216444,
+            "macd_signal": -1.617988,
+            "macd_hist": -0.598456,
+            "macd_hist_change": "deteriorating",
+            "volume": 179446.79258348,
+            "volume_vs_20_candle_average": 1.59627,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 78.04,
+            "ema5": 78.03750129049524,
+            "ema13": 78.81214247501138,
+            "ema8": 78.41208690715773,
+            "ema21": 79.10362262118166,
+            "ema_5_13_spread_pct": -0.9829,
+            "ema_8_21_spread_pct": -0.8742,
+            "stoch_k": 7.125364,
+            "stoch_d": 3.456131,
+            "stoch_cross_up": true,
+            "stoch_cross_down": false,
+            "macd": -0.481864,
+            "macd_signal": -0.187488,
+            "macd_hist": -0.294377,
+            "macd_hist_change": "improving",
+            "volume": 3810.13027992,
+            "volume_vs_20_candle_average": 0.152972,
+            "nearby_trendlines": [
+              {
+                "kind": "support",
+                "price": 56.270755,
+                "distance_pct": 38.687,
+                "touches": 3,
+                "start_time": "2026-07-01T20:00:00+00:00",
+                "end_time": "2026-07-10T16:00:00+00:00",
+                "start_price": 84.84,
+                "end_price": 82.61,
+                "slope_per_candle": -0.042075471698113286
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "4d89ffea5f154ceab03201c8d8bc5e88702a4bc88a1b067d209cf9296697f386",
+      "record_type": "decision_snapshot",
+      "pair": "VIRTUALUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-23T00:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "long",
+          "signal_time": "2026-10-11T12:00:00+00:00",
+          "line_kind": "resistance",
+          "line_price_at_break": 0.7336,
+          "touch_count": 3,
+          "daily_bias": "bullish",
+          "ema_aligned": false,
+          "momentum_context": {
+            "stoch_bullish_cross": true,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": true,
+            "macd_bearish_expansion": false,
+            "macd_histogram": 0.0052,
+            "macd_histogram_previous": 0.0043
+          },
+          "age_hours": 276.0,
+          "outcome": "failed_break",
+          "state": "INVALIDATED",
+          "message": "The breakout failed its close-based invalidation rule."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-23T00:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 698,
+            "price": 0.6492,
+            "pivot_time": "2026-10-19T12:00:00+00:00",
+            "confirmed_at": "2026-10-20T00:00:00+00:00",
+            "confirmation_index": 701
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 700,
+            "price": 0.6675,
+            "pivot_time": "2026-10-19T20:00:00+00:00",
+            "confirmed_at": "2026-10-20T08:00:00+00:00",
+            "confirmation_index": 703
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 0.6492,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 0.6605094,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 0.65835,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 0.6561906,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 0.018299999999999983,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 0.6605094,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 0.6605094,
+                "confluence_score": 4.5,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 8 prior touches",
+                  "near enough to monitor for a reaction",
+                  "level not decisively lost at current close"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.062
+              },
+              "touched": true,
+              "reaction": true,
+              "invalidation": 0.64732755,
+              "risk_pct": 2.1128761530319107,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.6605094,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.658875,
+                  "touches": 8,
+                  "kind": "both",
+                  "low": 0.6569,
+                  "high": 0.6603
+                },
+                "liquidity_reference": 0.6209,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": true,
+                "atr": 0.012849999999999988,
+                "confluence_score": 4,
+                "entry1_candidate": true,
+                "status": "ENTRY_1_CONFLUENCE_CANDIDATE"
+              },
+              "eligible": true
+            },
+            {
+              "fib": 0.5,
+              "price": 0.65835,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 0.65835,
+                "confluence_score": 4.5,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 8 prior touches",
+                  "near enough to monitor for a reaction",
+                  "level not decisively lost at current close"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.23
+              },
+              "touched": true,
+              "reaction": true,
+              "invalidation": 0.64732755,
+              "risk_pct": 2.1128761530319107,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.65835,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.658875,
+                  "touches": 8,
+                  "kind": "both",
+                  "low": 0.6569,
+                  "high": 0.6603
+                },
+                "liquidity_reference": 0.6209,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": true,
+                "atr": 0.012849999999999988,
+                "confluence_score": 4,
+                "entry1_candidate": true,
+                "status": "ENTRY_1_CONFLUENCE_CANDIDATE"
+              },
+              "eligible": true
+            },
+            {
+              "fib": 0.618,
+              "price": 0.6561906,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 0.6561906,
+                "confluence_score": 4.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 9 prior touches",
+                  "near enough to monitor for a reaction",
+                  "level not decisively lost at current close"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.398
+              },
+              "touched": true,
+              "reaction": true,
+              "invalidation": 0.64732755,
+              "risk_pct": 2.1128761530319107,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.6561906,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.6535833333333333,
+                  "touches": 12,
+                  "kind": "both",
+                  "low": 0.6515,
+                  "high": 0.655
+                },
+                "liquidity_reference": 0.6209,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": true,
+                "atr": 0.012849999999999988,
+                "confluence_score": 4,
+                "entry1_candidate": true,
+                "status": "ENTRY_1_CONFLUENCE_CANDIDATE"
+              },
+              "eligible": true
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 0.65835,
+              "confluence_score": 4.5,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 8 prior touches",
+                "near enough to monitor for a reaction",
+                "level not decisively lost at current close"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.23
+            },
+            {
+              "fib": 0.382,
+              "price": 0.6605094,
+              "confluence_score": 4.5,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 8 prior touches",
+                "near enough to monitor for a reaction",
+                "level not decisively lost at current close"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.062
+            },
+            {
+              "fib": 0.618,
+              "price": 0.6561906,
+              "confluence_score": 4.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 9 prior touches",
+                "near enough to monitor for a reaction",
+                "level not decisively lost at current close"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.398
+            }
+          ],
+          "execution": "paper/research only; no order submitted",
+          "state": "FIB_REACTION_CANDIDATE",
+          "is_actionable": false,
+          "trigger_type": "fibonacci_reaction_context_only",
+          "entry_reference_close": 0.6613,
+          "entry_fib": 0.382,
+          "entry_level": 0.6605094,
+          "invalidation": 0.64732755,
+          "risk_pct": 2.1128761530319107,
+          "target_candidates": [
+            {
+              "type": "prior_impulse_extreme",
+              "price": 0.6675
+            }
+          ],
+          "evidence": {
+            "fib_zero": 0.6605094,
+            "fib_area_touched": true,
+            "near_support_resistance": true,
+            "nearest_level": {
+              "price": 0.658875,
+              "touches": 8,
+              "kind": "both",
+              "low": 0.6569,
+              "high": 0.6603
+            },
+            "liquidity_reference": 0.6209,
+            "liquidity_sweep_and_reclaim": false,
+            "rejection_or_reclaim_candle": true,
+            "atr": 0.012849999999999988,
+            "confluence_score": 4,
+            "entry1_candidate": true,
+            "status": "ENTRY_1_CONFLUENCE_CANDIDATE"
+          },
+          "reason": "Confirmed long impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "state": "possible_bullish_turn",
+          "long_reversal_score": 2,
+          "short_reversal_score": 0,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 0.013845726888494916,
+          "rsi14": 46.26822706005144,
+          "ema8": 0.6625211278797014,
+          "ema21": 0.6675312426625384,
+          "evidence": {
+            "bullish": [
+              "rsi_recovering",
+              "closed_above_previous_candle_high"
+            ],
+            "bearish": []
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 0.6625,
+          "ema21_4h": 0.6675,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 9.0221,
+          "stoch_rsi_d": 3.3644,
+          "atr14": 0.0138
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "not_configured",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": null,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "VIRTUALUSD",
+          "state": "NO_SETUP",
+          "direction": null,
+          "signal_time": null,
+          "entry": null,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "no_fresh_extreme_zone_stoch_rsi_cross"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 9.0221,
+          "stoch_rsi_d": 3.3644
+        },
+        "multitimeframe_scan": {
+          "pair": "VIRTUALUSD",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-23T04:44:32.734388+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-22T00:00:00+00:00",
+            "close": 0.65,
+            "ema5": 0.6679408776630955,
+            "ema13": 0.6869256697568856,
+            "ema8": 0.6741569311453546,
+            "ema21": 0.7008217709409947,
+            "ema_5_13_spread_pct": -2.7637,
+            "ema_8_21_spread_pct": -3.8048,
+            "stoch_k": 35.929661,
+            "stoch_d": 29.495516,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -0.020381,
+            "macd_signal": -0.01287,
+            "macd_hist": -0.007511,
+            "macd_hist_change": "deteriorating",
+            "volume": 485854.15532,
+            "volume_vs_20_candle_average": 0.487179,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 0.6613,
+            "ema5": 0.658919009925371,
+            "ema13": 0.6658798629144855,
+            "ema8": 0.6625211278797014,
+            "ema21": 0.6675312426625384,
+            "ema_5_13_spread_pct": -1.0454,
+            "ema_8_21_spread_pct": -0.7505,
+            "stoch_k": 9.022087,
+            "stoch_d": 3.364379,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -0.00278,
+            "macd_signal": 0.000257,
+            "macd_hist": -0.003037,
+            "macd_hist_change": "improving",
+            "volume": 43988.36481,
+            "volume_vs_20_candle_average": 0.544244,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "840c2a2988ff59ac145c879a58a25d15dba6c69261b7416e06c2d9bfcc5af8f4",
+      "record_type": "decision_snapshot",
+      "pair": "SOLUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-23T00:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "long",
+          "signal_time": "2026-10-18T20:00:00+00:00",
+          "line_kind": "resistance",
+          "line_price_at_break": 103.4186,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": false,
+          "momentum_context": {
+            "stoch_bullish_cross": true,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": false,
+            "macd_histogram": -0.0019,
+            "macd_histogram_previous": -0.1401
+          },
+          "age_hours": 100.0,
+          "outcome": "no_retest_within_window",
+          "state": "EXPIRED",
+          "message": "No qualifying retest held within 72 hours."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-23T00:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 698,
+            "price": 103.43,
+            "pivot_time": "2026-10-19T12:00:00+00:00",
+            "confirmed_at": "2026-10-20T00:00:00+00:00",
+            "confirmation_index": 701
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 704,
+            "price": 108.13,
+            "pivot_time": "2026-10-20T12:00:00+00:00",
+            "confirmed_at": "2026-10-21T00:00:00+00:00",
+            "confirmation_index": 707
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 103.43,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 106.3346,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 105.78,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 105.22540000000001,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 4.699999999999989,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 106.3346,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 106.3346,
+                "confluence_score": 0.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.387
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 103.175005,
+              "risk_pct": 0.8980837575641155,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 106.3346,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 105.87714285714286,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 105.74,
+                  "high": 106.08
+                },
+                "liquidity_reference": 100.34,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.6035714285714289,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 105.78,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 105.78,
+                "confluence_score": 4.5,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 11 prior touches",
+                  "overlaps prior confirmed-style swing structure",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.041
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 103.175005,
+              "risk_pct": 0.8980837575641155,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 105.78,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 105.87714285714286,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 105.74,
+                  "high": 106.08
+                },
+                "liquidity_reference": 100.34,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.6035714285714289,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 105.22540000000001,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 105.22540000000001,
+                "confluence_score": 4.5,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 11 prior touches",
+                  "overlaps prior confirmed-style swing structure",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.696
+              },
+              "touched": true,
+              "reaction": false,
+              "invalidation": 103.175005,
+              "risk_pct": 0.8980837575641155,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 105.22540000000001,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 105.4,
+                  "touches": 8,
+                  "kind": "both",
+                  "low": 105.14,
+                  "high": 105.62
+                },
+                "liquidity_reference": 100.34,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 1.6035714285714289,
+                "confluence_score": 3,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 105.78,
+              "confluence_score": 4.5,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 11 prior touches",
+                "overlaps prior confirmed-style swing structure",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.041
+            },
+            {
+              "fib": 0.618,
+              "price": 105.22540000000001,
+              "confluence_score": 4.5,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 11 prior touches",
+                "overlaps prior confirmed-style swing structure",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.696
+            },
+            {
+              "fib": 0.382,
+              "price": 106.3346,
+              "confluence_score": 0.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.387
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "WATCHING",
+          "close": 104.11,
+          "reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "state": "mixed_early_reversal_evidence",
+          "long_reversal_score": 1,
+          "short_reversal_score": 0,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 1.6912301300662755,
+          "rsi14": 44.955603546115206,
+          "ema8": 104.54754386014591,
+          "ema21": 105.02541030827622,
+          "evidence": {
+            "bullish": [
+              "closed_above_previous_candle_high"
+            ],
+            "bearish": []
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 104.5475,
+          "ema21_4h": 105.0254,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 5.0846,
+          "stoch_rsi_d": 2.8306,
+          "atr14": 1.6912
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "not_configured",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": null,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "SOLUSD",
+          "state": "BLOCKED",
+          "direction": "long",
+          "signal_time": "2026-10-23T00:00:00+00:00",
+          "entry": 104.11,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "exhaustion_filter_not_confirmed"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 5.0846,
+          "stoch_rsi_d": 2.8306,
+          "ema8": 104.5475438601,
+          "ema21": 105.0254103083,
+          "macd_hist": -0.3204477479,
+          "exhaustion_filter": {
+            "state": "mixed_early_reversal_evidence",
+            "aligned_score": 1,
+            "opposing_score": 0,
+            "evidence": {
+              "bullish": [
+                "closed_above_previous_candle_high"
+              ],
+              "bearish": []
+            },
+            "passed": false
+          }
+        },
+        "multitimeframe_scan": {
+          "pair": "SOLUSD",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-23T04:44:24.271201+00:00",
+          "state": "WATCH_STRUCTURE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-22T00:00:00+00:00",
+            "close": 103.54,
+            "ema5": 105.07355290743482,
+            "ema13": 106.74070234014825,
+            "ema8": 105.53494006280727,
+            "ema21": 108.18765113498145,
+            "ema_5_13_spread_pct": -1.5619,
+            "ema_8_21_spread_pct": -2.452,
+            "stoch_k": 51.142694,
+            "stoch_d": 39.860814,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -2.033026,
+            "macd_signal": -1.366469,
+            "macd_hist": -0.666558,
+            "macd_hist_change": "improving",
+            "volume": 242953.24008871,
+            "volume_vs_20_candle_average": 0.896775,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 104.11,
+            "ema5": 104.18312172129818,
+            "ema13": 104.87934236628773,
+            "ema8": 104.54754386014591,
+            "ema21": 105.02541030827622,
+            "ema_5_13_spread_pct": -0.6638,
+            "ema_8_21_spread_pct": -0.455,
+            "stoch_k": 5.084575,
+            "stoch_d": 2.830556,
+            "stoch_cross_up": true,
+            "stoch_cross_down": false,
+            "macd": -0.231928,
+            "macd_signal": 0.08852,
+            "macd_hist": -0.320448,
+            "macd_hist_change": "improving",
+            "volume": 13882.60769139,
+            "volume_vs_20_candle_average": 0.360856,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "dad7122518596e1ca8c45a61f83b591b192c709c9166746c4260ddefe8b52d79",
+      "record_type": "decision_snapshot",
+      "pair": "ETHUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-23T00:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "long",
+          "signal_time": "2026-10-21T12:00:00+00:00",
+          "line_kind": "resistance",
+          "line_price_at_break": 2466.7882,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": true,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": true,
+            "macd_bearish_expansion": false,
+            "macd_histogram": 11.8341,
+            "macd_histogram_previous": 8.9222
+          },
+          "age_hours": 36.0,
+          "outcome": "failed_break",
+          "state": "INVALIDATED",
+          "message": "The breakout failed its close-based invalidation rule."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-23T00:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 701,
+            "price": 2370.41,
+            "pivot_time": "2026-10-20T00:00:00+00:00",
+            "confirmed_at": "2026-10-20T12:00:00+00:00",
+            "confirmation_index": 704
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 704,
+            "price": 2475.0,
+            "pivot_time": "2026-10-20T12:00:00+00:00",
+            "confirmed_at": "2026-10-21T00:00:00+00:00",
+            "confirmation_index": 707
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 2370.41,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 2435.04662,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 2422.705,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 2410.36338,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 104.59000000000015,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 2435.04662,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 2435.04662,
+                "confluence_score": 3.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 7 prior touches",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.805
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 2374.2932100000003,
+              "risk_pct": 1.3948697609515357,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 2435.04662,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 2440.792857142857,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 2434.51,
+                  "high": 2445.97
+                },
+                "liquidity_reference": 2326.25,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 33.73642857142853,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 2422.705,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 2422.705,
+                "confluence_score": 4.0,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 17 prior touches",
+                  "near enough to monitor for a reaction"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.439
+              },
+              "touched": true,
+              "reaction": false,
+              "invalidation": 2374.2932100000003,
+              "risk_pct": 1.3948697609515357,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 2422.705,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 2426.773333333333,
+                  "touches": 9,
+                  "kind": "both",
+                  "low": 2422.5,
+                  "high": 2431.88
+                },
+                "liquidity_reference": 2326.25,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 33.73642857142853,
+                "confluence_score": 3,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 2410.36338,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 2410.36338,
+                "confluence_score": 4.5,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 17 prior touches",
+                  "near enough to monitor for a reaction",
+                  "level not decisively lost at current close"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.074
+              },
+              "touched": true,
+              "reaction": false,
+              "invalidation": 2374.2932100000003,
+              "risk_pct": 1.3948697609515357,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 2410.36338,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 2414.17375,
+                  "touches": 8,
+                  "kind": "both",
+                  "low": 2409.66,
+                  "high": 2417.87
+                },
+                "liquidity_reference": 2326.25,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 33.73642857142853,
+                "confluence_score": 3,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.618,
+              "price": 2410.36338,
+              "confluence_score": 4.5,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 17 prior touches",
+                "near enough to monitor for a reaction",
+                "level not decisively lost at current close"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.074
+            },
+            {
+              "fib": 0.5,
+              "price": 2422.705,
+              "confluence_score": 4.0,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 17 prior touches",
+                "near enough to monitor for a reaction"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.439
+            },
+            {
+              "fib": 0.382,
+              "price": 2435.04662,
+              "confluence_score": 3.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 7 prior touches",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.805
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "WATCHING",
+          "close": 2407.88,
+          "reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "state": "possible_bullish_turn",
+          "long_reversal_score": 2,
+          "short_reversal_score": 0,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 35.59493901328808,
+          "rsi14": 46.367791600819935,
+          "ema8": 2411.6632143883744,
+          "ema21": 2422.9133336600016,
+          "evidence": {
+            "bullish": [
+              "rsi_recovering",
+              "closed_above_previous_candle_high"
+            ],
+            "bearish": []
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 2411.6632,
+          "ema21_4h": 2422.9133,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 8.1848,
+          "stoch_rsi_d": 2.9389,
+          "atr14": 35.5949
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [
+            {
+              "kind": "resistance",
+              "line_price": 2353.5730000000026,
+              "distance_pct": 2.307427897923602,
+              "touch_count": 3,
+              "anchor_start_index": 38,
+              "anchor_end_index": 48,
+              "anchor_start_time": "2026-09-29T12:00:00+00:00",
+              "anchor_end_time": "2026-10-01T04:00:00+00:00",
+              "anchor_start_wick": 2747.95,
+              "anchor_end_wick": 2719.98,
+              "slope_per_bar": -2.79699999999998,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 53,
+                "break_time": "2026-10-02T00:00:00+00:00",
+                "line_price": 2705.995,
+                "close": 2718.69,
+                "direction": "long",
+                "anchor_start_index": 38,
+                "anchor_end_index": 48,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "support",
+              "line_price": 2421.166666666666,
+              "distance_pct": -0.5487712535278841,
+              "touch_count": 3,
+              "anchor_start_index": 3,
+              "anchor_end_index": 87,
+              "anchor_start_time": "2026-09-23T16:00:00+00:00",
+              "anchor_end_time": "2026-10-07T16:00:00+00:00",
+              "anchor_start_wick": 2635.3,
+              "anchor_end_wick": 2533.1,
+              "slope_per_bar": -1.21666666666667,
+              "status": "broken",
+              "break": {
+                "kind": "support",
+                "break_index": 92,
+                "break_time": "2026-10-08T12:00:00+00:00",
+                "line_price": 2527.0166666666664,
+                "close": 2433.96,
+                "direction": "short",
+                "anchor_start_index": 3,
+                "anchor_end_index": 87,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 2382.532666666666,
+              "distance_pct": 1.063881880318426,
+              "touch_count": 3,
+              "anchor_start_index": 127,
+              "anchor_end_index": 157,
+              "anchor_start_time": "2026-10-14T08:00:00+00:00",
+              "anchor_end_time": "2026-10-19T08:00:00+00:00",
+              "anchor_start_wick": 2527.11,
+              "anchor_end_wick": 2443.7,
+              "slope_per_bar": -2.7803333333333438,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 164,
+                "break_time": "2026-10-20T12:00:00+00:00",
+                "line_price": 2424.2376666666664,
+                "close": 2438.48,
+                "direction": "long",
+                "anchor_start_index": 127,
+                "anchor_end_index": 157,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 2454.4704545454547,
+              "distance_pct": -1.8981876298072082,
+              "touch_count": 3,
+              "anchor_start_index": 120,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-13T04:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 2535.22,
+              "anchor_end_wick": 2475.0,
+              "slope_per_bar": -1.368636363636359,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 170,
+                "break_time": "2026-10-21T12:00:00+00:00",
+                "line_price": 2466.788181818182,
+                "close": 2510.39,
+                "direction": "long",
+                "anchor_start_index": 120,
+                "anchor_end_index": 164,
+                "touch_count": 3
+              }
+            }
+          ],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "not_configured",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": null,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "ETHUSD",
+          "state": "ENTRY_CANDIDATE",
+          "direction": "long",
+          "signal_time": "2026-10-23T00:00:00+00:00",
+          "entry": 2407.88,
+          "stop": 2365.070759148,
+          "target": 2475.0,
+          "reward_risk": 1.5679,
+          "eligible": true,
+          "blockers": [],
+          "research_only": true,
+          "stoch_rsi_k": 8.1848,
+          "stoch_rsi_d": 2.9389,
+          "ema8": 2411.6632143884,
+          "ema21": 2422.91333366,
+          "macd_hist": -6.8058487724,
+          "exhaustion_filter": {
+            "state": "possible_bullish_turn",
+            "aligned_score": 2,
+            "opposing_score": 0,
+            "evidence": {
+              "bullish": [
+                "rsi_recovering",
+                "closed_above_previous_candle_high"
+              ],
+              "bearish": []
+            },
+            "passed": true
+          },
+          "trade_plan": {
+            "eligible": true,
+            "direction": "long",
+            "entry": 2407.88,
+            "atr14": 35.5949390133,
+            "stop": 2365.070759148,
+            "target": 2475.0,
+            "target_source": "confirmed_structure",
+            "risk_per_unit": 42.809240852,
+            "reward_per_unit": 67.12,
+            "reward_risk": 1.5679,
+            "min_reward_risk": 1.5,
+            "fib": {
+              "retracements": {
+                "0.382": 2465.6870599999997,
+                "0.5": 2447.495,
+                "0.618": 2429.30294,
+                "0.786": 2403.40238
+              },
+              "extensions": {
+                "1.272": 2566.51424,
+                "1.618": 2619.85706
+              }
+            },
+            "confirmed_swing_high": {
+              "index": 711,
+              "price": 2524.58
+            },
+            "confirmed_swing_low": {
+              "index": 701,
+              "price": 2370.41
+            },
+            "blockers": [],
+            "research_only": true
+          }
+        },
+        "multitimeframe_scan": {
+          "pair": "ETHUSD",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-23T04:44:15.410928+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-22T00:00:00+00:00",
+            "close": 2386.08,
+            "ema5": 2423.5262566331694,
+            "ema13": 2456.5240832726267,
+            "ema8": 2433.224895442466,
+            "ema21": 2487.5199182438705,
+            "ema_5_13_spread_pct": -1.3433,
+            "ema_8_21_spread_pct": -2.1827,
+            "stoch_k": 63.379916,
+            "stoch_d": 49.607071,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -45.925434,
+            "macd_signal": -36.312571,
+            "macd_hist": -9.612863,
+            "macd_hist_change": "deteriorating",
+            "volume": 25682.63985272,
+            "volume_vs_20_candle_average": 0.938963,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 2407.88,
+            "ema5": 2403.4924266836847,
+            "ema13": 2419.1551545165844,
+            "ema8": 2411.6632143883744,
+            "ema21": 2422.9133336600016,
+            "ema_5_13_spread_pct": -0.6474,
+            "ema_8_21_spread_pct": -0.4643,
+            "stoch_k": 8.184766,
+            "stoch_d": 2.938949,
+            "stoch_cross_up": true,
+            "stoch_cross_down": false,
+            "macd": -6.108697,
+            "macd_signal": 0.697151,
+            "macd_hist": -6.805849,
+            "macd_hist_change": "improving",
+            "volume": 2142.83494554,
+            "volume_vs_20_candle_average": 0.535669,
+            "nearby_trendlines": [
+              {
+                "kind": "support",
+                "price": 1764.166667,
+                "distance_pct": 36.488,
+                "touches": 3,
+                "start_time": "2026-06-25T16:00:00+00:00",
+                "end_time": "2026-07-09T16:00:00+00:00",
+                "start_price": 2635.3,
+                "end_price": 2533.1,
+                "slope_per_candle": -1.21666666666667
+              },
+              {
+                "kind": "resistance",
+                "price": 1715.406818,
+                "distance_pct": 40.368,
+                "touches": 3,
+                "start_time": "2026-07-15T04:00:00+00:00",
+                "end_time": "2026-07-22T12:00:00+00:00",
+                "start_price": 2535.22,
+                "end_price": 2475.0,
+                "slope_per_candle": -1.368636363636359
+              },
+              {
+                "kind": "resistance",
+                "price": 881.152667,
+                "distance_pct": 173.265,
+                "touches": 3,
+                "start_time": "2026-07-16T08:00:00+00:00",
+                "end_time": "2026-07-21T08:00:00+00:00",
+                "start_price": 2527.11,
+                "end_price": 2443.7,
+                "slope_per_candle": -2.7803333333333438
+              },
+              {
+                "kind": "resistance",
+                "price": 843.193,
+                "distance_pct": 185.567,
+                "touches": 3,
+                "start_time": "2026-07-01T12:00:00+00:00",
+                "end_time": "2026-07-03T04:00:00+00:00",
+                "start_price": 2747.95,
+                "end_price": 2719.98,
+                "slope_per_candle": -2.79699999999998
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "c3373f4b56dc049c70eb3e98f5c4e6afea20f6c3ee653f7e7019881e5f1f8e39",
+      "record_type": "decision_snapshot",
+      "pair": "XBTUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-23T00:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "short",
+          "signal_time": "2026-10-22T08:00:00+00:00",
+          "line_kind": "support",
+          "line_price_at_break": 81820.8037,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": false,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": true,
+            "macd_histogram": -85.248,
+            "macd_histogram_previous": 26.9106
+          },
+          "age_hours": 16.0,
+          "outcome": "retest_held_waiting_continuation",
+          "state": "RETEST_HELD_WAITING_CONTINUATION",
+          "retest_confirmed_time": "2026-10-22T12:00:00+00:00",
+          "message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-23T00:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 701,
+            "price": 81099.7,
+            "pivot_time": "2026-10-20T00:00:00+00:00",
+            "confirmed_at": "2026-10-20T12:00:00+00:00",
+            "confirmation_index": 704
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 704,
+            "price": 83339.1,
+            "pivot_time": "2026-10-20T12:00:00+00:00",
+            "confirmed_at": "2026-10-21T00:00:00+00:00",
+            "confirmation_index": 707
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 81099.7,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 82483.6492,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 82219.4,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 81955.1508,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 2239.4000000000087,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 82483.6492,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 82483.6492,
+                "confluence_score": 3.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 12 prior touches",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.859
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 80899.6682,
+              "risk_pct": 1.0707778510136958,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 82483.6492,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 82562.45714285714,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 82374.2,
+                  "high": 82700.0
+                },
+                "liquidity_reference": 80567.9,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 824.8000000000009,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 82219.4,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 82219.4,
+                "confluence_score": 3.5,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 19 prior touches",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.538
+              },
+              "touched": true,
+              "reaction": false,
+              "invalidation": 80899.6682,
+              "risk_pct": 1.0707778510136958,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 82219.4,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 82061.51333333334,
+                  "touches": 15,
+                  "kind": "both",
+                  "low": 81853.8,
+                  "high": 82253.7
+                },
+                "liquidity_reference": 80567.9,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 824.8000000000009,
+                "confluence_score": 3,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 81955.1508,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 81955.1508,
+                "confluence_score": 4.5,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 19 prior touches",
+                  "near enough to monitor for a reaction",
+                  "level not decisively lost at current close"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 0.218
+              },
+              "touched": true,
+              "reaction": false,
+              "invalidation": 80899.6682,
+              "risk_pct": 1.0707778510136958,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 81955.1508,
+                "fib_area_touched": true,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 82061.51333333334,
+                  "touches": 15,
+                  "kind": "both",
+                  "low": 81853.8,
+                  "high": 82253.7
+                },
+                "liquidity_reference": 80567.9,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 824.8000000000009,
+                "confluence_score": 3,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.618,
+              "price": 81955.1508,
+              "confluence_score": 4.5,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 19 prior touches",
+                "near enough to monitor for a reaction",
+                "level not decisively lost at current close"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.218
+            },
+            {
+              "fib": 0.5,
+              "price": 82219.4,
+              "confluence_score": 3.5,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 19 prior touches",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.538
+            },
+            {
+              "fib": 0.382,
+              "price": 82483.6492,
+              "confluence_score": 3.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 12 prior touches",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 0.859
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "WATCHING",
+          "close": 81775.3,
+          "reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "state": "mixed_early_reversal_evidence",
+          "long_reversal_score": 1,
+          "short_reversal_score": 0,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 821.0439840897653,
+          "rsi14": 45.206405447677255,
+          "ema8": 81993.86907448372,
+          "ema21": 82277.50071009464,
+          "evidence": {
+            "bullish": [
+              "closed_above_previous_candle_high"
+            ],
+            "bearish": []
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 81993.8691,
+          "ema21_4h": 82277.5007,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 5.6361,
+          "stoch_rsi_d": 1.8787,
+          "atr14": 821.044
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-23T00:00:00+00:00",
+          "active_lines": [
+            {
+              "kind": "support",
+              "line_price": 80303.47692307692,
+              "distance_pct": 1.8328260908714489,
+              "touch_count": 3,
+              "anchor_start_index": 141,
+              "anchor_end_index": 154,
+              "anchor_start_time": "2026-10-16T16:00:00+00:00",
+              "anchor_end_time": "2026-10-18T20:00:00+00:00",
+              "anchor_start_wick": 80705.4,
+              "anchor_end_wick": 80567.9,
+              "slope_per_bar": -10.576923076923077,
+              "status": "active"
+            }
+          ],
+          "broken_lines": [
+            {
+              "kind": "resistance",
+              "line_price": 80665.32,
+              "distance_pct": 1.3760312362239384,
+              "touch_count": 3,
+              "anchor_start_index": 71,
+              "anchor_end_index": 121,
+              "anchor_start_time": "2026-10-05T00:00:00+00:00",
+              "anchor_end_time": "2026-10-13T08:00:00+00:00",
+              "anchor_start_wick": 86973.6,
+              "anchor_end_wick": 84053.1,
+              "slope_per_bar": -58.41,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 155,
+                "break_time": "2026-10-19T00:00:00+00:00",
+                "line_price": 82067.16,
+                "close": 82423.4,
+                "direction": "long",
+                "anchor_start_index": 71,
+                "anchor_end_index": 121,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 81333.87857142858,
+              "distance_pct": 0.542727626328263,
+              "touch_count": 3,
+              "anchor_start_index": 71,
+              "anchor_end_index": 127,
+              "anchor_start_time": "2026-10-05T00:00:00+00:00",
+              "anchor_end_time": "2026-10-14T08:00:00+00:00",
+              "anchor_start_wick": 86973.6,
+              "anchor_end_wick": 84049.3,
+              "slope_per_bar": -52.21964285714291,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 164,
+                "break_time": "2026-10-20T12:00:00+00:00",
+                "line_price": 82117.17321428572,
+                "close": 82514.0,
+                "direction": "long",
+                "anchor_start_index": 71,
+                "anchor_end_index": 127,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 82051.8494117647,
+              "distance_pct": -0.3370422650400992,
+              "touch_count": 3,
+              "anchor_start_index": 71,
+              "anchor_end_index": 156,
+              "anchor_start_time": "2026-10-05T00:00:00+00:00",
+              "anchor_end_time": "2026-10-19T04:00:00+00:00",
+              "anchor_start_wick": 86973.6,
+              "anchor_end_wick": 83100.0,
+              "slope_per_bar": -45.57176470588242,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 166,
+                "break_time": "2026-10-20T20:00:00+00:00",
+                "line_price": 82644.28235294117,
+                "close": 82936.1,
+                "direction": "long",
+                "anchor_start_index": 71,
+                "anchor_end_index": 156,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 82470.23809523809,
+              "distance_pct": -0.8426531937928469,
+              "touch_count": 4,
+              "anchor_start_index": 114,
+              "anchor_end_index": 156,
+              "anchor_start_time": "2026-10-12T04:00:00+00:00",
+              "anchor_end_time": "2026-10-19T04:00:00+00:00",
+              "anchor_start_wick": 84250.0,
+              "anchor_end_wick": 83100.0,
+              "slope_per_bar": -27.38095238095238,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 168,
+                "break_time": "2026-10-21T04:00:00+00:00",
+                "line_price": 82771.42857142857,
+                "close": 83053.1,
+                "direction": "long",
+                "anchor_start_index": 114,
+                "anchor_end_index": 156,
+                "touch_count": 4
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 82473.67714285714,
+              "distance_pct": -0.8467879292533999,
+              "touch_count": 3,
+              "anchor_start_index": 121,
+              "anchor_end_index": 156,
+              "anchor_start_time": "2026-10-13T08:00:00+00:00",
+              "anchor_end_time": "2026-10-19T04:00:00+00:00",
+              "anchor_start_wick": 84053.1,
+              "anchor_end_wick": 83100.0,
+              "slope_per_bar": -27.231428571428737,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 168,
+                "break_time": "2026-10-21T04:00:00+00:00",
+                "line_price": 82773.22285714286,
+                "close": 83053.1,
+                "direction": "long",
+                "anchor_start_index": 121,
+                "anchor_end_index": 156,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83065.83,
+              "distance_pct": -1.5536231925931503,
+              "touch_count": 4,
+              "anchor_start_index": 114,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-12T04:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 84250.0,
+              "anchor_end_wick": 83339.1,
+              "slope_per_bar": -18.217999999999883,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 169,
+                "break_time": "2026-10-21T08:00:00+00:00",
+                "line_price": 83248.01000000001,
+                "close": 83400.1,
+                "direction": "long",
+                "anchor_start_index": 114,
+                "anchor_end_index": 164,
+                "touch_count": 4
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83090.03023255814,
+              "distance_pct": -1.5822960093748701,
+              "touch_count": 3,
+              "anchor_start_index": 121,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-13T08:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 84053.1,
+              "anchor_end_wick": 83339.1,
+              "slope_per_bar": -16.6046511627907,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 169,
+                "break_time": "2026-10-21T08:00:00+00:00",
+                "line_price": 83256.07674418605,
+                "close": 83400.1,
+                "direction": "long",
+                "anchor_start_index": 121,
+                "anchor_end_index": 164,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 82752.89032258066,
+              "distance_pct": -1.1813367711627838,
+              "touch_count": 3,
+              "anchor_start_index": 71,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-05T00:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 86973.6,
+              "anchor_end_wick": 83339.1,
+              "slope_per_bar": -39.08064516129032,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 169,
+                "break_time": "2026-10-21T08:00:00+00:00",
+                "line_price": 83143.69677419355,
+                "close": 83400.1,
+                "direction": "long",
+                "anchor_start_index": 71,
+                "anchor_end_index": 164,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83753.2551724138,
+              "distance_pct": -2.3616457274908265,
+              "touch_count": 4,
+              "anchor_start_index": 135,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-15T16:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 82538.4,
+              "anchor_end_wick": 83339.1,
+              "slope_per_bar": 27.61034482758661,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 170,
+                "break_time": "2026-10-21T12:00:00+00:00",
+                "line_price": 83504.76206896553,
+                "close": 84468.7,
+                "direction": "long",
+                "anchor_start_index": 135,
+                "anchor_end_index": 164,
+                "touch_count": 4
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83646.96,
+              "distance_pct": -2.2375708573270368,
+              "touch_count": 3,
+              "anchor_start_index": 139,
+              "anchor_end_index": 164,
+              "anchor_start_time": "2026-10-16T08:00:00+00:00",
+              "anchor_end_time": "2026-10-20T12:00:00+00:00",
+              "anchor_start_wick": 82826.0,
+              "anchor_end_wick": 83339.1,
+              "slope_per_bar": 20.524000000000232,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 170,
+                "break_time": "2026-10-21T12:00:00+00:00",
+                "line_price": 83462.244,
+                "close": 84468.7,
+                "direction": "long",
+                "anchor_start_index": 139,
+                "anchor_end_index": 164,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83715.08571428573,
+              "distance_pct": -2.3171280274454835,
+              "touch_count": 3,
+              "anchor_start_index": 135,
+              "anchor_end_index": 156,
+              "anchor_start_time": "2026-10-15T16:00:00+00:00",
+              "anchor_end_time": "2026-10-19T04:00:00+00:00",
+              "anchor_start_wick": 82538.4,
+              "anchor_end_wick": 83100.0,
+              "slope_per_bar": 26.74285714285742,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 170,
+                "break_time": "2026-10-21T12:00:00+00:00",
+                "line_price": 83474.40000000001,
+                "close": 84468.7,
+                "direction": "long",
+                "anchor_start_index": 135,
+                "anchor_end_index": 156,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "resistance",
+              "line_price": 83246.50000000001,
+              "distance_pct": -1.7672815073306523,
+              "touch_count": 3,
+              "anchor_start_index": 114,
+              "anchor_end_index": 127,
+              "anchor_start_time": "2026-10-12T04:00:00+00:00",
+              "anchor_end_time": "2026-10-14T08:00:00+00:00",
+              "anchor_start_wick": 84250.0,
+              "anchor_end_wick": 84049.3,
+              "slope_per_bar": -15.438461538461315,
+              "status": "broken",
+              "break": {
+                "kind": "resistance",
+                "break_index": 170,
+                "break_time": "2026-10-21T12:00:00+00:00",
+                "line_price": 83385.44615384616,
+                "close": 84468.7,
+                "direction": "long",
+                "anchor_start_index": 114,
+                "anchor_end_index": 127,
+                "touch_count": 3
+              }
+            },
+            {
+              "kind": "support",
+              "line_price": 82026.83333333333,
+              "distance_pct": -0.3066476214084321,
+              "touch_count": 3,
+              "anchor_start_index": 134,
+              "anchor_end_index": 161,
+              "anchor_start_time": "2026-10-15T12:00:00+00:00",
+              "anchor_end_time": "2026-10-20T00:00:00+00:00",
+              "anchor_start_wick": 79709.0,
+              "anchor_end_wick": 81099.7,
+              "slope_per_bar": 51.5074074074073,
+              "status": "broken",
+              "break": {
+                "kind": "support",
+                "break_index": 175,
+                "break_time": "2026-10-22T08:00:00+00:00",
+                "line_price": 81820.8037037037,
+                "close": 81658.0,
+                "direction": "short",
+                "anchor_start_index": 134,
+                "anchor_end_index": 161,
+                "touch_count": 3
+              }
+            }
+          ],
+          "latest_support": {
+            "kind": "support",
+            "line_price": 80303.47692307692,
+            "distance_pct": 1.8328260908714489,
+            "touch_count": 3,
+            "anchor_start_index": 141,
+            "anchor_end_index": 154,
+            "anchor_start_time": "2026-10-16T16:00:00+00:00",
+            "anchor_end_time": "2026-10-18T20:00:00+00:00",
+            "anchor_start_wick": 80705.4,
+            "anchor_end_wick": 80567.9,
+            "slope_per_bar": -10.576923076923077,
+            "status": "active"
+          },
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "not_configured",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": null,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "XBTUSD",
+          "state": "BLOCKED",
+          "direction": "long",
+          "signal_time": "2026-10-23T00:00:00+00:00",
+          "entry": 81775.3,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "exhaustion_filter_not_confirmed"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 5.6361,
+          "stoch_rsi_d": 1.8787,
+          "ema8": 81993.8690744837,
+          "ema21": 82277.5007100946,
+          "macd_hist": -217.3720568054,
+          "exhaustion_filter": {
+            "state": "mixed_early_reversal_evidence",
+            "aligned_score": 1,
+            "opposing_score": 0,
+            "evidence": {
+              "bullish": [
+                "closed_above_previous_candle_high"
+              ],
+              "bearish": []
+            },
+            "passed": false
+          }
+        },
+        "multitimeframe_scan": {
+          "pair": "XBTUSD",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-23T04:44:04.360412+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-22T00:00:00+00:00",
+            "close": 81315.9,
+            "ema5": 82323.70293961967,
+            "ema13": 82481.86109234803,
+            "ema8": 82354.46371558573,
+            "ema21": 82537.5525269589,
+            "ema_5_13_spread_pct": -0.1917,
+            "ema_8_21_spread_pct": -0.2218,
+            "stoch_k": 59.779606,
+            "stoch_d": 52.729606,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": 44.618077,
+            "macd_signal": 241.472811,
+            "macd_hist": -196.854734,
+            "macd_hist_change": "deteriorating",
+            "volume": 2762.20368659,
+            "volume_vs_20_candle_average": 1.345738,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 81775.3,
+            "ema5": 81760.40580181751,
+            "ema13": 82200.73346116421,
+            "ema8": 81993.86907448372,
+            "ema21": 82277.50071009464,
+            "ema_5_13_spread_pct": -0.5357,
+            "ema_8_21_spread_pct": -0.3447,
+            "stoch_k": 5.636142,
+            "stoch_d": 1.878714,
+            "stoch_cross_up": true,
+            "stoch_cross_down": false,
+            "macd": -106.244484,
+            "macd_signal": 111.127573,
+            "macd_hist": -217.372057,
+            "macd_hist_change": "improving",
+            "volume": 191.20739264,
+            "volume_vs_20_candle_average": 0.498826,
+            "nearby_trendlines": [
+              {
+                "kind": "resistance",
+                "price": 74909.730769,
+                "distance_pct": 9.165,
+                "touches": 3,
+                "start_time": "2026-07-14T04:00:00+00:00",
+                "end_time": "2026-07-16T08:00:00+00:00",
+                "start_price": 84250.0,
+                "end_price": 84049.3,
+                "slope_per_candle": -15.438461538461315
+              },
+              {
+                "kind": "support",
+                "price": 74591.938462,
+                "distance_pct": 9.63,
+                "touches": 3,
+                "start_time": "2026-07-18T16:00:00+00:00",
+                "end_time": "2026-07-20T20:00:00+00:00",
+                "start_price": 80705.4,
+                "end_price": 80567.9,
+                "slope_per_candle": -10.576923076923077
+              },
+              {
+                "kind": "resistance",
+                "price": 74123.518605,
+                "distance_pct": 10.323,
+                "touches": 3,
+                "start_time": "2026-07-15T08:00:00+00:00",
+                "end_time": "2026-07-22T12:00:00+00:00",
+                "start_price": 84053.1,
+                "end_price": 83339.1,
+                "slope_per_candle": -16.6046511627907
+              },
+              {
+                "kind": "resistance",
+                "price": 73228.11,
+                "distance_pct": 11.672,
+                "touches": 4,
+                "start_time": "2026-07-14T04:00:00+00:00",
+                "end_time": "2026-07-22T12:00:00+00:00",
+                "start_price": 84250.0,
+                "end_price": 83339.1,
+                "slope_per_candle": -18.217999999999883
+              },
+              {
+                "kind": "resistance",
+                "price": 72156.8,
+                "distance_pct": 13.33,
+                "touches": 3,
+                "start_time": "2026-07-04T12:00:00+00:00",
+                "end_time": "2026-07-08T12:00:00+00:00",
+                "start_price": 87229.0,
+                "end_price": 86683.4,
+                "slope_per_candle": -22.733333333333576
+              },
+              {
+                "kind": "resistance",
+                "price": 94729.92,
+                "distance_pct": -13.675,
+                "touches": 3,
+                "start_time": "2026-07-18T08:00:00+00:00",
+                "end_time": "2026-07-22T12:00:00+00:00",
+                "start_price": 82826.0,
+                "end_price": 83339.1,
+                "slope_per_candle": 20.524000000000232
+              },
+              {
+                "kind": "resistance",
+                "price": 98156.228571,
+                "distance_pct": -16.689,
+                "touches": 3,
+                "start_time": "2026-07-17T16:00:00+00:00",
+                "end_time": "2026-07-21T04:00:00+00:00",
+                "start_price": 82538.4,
+                "end_price": 83100.0,
+                "slope_per_candle": 26.74285714285742
+              },
+              {
+                "kind": "resistance",
+                "price": 98662.841379,
+                "distance_pct": -17.116,
+                "touches": 4,
+                "start_time": "2026-07-17T16:00:00+00:00",
+                "end_time": "2026-07-22T12:00:00+00:00",
+                "start_price": 82538.4,
+                "end_price": 83339.1,
+                "slope_per_candle": 27.61034482758661
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
       "record_key": "abf2b48aabd880d5fe347264deab72be70e459373aaf40aef4c3574abf6be4b2",
       "record_type": "decision_snapshot",
       "pair": "HYPEUSD",
@@ -2481,7 +5173,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-15T04:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-15T00:00:00+00:00",
@@ -2538,7 +5230,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-13T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-12T20:00:00+00:00",
@@ -2595,7 +5287,7 @@
       "continuation_add_time": "2026-10-08T08:00:00+00:00",
       "continuation_add_close": 85.37,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T12:00:00+00:00",
@@ -2625,7 +5317,7 @@
         "anchor_end_time": "2026-10-02T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-07T16:00:00+00:00",
-        "retest_confirmed_bar_index": 628,
+        "retest_confirmed_bar_index": 627,
         "retest_close": 87.29,
         "retest_high": 89.03,
         "retest_low": 87.12,
@@ -2661,7 +5353,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-28T00:00:00+00:00",
@@ -2717,7 +5409,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-14T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-13T08:00:00+00:00",
@@ -2747,7 +5439,7 @@
         "anchor_end_time": "2026-09-12T04:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-13T12:00:00+00:00",
-        "retest_confirmed_bar_index": 483,
+        "retest_confirmed_bar_index": 482,
         "retest_close": 77.99,
         "retest_high": 78.6,
         "retest_low": 76.53,
@@ -2780,7 +5472,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-14T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-13T08:00:00+00:00",
@@ -2810,7 +5502,7 @@
         "anchor_end_time": "2026-09-12T04:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-13T12:00:00+00:00",
-        "retest_confirmed_bar_index": 483,
+        "retest_confirmed_bar_index": 482,
         "retest_close": 77.99,
         "retest_high": 78.6,
         "retest_low": 76.53,
@@ -2843,7 +5535,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-14T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-13T08:00:00+00:00",
@@ -2873,7 +5565,7 @@
         "anchor_end_time": "2026-09-12T04:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-13T12:00:00+00:00",
-        "retest_confirmed_bar_index": 483,
+        "retest_confirmed_bar_index": 482,
         "retest_close": 77.99,
         "retest_high": 78.6,
         "retest_low": 76.53,
@@ -2906,7 +5598,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-11T12:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-10T16:00:00+00:00",
@@ -2936,7 +5628,7 @@
         "anchor_end_time": "2026-08-30T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-10T20:00:00+00:00",
-        "retest_confirmed_bar_index": 467,
+        "retest_confirmed_bar_index": 466,
         "retest_close": 78.57,
         "retest_high": 80.71,
         "retest_low": 78.16,
@@ -2969,7 +5661,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-10T12:00:00+00:00",
@@ -2999,7 +5691,7 @@
         "anchor_end_time": "2026-09-08T12:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-11T12:00:00+00:00",
-        "retest_confirmed_bar_index": 471,
+        "retest_confirmed_bar_index": 470,
         "retest_close": 82.01,
         "retest_high": 83.85,
         "retest_low": 78.65,
@@ -3032,7 +5724,7 @@
       "continuation_add_time": "2026-09-10T12:00:00+00:00",
       "continuation_add_close": 80.69,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-10T04:00:00+00:00",
@@ -3062,7 +5754,7 @@
         "anchor_end_time": "2026-09-02T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-10T08:00:00+00:00",
-        "retest_confirmed_bar_index": 464,
+        "retest_confirmed_bar_index": 463,
         "retest_close": 82.84,
         "retest_high": 83.43,
         "retest_low": 82.19,
@@ -3098,7 +5790,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-02T20:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-02T16:00:00+00:00",
@@ -3155,7 +5847,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-28T12:00:00+00:00",
@@ -3211,7 +5903,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-28T12:00:00+00:00",
@@ -3267,7 +5959,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-28T12:00:00+00:00",
@@ -3297,7 +5989,7 @@
         "anchor_end_time": "2026-08-26T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-28T16:00:00+00:00",
-        "retest_confirmed_bar_index": 388,
+        "retest_confirmed_bar_index": 387,
         "retest_close": 79.62,
         "retest_high": 82.13,
         "retest_low": 78.53,
@@ -3330,7 +6022,7 @@
       "continuation_add_time": "2026-08-13T04:00:00+00:00",
       "continuation_add_close": 57.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-12T08:00:00+00:00",
@@ -3360,7 +6052,7 @@
         "anchor_end_time": "2026-08-10T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-12T12:00:00+00:00",
-        "retest_confirmed_bar_index": 291,
+        "retest_confirmed_bar_index": 290,
         "retest_close": 56.49,
         "retest_high": 56.51,
         "retest_low": 55.44,
@@ -3396,7 +6088,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-08-11T12:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-10T16:00:00+00:00",
@@ -3426,7 +6118,7 @@
         "anchor_end_time": "2026-08-07T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-11T00:00:00+00:00",
-        "retest_confirmed_bar_index": 282,
+        "retest_confirmed_bar_index": 281,
         "retest_close": 55.39,
         "retest_high": 55.47,
         "retest_low": 54.73,
@@ -3459,7 +6151,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3489,7 +6181,7 @@
         "anchor_end_time": "2026-07-23T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3525,7 +6217,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3555,7 +6247,7 @@
         "anchor_end_time": "2026-07-23T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3591,7 +6283,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3621,7 +6313,7 @@
         "anchor_end_time": "2026-07-23T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3657,7 +6349,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3687,7 +6379,7 @@
         "anchor_end_time": "2026-07-22T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3723,7 +6415,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3753,7 +6445,7 @@
         "anchor_end_time": "2026-07-18T12:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3789,7 +6481,7 @@
       "continuation_add_time": "2026-07-28T04:00:00+00:00",
       "continuation_add_close": 55.29,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-27T20:00:00+00:00",
@@ -3819,7 +6511,7 @@
         "anchor_end_time": "2026-07-22T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-28T00:00:00+00:00",
-        "retest_confirmed_bar_index": 198,
+        "retest_confirmed_bar_index": 197,
         "retest_close": 56.14,
         "retest_high": 56.42,
         "retest_low": 55.55,
@@ -3855,7 +6547,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-07-25T08:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-25T04:00:00+00:00",
@@ -3866,8 +6558,8 @@
         "touch_count": 3,
         "daily_bias": "bearish",
         "ema_aligned": true,
-        "stoch_k": 21.8349,
-        "stoch_d": 42.884,
+        "stoch_k": 21.8359,
+        "stoch_d": 42.8848,
         "momentum_context": {
           "stoch_bullish_cross": false,
           "stoch_bearish_cross": false,
@@ -3897,72 +6589,6 @@
       }
     },
     {
-      "event_key": "9e72f333bc4405b20e8d049417eee0edcc5609655ce098b0c20452e41c322866",
-      "pair": "HYPEUSD",
-      "timeframe": "4H",
-      "strategy_version": "friday-price-action-v2",
-      "event_type": "BREAK_CLOSE_PROBE",
-      "direction": "SHORT",
-      "signal_time": "2026-07-13T00:00:00+00:00",
-      "entry_reference": 66.76,
-      "line_kind": "support",
-      "line_price": 67.11159574468086,
-      "outcome": "continuation_add_confirmed",
-      "retest_confirmed": true,
-      "continuation_add_time": "2026-07-15T16:00:00+00:00",
-      "continuation_add_close": 66.76,
-      "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
-      "evidence": {
-        "event": "BREAK_CLOSE_PROBE",
-        "signal_time": "2026-07-13T00:00:00+00:00",
-        "direction": "short",
-        "line_kind": "support",
-        "line_price_at_break": 67.11159574468086,
-        "close_at_break": 66.56,
-        "touch_count": 3,
-        "daily_bias": "bullish",
-        "ema_aligned": true,
-        "stoch_k": 59.0413,
-        "stoch_d": 68.51,
-        "momentum_context": {
-          "stoch_bullish_cross": false,
-          "stoch_bearish_cross": true,
-          "macd_bullish_expansion": false,
-          "macd_bearish_expansion": false,
-          "macd_histogram": 0.0555,
-          "macd_histogram_previous": 0.1153
-        },
-        "converging_wedge": null,
-        "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
-        "retest_deadline": "2026-07-16T00:00:00+00:00",
-        "outcome": "continuation_add_confirmed",
-        "forward_bars_checked": 16,
-        "anchor_start_time": "2026-06-25T12:00:00+00:00",
-        "anchor_end_time": "2026-07-11T04:00:00+00:00",
-        "retest_confirmed": true,
-        "retest_confirmed_time": "2026-07-15T12:00:00+00:00",
-        "retest_confirmed_bar_index": 123,
-        "retest_close": 67.81,
-        "retest_high": 68.96,
-        "retest_low": 67.58,
-        "outcome_bars": 16,
-        "event_add": "CONTINUATION_ADD_CONFIRMED",
-        "continuation_add_time": "2026-07-15T16:00:00+00:00",
-        "continuation_add_close": 66.76,
-        "continuation_trigger": 67.58,
-        "forward_3_bar_return_pct": 4.0865,
-        "forward_3_bar_end_time": "2026-07-13T12:00:00+00:00",
-        "forward_6_bar_return_pct": 5.018,
-        "forward_6_bar_end_time": "2026-07-14T00:00:00+00:00",
-        "forward_12_bar_return_pct": -1.0817,
-        "forward_12_bar_end_time": "2026-07-15T00:00:00+00:00",
-        "forward_18_bar_return_pct": 0.7812,
-        "forward_18_bar_end_time": "2026-07-16T00:00:00+00:00",
-        "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
-      }
-    },
-    {
       "event_key": "a69517e351bb9f4a7602b9d92c79525145b8938f6a7f965f024110cac5e9c736",
       "pair": "VIRTUALUSD",
       "timeframe": "4H",
@@ -3978,7 +6604,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-12T20:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-11T12:00:00+00:00",
@@ -4008,7 +6634,7 @@
         "anchor_end_time": "2026-10-10T20:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-12T16:00:00+00:00",
-        "retest_confirmed_bar_index": 658,
+        "retest_confirmed_bar_index": 657,
         "retest_close": 0.7128,
         "retest_high": 0.7213,
         "retest_low": 0.7041,
@@ -4041,7 +6667,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-08T08:00:00+00:00",
@@ -4097,7 +6723,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-07T20:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T12:00:00+00:00",
@@ -4127,7 +6753,7 @@
         "anchor_end_time": "2026-10-02T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-07T16:00:00+00:00",
-        "retest_confirmed_bar_index": 628,
+        "retest_confirmed_bar_index": 627,
         "retest_close": 0.7658,
         "retest_high": 0.7704,
         "retest_low": 0.7566,
@@ -4160,7 +6786,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-02T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-01T20:00:00+00:00",
@@ -4217,7 +6843,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-16T08:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-15T20:00:00+00:00",
@@ -4247,7 +6873,7 @@
         "anchor_end_time": "2026-09-14T00:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-16T00:00:00+00:00",
-        "retest_confirmed_bar_index": 498,
+        "retest_confirmed_bar_index": 497,
         "retest_close": 0.5903,
         "retest_high": 0.594,
         "retest_low": 0.582,
@@ -4280,7 +6906,7 @@
       "continuation_add_time": "2026-09-06T20:00:00+00:00",
       "continuation_add_close": 0.7305,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-06T08:00:00+00:00",
@@ -4317,7 +6943,7 @@
         "anchor_end_time": "2026-09-05T12:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-06T12:00:00+00:00",
-        "retest_confirmed_bar_index": 441,
+        "retest_confirmed_bar_index": 440,
         "retest_close": 0.6957,
         "retest_high": 0.7174,
         "retest_low": 0.6897,
@@ -4353,7 +6979,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-05T08:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-04T12:00:00+00:00",
@@ -4383,7 +7009,7 @@
         "anchor_end_time": "2026-09-02T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-05T04:00:00+00:00",
-        "retest_confirmed_bar_index": 433,
+        "retest_confirmed_bar_index": 432,
         "retest_close": 0.6815,
         "retest_high": 0.6851,
         "retest_low": 0.6703,
@@ -4416,7 +7042,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-09-05T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-09-04T12:00:00+00:00",
@@ -4446,7 +7072,7 @@
         "anchor_end_time": "2026-09-02T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-09-04T16:00:00+00:00",
-        "retest_confirmed_bar_index": 430,
+        "retest_confirmed_bar_index": 429,
         "retest_close": 0.6666,
         "retest_high": 0.6691,
         "retest_low": 0.6553,
@@ -4479,7 +7105,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-30T04:00:00+00:00",
@@ -4509,7 +7135,7 @@
         "anchor_end_time": "2026-08-29T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-30T20:00:00+00:00",
-        "retest_confirmed_bar_index": 401,
+        "retest_confirmed_bar_index": 400,
         "retest_close": 0.6649,
         "retest_high": 0.7066,
         "retest_low": 0.6562,
@@ -4542,7 +7168,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-08-26T20:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-26T16:00:00+00:00",
@@ -4599,7 +7225,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-08-23T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-21T08:00:00+00:00",
@@ -4629,7 +7255,7 @@
         "anchor_end_time": "2026-08-20T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-22T04:00:00+00:00",
-        "retest_confirmed_bar_index": 349,
+        "retest_confirmed_bar_index": 348,
         "retest_close": 0.7022,
         "retest_high": 0.7675,
         "retest_low": 0.6307,
@@ -4662,7 +7288,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-08-23T00:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-21T08:00:00+00:00",
@@ -4692,7 +7318,7 @@
         "anchor_end_time": "2026-08-20T08:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-22T04:00:00+00:00",
-        "retest_confirmed_bar_index": 349,
+        "retest_confirmed_bar_index": 348,
         "retest_close": 0.7022,
         "retest_high": 0.7675,
         "retest_low": 0.6307,
@@ -4725,7 +7351,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-08-17T16:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-17T12:00:00+00:00",
@@ -4782,7 +7408,7 @@
       "continuation_add_time": "2026-08-15T16:00:00+00:00",
       "continuation_add_close": 0.5658,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-08-15T04:00:00+00:00",
@@ -4812,7 +7438,7 @@
         "anchor_end_time": "2026-08-10T12:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-08-15T12:00:00+00:00",
-        "retest_confirmed_bar_index": 309,
+        "retest_confirmed_bar_index": 308,
         "retest_close": 0.562,
         "retest_high": 0.562,
         "retest_low": 0.5577,
@@ -4848,7 +7474,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-07-11T20:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-07-10T20:00:00+00:00",
@@ -4859,8 +7485,8 @@
         "touch_count": 3,
         "daily_bias": "bullish",
         "ema_aligned": true,
-        "stoch_k": 98.6511,
-        "stoch_d": 97.6007,
+        "stoch_k": 98.6668,
+        "stoch_d": 97.6297,
         "momentum_context": {
           "stoch_bullish_cross": false,
           "stoch_bearish_cross": false,
@@ -4878,7 +7504,7 @@
         "anchor_end_time": "2026-07-02T04:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-07-11T00:00:00+00:00",
-        "retest_confirmed_bar_index": 96,
+        "retest_confirmed_bar_index": 95,
         "retest_close": 0.6313,
         "retest_high": 0.6372,
         "retest_low": 0.6094,
@@ -4911,7 +7537,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-18T20:00:00+00:00",
@@ -4967,7 +7593,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-18T20:00:00+00:00",
@@ -5023,7 +7649,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-15T12:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-15T08:00:00+00:00",
@@ -5080,7 +7706,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-13T04:00:00+00:00",
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-12T20:00:00+00:00",
@@ -5110,7 +7736,7 @@
         "anchor_end_time": "2026-10-08T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-13T00:00:00+00:00",
-        "retest_confirmed_bar_index": 660,
+        "retest_confirmed_bar_index": 659,
         "retest_close": 107.35,
         "retest_high": 107.82,
         "retest_low": 101.58,
@@ -5143,7 +7769,7 @@
       "continuation_add_time": "2026-10-08T00:00:00+00:00",
       "continuation_add_close": 115.65,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T12:00:00+00:00",
@@ -5173,7 +7799,7 @@
         "anchor_end_time": "2026-10-01T12:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-07T16:00:00+00:00",
-        "retest_confirmed_bar_index": 628,
+        "retest_confirmed_bar_index": 627,
         "retest_close": 115.78,
         "retest_high": 117.18,
         "retest_low": 115.68,
@@ -5209,7 +7835,7 @@
       "continuation_add_time": "2026-10-08T00:00:00+00:00",
       "continuation_add_close": 115.65,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T12:00:00+00:00",
@@ -5239,7 +7865,7 @@
         "anchor_end_time": "2026-10-02T16:00:00+00:00",
         "retest_confirmed": true,
         "retest_confirmed_time": "2026-10-07T16:00:00+00:00",
-        "retest_confirmed_bar_index": 628,
+        "retest_confirmed_bar_index": 627,
         "retest_close": 115.78,
         "retest_high": 117.18,
         "retest_low": 115.68,
@@ -5275,7 +7901,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T08:00:00+00:00",
@@ -5331,7 +7957,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T08:00:00+00:00",
@@ -5387,7 +8013,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T08:00:00+00:00",
@@ -5443,7 +8069,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T00:00:00+00:00",
@@ -5499,7 +8125,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261023T003539Z-32194eea",
+      "run_id": "friday-20261023T044357Z-7976244a",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-07T00:00:00+00:00",
@@ -5538,9 +8164,179 @@
         "forward_18_bar_end_time": "2026-10-10T00:00:00+00:00",
         "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
       }
+    },
+    {
+      "event_key": "b5eec57eda7dba1ee50ea120becfff5a42445d70db51d1fa95f4a25262e9a7dd",
+      "pair": "SOLUSD",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "event_type": "BREAK_CLOSE_PROBE",
+      "direction": "SHORT",
+      "signal_time": "2026-10-07T00:00:00+00:00",
+      "entry_reference": 117.32,
+      "line_kind": "support",
+      "line_price": 119.19206896551724,
+      "outcome": "continuation_add_confirmed",
+      "retest_confirmed": true,
+      "continuation_add_time": "2026-10-07T08:00:00+00:00",
+      "continuation_add_close": 117.32,
+      "failure_time": null,
+      "run_id": "friday-20261023T044357Z-7976244a",
+      "evidence": {
+        "event": "BREAK_CLOSE_PROBE",
+        "signal_time": "2026-10-07T00:00:00+00:00",
+        "direction": "short",
+        "line_kind": "support",
+        "line_price_at_break": 119.19206896551724,
+        "close_at_break": 118.22,
+        "touch_count": 3,
+        "daily_bias": "bullish",
+        "ema_aligned": true,
+        "stoch_k": 33.0402,
+        "stoch_d": 40.4864,
+        "momentum_context": {
+          "stoch_bullish_cross": false,
+          "stoch_bearish_cross": true,
+          "macd_bullish_expansion": false,
+          "macd_bearish_expansion": true,
+          "macd_histogram": -0.1999,
+          "macd_histogram_previous": -0.0519
+        },
+        "converging_wedge": null,
+        "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+        "retest_deadline": "2026-10-10T00:00:00+00:00",
+        "outcome": "continuation_add_confirmed",
+        "forward_bars_checked": 2,
+        "anchor_start_time": "2026-10-01T12:00:00+00:00",
+        "anchor_end_time": "2026-10-06T08:00:00+00:00",
+        "retest_confirmed": true,
+        "retest_confirmed_time": "2026-10-07T04:00:00+00:00",
+        "retest_confirmed_bar_index": 624,
+        "retest_close": 118.59,
+        "retest_high": 119.05,
+        "retest_low": 117.92,
+        "outcome_bars": 2,
+        "event_add": "CONTINUATION_ADD_CONFIRMED",
+        "continuation_add_time": "2026-10-07T08:00:00+00:00",
+        "continuation_add_close": 117.32,
+        "continuation_trigger": 117.92,
+        "forward_3_bar_return_pct": 1.2688,
+        "forward_3_bar_end_time": "2026-10-07T12:00:00+00:00",
+        "forward_6_bar_return_pct": 2.1739,
+        "forward_6_bar_end_time": "2026-10-08T00:00:00+00:00",
+        "forward_12_bar_return_pct": 6.6571,
+        "forward_12_bar_end_time": "2026-10-09T00:00:00+00:00",
+        "forward_18_bar_return_pct": 7.2999,
+        "forward_18_bar_end_time": "2026-10-10T00:00:00+00:00",
+        "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+      }
     }
   ],
   "runs": [
+    {
+      "run_id": "friday-20261023T044357Z-7976244a",
+      "started_at": "2026-10-23T04:43:57.736096+00:00",
+      "finished_at": "2026-10-23T04:44:40.474618+00:00",
+      "status": "ai_not_configured",
+      "pairs_checked": 5,
+      "pair_results": [
+        {
+          "pair": "XBTUSD",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-23T00:00:00+00:00",
+          "last_close": 81775.3,
+          "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+          "friday_decision": "WATCHING",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "not_configured",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 57,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "ETHUSD",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-23T00:00:00+00:00",
+          "last_close": 2407.88,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "WATCHING",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "not_configured",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bullish_turn",
+          "break_event_count": 49,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "MOMENTUM_REVERSAL",
+              "sent": false,
+              "status": "ai_review_blocked",
+              "reason": "ai_review_not_completed"
+            }
+          ]
+        },
+        {
+          "pair": "SOLUSD",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-23T00:00:00+00:00",
+          "last_close": 104.11,
+          "latest_setup_state": "EXPIRED",
+          "friday_decision": "WATCHING",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "not_configured",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 42,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "VIRTUALUSD",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-23T00:00:00+00:00",
+          "last_close": 0.6613,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "not_configured",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bullish_turn",
+          "break_event_count": 15,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "HYPEUSD",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-23T00:00:00+00:00",
+          "last_close": 78.04,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "not_configured",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 23,
+          "persistence": "configured",
+          "alert_results": []
+        }
+      ],
+      "error": null,
+      "trade_events_seen": 187,
+      "persistence_configured": true
+    },
     {
       "run_id": "friday-20261023T003539Z-32194eea",
       "started_at": "2026-10-23T00:35:39.481593+00:00",
@@ -5641,5 +8437,5 @@
   ],
   "alerts": [],
   "paper_trades": [],
-  "fetched_at": "2026-10-23T00:36:28.788248+00:00"
+  "fetched_at": "2026-10-23T04:44:40.479179+00:00"
 }
