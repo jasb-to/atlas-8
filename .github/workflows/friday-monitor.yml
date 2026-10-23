@@ -46,8 +46,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
           FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
+          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT' }}
         run: |
-          PAIRS="${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT' }}"
+          # Never interpolate workflow_dispatch input into shell source. The Python
+          # validator canonicalizes legacy USD aliases to the approved USDT universe.
+          PAIRS="$(python -c 'import os; from research.friday_monitor import validate_friday_pairs; print(",".join(validate_friday_pairs(os.environ["REQUESTED_PAIRS"].split(","))))')"
+          echo "Scanning canonical USDT markets: $PAIRS"
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
       - name: Generate per-pair learning reports
         if: always()

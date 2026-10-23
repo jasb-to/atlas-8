@@ -33,10 +33,11 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertFalse(_is_live_lifecycle_event("HYPEUSD", {"signal_time": "2026-10-24T00:00:00Z"}))
         self.assertTrue(_is_live_lifecycle_event("HYPEUSDT", {"signal_time": "2026-10-24T00:00:00Z"}))
 
-    def test_friday_cli_accepts_only_usdt_pairs(self):
+    def test_friday_cli_canonicalizes_legacy_aliases_and_only_scans_usdt_pairs(self):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
-        with self.assertRaisesRegex(ValueError, "USDT-quoted"):
-            validate_friday_pairs(["XBTUSD"])
+        self.assertEqual(validate_friday_pairs(["XBTUSD"]), ["XBTUSDT"])
+        with self.assertRaisesRegex(ValueError, "approved USDT universe"):
+            validate_friday_pairs(["DOGEUSD"])
         with self.assertRaisesRegex(ValueError, "At least one"):
             validate_friday_pairs([])
 

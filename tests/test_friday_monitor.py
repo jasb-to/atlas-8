@@ -3,7 +3,7 @@ from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
-from research.friday_monitor import _utc, run_monitor
+from research.friday_monitor import _utc, run_monitor, validate_friday_pairs
 
 
 class FridayMonitorTests(unittest.TestCase):
@@ -12,6 +12,19 @@ class FridayMonitorTests(unittest.TestCase):
 
     def test_utc_normalizes_offset_timestamp(self):
         self.assertEqual(_utc("2026-10-21T13:00:00+01:00").isoformat(), "2026-10-21T12:00:00+00:00")
+
+    def test_legacy_usd_inputs_are_canonicalized_to_usdt(self):
+        self.assertEqual(
+            validate_friday_pairs(["XBTUSD", "ETHUSD", "SOLUSD", "VIRTUALUSD", "HYPEUSD"]),
+            ["XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT"],
+        )
+
+    def test_duplicate_aliases_do_not_create_duplicate_market_scans(self):
+        self.assertEqual(validate_friday_pairs(["XBTUSD", "XBTUSDT", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
+
+    def test_unknown_usd_pair_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "approved USDT universe"):
+            validate_friday_pairs(["DOGEUSD"])
 
     def test_monitor_uses_preview_schema_and_writes_cron_artifact(self):
         preview = {
