@@ -61,7 +61,7 @@ export async function GET() {
       connected: false,
       status: "error",
       message: "Could not read FRIDAY's temporary repository data. Check the public repository data file and branch settings.",
-      snapshots: [], events: [], runs: [], alerts: [],
+      snapshots: [], events: [], runs: [], alerts: [], paper_trades: [],
     }, 503);
   }
 }
