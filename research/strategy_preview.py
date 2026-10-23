@@ -374,7 +374,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "rule_decision": friday_decision, "setup_lifecycle": setup_state,
         "indicators": result["current_indicators"], "structure": structure_payload,
         "candidate_universe": {
-            "latest_break_event": next((e for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
+            "latest_break_event": next((dict(e, strategy="friday-price-action-v2") for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
             "momentum_reversal_candidate": result["momentum_reversal"],
             "structural_trade_plans": result["trade_plans"],
             "exhaustion_context": result["reversal_context"],
