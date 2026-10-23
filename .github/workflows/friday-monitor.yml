@@ -1,6 +1,12 @@
 name: Friday research monitor
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "research/**"
+      - "tests/test_friday_momentum_reversal.py"
+      - ".github/workflows/friday-monitor.yml"
   schedule:
     - cron: "17 */4 * * *"
   workflow_dispatch:
