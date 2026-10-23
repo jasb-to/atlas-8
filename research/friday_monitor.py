@@ -51,6 +51,16 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     return not blockers, blockers
 
 
+def _ai_candidate_pass(review: dict | None) -> tuple[bool, str]:
+    """Require an actual supportive AI review before promoting a candidate to paper trade/alert."""
+    if not isinstance(review, dict) or review.get("status") != "ok":
+        return False, "ai_review_not_completed"
+    response = review.get("response") or {}
+    if response.get("assessment") != "supportive":
+        return False, f"ai_assessment_{response.get('assessment', 'missing')}"
+    return True, "ai_supportive"
+
+
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_id = f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
@@ -123,6 +133,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
+                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+                if not ai_pass:
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
+                    continue
                 if not passed:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "filtered", "reason": ", ".join(filter_blockers)})
                     continue
@@ -170,6 +184,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
+                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+                    if not ai_pass:
+                        row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
+                        continue
                     direction = str(event.get("direction", "")).lower()
                     plan = (result.get("trade_plans") or {}).get(direction, {})
                     entry_ref = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
@@ -236,7 +254,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
             reversal = result.get("momentum_reversal", {})
-            if reversal.get("eligible") and reversal.get("signal_time") and store.configured and hasattr(store, "paper_trades"):
+            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+            if reversal.get("eligible") and reversal.get("signal_time") and ai_pass and store.configured and hasattr(store, "paper_trades"):
                 register_paper_trade(
                     store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
                     signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
@@ -247,6 +266,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 )
             reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
             if reversal.get("eligible") and reversal_ts == latest:
+                if not ai_pass:
+                    row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                 reversal_event = {
                     "event": "MOMENTUM_REVERSAL_CANDIDATE",
                     "signal_time": reversal.get("signal_time"),
@@ -273,8 +294,9 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         payload=reversal,
                         strategy_version="friday-stoch-rsi-structural-reversal-v1",
                     ))
-                    alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
-                    claimed = store.claim_alert(
+                    if ai_pass:
+                        alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
+                        claimed = store.claim_alert(
                         alert_key=alert_key, pair=pair, alert_type="MOMENTUM_REVERSAL",
                         signal_time=reversal.get("signal_time"),
                     )
