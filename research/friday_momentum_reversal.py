@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from research.friday_trade_plan import build_trade_plan
+from research.friday_trade_plan import build_trade_plan\nfrom research.friday_reversal import reversal_context
 
 
 def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dict:
@@ -81,6 +81,21 @@ def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dic
     if not context_ok:
         result["state"] = "BLOCKED"
         result["blockers"] = ["momentum_structure_not_confirmed"]
+        return result
+
+    exhaustion = reversal_context(data)
+    aligned_score = int(exhaustion.get("long_reversal_score" if direction == "long" else "short_reversal_score", 0))
+    opposing_score = int(exhaustion.get("short_reversal_score" if direction == "long" else "long_reversal_score", 0))
+    result["exhaustion_filter"] = {
+        "state": exhaustion.get("state"),
+        "aligned_score": aligned_score,
+        "opposing_score": opposing_score,
+        "evidence": exhaustion.get("evidence"),
+        "passed": aligned_score >= 2 and aligned_score > opposing_score,
+    }
+    if not result["exhaustion_filter"]["passed"]:
+        result["state"] = "BLOCKED"
+        result["blockers"] = ["exhaustion_filter_not_confirmed"]
         return result
 
     plan = build_trade_plan(data, direction, entry=float(close.iloc[-1]), min_reward_risk=1.5)
