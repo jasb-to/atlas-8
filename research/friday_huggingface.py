@@ -55,7 +55,15 @@ def review_decision(
                 json={"decision": dict(decision), "model_id": model},
                 timeout=max(timeout, 20),
             )
-            proxy_response.raise_for_status()
+            if not proxy_response.ok:
+                try:
+                    error_body = proxy_response.json()
+                    detail = error_body.get("error", error_body.get("message", error_body))
+                except Exception:
+                    detail = proxy_response.text
+                raise RuntimeError(
+                    f"Vercel review proxy HTTP {proxy_response.status_code}: {str(detail)[:180]}"
+                )
             proxy_body = proxy_response.json()
             if not isinstance(proxy_body, dict) or proxy_body.get("status") != "ok":
                 raise ValueError("Vercel review proxy returned an invalid review response")
