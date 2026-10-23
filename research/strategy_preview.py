@@ -14,6 +14,7 @@ from research.signal_journal import append_decision, build_decision_record
 from research.friday_huggingface import review_decision
 from research.friday_reversal import reversal_context
 from research.friday_trade_plan import build_trade_plan
+from research.friday_momentum_reversal import scan_momentum_reversal
 
 LINE_TOL = 0.0015
 BREAK_BUFFER = 0.0015
@@ -325,6 +326,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"walk_forward_split_time":walk_forward_split_time,"last_close":float(last.close),
         "trade_plans":{"long":build_trade_plan(frame, "long"),"short":build_trade_plan(frame, "short")},
+        "momentum_reversal":scan_momentum_reversal(raw, pair=pair),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
