@@ -333,6 +333,12 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     status = "success" if not failures else ("partial_failure" if len(failures) < len(pairs) else "failure")
     if not store.configured:
         status = "persistence_not_configured" if not failures else "partial_failure"
+    elif not failures:
+        ai_statuses = [row.get("ai_review_status", "missing") for row in pair_results if row.get("status") == "ok"]
+        if ai_statuses and all(value == "not_configured" for value in ai_statuses):
+            status = "ai_not_configured"
+        elif any(value != "ok" for value in ai_statuses):
+            status = "ai_review_failure"
     run_record = make_cron_run(
         run_id=run_id, status=status, pair_results=pair_results, started_at=started_at,
         error="; ".join(failures) if failures else None,
