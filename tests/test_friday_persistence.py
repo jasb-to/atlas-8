@@ -70,8 +70,8 @@ class FridayPersistenceTests(unittest.TestCase):
             )
             store.record_trade_event(event)
             store.record_archive(make_archive_record(
-                record_key="snapshot-1", record_type="decision_snapshot", pair="XBTUSD",
-                timeframe="4H", signal_time="2026-10-21T12:00:00Z", payload={"state":"WATCH"},
+                record_key="snapshot-1", record_type="decision_snapshot", pair="XBTUSDT",
+                timeframe="4H", signal_time="2026-10-24T12:00:00Z", payload={"state":"WATCH"},
             ))
             store.record_cron_run(make_cron_run(
                 run_id="run-1", status="success", pair_results=[{"pair":"XBTUSD","status":"ok"}],
@@ -103,6 +103,21 @@ class FridayPersistenceTests(unittest.TestCase):
             with open(f"{directory}/alerts.json", encoding="utf-8") as handle:
                 alerts = json.load(handle)
             self.assertEqual(len(alerts), 12)
+
+    def test_dashboard_filters_prelaunch_usd_snapshots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = RepoFolderFridayStore(root=directory)
+            store.record_archive(make_archive_record(
+                record_key="old-usd", record_type="decision_snapshot", pair="XBTUSD",
+                timeframe="4H", signal_time="2026-10-15T12:00:00Z", payload={"state":"OLD"},
+            ))
+            store.record_archive(make_archive_record(
+                record_key="new-usdt", record_type="decision_snapshot", pair="XBTUSDT",
+                timeframe="4H", signal_time="2026-10-24T12:00:00Z", payload={"state":"CURRENT"},
+            ))
+            with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
+                dashboard = json.load(handle)
+            self.assertEqual([row["record_key"] for row in dashboard["snapshots"]], ["new-usdt"])
 
     def test_unconfigured_store_does_not_claim_success(self):
         store = SupabaseFridayStore(url="", key="")
