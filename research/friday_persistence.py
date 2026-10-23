@@ -171,6 +171,9 @@ def make_cron_run(*, run_id: str, status: str, pair_results: list[Mapping[str, A
         "status": status,
         "pairs_checked": len(pair_results),
         "pair_results": list(pair_results),
+        "trade_events_seen": 0,
+        "live_events_persisted": 0,
+        "historical_replay_events_ignored": 0,
         "error": error,
     })
 
@@ -373,6 +376,10 @@ class RepoFolderFridayStore:
         runs = []
         for record in self._read("runs.json"):
             pair_results = record.get("pair_results") or []
+            # Do not surface pre-cleanup run records whose event counts included
+            # historical replay; the original records remain in runs.json for audit.
+            if "historical_replay_events_ignored" not in record:
+                continue
             if not post_launch(record.get("started_at")) or not pair_results:
                 continue
             if not all(str(result.get("pair", "")).upper().endswith("USDT") for result in pair_results):

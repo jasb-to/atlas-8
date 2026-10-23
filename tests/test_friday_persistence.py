@@ -115,9 +115,21 @@ class FridayPersistenceTests(unittest.TestCase):
                 record_key="new-usdt", record_type="decision_snapshot", pair="XBTUSDT",
                 timeframe="4H", signal_time="2026-10-24T12:00:00Z", payload={"state":"CURRENT"},
             ))
+            store.record_cron_run({
+                "run_id": "legacy-run", "status": "partial_failure",
+                "started_at": "2026-10-24T12:00:00Z",
+                "pair_results": [{"pair": "XBTUSDT", "status": "ok"}],
+                "trade_events_seen": 186,
+            })
+            store.record_cron_run(make_cron_run(
+                run_id="clean-run", status="success",
+                pair_results=[{"pair": "XBTUSDT", "status": "ok"}],
+                started_at="2026-10-24T12:00:00Z",
+            ))
             with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
                 dashboard = json.load(handle)
             self.assertEqual([row["record_key"] for row in dashboard["snapshots"]], ["new-usdt"])
+            self.assertEqual([row["run_id"] for row in dashboard["runs"]], ["clean-run"])
 
     def test_unconfigured_store_does_not_claim_success(self):
         store = SupabaseFridayStore(url="", key="")

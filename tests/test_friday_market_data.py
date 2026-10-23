@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pandas as pd
 
 from research.friday_market_data import fetch_ohlc
-from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass
+from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass, _is_live_lifecycle_event
 from research.friday_persistence import RepoFolderFridayStore
 
 
@@ -27,6 +27,11 @@ class FridayMarketDataTests(unittest.TestCase):
         wrong_strategy = {"status": "ok", "response": {"assessment": "supportive", "priority_candidate": "stoch-rsi-structural-reversal-v1"}}
         self.assertFalse(_ai_candidate_pass(wrong_strategy, "friday-price-action-v2")[0])
         self.assertFalse(_ai_candidate_pass({"status": "error"}, "friday-price-action-v2")[0])
+
+    def test_only_post_launch_usdt_lifecycle_events_are_live(self):
+        self.assertFalse(_is_live_lifecycle_event("HYPEUSDT", {"signal_time": "2026-10-15T00:00:00Z"}))
+        self.assertFalse(_is_live_lifecycle_event("HYPEUSD", {"signal_time": "2026-10-24T00:00:00Z"}))
+        self.assertTrue(_is_live_lifecycle_event("HYPEUSDT", {"signal_time": "2026-10-24T00:00:00Z"}))
 
     def test_friday_cli_accepts_only_usdt_pairs(self):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
