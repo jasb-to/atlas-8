@@ -372,6 +372,13 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "pair": pair, "timeframe": f"{interval}m", "candle_time_utc": last.timestamp.isoformat(),
         "rule_decision": friday_decision, "setup_lifecycle": setup_state,
         "indicators": result["current_indicators"], "structure": structure_payload,
+        "candidate_universe": {
+            "latest_break_event": next((e for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
+            "momentum_reversal_candidate": result["momentum_reversal"],
+            "structural_trade_plans": result["trade_plans"],
+            "exhaustion_context": result["reversal_context"],
+            "momentum_context": result["latest_momentum_context"],
+        },
     })
     result["model_review"] = model_review
     journal_record = build_decision_record(
