@@ -19,6 +19,7 @@ from research.friday_persistence import (
 )
 from research.strategy_preview import build_preview
 from research.friday_multitimeframe import analyse_pair
+from research.friday_paper_trades import register_paper_trade, update_paper_trades
 
 
 def _utc(value) -> pd.Timestamp:
@@ -26,6 +27,28 @@ def _utc(value) -> pd.Timestamp:
     if stamp.tzinfo is None:
         return stamp.tz_localize("UTC")
     return stamp.tz_convert("UTC")
+
+
+def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
+    """Hard-gate new price-action entries on directional momentum and exhaustion."""
+    direction = str(event.get("direction", "")).lower()
+    momentum = event.get("momentum_context") or {}
+    if direction == "long":
+        momentum_ok = bool(momentum.get("stoch_bullish_cross") or momentum.get("macd_bullish_expansion"))
+        aligned = int(reversal.get("long_reversal_score", 0) or 0)
+        opposing = int(reversal.get("short_reversal_score", 0) or 0)
+    elif direction == "short":
+        momentum_ok = bool(momentum.get("stoch_bearish_cross") or momentum.get("macd_bearish_expansion"))
+        aligned = int(reversal.get("short_reversal_score", 0) or 0)
+        opposing = int(reversal.get("long_reversal_score", 0) or 0)
+    else:
+        return False, ["direction_missing"]
+    blockers = []
+    if not momentum_ok:
+        blockers.append("directional_momentum_filter_failed")
+    if opposing >= 2 and opposing > aligned:
+        blockers.append("opposing_exhaustion_filter_blocked_entry")
+    return not blockers, blockers
 
 
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
@@ -48,6 +71,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             mtf = analyse_pair(pair=pair)
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
+            candles = pd.DataFrame(result.get("closed_candles", []))
+            paper_updates = update_paper_trades(store, pair=pair, candles=candles) if store.configured and hasattr(store, "paper_trades") else []
             row = {
                 "pair": pair, "status": "ok", "last_completed_candle_utc": latest.isoformat(),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
@@ -83,6 +108,41 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     timeframe="1D+4H", signal_time=mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
                     payload=mtf,
                 ))
+            # Register fresh price-action entries only when directional momentum
+            # and exhaustion gates pass and a structural plan clears at least 1.5R.
+            reversal_context_now = result.get("reversal_context", {})
+            for event in result.get("break_events", []):
+                event_time = _utc(event["signal_time"]) if event.get("signal_time") else None
+                add_time = _utc(event["continuation_add_time"]) if event.get("continuation_add_time") else None
+                is_fresh_entry = (event.get("event") == "BREAK_CLOSE_PROBE" and event_time == latest) or (
+                    event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_time == latest
+                )
+                if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
+                    continue
+                passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
+                if not passed:
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "filtered", "reason": ", ".join(filter_blockers)})
+                    continue
+                direction = str(event.get("direction", "")).lower()
+                plan = (result.get("trade_plans") or {}).get(direction, {})
+                if not plan.get("eligible"):
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "blocked_trade_plan", "reason": ", ".join(plan.get("blockers", []))})
+                    continue
+                signal_time = event.get("continuation_add_time") if event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" else event.get("signal_time")
+                entry_price = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
+                stop, target = float(plan["stop"]), float(plan["target"])
+                risk = abs(entry_price - stop)
+                reward = (target - entry_price) if direction == "long" else (entry_price - target)
+                rr = reward / risk if risk > 0 else 0
+                geometry_ok = (stop < entry_price < target) if direction == "long" else (target < entry_price < stop)
+                if not geometry_ok or rr < 1.5:
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "blocked_trade_plan", "reason": "entry-adjusted structural plan failed geometry or 1.5R minimum"})
+                    continue
+                register_paper_trade(
+                    store, pair=pair, strategy="friday-price-action-v2",
+                    signal_time=pd.Timestamp(signal_time).isoformat(), direction=direction,
+                    entry=entry_price, stop=stop, target=target, reward_risk=rr,
+                )
             # Persist the lifecycle ledger idempotently. Only alert events that
             # first become actionable on the latest closed candle.
             for event in result.get("break_events", []):
@@ -144,6 +204,14 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
             reversal = result.get("momentum_reversal", {})
+            if reversal.get("eligible") and reversal.get("signal_time") and store.configured and hasattr(store, "paper_trades"):
+                register_paper_trade(
+                    store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
+                    signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
+                    direction=str(reversal["direction"]).lower(), entry=float(reversal["entry"]),
+                    stop=float(reversal["stop"]), target=float(reversal["target"]),
+                    reward_risk=float(reversal["reward_risk"]),
+                )
             reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
             if reversal.get("eligible") and reversal_ts == latest:
                 reversal_event = {
