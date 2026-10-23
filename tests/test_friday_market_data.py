@@ -2,7 +2,7 @@ import json
 import os
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pandas as pd
 
@@ -34,6 +34,23 @@ class FridayMarketDataTests(unittest.TestCase):
             validate_friday_pairs(["XBTUSD"])
         with self.assertRaisesRegex(ValueError, "At least one"):
             validate_friday_pairs([])
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_missing_kraken_usdt_pair_falls_back_to_binance_usdt(self, kraken, get):
+        kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
+        now = pd.Timestamp.now(tz="UTC")
+        start_ms = int((now - pd.Timedelta(hours=204)).timestamp() * 1000)
+        rows = []
+        for i in range(50):
+            open_ms = start_ms + i * 4 * 60 * 60 * 1000
+            rows.append([open_ms, "100", "105", "99", "103", "10",
+                         open_ms + 4 * 60 * 60 * 1000 - 1, "1020", 10, "5", "510", "0"])
+        get.return_value = Mock(status_code=200, json=lambda: rows, raise_for_status=lambda: None)
+        frame = fetch_ohlc("HYPEUSDT", 240)
+        self.assertEqual(get.call_args.kwargs["params"]["symbol"], "HYPEUSDT")
+        self.assertEqual(len(frame), 50)
+        self.assertIn("vwap", frame.columns)
 
     @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_passes_usdt_pair_to_kraken(self, fetch):
