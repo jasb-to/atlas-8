@@ -1,0 +1,46 @@
+name: FRIDAY Telegram connection test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  telegram-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send a test message to the configured Telegram chat
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+          if not token or not chat_id:
+              raise SystemExit(
+                  "Required repository secrets TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are missing."
+              )
+
+          payload = json.dumps({
+              "chat_id": chat_id,
+              "text": "✅ FRIDAY Telegram connection test successful. Alerts can reach this chat."
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          if not result.get("ok"):
+              raise SystemExit("Telegram did not confirm the test message.")
+          print("Telegram confirmed delivery. Message ID:", result.get("result", {}).get("message_id"))
+          PY
