@@ -51,14 +51,17 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     return not blockers, blockers
 
 
-def _ai_candidate_pass(review: dict | None) -> tuple[bool, str]:
-    """Require an actual supportive AI review before promoting a candidate to paper trade/alert."""
+def _ai_candidate_pass(review: dict | None, expected_strategy: str) -> tuple[bool, str]:
+    """Require AI to positively select this supplied strategy before paper promotion."""
     if not isinstance(review, dict) or review.get("status") != "ok":
         return False, "ai_review_not_completed"
     response = review.get("response") or {}
     if response.get("assessment") != "supportive":
         return False, f"ai_assessment_{response.get('assessment', 'missing')}"
-    return True, "ai_supportive"
+    priority = response.get("priority_candidate")
+    if not isinstance(priority, str) or expected_strategy not in priority:
+        return False, "ai_did_not_select_this_strategy"
+    return True, "ai_selected_supportive"
 
 
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
@@ -133,7 +136,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
-                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
                 if not ai_pass:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                     continue
@@ -254,7 +257,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
             reversal = result.get("momentum_reversal", {})
-            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1")
             if reversal.get("eligible") and reversal.get("signal_time") and ai_pass and store.configured and hasattr(store, "paper_trades"):
                 register_paper_trade(
                     store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
