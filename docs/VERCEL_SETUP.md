@@ -16,7 +16,7 @@ For the two-week proof-of-concept trial, FRIDAY uses JSON files committed under 
 
 | Variable | Required? | Where it is used |
 | --- | --- | --- |
-| `FRIDAY_GITHUB_TOKEN` | Yes | Vercel Production dashboard API reads repository contents; also used by the scan-dispatch route |
+| `FRIDAY_GITHUB_TOKEN` | Yes, for manual/cron scan dispatch | Vercel Production scan-dispatch route calls GitHub Actions; dashboard reads the public JSON file without a token |
 | `FRIDAY_GITHUB_REPOSITORY` | Optional | Override for the repository containing the FRIDAY data; defaults to `jasb-to/atlas-8` |
 | `FRIDAY_GITHUB_DATA_BRANCH` | Optional | Data branch; defaults to `main` |
 | `FRIDAY_CRON_SECRET` | Required for cron endpoint | Vercel Production only; authenticates cron-job.org |
@@ -24,7 +24,7 @@ For the two-week proof-of-concept trial, FRIDAY uses JSON files committed under 
 | `FRIDAY_TELEGRAM_CHAT_ID` | Optional | GitHub Actions research alerts |
 | `HUGGINGFACE_API_KEY` | Optional | Advisory-only model review |
 
-The token must have permission to read repository contents. To trigger Actions through the existing `/api/friday/scan` route, it also needs permission to dispatch workflows. Do not paste tokens into chat or commit them to Git. Never use `NEXT_PUBLIC_` on secrets. Friday must remain research-only; do not configure exchange API keys.
+The token used by `/api/friday/scan` needs permission to dispatch GitHub Actions workflows. The dashboard reader uses the public raw JSON file to avoid GitHub API rate limits on 30-second refreshes. Do not paste tokens into chat or commit them to Git. Do not paste tokens into chat or commit them to Git. Never use `NEXT_PUBLIC_` on secrets. Friday must remain research-only; do not configure exchange API keys.
 
 **Important:** the GitHub Actions monitor is the writer; the Vercel dashboard API is a reader. GitHub Actions commits are not instantaneous database writes, and the dashboard reflects the latest committed state. Each scan creates a commit, so this is intentionally a temporary, low-volume approach. The repository is public: only commit research data that is safe to be public. Do not store credentials, private user data, or exchange keys.
 
