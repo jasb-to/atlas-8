@@ -59,7 +59,7 @@ def build_momentum_reversal_alert(candidate: Mapping[str, Any], *, pair: str, ti
     direction = str(candidate.get("direction", "")).upper()
     if direction not in {"LONG", "SHORT"} or not candidate.get("eligible"):
         raise ValueError("candidate must be an eligible long or short plan")
-    return "\\n".join([
+    return "\n".join([
         "FRIDAY | ENTRY CANDIDATE — STOCH RSI REVERSAL",
         f"Market: {pair} · Timeframe: {timeframe} · Direction: {direction}",
         f"Signal candle: {candidate.get('signal_time')}",
