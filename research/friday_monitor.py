@@ -198,7 +198,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
                 else:
                     row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
-            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
+            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
         except Exception as exc:
             failures.append(f"{pair}: {type(exc).__name__}: {exc}")
