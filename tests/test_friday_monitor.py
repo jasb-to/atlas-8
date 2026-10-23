@@ -26,6 +26,15 @@ class FridayMonitorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
             validate_friday_pairs(["DOGEUSD"])
 
+    def test_scan_exit_code_is_success_when_ai_review_is_temporarily_unavailable(self):
+        # AI unavailability must not kill the scheduled market scan. It is still
+        # a degraded scan, and candidate/alert gates remain closed without valid AI.
+        from research.friday_monitor import _monitor_exit_code
+        self.assertEqual(_monitor_exit_code("scan_complete_ai_unavailable"), 0)
+        self.assertEqual(_monitor_exit_code("success"), 0)
+        self.assertEqual(_monitor_exit_code("partial_failure"), 1)
+        self.assertEqual(_monitor_exit_code("failure"), 1)
+
     def test_monitor_uses_preview_schema_and_writes_cron_artifact(self):
         preview = {
             "last_completed_candle_utc": "2026-10-21T12:00:00+00:00",
