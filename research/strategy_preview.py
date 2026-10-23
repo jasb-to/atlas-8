@@ -305,7 +305,7 @@ def latest_setup_state(events, last_closed_candle):
             "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
 
 
-def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-preview"):
+def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-preview"):
     raw=fetch_ohlc(pair=pair,interval=interval)
     events,status,frame=causal_replay(raw)
     setups=consolidate_setups(events,frame)
