@@ -72,18 +72,23 @@ def line_retest(frame, line, break_i, i):
     return False, None, False
 
 def momentum_context(frame, i):
-    """Causal momentum confirmation: Stoch RSI recross and positive/rising MACD."""
+    """Causal, directional Stoch RSI and MACD momentum evidence."""
     if i < 2:
-        return {"stoch_bullish_cross": False, "macd_bullish_expansion": False}
+        return {"stoch_bullish_cross": False, "stoch_bearish_cross": False,
+                "macd_bullish_expansion": False, "macd_bearish_expansion": False}
     row, prev = frame.iloc[i], frame.iloc[i-1]
     k, d, pk, pd_ = row.stoch_k, row.stoch_d, prev.stoch_k, prev.stoch_d
-    cross = all(np.isfinite(x) for x in (k, d, pk, pd_)) and pk <= pd_ and k > d
+    valid = all(np.isfinite(x) for x in (k, d, pk, pd_))
+    bull_cross = valid and pk <= pd_ and k > d
+    bear_cross = valid and pk >= pd_ and k < d
     close = frame.close.astype(float)
     macd = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
     signal = macd.ewm(span=9, adjust=False).mean()
     hist = macd - signal
-    expansion = hist.iloc[i] > 0 and hist.iloc[i] > hist.iloc[i-1] and macd.iloc[i] > signal.iloc[i]
-    return {"stoch_bullish_cross": bool(cross), "macd_bullish_expansion": bool(expansion),
+    bull_expansion = hist.iloc[i] > 0 and hist.iloc[i] > hist.iloc[i-1] and macd.iloc[i] > signal.iloc[i]
+    bear_expansion = hist.iloc[i] < 0 and hist.iloc[i] < hist.iloc[i-1] and macd.iloc[i] < signal.iloc[i]
+    return {"stoch_bullish_cross": bool(bull_cross), "stoch_bearish_cross": bool(bear_cross),
+            "macd_bullish_expansion": bool(bull_expansion), "macd_bearish_expansion": bool(bear_expansion),
             "macd_histogram": _num(hist.iloc[i]), "macd_histogram_previous": _num(hist.iloc[i-1])}
 
 
@@ -325,7 +330,7 @@ def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-prev
         "latest_setup_state":setup_state,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"walk_forward_split_time":walk_forward_split_time,"last_close":float(last.close),
-        "trade_plans":{"long":build_trade_plan(frame, "long"),"short":build_trade_plan(frame, "short")},
+        "trade_plans":{"long":build_trade_plan(frame, "long"),"short":build_trade_plan(frame, "short")},\n        "closed_candles":[{"timestamp":pd.Timestamp(r.timestamp).isoformat(),"open":float(r.open),"high":float(r.high),"low":float(r.low),"close":float(r.close)} for r in raw.tail(100).itertuples(index=False)],
         "momentum_reversal":scan_momentum_reversal(raw, pair=pair),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
