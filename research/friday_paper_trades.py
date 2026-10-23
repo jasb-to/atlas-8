@@ -70,6 +70,16 @@ def update_paper_trades(store, *, pair: str, candles: pd.DataFrame) -> list[dict
         later = frame[(frame.timestamp > signal_time) & (frame.timestamp > last_checked)]
         if later.empty:
             continue
+        earliest = frame.timestamp.min()
+        if last_checked < earliest - pd.Timedelta(hours=4):
+            trade.update({
+                "status": "STALE_UNRESOLVED",
+                "last_checked_at": utc_now(),
+                "tracking_error": "Gap in candle history exceeds the available OHLC window; exit cannot be inferred safely.",
+            })
+            store.upsert_paper_trade(trade)
+            updated.append(trade)
+            continue
         for candle in later.itertuples(index=False):
             high, low = float(candle.high), float(candle.low)
             direction = trade["direction"].lower()
