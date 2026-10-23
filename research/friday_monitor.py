@@ -380,14 +380,26 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
 
 
 def validate_friday_pairs(pairs: list[str]) -> list[str]:
-    normalized = [pair.strip().upper() for pair in pairs if pair.strip()]
-    invalid = [pair for pair in normalized if not pair.endswith("USDT")]
-    if invalid:
-        raise ValueError(
-            "FRIDAY research scans require USDT-quoted pairs; rejected: " + ", ".join(invalid)
-        )
+    """Canonicalize only known legacy quote aliases; never scan a USD market."""
+    legacy_aliases = {
+        "XBTUSD": "XBTUSDT", "BTCUSD": "XBTUSDT",
+        "ETHUSD": "ETHUSDT", "SOLUSD": "SOLUSDT",
+        "VIRTUALUSD": "VIRTUALUSDT", "HYPEUSD": "HYPEUSDT",
+    }
+    normalized = []
+    for raw_pair in pairs:
+        pair = str(raw_pair).strip().upper()
+        if not pair:
+            continue
+        pair = legacy_aliases.get(pair, pair)
+        if pair not in {"XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT"}:
+            raise ValueError(
+                "FRIDAY research scans only the approved USDT universe; rejected: " + pair
+            )
+        if pair not in normalized:
+            normalized.append(pair)
     if not normalized:
-        raise ValueError("At least one USDT-quoted pair is required")
+        raise ValueError("At least one approved USDT-quoted pair is required")
     return normalized
 
 
