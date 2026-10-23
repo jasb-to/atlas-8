@@ -344,7 +344,7 @@ class RepoFolderFridayStore:
             "message": "Connected to FRIDAY's temporary Git repository research store.",
             "storage_backend": "github_repository_folder",
             "snapshots": snapshots, "events": self._read("events.json")[:50],
-            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],
+            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],\n            "paper_trades": self._read("paper_trades.json")[:100],
             "fetched_at": utc_now(),
         }
         target = self.root / "dashboard.json"
@@ -376,6 +376,16 @@ class RepoFolderFridayStore:
         self._refresh_dashboard()
         return {"persisted": True, "table": "runs.json"}
 
+    def paper_trades(self) -> list[dict[str, Any]]:
+        return self._read("paper_trades.json")
+
+    def upsert_paper_trade(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        rows = [r for r in self._read("paper_trades.json") if r.get("trade_id") != record.get("trade_id")]
+        rows.insert(0, dict(record))
+        self._write("paper_trades.json", rows[:1000])
+        self._refresh_dashboard()
+        return {"persisted": True, "table": "paper_trades.json"}
+
     def claim_alert(self, *, alert_key: str, pair: str, alert_type: str, signal_time: str | None) -> bool:
         rows = self._read("alerts.json")
         if any(r.get("alert_key") == alert_key and r.get("status") == "sent" for r in rows):
@@ -383,7 +393,7 @@ class RepoFolderFridayStore:
         if not any(r.get("alert_key") == alert_key for r in rows):
             rows.insert(0, {"alert_key": alert_key, "pair": pair, "alert_type": alert_type,
                             "signal_time": signal_time, "status": "sending", "updated_at": utc_now()})
-            self._write("alerts.json", rows[:10])
+            self._write("alerts.json", rows[:5000])
         self._refresh_dashboard()
         return True
 
