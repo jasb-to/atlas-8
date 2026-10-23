@@ -20,15 +20,19 @@ For the two-week proof-of-concept trial, FRIDAY uses JSON files committed under 
 | `FRIDAY_GITHUB_REPOSITORY` | Optional | Override for the repository containing the FRIDAY data; defaults to `jasb-to/atlas-8` |
 | `FRIDAY_GITHUB_DATA_BRANCH` | Optional | Data branch; defaults to `main` |
 | `FRIDAY_CRON_SECRET` | Required for cron endpoint | Vercel Production only; authenticates cron-job.org |
-| `FRIDAY_TELEGRAM_BOT_TOKEN` | Optional | GitHub Actions research alerts |
-| `FRIDAY_TELEGRAM_CHAT_ID` | Optional | GitHub Actions research alerts |
-| `HUGGINGFACE_API_KEY` | Optional | Advisory-only model review |
+| `FRIDAY_TELEGRAM_BOT_TOKEN` | Required for Telegram alerts | GitHub Actions research alerts |
+| `FRIDAY_TELEGRAM_CHAT_ID` | Required for Telegram alerts | GitHub Actions research alerts |
+| `HUGGINGFACE_API_KEY` | **Required for AI-approved paper trades** | GitHub Actions AI candidate review and selection |
+| `FRIDAY_HF_MODEL_ID` | Optional repository variable | Model selection; defaults to the configured gpt-oss reviewer |
+| `FRIDAY_HF_ENDPOINT` | Optional repository variable | Model endpoint override |
 
-The token used by `/api/friday/scan` needs permission to dispatch GitHub Actions workflows. The dashboard reader uses the public raw JSON file to avoid GitHub API rate limits on 30-second refreshes. Do not paste tokens into chat or commit them to Git. Do not paste tokens into chat or commit them to Git. Never use `NEXT_PUBLIC_` on secrets. Friday must remain research-only; do not configure exchange API keys.
+The token used by `/api/friday/scan` needs permission to dispatch GitHub Actions workflows. The dashboard reader uses the public raw JSON file to avoid GitHub API rate limits on 30-second refreshes. Do not paste tokens into chat or commit them to Git. Never use `NEXT_PUBLIC_` on secrets. Friday must remain research-only; do not configure exchange API keys.
 
 **Important:** the GitHub Actions monitor is the writer; the Vercel dashboard API is a reader. GitHub Actions commits are not instantaneous database writes, and the dashboard reflects the latest committed state. Each scan creates a commit, so this is intentionally a temporary, low-volume approach. The repository is public: only commit research data that is safe to be public. Do not store credentials, private user data, or exchange keys.
 
 ## Verify the trial
+
+Before expecting an AI-approved candidate, open **GitHub → Settings → Secrets and variables → Actions** and add the repository secrets `HUGGINGFACE_API_KEY`, `FRIDAY_TELEGRAM_BOT_TOKEN`, and `FRIDAY_TELEGRAM_CHAT_ID`. The most recent inspected workflow log showed all three values were empty, so AI review and Telegram delivery were not configured. Do not paste secret values into chat or commit them to the repository.
 
 1. Run `Friday research monitor` manually from GitHub Actions.
 2. Confirm the run attempted XBTUSD, ETHUSD, SOLUSD, VIRTUALUSD and HYPEUSD and produced `testing/friday/data/dashboard.json`.
