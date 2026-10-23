@@ -187,7 +187,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
-                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"))
+                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
                     if not ai_pass:
                         row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                         continue
