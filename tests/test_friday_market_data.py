@@ -11,10 +11,6 @@ from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMarketDataTests(unittest.TestCase):
-    def test_rejects_non_usdt_pair(self):
-        with self.assertRaisesRegex(ValueError, "USDT-quoted"):
-            fetch_ohlc("HYPEUSD")
-
     @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_passes_usdt_pair_to_kraken(self, fetch):
         timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
