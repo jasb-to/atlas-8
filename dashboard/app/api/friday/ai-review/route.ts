@@ -57,9 +57,14 @@ export async function POST(request: Request) {
     return json({ status: "error", error: message }, 401);
   }
 
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
-  if (!apiKey) return json({ status: "error", error: "Hugging Face key is not configured in Vercel" }, 503);
-  const model = process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest";
+  // Prefer Gemini when configured; retain Hugging Face as a compatibility fallback.
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const hfKey = process.env.HUGGINGFACE_API_KEY;
+  const provider = geminiKey ? "gemini" : hfKey ? "huggingface" : null;
+  if (!provider) return json({ status: "error", error: "Neither GEMINI_API_KEY nor HUGGINGFACE_API_KEY is configured in Vercel" }, 503);
+  const model = provider === "gemini"
+    ? (process.env.FRIDAY_GEMINI_MODEL || "gemini-2.5-flash")
+    : (process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest");
   let input: any;
   try { input = await request.json(); } catch { return json({ status: "error", error: "Invalid JSON request" }, 400); }
   if (!input?.decision || typeof input.decision !== "object" || Array.isArray(input.decision)) {
@@ -84,30 +89,52 @@ export async function POST(request: Request) {
   };
   const started = Date.now();
   try {
-    const response = await fetch(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model,
-        temperature: 0,
-        messages: [
-          { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
-          { role: "user", content: JSON.stringify(prompt) }
-        ]
-      }),
-      signal: AbortSignal.timeout(25000)
-    });
+    let response: Response;
+    let body: any;
+    let raw: any;
+    if (provider === "gemini") {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        method: "POST",
+        headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
+          contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
+          generationConfig: { temperature: 0, responseMimeType: "application/json" }
+        }),
+        signal: AbortSignal.timeout(25000)
+      });
+    } else {
+      response = await fetch(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          temperature: 0,
+          messages: [
+            { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
+            { role: "user", content: JSON.stringify(prompt) }
+          ]
+        }),
+        signal: AbortSignal.timeout(25000)
+      });
+    }
     if (!response.ok) {
       const upstreamError = (await response.text()).slice(0, 180);
       return json({
         status: "error",
-        error: `Hugging Face returned HTTP ${response.status}: ${upstreamError}`,
+        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${response.status}: ${upstreamError}`,
+        provider,
         model_id: model
       }, 502);
     }
-    const body: any = await response.json();
-    let raw = body?.choices?.[0]?.message?.content;
-    if (Array.isArray(raw)) raw = raw.filter((part: any) => part && typeof part.text === "string").map((part: any) => part.text).join("");
+    body = await response.json();
+    if (provider === "gemini") {
+      raw = body?.candidates?.[0]?.content?.parts?.map((part: any) => typeof part.text === "string" ? part.text : "").join("");
+      if (typeof raw !== "string" || !raw.trim()) throw new Error("Gemini response had no text content");
+    } else {
+      raw = body?.choices?.[0]?.message?.content;
+      if (Array.isArray(raw)) raw = raw.filter((part: any) => part && typeof part.text === "string").map((part: any) => part.text).join("");
+    }
     if (typeof raw !== "string") throw new Error("Model response had no text content");
     raw = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
     const parsed = JSON.parse(raw);
@@ -119,9 +146,9 @@ export async function POST(request: Request) {
     if (parsed.confidence !== "low" && parsed.confidence !== "medium" && parsed.confidence !== "high") parsed.confidence = "low";
     if (parsed.priority_candidate !== null && typeof parsed.priority_candidate !== "string") parsed.priority_candidate = null;
     if (typeof parsed.rationale !== "string") parsed.rationale = "";
-    return json({ status: "ok", provider: "huggingface", model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
+    return json({ status: "ok", provider, model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Model review failed";
-    return json({ status: "error", provider: "huggingface", model_id: model, response: null, latency_ms: Date.now() - started, error: message.slice(0, 200) }, 502);
+    return json({ status: "error", provider, model_id: model, response: null, latency_ms: Date.now() - started, error: message.slice(0, 200) }, 502);
   }
 }
