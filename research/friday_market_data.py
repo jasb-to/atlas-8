@@ -6,12 +6,32 @@ HYPE/USDT spot listing has enough history for both 4H and daily analysis.
 """
 from __future__ import annotations
 
+import threading
+import time
+
 import pandas as pd
 import requests
 
 from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
+
+# Space request starts to stay conservative with public-market-data rate limits.
+MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
+_request_lock = threading.Lock()
+_last_request_started = 0.0
+
+
+def _throttle_public_request() -> None:
+    global _last_request_started
+    with _request_lock:
+        now = time.monotonic()
+        wait = MIN_PUBLIC_REQUEST_INTERVAL_SECONDS - (now - _last_request_started)
+        if wait > 0:
+            time.sleep(wait)
+        _last_request_started = time.monotonic()
+
+
 OKX_INTERVALS = {1: "1m", 5: "5m", 15: "15m", 30: "30m", 60: "1H", 120: "2H", 240: "4H", 360: "6H", 720: "12H", 1440: "1Dutc", 10080: "1W"}
 
 
@@ -25,6 +45,7 @@ def _fetch_okx_ohlc(pair: str, interval: int) -> pd.DataFrame:
     bar = OKX_INTERVALS.get(int(interval))
     if not bar:
         raise ValueError(f"Unsupported OKX candle interval: {interval} minutes")
+    _throttle_public_request()
     response = requests.get(
         OKX_CANDLES_URL,
         params={"instId": f"{base}-USDT", "bar": bar, "limit": 300},
@@ -59,6 +80,7 @@ def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240):
     """Use Kraken where the pair exists; fall back to OKX only for missing USDT pairs."""
     symbol = pair.upper().strip()
     try:
+        _throttle_public_request()
         return fetch_kraken_ohlc(pair=symbol, interval=interval)
     except RuntimeError as exc:
         if not symbol.endswith("USDT") or "Unknown asset pair" not in str(exc):
