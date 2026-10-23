@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
-from research.validate_kraken_trendlines import fetch_ohlc
+from research.friday_market_data import fetch_ohlc
 from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.structure_lifecycle import evaluate_structure
 from research.friday_decision import evaluate_friday_decision
