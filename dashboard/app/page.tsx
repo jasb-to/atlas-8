@@ -38,6 +38,8 @@ export default function Home() {
   const latestRun = data.runs[0];
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const candidates = events.filter(x => x.event_type === "BREAK_CLOSE_PROBE" || x.event_type === "ENTRY_1" || x.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED");
+  const reversalCandidate = snapshotData.momentum_reversal ?? {};
+  const candidateCount = candidates.length + (reversalCandidate.eligible ? 1 : 0);
   const latestEvents = events.slice(0, 50);
   const runAgeMs = latestRun?.started_at ? Date.now() - new Date(latestRun.started_at).getTime() : Number.POSITIVE_INFINITY;
   const engineOk = latestRun?.status === "success" && data.connected && runAgeMs >= 0 && runAgeMs < 6 * 60 * 60 * 1000;
@@ -60,19 +62,27 @@ export default function Home() {
           <div className={`radar-grid ${engineOk ? "radar-active" : "radar-idle"}`}><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
             <span className="radar-dot dot-btc" /><span className="radar-dot dot-virtual" /><span className="radar-dot dot-ghost" />
             <div className="radar-core"><b>F</b><small>{engineOk ? "MONITOR OK" : "FRIDAY"}</small></div>
-            <span className="radar-label label-btc">XBTUSD</span><span className="radar-label label-virtual">VIRTUALUSD</span>
+            <span className="radar-label label-btc">XBTUSD</span><span className="radar-label label-virtual">VIRTUALUSD</span><span className="radar-label label-ghost">HYPEUSD</span>
           </div>
         </div>
         <div className="radar-foot"><div><span>LAST COMPLETED RUN</span><b>{fmtTime(lastScan)}</b></div><div><span>PAIRS ATTEMPTED</span><b>{latestRun?.pairs_checked ?? "—"}</b></div><div><span>LAST CANDLE</span><b>{fmtTime(snapshot?.signal_time)}</b></div></div>
-        {!data.connected && <div className="notice"><b>Data connection unavailable</b><p>{data.message} FRIDAY needs the correct dedicated Supabase project, schema and server-only credentials.</p></div>}
+        {!data.connected && <div className="notice"><b>Data connection unavailable</b><p>{data.message} FRIDAY needs a successful scheduled scan and a readable repository-backed dashboard data file.</p></div>}
         {latestRun?.error && <div className="error-note"><b>Last run error</b><p>{latestRun.error}</p></div>}
       </article>
 
       <aside className="candidate-panel">
-        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Setup signals</h2></div><span className="count-badge">{candidates.length}</span></div>
-        <p className="panel-intro">Recorded Entry 1 / Entry 2 events only. A signal is not a complete trade plan until invalidation, targets and risk/reward are defined.</p>
+        <div className="panel-head"><div><span className="section-kicker">02 / OPPORTUNITY QUEUE</span><h2>Setup signals</h2></div><span className="count-badge">{candidateCount}</span></div>
+        <p className="panel-intro">Break/retest events plus a separate Stoch RSI reversal archetype. Only reversal candidates with a structural stop, target and at least 1.5R are eligible; all signals remain research-only.</p>
         <div className="candidate-list">
-          {candidates.length ? candidates.slice(0, 12).map((event, i) => {
+          {(candidates.length || reversalCandidate.eligible) ? <>
+          {reversalCandidate.eligible && <article className="candidate" key={"momentum-reversal-" + reversalCandidate.pair + "-" + reversalCandidate.signal_time}>
+            <div className="candidate-top"><b>{reversalCandidate.pair}</b><span className={reversalCandidate.direction === "long" ? "direction long" : "direction short"}>{String(reversalCandidate.direction ?? "").toUpperCase()}</span></div>
+            <div className="candidate-title">ENTRY CANDIDATE · STOCH RSI REVERSAL</div>
+            <div className="candidate-stats"><div><span>ENTRY</span><b>{fmtPrice(reversalCandidate.entry)}</b></div><div><span>STRUCTURAL STOP</span><b>{fmtPrice(reversalCandidate.stop)}</b></div><div><span>TARGET</span><b>{fmtPrice(reversalCandidate.target)}</b></div><div><span>REWARD / RISK</span><b>{reversalCandidate.reward_risk}R</b></div></div>
+            <div className="candidate-bottom"><span className="state-pill">risk-defined candidate</span><span>{fmtTime(reversalCandidate.signal_time)}</span></div>
+            <p className="candidate-reason">Fresh Stoch RSI cross from an extreme zone with momentum/structure confirmation. Research / paper only.</p>
+          </article>}
+          {candidates.slice(0, 12).map((event, i) => {
             const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
             const direction = String(event.direction ?? "").toLowerCase();
             return <article className="candidate" key={event.event_key ?? i}>
@@ -82,7 +92,8 @@ export default function Home() {
               <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(entry2 ? event.continuation_add_time : event.signal_time)}</span></div>
               <p className="candidate-reason">{event.evidence?.line_kind ? clean(event.evidence.line_kind) + " · " : ""}{event.evidence?.daily_bias ? "Daily bias: " + clean(event.evidence.daily_bias) : "See event evidence before treating this as actionable."}</p>
             </article>;
-          }) : <div className="empty-state"><span className="empty-orbit">◎</span><b>No qualifying events recorded</b><p>When the engine records a break-close probe or confirmed continuation event, it will appear here. No placeholder trades are shown.</p></div>}
+          })}
+          </> : <div className="empty-state"><span className="empty-orbit">◎</span><b>No qualifying events recorded</b><p>When the engine records a risk-defined reversal candidate, break-close probe or confirmed continuation event, it will appear here. No placeholder trades are shown.</p></div>}
         </div>
         <div className="panel-bottom"><span>RESEARCH / PAPER ONLY</span><span>NO EXCHANGE ORDERS</span></div>
       </aside>
