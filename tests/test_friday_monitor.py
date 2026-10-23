@@ -20,7 +20,7 @@ class FridayMonitorTests(unittest.TestCase):
         )
 
     def test_duplicate_aliases_do_not_create_duplicate_market_scans(self):
-        self.assertEqual(validate_friday_pairs(["XBTUSD", "XBTUSDT", "ETHUSDT", "SUIUSDT", "SUIUSD"]), ["XBTUSDT", "ETHUSDT"])
+        self.assertEqual(validate_friday_pairs(["XBTUSD", "XBTUSDT", "ETHUSDT", "SUIUSDT", "SUIUSD"]), ["XBTUSDT", "ETHUSDT", "SUIUSDT"])
 
     def test_unknown_usd_pair_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
