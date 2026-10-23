@@ -18,7 +18,7 @@ class FridayMarketDataTests(unittest.TestCase):
     @patch("research.friday_market_data.requests.get")
     def test_maps_xbt_to_binance_btc_and_drops_open_candle(self, get):
         now = pd.Timestamp.now(tz="UTC")
-        open_ms = int((now - pd.Timedelta(hours=8)).timestamp() * 1000)
+        open_ms = int((now - pd.Timedelta(hours=204)).timestamp() * 1000)
         rows = []
         for i in range(50):
             t = open_ms + i * 4 * 60 * 60 * 1000
