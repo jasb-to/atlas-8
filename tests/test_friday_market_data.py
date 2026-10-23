@@ -7,10 +7,18 @@ from unittest.mock import patch
 import pandas as pd
 
 from research.friday_market_data import fetch_ohlc
+from research.friday_monitor import validate_friday_pairs
 from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMarketDataTests(unittest.TestCase):
+    def test_friday_cli_accepts_only_usdt_pairs(self):
+        self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
+        with self.assertRaisesRegex(ValueError, "USDT-quoted"):
+            validate_friday_pairs(["XBTUSD"])
+        with self.assertRaisesRegex(ValueError, "At least one"):
+            validate_friday_pairs([])
+
     @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_passes_usdt_pair_to_kraken(self, fetch):
         timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
