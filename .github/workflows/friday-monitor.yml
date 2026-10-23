@@ -43,8 +43,8 @@ jobs:
         env:
           FRIDAY_STORAGE_BACKEND: repo
           FRIDAY_REPO_DATA_DIR: testing/friday/data
-          TELEGRAM_BOT_TOKEN: ${{ secrets.FRIDAY_TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
           FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
           REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT' }}
