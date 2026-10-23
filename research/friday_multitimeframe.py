@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
-from research.validate_kraken_trendlines import fetch_ohlc
+from research.friday_market_data import fetch_ohlc
 
 BREAK_BUFFER = 0.0015
 LINE_TOL = 0.0015
