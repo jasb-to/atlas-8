@@ -12,7 +12,7 @@ class FridayMomentumReversalTests(unittest.TestCase):
         self.assertFalse(result["eligible"])
         self.assertIn("missing_ohlc_data", result["blockers"])
 
-    def test_flat_market_does_not_emit_a_setup(self):
+    def test_flat_market_is_blocked_when_stoch_rsi_is_undefined(self):
         count = 120
         frame = pd.DataFrame({
             "timestamp": pd.date_range("2026-01-01", periods=count, freq="4h", tz="UTC"),
@@ -23,9 +23,9 @@ class FridayMomentumReversalTests(unittest.TestCase):
             "volume": [1000.0] * count,
         })
         result = scan_momentum_reversal(frame, pair="HYPEUSD")
-        self.assertEqual(result["state"], "NO_SETUP")
+        self.assertEqual(result["state"], "BLOCKED")
         self.assertFalse(result["eligible"])
-        self.assertIn("no_fresh_extreme_zone_stoch_rsi_cross", result["blockers"])
+        self.assertIn("insufficient_indicator_history", result["blockers"])
 
 
 if __name__ == "__main__":
