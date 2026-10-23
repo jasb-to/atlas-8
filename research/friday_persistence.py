@@ -354,6 +354,19 @@ class RepoFolderFridayStore:
         temporary.replace(target)
 
     def record_trade_event(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        # Historical candles are useful for replay/backtests but are not trades
+        # first observed by FRIDAY. Only add lifecycle events at/after launch.
+        cutoff = pd.Timestamp(os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
+        signal_time = record.get("continuation_add_time") or record.get("signal_time")
+        if signal_time:
+            event_time = pd.Timestamp(signal_time)
+            if event_time.tzinfo is None:
+                event_time = event_time.tz_localize("UTC")
+            else:
+                event_time = event_time.tz_convert("UTC")
+            cutoff = cutoff.tz_localize("UTC") if cutoff.tzinfo is None else cutoff.tz_convert("UTC")
+            if event_time < cutoff:
+                return {"persisted": False, "skipped": "historical_backfill_before_tracking_start", "table": "events.json"}
         rows = [r for r in self._read("events.json") if r.get("event_key") != record.get("event_key")]
         rows.insert(0, dict(record))
         self._write("events.json", rows[:50])
