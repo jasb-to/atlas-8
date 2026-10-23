@@ -11,6 +11,7 @@ type DashboardPayload = {
   events?: unknown[];
   runs?: unknown[];
   alerts?: unknown[];
+  paper_trades?: unknown[];
   [key: string]: unknown;
 };
 
@@ -38,7 +39,7 @@ export async function GET() {
         connected: false,
         status: "waiting_for_first_run",
         message: "Waiting for the first successful FRIDAY run to publish dashboard data to the repository.",
-        snapshots: [], events: [], runs: [], alerts: [],
+        snapshots: [], events: [], runs: [], alerts: [], paper_trades: [],
       });
     }
     if (!result.ok) {
