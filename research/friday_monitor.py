@@ -141,7 +141,64 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     except Exception as alert_exc:
                         store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
                         raise
-            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
+            # Separate Stoch RSI reversal archetype: notify only when a fresh
+            # completed-candle candidate also has a valid structural risk plan.
+            reversal = result.get("momentum_reversal", {})
+            reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
+            if reversal.get("eligible") and reversal_ts == latest:
+                reversal_event = {
+                    "event": "MOMENTUM_REVERSAL_CANDIDATE",
+                    "signal_time": reversal.get("signal_time"),
+                    "direction": reversal.get("direction"),
+                    "line_kind": "momentum_reversal",
+                    "anchor_start_time": reversal.get("signal_time"),
+                    "anchor_end_time": reversal.get("signal_time"),
+                    "close_at_break": reversal.get("entry"),
+                    "outcome": "candidate",
+                    "retest_confirmed": False,
+                    "evidence": reversal,
+                }
+                reversal_row = make_trade_event(
+                    pair=pair, timeframe="4H", event=reversal_event, run_id=run_id,
+                    strategy_version="friday-stoch-rsi-structural-reversal-v1",
+                )
+                all_rows.append(reversal_row)
+                if store.configured:
+                    store.record_trade_event(reversal_row)
+                    store.record_archive(make_archive_record(
+                        record_key=reversal_row["event_key"] + ":plan",
+                        record_type="momentum_reversal_candidate", pair=pair,
+                        timeframe="4H", signal_time=reversal.get("signal_time"),
+                        payload=reversal,
+                        strategy_version="friday-stoch-rsi-structural-reversal-v1",
+                    ))
+                    alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
+                    claimed = store.claim_alert(
+                        alert_key=alert_key, pair=pair, alert_type="MOMENTUM_REVERSAL",
+                        signal_time=reversal.get("signal_time"),
+                    )
+                    if claimed:
+                        from research.friday_alerts import build_momentum_reversal_alert
+                        try:
+                            alert = send_telegram_alert(
+                                build_momentum_reversal_alert(reversal, pair=pair, timeframe="4H")
+                            )
+                            if alert.get("sent"):
+                                store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
+                            else:
+                                store.finish_alert(alert_key, status="failed", error=alert.get("reason"))
+                            row["alert_results"].append({
+                                "type": "MOMENTUM_REVERSAL", "sent": alert.get("sent", False),
+                                "status": alert.get("status"), "reason": alert.get("reason"),
+                            })
+                        except Exception as alert_exc:
+                            store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                            raise
+                    else:
+                        row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
+                else:
+                    row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
+            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))            (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
         except Exception as exc:
             failures.append(f"{pair}: {type(exc).__name__}: {exc}")
