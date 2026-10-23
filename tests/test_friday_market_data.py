@@ -7,11 +7,27 @@ from unittest.mock import patch
 import pandas as pd
 
 from research.friday_market_data import fetch_ohlc
-from research.friday_monitor import validate_friday_pairs
+from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass
 from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMarketDataTests(unittest.TestCase):
+    def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
+        supportive = {
+            "status": "ok",
+            "response": {
+                "assessment": "supportive",
+                "priority_candidate": "friday-price-action-v2",
+            },
+        }
+        self.assertEqual(_ai_candidate_pass(supportive, "friday-price-action-v2"),
+                         (True, "ai_selected_supportive"))
+        caution = {"status": "ok", "response": {"assessment": "caution", "priority_candidate": "friday-price-action-v2"}}
+        self.assertFalse(_ai_candidate_pass(caution, "friday-price-action-v2")[0])
+        wrong_strategy = {"status": "ok", "response": {"assessment": "supportive", "priority_candidate": "stoch-rsi-structural-reversal-v1"}}
+        self.assertFalse(_ai_candidate_pass(wrong_strategy, "friday-price-action-v2")[0])
+        self.assertFalse(_ai_candidate_pass({"status": "error"}, "friday-price-action-v2")[0])
+
     def test_friday_cli_accepts_only_usdt_pairs(self):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
         with self.assertRaisesRegex(ValueError, "USDT-quoted"):
