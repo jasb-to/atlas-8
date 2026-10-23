@@ -84,6 +84,26 @@ class FridayPersistenceTests(unittest.TestCase):
             self.assertEqual(len(dashboard["snapshots"]), 1)
             self.assertEqual(dashboard["runs"][0]["run_id"], "run-1")
 
+    def test_repo_paper_trade_is_in_dashboard_and_alert_history_is_bounded_separately(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = RepoFolderFridayStore(root=directory)
+            store.upsert_paper_trade({
+                "trade_id": "trade-1", "pair": "HYPEUSD", "status": "OPEN",
+                "stop_loss": 84.0, "take_profit": 75.0,
+            })
+            with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
+                dashboard = json.load(handle)
+            self.assertEqual(dashboard["paper_trades"][0]["trade_id"], "trade-1")
+            for index in range(12):
+                key = f"alert-{index}"
+                self.assertTrue(store.claim_alert(
+                    alert_key=key, pair="HYPEUSD", alert_type="TEST",
+                    signal_time=f"2026-10-22T{index:02d}:00:00Z",
+                ))
+            with open(f"{directory}/alerts.json", encoding="utf-8") as handle:
+                alerts = json.load(handle)
+            self.assertEqual(len(alerts), 12)
+
     def test_unconfigured_store_does_not_claim_success(self):
         store = SupabaseFridayStore(url="", key="")
         self.assertFalse(store.configured)
