@@ -9,7 +9,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from research.friday_trade_plan import build_trade_plan\nfrom research.friday_reversal import reversal_context
+from research.friday_trade_plan import build_trade_plan
+from research.friday_reversal import reversal_context
 
 
 def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dict:
