@@ -103,14 +103,15 @@ export default function Home() {
 
     <section className="feed-section">
       <div className="section-head"><div><span className="section-kicker">03 / PAPER TRADE MANAGEMENT</span><h2>Stops & targets</h2><p>Open paper positions are checked against each newly closed 4H candle. If stop and target hit in the same candle, stop is recorded first conservatively.</p></div></div>
-      <div className="feed-table-wrap"><table><thead><tr><th>MARKET / STRATEGY</th><th>DIRECTION</th><th>STATUS</th><th>ENTRY</th><th>STOP LOSS</th><th>TAKE PROFIT</th><th>EXIT / RESULT</th></tr></thead><tbody>
+      <div className="feed-table-wrap"><table><thead><tr><th>MARKET / STRATEGY</th><th>DIRECTION</th><th>STATUS</th><th>ENTRY</th><th>STOP LOSS</th><th>TAKE PROFIT</th><th>AI REVIEW</th><th>EXIT / RESULT</th></tr></thead><tbody>
         {data.paper_trades.length ? data.paper_trades.slice(0, 100).map((trade, i) => <tr key={trade.trade_id ?? i}>
           <td><b>{trade.pair}</b><small>{clean(trade.strategy)} · {fmtTime(trade.signal_time)}</small></td>
           <td><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{trade.direction}</span></td>
           <td><span className={"state-pill " + (trade.status === "OPEN" ? "good" : "")}>{trade.status}</span></td>
           <td>{fmtPrice(trade.entry)}</td><td>{fmtPrice(trade.stop_loss)}</td><td>{fmtPrice(trade.take_profit)}</td>
+          <td>{clean(trade.ai_review_status)}{trade.ai_assessment ? <small>{clean(trade.ai_assessment)}</small> : null}</td>
           <td>{trade.exit_reason ? <>{clean(trade.exit_reason)} @ {fmtPrice(trade.exit_price)}<small>{trade.realized_r_multiple}R · {fmtTime(trade.exit_time)}</small></> : "Monitoring"}</td>
-        </tr>) : <tr><td colSpan={7}><div className="empty-row">No risk-defined paper trades recorded yet. FRIDAY will not invent a position when filters or risk plans fail.</div></td></tr>}
+        </tr>) : <tr><td colSpan={8}><div className="empty-row">No risk-defined paper trades recorded yet. FRIDAY will not invent a position when filters or risk plans fail.</div></td></tr>}
       </tbody></table></div>
       <div className="feed-foot"><span>{data.paper_trades.filter(x => x.status === "OPEN").length} open paper trades</span><span>{data.paper_trades.filter(x => x.status === "CLOSED").length} closed by stop/target</span></div>
     </section>
