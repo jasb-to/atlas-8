@@ -356,12 +356,28 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     return run_record
 
 
+def validate_friday_pairs(pairs: list[str]) -> list[str]:
+    normalized = [pair.strip().upper() for pair in pairs if pair.strip()]
+    invalid = [pair for pair in normalized if not pair.endswith("USDT")]
+    if invalid:
+        raise ValueError(
+            "FRIDAY research scans require USDT-quoted pairs; rejected: " + ", ".join(invalid)
+        )
+    if not normalized:
+        raise ValueError("At least one USDT-quoted pair is required")
+    return normalized
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT")
     parser.add_argument("--output-dir", default="results/friday-monitor")
     args = parser.parse_args()
-    result = run_monitor([x.strip().upper() for x in args.pairs.split(",") if x.strip()], args.output_dir)
+    try:
+        pairs = validate_friday_pairs(args.pairs.split(","))
+    except ValueError as exc:
+        parser.error(str(exc))
+    result = run_monitor(pairs, args.output_dir)
     return 0 if result["status"] == "success" else 1
 
 
