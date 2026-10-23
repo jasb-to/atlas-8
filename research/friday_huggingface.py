@@ -34,11 +34,13 @@ def review_decision(
             "response": None, "latency_ms": None, "error": None,
         }
     prompt = {
-        "task": "Review this causal crypto setup as an independent research analyst.",
+        "task": "Review and rank the supplied causal crypto trade candidates as an independent research analyst. This is AI-assisted discovery/ranking over a deterministic candidate universe, not free-form price prediction.",
         "rules": [
             "Use only the supplied evidence; do not infer missing chart data.",
             "Do not invent prices, indicators, probabilities, or future outcomes.",
-            "Do not change the deterministic rule engine's state, direction, stop, or targets.",
+            "Do not invent candidates, prices, direction, stops, targets, or future outcomes. Only discuss candidates explicitly present in candidate_universe or frozen_decision.",
+            "Identify which supplied candidate deserves the most attention and why, but treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
+            "A supportive AI opinion cannot promote a blocked candidate or bypass any hard gate.",
             "Identify missing evidence, contradictory evidence, and likely false-break risks.",
             "Return a JSON object with keys: assessment (one of supportive, mixed, caution, insufficient_evidence), "
             "confidence (low, medium, high; qualitative only), supporting_evidence (array), "
