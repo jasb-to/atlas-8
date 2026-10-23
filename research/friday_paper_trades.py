@@ -19,7 +19,8 @@ def _key(pair: str, strategy: str, signal_time: str, direction: str) -> str:
 
 def register_paper_trade(store, *, pair: str, strategy: str, signal_time: str,
                          direction: str, entry: float, stop: float, target: float,
-                         reward_risk: float, timeframe: str = "4H") -> dict[str, Any]:
+                         reward_risk: float, timeframe: str = "4H",
+                         ai_review: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Idempotently register a risk-defined paper trade."""
     if direction.lower() not in {"long", "short"}:
         raise ValueError("direction must be long or short")
@@ -40,7 +41,11 @@ def register_paper_trade(store, *, pair: str, strategy: str, signal_time: str,
         "timeframe": timeframe, "direction": direction.upper(),
         "signal_time": signal_time, "opened_at": utc_now(),
         "entry": entry, "stop_loss": stop, "take_profit": target,
-        "reward_risk": float(reward_risk), "status": "OPEN",
+        "reward_risk": float(reward_risk),
+        "ai_review_status": (ai_review or {}).get("status", "not_attached"),
+        "ai_assessment": ((ai_review or {}).get("response") or {}).get("assessment"),
+        "ai_rationale": ((ai_review or {}).get("response") or {}).get("rationale"),
+        "status": "OPEN",
         "last_checked_candle": None, "last_checked_at": utc_now(),
         "exit_time": None, "exit_price": None, "exit_reason": None,
         "realized_r_multiple": None, "research_only": True,
