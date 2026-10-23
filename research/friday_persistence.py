@@ -341,33 +341,63 @@ class RepoFolderFridayStore:
     def _refresh_dashboard(self) -> None:
         cutoff = pd.Timestamp(os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
         cutoff = cutoff.tz_localize("UTC") if cutoff.tzinfo is None else cutoff.tz_convert("UTC")
+
+        def post_launch(value: Any) -> bool:
+            if not value:
+                return False
+            try:
+                timestamp = pd.Timestamp(value)
+                timestamp = timestamp.tz_localize("UTC") if timestamp.tzinfo is None else timestamp.tz_convert("UTC")
+                return timestamp >= cutoff
+            except (TypeError, ValueError, OverflowError):
+                return False
+
         snapshots = []
         for record in self._read("archive.json"):
             if record.get("record_type") != "decision_snapshot":
                 continue
             if not str(record.get("pair", "")).upper().endswith("USDT"):
                 continue
-            signal_time = record.get("signal_time")
-            if not signal_time:
-                continue
-            event_time = pd.Timestamp(signal_time)
-            event_time = event_time.tz_localize("UTC") if event_time.tzinfo is None else event_time.tz_convert("UTC")
-            if event_time < cutoff:
+            if not post_launch(record.get("signal_time")):
                 continue
             snapshots.append(record)
             if len(snapshots) == 12:
                 break
+
         events = [
             record for record in self._read("events.json")
             if str(record.get("pair", "")).upper().endswith("USDT")
+            and post_launch(record.get("continuation_add_time") or record.get("signal_time"))
         ][:50]
+
+        runs = []
+        for record in self._read("runs.json"):
+            pair_results = record.get("pair_results") or []
+            if not post_launch(record.get("started_at")) or not pair_results:
+                continue
+            if not all(str(result.get("pair", "")).upper().endswith("USDT") for result in pair_results):
+                continue
+            runs.append(record)
+            if len(runs) == 10:
+                break
+
+        alerts = [
+            record for record in self._read("alerts.json")
+            if str(record.get("pair", "")).upper().endswith("USDT")
+            and post_launch(record.get("signal_time"))
+        ][:10]
+        paper_trades = [
+            record for record in self._read("paper_trades.json")
+            if str(record.get("pair", "")).upper().endswith("USDT")
+            and post_launch(record.get("signal_time") or record.get("opened_at") or record.get("created_at"))
+        ][:100]
+
         payload = {
             "connected": True, "status": "connected",
             "message": "Connected to FRIDAY's temporary Git repository research store; only post-launch USDT research is shown.",
             "storage_backend": "github_repository_folder",
-            "snapshots": snapshots, "events": events,
-            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],
-            "paper_trades": self._read("paper_trades.json")[:100],
+            "snapshots": snapshots, "events": events, "runs": runs,
+            "alerts": alerts, "paper_trades": paper_trades,
             "fetched_at": utc_now(),
         }
         target = self.root / "dashboard.json"
