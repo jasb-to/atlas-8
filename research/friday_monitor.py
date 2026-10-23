@@ -368,7 +368,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
         error="; ".join(failures) if failures else None,
     )
     run_record["trade_events_seen"] = len(all_rows)
-    run_record["live_events_persisted"] = len(all_rows)
+    run_record["live_events_persisted"] = len(all_rows) if store.configured else 0
     run_record["historical_replay_events_ignored"] = historical_rows_ignored
     run_record["persistence_configured"] = store.configured
     (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
