@@ -31,12 +31,12 @@ The token must have permission to read repository contents. To trigger Actions t
 ## Verify the trial
 
 1. Run `Friday research monitor` manually from GitHub Actions.
-2. Confirm the run scanned both configured pairs and produced `testing/friday/data/dashboard.json`.
+2. Confirm the run attempted XBTUSD, ETHUSD, SOLUSD, VIRTUALUSD and HYPEUSD and produced `testing/friday/data/dashboard.json`.
 3. Confirm the workflow committed files under `testing/friday/data/` and `testing/friday/runs/`.
 4. Open `/api/friday` on the dashboard deployment; it should return `connected: true` and `storage_backend: github_repository_folder`.
 5. Verify the radar, setup queue, run history and diagnostics show those saved records.
 6. Confirm the scheduled monitor runs successfully before relying on the cadence. A successful legacy preview workflow is not enough.
-7. Do not promote any setup to “tradeable” until the trade-plan builder is wired into the scan and validates stops, targets and reward/risk.
+7. The Stoch RSI reversal archetype now requires a structural stop, target and at least 1.5R before alert eligibility. Break/retest events are still research signals and must not be labelled fully tradeable until their alert path also consumes the risk plan and all market/persistence/deployment checks pass.
 
 ## Current limitation
 
