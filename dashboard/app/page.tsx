@@ -37,6 +37,8 @@ export default function Home() {
   const snapshotData = payloadOf(snapshot);
   const latestRun = data.runs[0];
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
+  const aiOkCount = pairScans.filter(x => x.ai_review_status === "ok").length;
+  const aiConfiguredCount = pairScans.filter(x => x.ai_review_status && x.ai_review_status !== "not_configured").length;
   const candidates = events.filter(x => x.event_type === "BREAK_CLOSE_PROBE" || x.event_type === "ENTRY_1" || x.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED");
   const reversalCandidate = snapshotData.momentum_reversal ?? {};
   const candidateCount = candidates.length + (reversalCandidate.eligible ? 1 : 0);
@@ -129,6 +131,7 @@ export default function Home() {
         <div><span>DATA LINK</span><b className={data.connected ? "value-good" : "value-bad"}>{data.connected ? "CONNECTED" : clean(data.status).toUpperCase()}</b></div>
         <div><span>LAST RUN</span><b>{latestRun?.status ? clean(latestRun.status).toUpperCase() : "NO RUN RECORD"}</b></div>
         <div><span>PAIRS WITH RESULTS</span><b>{pairScans.filter(x => x.status === "ok").length} / {latestRun?.pairs_checked ?? 0}</b></div>
+        <div><span>AI REVIEWS</span><b className={aiOkCount === pairScans.length && pairScans.length > 0 ? "value-good" : "value-bad"}>{aiOkCount} / {pairScans.length || 0} OK</b><small>{aiConfiguredCount === 0 ? "Model not configured" : "Completed reviews in latest run"}</small></div>
         <div><span>ALERT RECORDS</span><b>{data.alerts.length}</b></div>
       </div>
     </section>
