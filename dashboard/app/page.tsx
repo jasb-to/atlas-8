@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 type Row = Record<string, any>;
-type Payload = { connected: boolean; status: string; message: string; snapshots: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; fetched_at?: string };
-const empty: Payload = { connected: false, status: "loading", message: "Checking FRIDAY's data link…", snapshots: [], events: [], runs: [], alerts: [] };
+type Payload = { connected: boolean; status: string; message: string; snapshots: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; paper_trades: Row[]; fetched_at?: string };
+const empty: Payload = { connected: false, status: "loading", message: "Checking FRIDAY's data link…", snapshots: [], events: [], runs: [], alerts: [], paper_trades: [] };
 const fmtTime = (v?: string) => v ? new Date(v).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "—";
 const fmtPrice = (v: unknown) => typeof v === "number" ? v.toLocaleString(undefined, { maximumFractionDigits: 6 }) : typeof v === "string" ? v : "—";
 const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object" ? row.payload : {};
@@ -100,7 +100,21 @@ export default function Home() {
     </section>
 
     <section className="feed-section">
-      <div className="section-head"><div><span className="section-kicker">03 / SCAN & TRADE LEDGER</span><h2>What FRIDAY has recorded</h2><p>New records appear after persistence succeeds. Refreshes automatically every 30 seconds.</p></div>
+      <div className="section-head"><div><span className="section-kicker">03 / PAPER TRADE MANAGEMENT</span><h2>Stops & targets</h2><p>Open paper positions are checked against each newly closed 4H candle. If stop and target hit in the same candle, stop is recorded first conservatively.</p></div></div>
+      <div className="feed-table-wrap"><table><thead><tr><th>MARKET / STRATEGY</th><th>DIRECTION</th><th>STATUS</th><th>ENTRY</th><th>STOP LOSS</th><th>TAKE PROFIT</th><th>EXIT / RESULT</th></tr></thead><tbody>
+        {data.paper_trades.length ? data.paper_trades.slice(0, 100).map((trade, i) => <tr key={trade.trade_id ?? i}>
+          <td><b>{trade.pair}</b><small>{clean(trade.strategy)} · {fmtTime(trade.signal_time)}</small></td>
+          <td><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{trade.direction}</span></td>
+          <td><span className={"state-pill " + (trade.status === "OPEN" ? "good" : "")}>{trade.status}</span></td>
+          <td>{fmtPrice(trade.entry)}</td><td>{fmtPrice(trade.stop_loss)}</td><td>{fmtPrice(trade.take_profit)}</td>
+          <td>{trade.exit_reason ? <>{clean(trade.exit_reason)} @ {fmtPrice(trade.exit_price)}<small>{trade.realized_r_multiple}R · {fmtTime(trade.exit_time)}</small></> : "Monitoring"}</td>
+        </tr>) : <tr><td colSpan={7}><div className="empty-row">No risk-defined paper trades recorded yet. FRIDAY will not invent a position when filters or risk plans fail.</div></td></tr>}
+      </tbody></table></div>
+      <div className="feed-foot"><span>{data.paper_trades.filter(x => x.status === "OPEN").length} open paper trades</span><span>{data.paper_trades.filter(x => x.status === "CLOSED").length} closed by stop/target</span></div>
+    </section>
+
+    <section className="feed-section">
+      <div className="section-head"><div><span className="section-kicker">04 / SCAN & TRADE LEDGER</span><h2>What FRIDAY has recorded</h2><p>New records appear after persistence succeeds. Refreshes automatically every 30 seconds.</p></div>
         <label className="filter-label">PAIR <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}>{pairs.map(p => <option key={p} value={p}>{p}</option>)}</select></label>
       </div>
       <div className="feed-table-wrap"><table><thead><tr><th>TIME / MARKET</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th><th>RETEST</th><th>CONTINUATION</th></tr></thead><tbody>
@@ -110,7 +124,7 @@ export default function Home() {
     </section>
 
     <section className="engine-strip">
-      <div><span className="section-kicker">04 / ENGINE DIAGNOSTICS</span><h2>Trust, but verify.</h2></div>
+      <div><span className="section-kicker">05 / ENGINE DIAGNOSTICS</span><h2>Trust, but verify.</h2></div>
       <div className="diagnostic-grid">
         <div><span>DATA LINK</span><b className={data.connected ? "value-good" : "value-bad"}>{data.connected ? "CONNECTED" : clean(data.status).toUpperCase()}</b></div>
         <div><span>LAST RUN</span><b>{latestRun?.status ? clean(latestRun.status).toUpperCase() : "NO RUN RECORD"}</b></div>
