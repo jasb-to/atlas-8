@@ -71,6 +71,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         "current_indicators": result.get("current_indicators"),
                         "structure_lifecycle": result.get("structure_lifecycle"),
                         "model_review": result.get("model_review"),
+                        "momentum_reversal": result.get("momentum_reversal"),
                         "multitimeframe_scan": mtf,
                     },
                 ))
