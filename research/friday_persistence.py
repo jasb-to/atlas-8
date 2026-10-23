@@ -344,7 +344,8 @@ class RepoFolderFridayStore:
             "message": "Connected to FRIDAY's temporary Git repository research store.",
             "storage_backend": "github_repository_folder",
             "snapshots": snapshots, "events": self._read("events.json")[:50],
-            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],\n            "paper_trades": self._read("paper_trades.json")[:100],
+            "runs": self._read("runs.json")[:10], "alerts": self._read("alerts.json")[:10],
+            "paper_trades": self._read("paper_trades.json")[:100],
             "fetched_at": utc_now(),
         }
         target = self.root / "dashboard.json"
