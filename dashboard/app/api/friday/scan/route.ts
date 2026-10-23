@@ -65,7 +65,7 @@ async function triggerScan(request: NextRequest) {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { pairs: "XBTUSD,ETHUSD,SOLUSD,VIRTUALUSD,HYPEUSD" },
+        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT" },
       }),
       cache: "no-store",
     });
@@ -100,7 +100,7 @@ async function triggerScan(request: NextRequest) {
       message: "FRIDAY research workflow dispatch accepted by GitHub Actions.",
       workflow: "friday-monitor.yml",
       ref: "main",
-      pairs: ["XBTUSD", "ETHUSD", "SOLUSD", "VIRTUALUSD", "HYPEUSD"],
+      pairs: ["XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT"],
     }, 202);
   } catch (error) {
     console.error("[FRIDAY scan] GitHub API request failed", {

@@ -31,7 +31,7 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const pairs = useMemo(() => ["ALL", ...Array.from(new Set(data.events.map(x => x.pair).filter(Boolean)))], [data.events]);
+  const pairs = useMemo(() => ["ALL", ...Array.from(new Set([...data.events.map(x => x.pair), ...((data.runs[0]?.pair_results ?? []).map((x: Row) => x.pair))].filter(Boolean)))], [data.events, data.runs]);
   const events = useMemo(() => selectedPair === "ALL" ? data.events : data.events.filter(x => x.pair === selectedPair), [data.events, selectedPair]);
   const snapshot = data.snapshots[0];
   const snapshotData = payloadOf(snapshot);
@@ -44,8 +44,9 @@ export default function Home() {
   const candidateCount = candidates.length + (reversalCandidate.eligible ? 1 : 0);
   const latestEvents = events.slice(0, 50);
   const runAgeMs = latestRun?.started_at ? Date.now() - new Date(latestRun.started_at).getTime() : Number.POSITIVE_INFINITY;
-  const engineOk = latestRun?.status === "success" && data.connected && runAgeMs >= 0 && runAgeMs < 6 * 60 * 60 * 1000;
+  const engineOk = Boolean(latestRun && ["success", "scan_complete_ai_unavailable"].includes(latestRun.status) && data.connected && runAgeMs >= 0 && runAgeMs < 6 * 60 * 60 * 1000);
   const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
+  const latestCandle = pairScans.map(x => x.last_completed_candle_utc).filter(Boolean).sort().at(-1) ?? snapshot?.signal_time;
   const latestDecision = snapshotData.friday_decision ?? {};
   const latestSetup = snapshotData.latest_setup_state ?? {};
 
@@ -61,13 +62,19 @@ export default function Home() {
       <article className="radar-panel">
         <div className="panel-head"><div><span className="section-kicker">01 / SCANNER</span><h2>FRIDAY radar</h2></div><span className={engineOk ? "status-pill good" : "status-pill"}>{engineOk ? "RUN CONFIRMED" : "AWAITING PROOF"}</span></div>
         <div className="radar-stage">
-          <div className={`radar-grid ${engineOk ? "radar-active" : "radar-idle"}`}><span className="radar-sweep" /><i className="radar-cross cross-h" /><i className="radar-cross cross-v" />
-            <span className="radar-dot dot-btc" /><span className="radar-dot dot-virtual" /><span className="radar-dot dot-ghost" />
-            <div className="radar-core"><b>F</b><small>{engineOk ? "MONITOR OK" : "FRIDAY"}</small></div>
-            <span className="radar-label label-btc">XBTUSDT</span><span className="radar-label label-virtual">VIRTUALUSDT</span><span className="radar-label label-ghost">HYPEUSDT</span>
+          <div className="scanner-market-grid">
+            {pairScans.length ? pairScans.map((scan, i) => {
+              const symbol = String(scan.pair ?? "UNKNOWN").toUpperCase();
+              const display = symbol === "XBTUSDT" || symbol === "XBTUSD" ? "BTC" : symbol.replace(/USDT$/, "");
+              return <div className={`scanner-market ${scan.status === "ok" ? "market-ok" : "market-error"}`} key={symbol}>
+                <div className="scanner-market-top"><b>{display}</b><span>{scan.status === "ok" ? "SCANNED" : "ERROR"}</span></div>
+                <strong>{fmtPrice(scan.last_close)}</strong>
+                <small>{clean(scan.latest_setup_state ?? "waiting")}</small>
+              </div>;
+            }) : <div className="scanner-empty">No per-market results have been published yet.</div>}
           </div>
         </div>
-        <div className="radar-foot"><div><span>LAST COMPLETED RUN</span><b>{fmtTime(lastScan)}</b></div><div><span>PAIRS ATTEMPTED</span><b>{latestRun?.pairs_checked ?? "—"}</b></div><div><span>LAST CANDLE</span><b>{fmtTime(snapshot?.signal_time)}</b></div></div>
+        <div className="radar-foot"><div><span>LAST COMPLETED RUN</span><b>{fmtTime(lastScan)}</b></div><div><span>PAIRS ATTEMPTED</span><b>{latestRun?.pairs_checked ?? "—"}</b></div><div><span>LAST CANDLE</span><b>{fmtTime(latestCandle)}</b></div></div>
         {!data.connected && <div className="notice"><b>Data connection unavailable</b><p>{data.message} FRIDAY needs a successful scheduled scan and a readable repository-backed dashboard data file.</p></div>}
         {latestRun?.error && <div className="error-note"><b>Last run error</b><p>{latestRun.error}</p></div>}
       </article>
