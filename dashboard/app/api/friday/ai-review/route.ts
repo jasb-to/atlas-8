@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     let raw = body?.choices?.[0]?.message?.content;
     if (Array.isArray(raw)) raw = raw.filter((part: any) => part && typeof part.text === "string").map((part: any) => part.text).join("");
     if (typeof raw !== "string") throw new Error("Model response had no text content");
-    raw = raw.trim().replace(/^\`\`\`(?:json)?\s*/i, "").replace(/\s*\`\`\`$/, "");
+    raw = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
     const parsed = JSON.parse(raw);
     const assessments = ["supportive", "mixed", "caution", "insufficient_evidence"];
     if (!parsed || typeof parsed !== "object" || !assessments.includes(parsed.assessment)) throw new Error("Model response assessment failed schema validation");
