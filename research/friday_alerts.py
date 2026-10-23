@@ -46,8 +46,9 @@ def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = 
         f"Signal candle: {signal_time}",
         f"Reference close: {entry}",
         f"Trendline at break: {line}",
+        *([f"Structural stop: {event.get('paper_stop')}", f"Target: {event.get('paper_target')}", f"Reward/risk: {event.get('paper_reward_risk')}R"] if event.get("paper_stop") is not None else []),
         *[f"• {item}" for item in why],
-        "Risk: define structural invalidation and target before any manual action.",
+        "Risk-defined paper candidate only; no order submitted.",
         "Mode: research / paper only — no trade submitted.",
     ]
     return "\n".join(lines)
