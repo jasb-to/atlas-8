@@ -108,6 +108,10 @@ jobs:
             exit 0
           fi
           git commit -m "test(friday): archive research run $RUN_ID"
+          # Dashboard/code deployments can advance main while this scan runs.
+          # Rebase the data-only archive commit before pushing to avoid losing it.
+          git fetch origin main
+          git rebase origin/main
           git push origin HEAD:main
       - name: Upload Friday run logs and market snapshots
         if: always()
