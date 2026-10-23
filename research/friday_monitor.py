@@ -145,6 +145,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     store, pair=pair, strategy="friday-price-action-v2",
                     signal_time=pd.Timestamp(signal_time).isoformat(), direction=direction,
                     entry=entry_price, stop=stop, target=target, reward_risk=rr,
+                    ai_review=result.get("model_review"),
                 )
             # Persist the lifecycle ledger idempotently. Only alert events that
             # first become actionable on the latest closed candle.
@@ -242,6 +243,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     direction=str(reversal["direction"]).lower(), entry=float(reversal["entry"]),
                     stop=float(reversal["stop"]), target=float(reversal["target"]),
                     reward_risk=float(reversal["reward_risk"]),
+                    ai_review=result.get("model_review"),
                 )
             reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
             if reversal.get("eligible") and reversal_ts == latest:
