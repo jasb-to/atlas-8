@@ -358,7 +358,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pairs", default="XBTUSD,VIRTUALUSD")
+    parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT")
     parser.add_argument("--output-dir", default="results/friday-monitor")
     args = parser.parse_args()
     result = run_monitor([x.strip().upper() for x in args.pairs.split(",") if x.strip()], args.output_dir)
