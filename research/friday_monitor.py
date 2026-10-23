@@ -64,6 +64,17 @@ def _ai_candidate_pass(review: dict | None, expected_strategy: str) -> tuple[boo
     return True, "ai_selected_supportive"
 
 
+def _is_live_lifecycle_event(pair: str, event: dict, tracking_start: str | None = None) -> bool:
+    """Only count/persist post-launch events from the configured USDT market universe."""
+    if not str(pair).upper().endswith("USDT"):
+        return False
+    signal_time = event.get("continuation_add_time") or event.get("signal_time")
+    if not signal_time:
+        return False
+    cutoff = _utc(tracking_start or os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
+    return _utc(signal_time) >= cutoff
+
+
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_id = f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
@@ -71,6 +82,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     pair_results = []
     failures = []
     all_rows = []
+    historical_rows_ignored = 0
+    tracking_cutoff = _utc(os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -171,20 +184,24 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 signal_ts = _utc(event["signal_time"]) if event.get("signal_time") else None
                 add_ts = _utc(event["continuation_add_time"]) if event.get("continuation_add_time") else None
                 row_event = make_trade_event(pair=pair, timeframe="4H", event=normalized, run_id=run_id)
-                all_rows.append(row_event)
-                if store.configured:
-                    store.record_trade_event(row_event)
-                    lifecycle_state_key = hashlib.sha256(
-                        f"{row_event['event_key']}|{normalized.get('outcome', 'pending')}|{normalized.get('event_add', '')}".encode()
-                    ).hexdigest()
-                    store.record_archive(make_archive_record(
-                        record_key=lifecycle_state_key, record_type="setup_lifecycle",
-                        pair=pair, timeframe="4H", signal_time=row_event.get("signal_time"),
-                        payload=normalized,
-                    ))
+                live_event = _is_live_lifecycle_event(pair, normalized, tracking_cutoff.isoformat())
+                if live_event:
+                    all_rows.append(row_event)
+                    if store.configured:
+                        store.record_trade_event(row_event)
+                        lifecycle_state_key = hashlib.sha256(
+                            f"{row_event['event_key']}|{normalized.get('outcome', 'pending')}|{normalized.get('event_add', '')}".encode()
+                        ).hexdigest()
+                        store.record_archive(make_archive_record(
+                            record_key=lifecycle_state_key, record_type="setup_lifecycle",
+                            pair=pair, timeframe="4H", signal_time=row_event.get("signal_time"),
+                            payload=normalized,
+                        ))
+                else:
+                    historical_rows_ignored += 1
 
-                fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest
-                fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
+                fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest and signal_ts is not None and signal_ts >= tracking_cutoff
+                fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest and add_ts is not None and add_ts >= tracking_cutoff
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
                     ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
@@ -257,8 +274,13 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
             reversal = result.get("momentum_reversal", {})
+            reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
+            reversal_is_live = (
+                reversal_ts is not None and reversal_ts >= tracking_cutoff
+                and pair.upper().endswith("USDT")
+            )
             ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1")
-            if reversal.get("eligible") and reversal.get("signal_time") and ai_pass and store.configured and hasattr(store, "paper_trades"):
+            if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and ai_pass and store.configured and hasattr(store, "paper_trades"):
                 register_paper_trade(
                     store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
                     signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
@@ -267,8 +289,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     reward_risk=float(reversal["reward_risk"]),
                     ai_review=result.get("model_review"),
                 )
-            reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
-            if reversal.get("eligible") and reversal_ts == latest:
+            if reversal.get("eligible") and reversal_ts == latest and reversal_is_live:
                 if not ai_pass:
                     row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                 reversal_event = {
@@ -347,6 +368,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
         error="; ".join(failures) if failures else None,
     )
     run_record["trade_events_seen"] = len(all_rows)
+    run_record["live_events_persisted"] = len(all_rows)
+    run_record["historical_replay_events_ignored"] = historical_rows_ignored
     run_record["persistence_configured"] = store.configured
     (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
     # Database logging must not be silently reported as successful if missing.
