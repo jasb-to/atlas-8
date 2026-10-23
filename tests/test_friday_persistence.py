@@ -63,8 +63,8 @@ class FridayPersistenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             store = RepoFolderFridayStore(root=directory)
             event = make_trade_event(
-                pair="XBTUSD", timeframe="4H",
-                event={"event":"BREAK_CLOSE_PROBE","signal_time":"2026-10-21T12:00:00Z",
+                pair="XBTUSDT", timeframe="4H",
+                event={"event":"BREAK_CLOSE_PROBE","signal_time":"2026-10-24T12:00:00Z",
                        "direction":"long","line_kind":"resistance","close_at_break":100},
                 run_id="run-1",
             )
