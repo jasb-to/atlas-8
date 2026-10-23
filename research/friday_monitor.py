@@ -165,6 +165,31 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
                 if fresh_entry1 or fresh_entry2:
+                    passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
+                    direction = str(event.get("direction", "")).lower()
+                    plan = (result.get("trade_plans") or {}).get(direction, {})
+                    entry_ref = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
+                    stop = plan.get("stop")
+                    target = plan.get("target")
+                    if not passed or not plan.get("eligible") or stop is None or target is None:
+                        reasons = filter_blockers + list(plan.get("blockers", []))
+                        row["alert_results"].append({
+                            "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
+                            "status": "filtered_or_no_valid_plan",
+                            "reason": ", ".join(reasons) or "structural trade plan is not eligible",
+                        })
+                        continue
+                    risk = abs(entry_ref - float(stop))
+                    reward = float(target) - entry_ref if direction == "long" else entry_ref - float(target)
+                    rr = reward / risk if risk > 0 else 0
+                    geometry_ok = (float(stop) < entry_ref < float(target)) if direction == "long" else (float(target) < entry_ref < float(stop))
+                    if not geometry_ok or rr < 1.5:
+                        row["alert_results"].append({
+                            "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
+                            "status": "filtered_or_no_valid_plan",
+                            "reason": "structural plan failed entry geometry or minimum 1.5R",
+                        })
+                        continue
                     alert_type = "ENTRY_2" if fresh_entry2 else "ENTRY_1"
                     if not store.configured:
                         row["alert_results"].append({
@@ -184,6 +209,9 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         })
                         continue
                     alert_event = dict(event)
+                    alert_event["paper_stop"] = float(stop)
+                    alert_event["paper_target"] = float(target)
+                    alert_event["paper_reward_risk"] = round(rr, 3)
                     if fresh_entry2:
                         alert_event["event_add"] = "CONTINUATION_ADD_CONFIRMED"
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
