@@ -27,11 +27,58 @@ def review_decision(
 ) -> dict[str, Any]:
     api_token = token or os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
     model = model_id or os.getenv("FRIDAY_HF_MODEL_ID") or DEFAULT_MODEL_ID
+    # In GitHub Actions, the Hugging Face key deliberately stays in Vercel.
+    # Exchange the runner's short-lived OIDC identity for a server-side Vercel review.
     if not api_token:
-        return {
-            "status": "not_configured", "provider": "huggingface", "model_id": model,
-            "response": None, "latency_ms": None, "error": None,
-        }
+        proxy_url = os.getenv("FRIDAY_AI_REVIEW_URL") or "https://atlas8-friday.vercel.app/api/friday/ai-review"
+        oidc_url = os.getenv("ACTIONS_ID_TOKEN_REQUEST_URL")
+        oidc_request_token = os.getenv("ACTIONS_ID_TOKEN_REQUEST_TOKEN")
+        if not oidc_url or not oidc_request_token:
+            return {
+                "status": "not_configured", "provider": "huggingface", "model_id": model,
+                "response": None, "latency_ms": None,
+                "error": "Vercel review proxy requires a GitHub Actions OIDC token",
+            }
+        started = time.monotonic()
+        try:
+            separator = "&" if "?" in oidc_url else "?"
+            oidc_response = session.get(
+                f"{oidc_url}{separator}audience=friday-huggingface-review",
+                headers={"Authorization": f"Bearer {oidc_request_token}"},
+                timeout=timeout,
+            )
+            oidc_response.raise_for_status()
+            oidc_token = oidc_response.json()["value"]
+            proxy_response = session.post(
+                proxy_url,
+                headers={"Authorization": f"Bearer {oidc_token}", "Content-Type": "application/json"},
+                json={"decision": dict(decision), "model_id": model},
+                timeout=max(timeout, 20),
+            )
+            proxy_response.raise_for_status()
+            proxy_body = proxy_response.json()
+            if not isinstance(proxy_body, dict) or proxy_body.get("status") != "ok":
+                raise ValueError("Vercel review proxy returned an invalid review response")
+            parsed = proxy_body.get("response")
+            allowed = {"supportive", "mixed", "caution", "insufficient_evidence"}
+            if not isinstance(parsed, dict) or parsed.get("assessment") not in allowed:
+                raise ValueError("Vercel review proxy response did not match Friday review schema")
+            for field in ("supporting_evidence", "counter_evidence", "missing_evidence"):
+                if not isinstance(parsed.get(field), list):
+                    raise ValueError(f"Vercel review proxy field {field} must be an array")
+            return {
+                "status": "ok", "provider": "huggingface",
+                "model_id": proxy_body.get("model_id", model),
+                "response": parsed,
+                "latency_ms": proxy_body.get("latency_ms", round((time.monotonic() - started) * 1000)),
+                "error": None,
+            }
+        except Exception as exc:
+            return {
+                "status": "error", "provider": "huggingface", "model_id": model,
+                "response": None, "latency_ms": round((time.monotonic() - started) * 1000),
+                "error": f"Vercel review proxy: {type(exc).__name__}: {str(exc)[:200]}",
+            }
     prompt = {
         "task": "Review and rank the supplied causal crypto trade candidates as an independent research analyst. This is AI-assisted discovery/ranking over a deterministic candidate universe, not free-form price prediction.",
         "rules": [

@@ -14,10 +14,11 @@ on:
       pairs:
         description: Comma-separated Kraken pairs
         required: false
-        default: XBTUSD,ETHUSD,SOLUSD,VIRTUALUSD,HYPEUSD
+        default: XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: friday-research-monitor
@@ -43,11 +44,10 @@ jobs:
           FRIDAY_REPO_DATA_DIR: testing/friday/data
           TELEGRAM_BOT_TOKEN: ${{ secrets.FRIDAY_TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.FRIDAY_TELEGRAM_CHAT_ID }}
-          HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
-          FRIDAY_HF_MODEL_ID: ${{ vars.FRIDAY_HF_MODEL_ID }}
-          FRIDAY_HF_ENDPOINT: ${{ vars.FRIDAY_HF_ENDPOINT }}
+          FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
+          FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
         run: |
-          PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,ETHUSD,SOLUSD,VIRTUALUSD,HYPEUSD' }}"
+          PAIRS="${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT' }}"
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
       - name: Generate per-pair learning reports
         if: always()

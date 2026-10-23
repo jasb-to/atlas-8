@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
-from research.validate_kraken_trendlines import fetch_ohlc
+from research.friday_market_data import fetch_ohlc
 from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.structure_lifecycle import evaluate_structure
 from research.friday_decision import evaluate_friday_decision
@@ -305,7 +305,7 @@ def latest_setup_state(events, last_closed_candle):
             "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."}
 
 
-def build_preview(pair="XBTUSD", interval=240, output_dir="results/strategy-preview"):
+def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-preview"):
     raw=fetch_ohlc(pair=pair,interval=interval)
     events,status,frame=causal_replay(raw)
     setups=consolidate_setups(events,frame)
