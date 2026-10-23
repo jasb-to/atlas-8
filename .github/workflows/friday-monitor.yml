@@ -8,7 +8,7 @@ on:
       pairs:
         description: Comma-separated Kraken pairs
         required: false
-        default: XBTUSD,VIRTUALUSD
+        default: XBTUSD,ETHUSD,SOLUSD,VIRTUALUSD,HYPEUSD
 
 permissions:
   contents: write
@@ -41,7 +41,7 @@ jobs:
           FRIDAY_HF_MODEL_ID: ${{ vars.FRIDAY_HF_MODEL_ID }}
           FRIDAY_HF_ENDPOINT: ${{ vars.FRIDAY_HF_ENDPOINT }}
         run: |
-          PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,VIRTUALUSD' }}"
+          PAIRS="${{ github.event.inputs.pairs || 'XBTUSD,ETHUSD,SOLUSD,VIRTUALUSD,HYPEUSD' }}"
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
       - name: Generate per-pair learning reports
         if: always()
