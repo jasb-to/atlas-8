@@ -53,6 +53,25 @@ def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = 
     return "\n".join(lines)
 
 
+
+def build_momentum_reversal_alert(candidate: Mapping[str, Any], *, pair: str, timeframe: str = "4H") -> str:
+    """Format a risk-defined momentum reversal candidate for notification."""
+    direction = str(candidate.get("direction", "")).upper()
+    if direction not in {"LONG", "SHORT"} or not candidate.get("eligible"):
+        raise ValueError("candidate must be an eligible long or short plan")
+    return "\\n".join([
+        "FRIDAY | ENTRY CANDIDATE — STOCH RSI REVERSAL",
+        f"Market: {pair} · Timeframe: {timeframe} · Direction: {direction}",
+        f"Signal candle: {candidate.get('signal_time')}",
+        f"Entry reference: {candidate.get('entry')}",
+        f"Structural stop: {candidate.get('stop')}",
+        f"Target: {candidate.get('target')}",
+        f"Reward/risk: {candidate.get('reward_risk')}R",
+        f"Reason: fresh Stoch RSI cross from an extreme zone with momentum/structure confirmation.",
+        "Mode: research / paper only — no trade submitted.",
+    ])
+
+
 def send_telegram_alert(message: str, *, environ: Mapping[str, str] | None = None,
                         timeout_seconds: int = 8) -> dict[str, Any]:
     """Send a Telegram notification if credentials are configured; never logs secrets."""
