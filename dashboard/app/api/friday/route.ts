@@ -22,28 +22,14 @@ function response(body: DashboardPayload, status = 200) {
 }
 
 export async function GET() {
-  const token = process.env.FRIDAY_GITHUB_TOKEN;
   const repository = process.env.FRIDAY_GITHUB_REPOSITORY ?? "jasb-to/atlas-8";
   const branch = process.env.FRIDAY_GITHUB_DATA_BRANCH ?? "main";
-
-  if (!token) {
-    return response({
-      connected: false,
-      status: "not_configured",
-      message: "Temporary repository storage is selected, but FRIDAY_GITHUB_TOKEN is missing from the Vercel Production environment.",
-      snapshots: [], events: [], runs: [], alerts: [],
-    });
-  }
+  const path = "testing/friday/data/dashboard.json";
+  const url = `https://raw.githubusercontent.com/${repository}/${encodeURIComponent(branch)}/${path}?t=${Date.now()}`;
 
   try {
-    const path = "testing/friday/data/dashboard.json";
-    const url = `https://api.github.com/repos/${repository}/contents/${path}?ref=${encodeURIComponent(branch)}`;
     const result = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
+      headers: { Accept: "application/json" },
       cache: "no-store",
     });
 
@@ -51,26 +37,21 @@ export async function GET() {
       return response({
         connected: false,
         status: "waiting_for_first_run",
-        message: "Repository storage is configured. Waiting for the first successful FRIDAY run to publish dashboard data.",
+        message: "Waiting for the first successful FRIDAY run to publish dashboard data to the repository.",
         snapshots: [], events: [], runs: [], alerts: [],
       });
     }
     if (!result.ok) {
-      throw new Error(`GitHub returned HTTP ${result.status} while reading FRIDAY's repository data.`);
+      throw new Error(`Repository data fetch returned HTTP ${result.status}.`);
     }
 
-    const file = await result.json() as { content?: string; encoding?: string; sha?: string };
-    if (file.encoding !== "base64" || !file.content) {
-      throw new Error("FRIDAY dashboard data file was not returned as base64 content.");
-    }
-    const payload = JSON.parse(Buffer.from(file.content.replace(/\n/g, ""), "base64").toString("utf8")) as DashboardPayload;
+    const payload = await result.json() as DashboardPayload;
     return response({
       ...payload,
       connected: true,
       status: "connected",
       storage_backend: "github_repository_folder",
       fetched_at: new Date().toISOString(),
-      repository_data_sha: file.sha,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -78,7 +59,7 @@ export async function GET() {
     return response({
       connected: false,
       status: "error",
-      message: "Could not read FRIDAY's temporary repository data. Check FRIDAY_GITHUB_TOKEN access and the testing/friday/data/dashboard.json file.",
+      message: "Could not read FRIDAY's temporary repository data. Check the public repository data file and branch settings.",
       snapshots: [], events: [], runs: [], alerts: [],
     }, 503);
   }
