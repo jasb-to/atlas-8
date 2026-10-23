@@ -1,8 +1,7 @@
-"""Optional Hugging Face shadow reviewer for Friday's frozen rule evidence.
+"""Hugging Face candidate reviewer for FRIDAY's frozen rule evidence.
 
-Advisory only: it cannot create or veto signals, alter stops/targets, or place orders.
-Set HUGGINGFACE_API_KEY to enable; the model and endpoint have safe defaults.
-No secrets are logged.
+AI may prioritize or block promotion of a rule-generated candidate, but it cannot
+invent a trade, alter deterministic prices, or place orders.
 """
 from __future__ import annotations
 
@@ -39,7 +38,9 @@ def review_decision(
             "Use only the supplied evidence; do not infer missing chart data.",
             "Do not invent prices, indicators, probabilities, or future outcomes.",
             "Do not invent candidates, prices, direction, stops, targets, or future outcomes. Only discuss candidates explicitly present in candidate_universe or frozen_decision.",
-            "Identify which supplied candidate deserves the most attention and why, but treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
+            "Evaluate candidate_universe independently from rule_decision. A NO_TRADE rule_decision does not automatically disqualify a separate candidate that is explicitly marked eligible in candidate_universe.",
+            "Identify which supplied candidate deserves the most attention and why, using its supplied strategy and signal time in priority_candidate. If no eligible candidate exists, use null.",
+            "Treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
             "A supportive AI opinion cannot promote a blocked candidate or bypass any hard gate.",
             "Identify missing evidence, contradictory evidence, and likely false-break risks.",
             "Return a JSON object with keys: assessment (one of supportive, mixed, caution, insufficient_evidence), priority_candidate (string identifying the supplied candidate or null), "
