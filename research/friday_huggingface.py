@@ -42,7 +42,7 @@ def review_decision(
             "Identify which supplied candidate deserves the most attention and why, but treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
             "A supportive AI opinion cannot promote a blocked candidate or bypass any hard gate.",
             "Identify missing evidence, contradictory evidence, and likely false-break risks.",
-            "Return a JSON object with keys: assessment (one of supportive, mixed, caution, insufficient_evidence), "
+            "Return a JSON object with keys: assessment (one of supportive, mixed, caution, insufficient_evidence), priority_candidate (string identifying the supplied candidate or null), "
             "confidence (low, medium, high; qualitative only), supporting_evidence (array), "
             "counter_evidence (array), missing_evidence (array), rationale (string).",
             "This is shadow research, not financial advice and not an execution instruction.",
