@@ -2,7 +2,7 @@ import json
 import os
 import tempfile
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -15,20 +15,22 @@ class FridayMarketDataTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "USDT-quoted"):
             fetch_ohlc("HYPEUSD")
 
-    @patch("research.friday_market_data.requests.get")
-    def test_maps_xbt_to_binance_btc_and_drops_open_candle(self, get):
-        now = pd.Timestamp.now(tz="UTC")
-        open_ms = int((now - pd.Timedelta(hours=204)).timestamp() * 1000)
-        rows = []
-        for i in range(50):
-            t = open_ms + i * 4 * 60 * 60 * 1000
-            rows.append([t, "100", "105", "99", "103", "10", t + 4 * 60 * 60 * 1000 - 1, "1020", 10, "5", "510", "0"])
-        get.return_value = Mock(status_code=200, json=lambda: rows, raise_for_status=lambda: None)
-        frame = fetch_ohlc("XBTUSDT", 240)
-        self.assertEqual(get.call_args.kwargs["params"]["symbol"], "BTCUSDT")
-        self.assertEqual(len(frame), 50)
-        self.assertIn("timestamp", frame.columns)
-        self.assertIn("vwap", frame.columns)
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_passes_usdt_pair_to_kraken(self, fetch):
+        timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps,
+            "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50,
+            "vwap": [102.0] * 50, "volume": [10.0] * 50,
+            "trades": [10] * 50,
+        })
+        fetch.return_value = frame
+        result = fetch_ohlc("XBTUSDT", 240)
+        fetch.assert_called_once_with(pair="XBTUSDT", interval=240)
+        self.assertEqual(len(result), 50)
+        self.assertIn("timestamp", result.columns)
+        self.assertIn("vwap", result.columns)
 
 
 class FridayLedgerTrackingTests(unittest.TestCase):
