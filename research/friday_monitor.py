@@ -359,10 +359,12 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
         status = "persistence_not_configured" if not failures else "partial_failure"
     elif not failures:
         ai_statuses = [row.get("ai_review_status", "missing") for row in pair_results if row.get("status") == "ok"]
-        if ai_statuses and all(value == "not_configured" for value in ai_statuses):
-            status = "ai_not_configured"
-        elif any(value != "ok" for value in ai_statuses):
-            status = "ai_review_failure"
+        # Market scanning, persistence, and the run ledger must continue when the
+        # optional AI reviewer is temporarily unavailable. Candidate promotion and
+        # alerts remain blocked by _ai_candidate_pass unless a valid review exists.
+        # This is a successful scan with a clearly degraded AI status, not an AI pass.
+        if ai_statuses and any(value != "ok" for value in ai_statuses):
+            status = "scan_complete_ai_unavailable"
     run_record = make_cron_run(
         run_id=run_id, status=status, pair_results=pair_results, started_at=started_at,
         error="; ".join(failures) if failures else None,
@@ -403,6 +405,11 @@ def validate_friday_pairs(pairs: list[str]) -> list[str]:
     return normalized
 
 
+def _monitor_exit_code(status: str) -> int:
+    """Return success when scanning/persistence completed, even if AI is degraded."""
+    return 0 if status in {"success", "scan_complete_ai_unavailable"} else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT")
@@ -413,7 +420,7 @@ def main() -> int:
     except ValueError as exc:
         parser.error(str(exc))
     result = run_monitor(pairs, args.output_dir)
-    return 0 if result["status"] == "success" else 1
+    return _monitor_exit_code(result["status"])
 
 
 if __name__ == "__main__":
