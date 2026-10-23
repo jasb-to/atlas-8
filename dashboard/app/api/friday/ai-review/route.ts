@@ -97,7 +97,14 @@ export async function POST(request: Request) {
       }),
       signal: AbortSignal.timeout(25000)
     });
-    if (!response.ok) return json({ status: "error", error: `Hugging Face returned HTTP ${response.status}`, model_id: model }, 502);
+    if (!response.ok) {
+      const upstreamError = (await response.text()).slice(0, 180);
+      return json({
+        status: "error",
+        error: `Hugging Face returned HTTP ${response.status}: ${upstreamError}`,
+        model_id: model
+      }, 502);
+    }
     const body: any = await response.json();
     let raw = body?.choices?.[0]?.message?.content;
     if (Array.isArray(raw)) raw = raw.filter((part: any) => part && typeof part.text === "string").map((part: any) => part.text).join("");
