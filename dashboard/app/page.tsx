@@ -109,7 +109,7 @@ export default function Home() {
           <td><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{trade.direction}</span></td>
           <td><span className={"state-pill " + (trade.status === "OPEN" ? "good" : "")}>{trade.status}</span></td>
           <td>{fmtPrice(trade.entry)}</td><td>{fmtPrice(trade.stop_loss)}</td><td>{fmtPrice(trade.take_profit)}</td>
-          <td>{clean(trade.ai_review_status)}{trade.ai_assessment ? <small>{clean(trade.ai_assessment)}</small> : null}</td>
+          <td>{clean(trade.ai_review_status)}{trade.ai_assessment ? <small>{clean(trade.ai_assessment)}</small> : null}{trade.ai_priority_candidate ? <small>{clean(trade.ai_priority_candidate)}</small> : null}</td>
           <td>{trade.exit_reason ? <>{clean(trade.exit_reason)} @ {fmtPrice(trade.exit_price)}<small>{trade.realized_r_multiple}R · {fmtTime(trade.exit_time)}</small></> : "Monitoring"}</td>
         </tr>) : <tr><td colSpan={8}><div className="empty-row">No risk-defined paper trades recorded yet. FRIDAY will not invent a position when filters or risk plans fail.</div></td></tr>}
       </tbody></table></div>
