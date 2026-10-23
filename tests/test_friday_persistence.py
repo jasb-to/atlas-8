@@ -74,8 +74,8 @@ class FridayPersistenceTests(unittest.TestCase):
                 timeframe="4H", signal_time="2026-10-24T12:00:00Z", payload={"state":"WATCH"},
             ))
             store.record_cron_run(make_cron_run(
-                run_id="run-1", status="success", pair_results=[{"pair":"XBTUSD","status":"ok"}],
-                started_at="2026-10-21T12:00:00Z",
+                run_id="run-1", status="success", pair_results=[{"pair":"XBTUSDT","status":"ok"}],
+                started_at="2026-10-24T12:00:00Z",
             ))
             with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
                 dashboard = json.load(handle)
@@ -88,8 +88,8 @@ class FridayPersistenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             store = RepoFolderFridayStore(root=directory)
             store.upsert_paper_trade({
-                "trade_id": "trade-1", "pair": "HYPEUSD", "status": "OPEN",
-                "stop_loss": 84.0, "take_profit": 75.0,
+                "trade_id": "trade-1", "pair": "HYPEUSDT", "status": "OPEN",
+                "signal_time": "2026-10-24T12:00:00Z", "stop_loss": 84.0, "take_profit": 75.0,
             })
             with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
                 dashboard = json.load(handle)
