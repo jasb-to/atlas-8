@@ -126,6 +126,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             f"venue_symbol={pair} interval=4H thesis=1D+4H",
             flush=True,
         )
+        row = None
         try:
             pair_dir = out / pair.lower()
             pair_dir.mkdir(parents=True, exist_ok=True)
@@ -387,6 +388,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         })
                     except Exception as alert_exc:
                         store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": False, "status": "failed",
+                            "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                        })
                         raise
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
@@ -457,6 +462,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                                 })
                             except Exception as alert_exc:
                                 store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                                row["alert_results"].append({
+                                    "type": "MOMENTUM_REVERSAL", "sent": False, "status": "failed",
+                                    "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                                })
                                 raise
                         else:
                             row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
@@ -510,12 +519,16 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             error_text = f"{type(exc).__name__}: {exc}"
             failed_at = utc_now()
             failures.append(f"{pair}: {error_text}")
+            partial_alert_results = list((row or {}).get("alert_results") or [])
             failed_row = {
                 "run_id": run_id, "pair": pair, "status": "error",
                 "market_started_at": pair_started, "market_finished_at": failed_at,
                 "duration_seconds": round((pd.Timestamp(failed_at) - pd.Timestamp(pair_started)).total_seconds(), 3),
-                "error": error_text, "alert_results": [],
-                "alert_outcomes_total": 0, "alert_outcomes_sent": 0, "alert_outcomes_blocked": 0,
+                "error": error_text, "scan_diagnostic": error_text,
+                "alert_results": partial_alert_results,
+                "alert_outcomes_total": len(partial_alert_results),
+                "alert_outcomes_sent": sum(1 for item in partial_alert_results if item.get("sent") is True),
+                "alert_outcomes_blocked": sum(1 for item in partial_alert_results if item.get("sent") is False),
             }
             pair_results.append(failed_row)
             # Failed markets must have the same durable summary artifact as
@@ -558,9 +571,21 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_record["ai_reviews_ok"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") == "ok")
     run_record["ai_reviews_failed"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") != "ok")
     (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
-    # Database logging must not be silently reported as successful if missing.
+    # Database/repository logging failures must remain visible in the local
+    # artifact and Actions log instead of aborting before RUN_FINISHED.
+    run_record["run_ledger_persisted"] = bool(store.configured)
     if store.configured:
-        store.record_cron_run(run_record)
+        try:
+            store.record_cron_run(run_record)
+        except Exception as persist_exc:
+            run_record["run_ledger_persisted"] = False
+            run_record["persistence_error"] = f"{type(persist_exc).__name__}: {persist_exc}"
+            if status in {"success", "scan_complete_ai_unavailable"}:
+                status = "partial_failure"
+            run_record["status"] = status
+            run_record["error"] = "; ".join(filter(None, [run_record.get("error"), run_record["persistence_error"]]))
+            print(f"[FRIDAY] RUN_LEDGER_PERSIST_FAILED id={run_id} error={run_record['persistence_error']}", flush=True)
+    (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
     print(
         f"[FRIDAY] RUN_FINISHED id={run_id} status={status} "
         f"markets={len(pair_results)}/{len(pairs)} failed={len(failures)} "
