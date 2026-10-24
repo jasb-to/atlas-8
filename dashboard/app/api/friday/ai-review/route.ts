@@ -13,53 +13,6 @@ const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/head
 const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
-// Retry only transient transport/provider failures. Each attempt gets its own
-// timeout so an expired AbortSignal cannot make every retry fail immediately.
-// Two 8-second attempts fit inside a conservative 20-second function budget.
-async function fetchWithTransientRetry(
-  input: RequestInfo | URL,
-  init: RequestInit,
-  provider: string,
-): Promise<Response> {
-  const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
-  const maxAttempts = 2;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const attemptStarted = Date.now();
-    console.info("[FRIDAY AI review] provider attempt started", {
-      provider, attempt, max_attempts: maxAttempts, timeout_ms: 8000,
-    });
-    try {
-      const response = await fetch(input, {
-        ...init,
-        signal: AbortSignal.timeout(8000),
-      });
-      console.info("[FRIDAY AI review] provider attempt completed", {
-        provider, attempt, upstream_status: response.status,
-        attempt_latency_ms: Date.now() - attemptStarted,
-      });
-      const retryAfter = Number(response.headers.get("retry-after") ?? "0");
-      const canRetry = attempt < maxAttempts
-        && retryableStatuses.has(response.status)
-        && !(response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 1);
-      if (!canRetry) return response;
-      console.warn("[FRIDAY AI review] transient provider response; retrying", {
-        provider, attempt, status: response.status,
-      });
-      await response.body?.cancel().catch(() => undefined);
-    } catch (error) {
-      const name = error instanceof Error ? error.name : "UnknownError";
-      const retryable = name === "TypeError" || name === "TimeoutError" || name === "AbortError";
-      console.error("[FRIDAY AI review] provider attempt failed", {
-        provider, attempt, attempt_latency_ms: Date.now() - attemptStarted,
-        error_class: name, retrying: attempt < maxAttempts && retryable,
-      });
-      if (attempt >= maxAttempts || !retryable) throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
-  }
-  throw new Error("Provider retry loop exhausted");
-}
-
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
 }
@@ -107,9 +60,10 @@ export async function POST(request: Request) {
 
   // Prefer Gemini when configured; retain Hugging Face as a compatibility fallback.
   const geminiKey = process.env.GEMINI_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
   const hfKey = process.env.HUGGINGFACE_API_KEY;
-  const provider = geminiKey ? "gemini" : hfKey ? "huggingface" : null;
-  if (!provider) return json({ status: "error", error: "Neither GEMINI_API_KEY nor HUGGINGFACE_API_KEY is configured in Vercel" }, 503);
+  const provider = geminiKey ? "gemini" : groqKey ? "groq" : hfKey ? "huggingface" : null;
+  if (!provider) return json({ status: "error", error: "No AI provider configured. Set GEMINI_API_KEY, GROQ_API_KEY, or HUGGINGFACE_API_KEY." }, 503);
   // Gemini 2.5 Flash is restricted for new users and returns HTTP 404 on this key.
   // Migrate the legacy default/override to the supported, cost-efficient Flash-Lite model.
   const configuredGeminiModel = process.env.FRIDAY_GEMINI_MODEL;
@@ -118,7 +72,9 @@ export async function POST(request: Request) {
     : configuredGeminiModel;
   const model = provider === "gemini"
     ? geminiModel
-    : (process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest");
+    : provider === "groq"
+      ? (process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b")
+      : (process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest");
   let input: any;
   try { input = await request.json(); } catch { return json({ status: "error", error: "Invalid JSON request" }, 400); }
   if (!input?.decision || typeof input.decision !== "object" || Array.isArray(input.decision)) {
@@ -142,53 +98,106 @@ export async function POST(request: Request) {
     frozen_decision: input.decision
   };
   const started = Date.now();
+  let activeProvider = provider;
+  let activeModel = model;
   try {
-    let response: Response;
+    let response: Response | null = null;
     let body: any;
     let raw: any;
-    if (provider === "gemini") {
-      response = await fetchWithTransientRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-        method: "POST",
-        headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
-          contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
-          generationConfig: {
-            temperature: 0,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                assessment: { type: "STRING", enum: ["supportive", "mixed", "caution", "insufficient_evidence"] },
-                priority_candidate: { type: "STRING", nullable: true },
-                confidence: { type: "STRING", enum: ["low", "medium", "high"] },
-                supporting_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                counter_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                missing_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                rationale: { type: "STRING" }
-              },
-              required: ["assessment", "priority_candidate", "confidence", "supporting_evidence", "counter_evidence", "missing_evidence", "rationale"]
-            }
-          }
-        }),
-        signal: AbortSignal.timeout(12000)
-      }, provider);
-    } else {
-      response = await fetchWithTransientRetry(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          temperature: 0,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
-            { role: "user", content: JSON.stringify(prompt) }
-          ]
-        }),
-        signal: AbortSignal.timeout(12000)
-      }, provider);
+    const providers = [
+      ...(geminiKey ? [{ provider: "gemini", model: geminiModel }] : []),
+      ...(groqKey ? [{ provider: "groq", model: process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b" }] : []),
+      ...(hfKey ? [{ provider: "huggingface", model: process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest" }] : []),
+    ];
+    const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
+    let lastTransportError: unknown = null;
+    let gotResponse = false;
+    for (let index = 0; index < providers.length; index += 1) {
+      activeProvider = providers[index].provider;
+      activeModel = providers[index].model;
+      console.info("[FRIDAY AI review] provider attempt started", {
+        provider: activeProvider, model_id: activeModel, attempt: 1,
+        provider_index: index + 1, provider_count: providers.length, timeout_ms: 5000,
+      });
+      const attemptStarted = Date.now();
+      try {
+        if (activeProvider === "gemini") {
+          response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(activeModel)}:generateContent`, {
+            method: "POST",
+            headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
+              contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
+              generationConfig: {
+                temperature: 0,
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    assessment: { type: "STRING", enum: ["supportive", "mixed", "caution", "insufficient_evidence"] },
+                    priority_candidate: { type: "STRING", nullable: true },
+                    confidence: { type: "STRING", enum: ["low", "medium", "high"] },
+                    supporting_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                    counter_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                    missing_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                    rationale: { type: "STRING" }
+                  },
+                  required: ["assessment", "priority_candidate", "confidence", "supporting_evidence", "counter_evidence", "missing_evidence", "rationale"]
+                }
+              }
+            }),
+            signal: AbortSignal.timeout(5000),
+          });
+        } else {
+          const apiKey = activeProvider === "groq" ? groqKey! : hfKey!;
+          const endpoint = activeProvider === "groq"
+            ? "https://api.groq.com/openai/v1/chat/completions"
+            : (process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions");
+          response = await fetch(endpoint, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: activeModel,
+              temperature: 0,
+              response_format: { type: "json_object" },
+              messages: [
+                { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
+                { role: "user", content: JSON.stringify(prompt) }
+              ]
+            }),
+            signal: AbortSignal.timeout(5000),
+          });
+        }
+        console.info("[FRIDAY AI review] provider attempt completed", {
+          provider: activeProvider, attempt: 1, upstream_status: response.status,
+          attempt_latency_ms: Date.now() - attemptStarted,
+        });
+        gotResponse = true;
+        if (response.ok) break;
+        const hasBackup = index < providers.length - 1;
+        if (hasBackup && retryableStatuses.has(response.status)) {
+          console.warn("[FRIDAY AI review] provider unavailable; failing over", {
+            provider: activeProvider, status: response.status,
+            next_provider: providers[index + 1].provider,
+          });
+          await response.body?.cancel().catch(() => undefined);
+          continue;
+        }
+        break;
+      } catch (error) {
+        lastTransportError = error;
+        const errorClass = error instanceof Error ? error.name : "UnknownError";
+        const hasBackup = index < providers.length - 1;
+        console.error("[FRIDAY AI review] provider transport failed", {
+          provider: activeProvider, error_class: errorClass,
+          attempt_latency_ms: Date.now() - attemptStarted, failing_over: hasBackup,
+          next_provider: hasBackup ? providers[index + 1].provider : null,
+        });
+        if (!hasBackup) throw error;
+      }
     }
+    if (!gotResponse && lastTransportError) throw lastTransportError;
+    if (!response) throw new Error("No AI provider returned a response");
     if (!response.ok) {
       // Do not expose provider response bodies to the caller; record actionable,
       // non-secret diagnostics in Vercel logs and return a stable error category.
@@ -202,21 +211,21 @@ export async function POST(request: Request) {
         : "provider_rejected_request";
       const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\s+)[^\s,"]+/gi, "$1[REDACTED]");
       console.error("[FRIDAY AI review] upstream request failed", {
-        provider, model_id: model, upstream_status: status, category,
+        provider: activeProvider, model_id: activeModel, upstream_status: status, category,
         latency_ms: Date.now() - started, response_excerpt: upstreamError,
       });
       return json({
         status: "error",
-        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
+        error: `${activeProvider === "gemini" ? "Gemini" : activeProvider === "groq" ? "Groq" : "Hugging Face"} returned HTTP ${status}`,
         error_category: category,
         upstream_status: status,
-        provider,
-        model_id: model,
+        provider: activeProvider,
+        model_id: activeModel,
         latency_ms: Date.now() - started,
       }, 502);
     }
     body = await response.json();
-    if (provider === "gemini") {
+    if (activeProvider === "gemini") {
       raw = body?.candidates?.[0]?.content?.parts?.map((part: any) => typeof part.text === "string" ? part.text : "").join("");
       if (typeof raw !== "string" || !raw.trim()) throw new Error("Gemini response had no text content");
     } else {
@@ -244,7 +253,7 @@ export async function POST(request: Request) {
     if (parsed.confidence !== "low" && parsed.confidence !== "medium" && parsed.confidence !== "high") parsed.confidence = "low";
     if (parsed.priority_candidate !== null && typeof parsed.priority_candidate !== "string") parsed.priority_candidate = null;
     if (typeof parsed.rationale !== "string") parsed.rationale = "";
-    return json({ status: "ok", provider, model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
+    return json({ status: "ok", provider: activeProvider, model_id: activeModel, response: parsed, latency_ms: Date.now() - started, error: null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Model review failed";
     const category = error instanceof Error && error.name === "TimeoutError"
@@ -253,13 +262,13 @@ export async function POST(request: Request) {
         ? "invalid_provider_response"
         : "provider_transport_or_parse_error";
     console.error("[FRIDAY AI review] request failed", {
-      provider, model_id: model, category,
+      provider: activeProvider, model_id: activeModel, category,
       error_class: error instanceof Error ? error.name : "UnknownError",
       latency_ms: Date.now() - started,
       message: message.slice(0, 160),
     });
     return json({
-      status: "error", provider, model_id: model, response: null,
+      status: "error", provider: activeProvider, model_id: activeModel, response: null,
       latency_ms: Date.now() - started, error_category: category,
       error: message.slice(0, 200),
     }, 502);
