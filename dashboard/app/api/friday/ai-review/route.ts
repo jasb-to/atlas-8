@@ -3,7 +3,8 @@ import { createPublicKey, verify as verifySignature } from "node:crypto";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-export const maxDuration = 30;
+// Keep enough headroom for provider response parsing and a structured error response.
+export const maxDuration = 20;
 
 const ISSUER = "https://token.actions.githubusercontent.com";
 const AUDIENCE = "friday-huggingface-review";
@@ -14,7 +15,7 @@ let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
 // Retry only transient transport/provider failures. Each attempt gets its own
 // timeout so an expired AbortSignal cannot make every retry fail immediately.
-// Two bounded attempts fit within this route's 30-second Vercel duration.
+// Two 8-second attempts fit inside a conservative 20-second function budget.
 async function fetchWithTransientRetry(
   input: RequestInfo | URL,
   init: RequestInit,
@@ -23,10 +24,18 @@ async function fetchWithTransientRetry(
   const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
   const maxAttempts = 2;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const attemptStarted = Date.now();
+    console.info("[FRIDAY AI review] provider attempt started", {
+      provider, attempt, max_attempts: maxAttempts, timeout_ms: 8000,
+    });
     try {
       const response = await fetch(input, {
         ...init,
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(8000),
+      });
+      console.info("[FRIDAY AI review] provider attempt completed", {
+        provider, attempt, upstream_status: response.status,
+        attempt_latency_ms: Date.now() - attemptStarted,
       });
       const retryAfter = Number(response.headers.get("retry-after") ?? "0");
       const canRetry = attempt < maxAttempts
@@ -40,12 +49,13 @@ async function fetchWithTransientRetry(
     } catch (error) {
       const name = error instanceof Error ? error.name : "UnknownError";
       const retryable = name === "TypeError" || name === "TimeoutError" || name === "AbortError";
-      if (attempt >= maxAttempts || !retryable) throw error;
-      console.warn("[FRIDAY AI review] transient provider transport failure; retrying", {
-        provider, attempt, error_class: name,
+      console.error("[FRIDAY AI review] provider attempt failed", {
+        provider, attempt, attempt_latency_ms: Date.now() - attemptStarted,
+        error_class: name, retrying: attempt < maxAttempts && retryable,
       });
+      if (attempt >= maxAttempts || !retryable) throw error;
     }
-    await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+    await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
   }
   throw new Error("Provider retry loop exhausted");
 }
