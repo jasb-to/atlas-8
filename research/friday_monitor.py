@@ -144,8 +144,24 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"last_closed_candle={result.get('last_completed_candle_utc', 'n/a')}",
                 flush=True,
             )
+            # Load the stable thesis record before analysis so a higher-timeframe
+            # break survives scans even when its line is no longer nearby.
+            mtf_key = hashlib.sha256(f"{pair}|1D+4H|daily-thesis-lifecycle".encode()).hexdigest()
+            previous_thesis = None
+            if store.configured and hasattr(store, "get_archive"):
+                try:
+                    previous_record = store.get_archive(mtf_key)
+                    if isinstance(previous_record, dict):
+                        previous_payload = previous_record.get("payload") or {}
+                        previous_thesis = previous_payload.get("daily_thesis_lifecycle")
+                except Exception as thesis_read_exc:
+                    print(
+                        f"[FRIDAY MARKET {index}/{len(pairs)}] THESIS_LOOKUP_FAILED pair={display_pair} "
+                        f"error={type(thesis_read_exc).__name__}: {thesis_read_exc}",
+                        flush=True,
+                    )
             # Daily thesis + 4H execution scan uses completed candles from Kraken.
-            mtf = analyse_pair(pair=pair)
+            mtf = analyse_pair(pair=pair, previous_thesis=previous_thesis)
             daily_thesis = mtf.get("daily_thesis_lifecycle") or {}
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] ANALYSIS_OK pair={display_pair} "
@@ -215,7 +231,6 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             if store.configured:
                 # Stable key updates the current thesis record instead of creating
                 # an unbounded series of unrelated snapshots with no active lifecycle.
-                mtf_key = hashlib.sha256(f"{pair}|1D+4H|daily-thesis-lifecycle".encode()).hexdigest()
                 store.record_archive(make_archive_record(
                     record_key=mtf_key, record_type="multitimeframe_thesis", pair=pair,
                     timeframe="1D+4H", signal_time=daily_thesis.get("break_time") or mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
