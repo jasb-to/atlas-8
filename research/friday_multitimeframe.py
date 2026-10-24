@@ -103,10 +103,10 @@ def _daily_thesis_lifecycle(daily: pd.DataFrame) -> dict:
             close = float(row.close)
             if direction == "short":
                 invalid = close > level * 1.003
-                retest = float(row.high) >= level * 0.995 and close <= level
+                retest = float(row.high) >= level * 0.9985 and close <= level
             else:
                 invalid = close < level * 0.997
-                retest = float(row.low) <= level * 1.005 and close >= level
+                retest = float(row.low) <= level * 1.0015 and close >= level
             if invalid:
                 state = "INVALIDATED"
                 invalidation_time = pd.Timestamp(row.timestamp).isoformat()
