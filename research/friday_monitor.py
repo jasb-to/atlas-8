@@ -145,7 +145,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"daily_4h_state={mtf.get('state', 'UNKNOWN')} "
                 f"direction={mtf.get('thesis_direction', 'none')} "
                 f"ai_status={(result.get('model_review') or {}).get('status', 'missing')} "
-                f"ai_assessment=((result.get('model_review') or {}).get('response') or {}).get('assessment', 'n/a') "
+                f"ai_assessment={((result.get('model_review') or {}).get('response') or {}).get('assessment', 'n/a')} "
                 f"break_events={result.get('event_count', 0)}",
                 flush=True,
             )
