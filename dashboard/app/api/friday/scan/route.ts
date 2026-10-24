@@ -65,9 +65,15 @@ async function triggerScan(request: NextRequest) {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT" },
+        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT" },
       }),
       cache: "no-store",
+    });
+
+    console.info("[FRIDAY scan] Dispatching research workflow", {
+      workflow: "friday-monitor.yml",
+      ref: "main",
+      pairs: ["BTC", "ETH", "SOL", "XRP", "ADA", "AVAX", "BNB", "VIRTUAL", "HYPE", "DOGE", "LINK", "ZEC", "NEAR", "SUI", "LIT"],
     });
 
     if (upstream.status !== 204) {
@@ -94,13 +100,22 @@ async function triggerScan(request: NextRequest) {
       }, 502);
     }
 
+    console.info("[FRIDAY scan] GitHub Actions dispatch accepted", {
+      workflow: "friday-monitor.yml",
+      ref: "main",
+      http_status: upstream.status,
+      workflow_url: "https://github.com/jasb-to/atlas-8/actions/workflows/friday-monitor.yml",
+    });
+
     return json({
       ok: true,
       status: "accepted",
       message: "FRIDAY research workflow dispatch accepted by GitHub Actions.",
       workflow: "friday-monitor.yml",
       ref: "main",
-      pairs: ["XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT"],
+      pairs: ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT"],
+      workflow_url: "https://github.com/jasb-to/atlas-8/actions/workflows/friday-monitor.yml",
+      note: "202 confirms dispatch only. Follow the GitHub Actions run for per-market scan progress and completion.",
     }, 202);
   } catch (error) {
     console.error("[FRIDAY scan] GitHub API request failed", {
