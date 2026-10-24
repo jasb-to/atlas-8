@@ -176,8 +176,8 @@ export async function POST(request: Request) {
             { role: "user", content: JSON.stringify(prompt) }
           ]
         }),
-        signal: AbortSignal.timeout(25000)
-      });
+        signal: AbortSignal.timeout(12000)
+      }, provider);
     }
     if (!response.ok) {
       // Do not expose provider response bodies to the caller; record actionable,
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
         : status === 429 ? "rate_limit_or_quota"
         : status >= 500 ? "provider_unavailable"
         : "provider_rejected_request";
-      const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\\s+)[^\\s,"]+/gi, "$1[REDACTED]");
+      const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\s+)[^\s,"]+/gi, "$1[REDACTED]");
       console.error("[FRIDAY AI review] upstream request failed", {
         provider, model_id: model, upstream_status: status, category,
         latency_ms: Date.now() - started, response_excerpt: upstreamError,
