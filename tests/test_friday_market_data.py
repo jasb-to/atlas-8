@@ -22,10 +22,14 @@ class FridayMarketDataTests(unittest.TestCase):
         }
         self.assertEqual(_ai_candidate_pass(supportive, "friday-price-action-v2"),
                          (True, "ai_selected_supportive"))
-        caution = {"status": "ok", "response": {"assessment": "caution", "priority_candidate": "friday-price-action-v2"}}
-        self.assertFalse(_ai_candidate_pass(caution, "friday-price-action-v2")[0])
+        mixed_short = {"status": "ok", "response": {"assessment": "mixed", "priority_candidate": "short"}}
+        self.assertEqual(_ai_candidate_pass(mixed_short, "friday-price-action-v2", "short"),
+                         (True, "ai_selected_direction_with_caveats"))
+        self.assertFalse(_ai_candidate_pass(mixed_short, "friday-price-action-v2", "long")[0])
+        caution = {"status": "ok", "response": {"assessment": "caution", "priority_candidate": "short"}}
+        self.assertFalse(_ai_candidate_pass(caution, "friday-price-action-v2", "short")[0])
         wrong_strategy = {"status": "ok", "response": {"assessment": "supportive", "priority_candidate": "stoch-rsi-structural-reversal-v1"}}
-        self.assertFalse(_ai_candidate_pass(wrong_strategy, "friday-price-action-v2")[0])
+        self.assertFalse(_ai_candidate_pass(wrong_strategy, "friday-price-action-v2", "short")[0])
         self.assertFalse(_ai_candidate_pass({"status": "error"}, "friday-price-action-v2")[0])
 
     def test_only_post_launch_usdt_lifecycle_events_are_live(self):
