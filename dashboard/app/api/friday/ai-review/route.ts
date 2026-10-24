@@ -62,8 +62,14 @@ export async function POST(request: Request) {
   const hfKey = process.env.HUGGINGFACE_API_KEY;
   const provider = geminiKey ? "gemini" : hfKey ? "huggingface" : null;
   if (!provider) return json({ status: "error", error: "Neither GEMINI_API_KEY nor HUGGINGFACE_API_KEY is configured in Vercel" }, 503);
+  // Gemini 2.5 Flash is restricted for new users and returns HTTP 404 on this key.
+  // Migrate the legacy default/override to the supported, cost-efficient Flash-Lite model.
+  const configuredGeminiModel = process.env.FRIDAY_GEMINI_MODEL;
+  const geminiModel = !configuredGeminiModel || configuredGeminiModel === "gemini-2.5-flash"
+    ? "gemini-3.5-flash-lite"
+    : configuredGeminiModel;
   const model = provider === "gemini"
-    ? (process.env.FRIDAY_GEMINI_MODEL || "gemini-2.5-flash")
+    ? geminiModel
     : (process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest");
   let input: any;
   try { input = await request.json(); } catch { return json({ status: "error", error: "Invalid JSON request" }, 400); }
