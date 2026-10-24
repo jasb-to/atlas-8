@@ -46,6 +46,9 @@ class FridayTradePlanTests(unittest.TestCase):
         self.assertEqual(result["target_source"], "confirmed_structure")
         self.assertIsNotNone(result["reward_risk"])
         self.assertTrue(result["research_only"])
+        self.assertIsNotNone(result["structural_stop"])
+        self.assertLessEqual(result["stop_distance_pct"], 1.0)
+        self.assertEqual(result["stop_policy"], "risk stop capped at 1.0% from entry; structural_stop retained separately for context")
 
     def test_uses_fib_extension_when_nearby_structure_fails_minimum_rr(self):
         data = self.frame()

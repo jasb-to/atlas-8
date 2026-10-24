@@ -63,7 +63,21 @@ def build_trade_plan(frame: pd.DataFrame, direction: str, entry: float | None = 
 
     if stop is None:
         blockers.append("no_valid_confirmed_structural_stop")
+
+    # Preserve the true structural invalidation for context, but cap the paper
+    # risk stop at 1% from entry to match the requested 20x-risk specification.
+    # This does not imply the structure itself is invalidated at the capped stop;
+    # it deliberately means the paper position may stop before structural failure.
+    structural_stop = float(stop) if stop is not None else None
+    max_stop_distance = entry_price * 0.01
+    if stop is not None:
+        if direction == "long":
+            stop = max(float(stop), entry_price - max_stop_distance)
+        else:
+            stop = min(float(stop), entry_price + max_stop_distance)
+
     risk = abs(entry_price-stop) if stop is not None else None
+    stop_distance_pct = (risk / entry_price * 100.0) if risk is not None and entry_price > 0 else None
     if risk is not None and risk <= 0:
         blockers.append("non_positive_risk")
         risk = None
@@ -108,6 +122,9 @@ def build_trade_plan(frame: pd.DataFrame, direction: str, entry: float | None = 
     return {
         "eligible": not blockers, "direction": direction, "entry": round(entry_price, 10),
         "atr14": round(atr, 10), "stop": round(stop, 10) if stop is not None else None,
+        "structural_stop": round(structural_stop, 10) if structural_stop is not None else None,
+        "stop_distance_pct": round(stop_distance_pct, 4) if stop_distance_pct is not None else None,
+        "stop_policy": "risk stop capped at 1.0% from entry; structural_stop retained separately for context",
         "target": round(target, 10) if target is not None else None,
         "target_source": target_source, "risk_per_unit": round(risk, 10) if risk is not None else None,
         "reward_per_unit": round(reward, 10) if reward is not None else None,

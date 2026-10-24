@@ -390,6 +390,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         continue
                     alert_event = dict(event)
                     alert_event["paper_stop"] = float(stop)
+                    alert_event["paper_structural_stop"] = plan.get("structural_stop")
+                    alert_event["paper_stop_distance_pct"] = plan.get("stop_distance_pct")
                     alert_event["paper_target"] = float(target)
                     alert_event["paper_reward_risk"] = round(rr, 3)
                     if fresh_entry2:
