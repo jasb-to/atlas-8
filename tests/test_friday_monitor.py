@@ -3,10 +3,15 @@ from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
-from research.friday_monitor import _utc, run_monitor, validate_friday_pairs
+from research.friday_monitor import _display_pair, _utc, run_monitor, validate_friday_pairs
 
 
 class FridayMonitorTests(unittest.TestCase):
+    def test_user_facing_btc_symbol_is_normalized(self):
+        self.assertEqual(_display_pair("XBTUSDT"), "BTCUSDT")
+        self.assertEqual(_display_pair("XBTUSD"), "BTCUSDT")
+        self.assertEqual(_display_pair("ETHUSDT"), "ETHUSDT")
+
     def test_utc_normalizes_naive_timestamp(self):
         self.assertEqual(_utc("2026-10-21T12:00:00").isoformat(), "2026-10-21T12:00:00+00:00")
 
