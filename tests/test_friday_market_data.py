@@ -44,7 +44,7 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
         self.assertEqual(validate_friday_pairs(["XBTUSD"]), ["XBTUSDT"])
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
-            validate_friday_pairs(["AVAXUSD"])
+            validate_friday_pairs(["UNKNOWNUSD"])
         with self.assertRaisesRegex(ValueError, "At least one"):
             validate_friday_pairs([])
 

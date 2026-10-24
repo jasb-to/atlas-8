@@ -435,8 +435,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
 def validate_friday_pairs(pairs: list[str]) -> list[str]:
     """Canonicalize only known legacy quote aliases; never scan a USD market."""
     legacy_aliases = {
-        "XBTUSD": "XBTUSDT", "BTCUSD": "XBTUSDT",
+        "XBTUSD": "XBTUSDT", "BTCUSD": "XBTUSDT", "BTCUSDT": "XBTUSDT",
         "ETHUSD": "ETHUSDT", "SOLUSD": "SOLUSDT",
+        "XRPUSD": "XRPUSDT", "ADAUSD": "ADAUSDT",
+        "AVAXUSD": "AVAXUSDT", "BNBUSD": "BNBUSDT",
         "VIRTUALUSD": "VIRTUALUSDT", "HYPEUSD": "HYPEUSDT",
         "DOGEUSD": "DOGEUSDT", "LINKUSD": "LINKUSDT",
         "ZECUSD": "ZECUSDT", "NEARUSD": "NEARUSDT",
@@ -449,8 +451,9 @@ def validate_friday_pairs(pairs: list[str]) -> list[str]:
             continue
         pair = legacy_aliases.get(pair, pair)
         if pair not in {
-            "XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT",
-            "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT",
+            "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT",
+            "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT",
+            "SUIUSDT", "LITUSDT",
         }:
             raise ValueError(
                 "FRIDAY research scans only the approved USDT universe; rejected: " + pair
@@ -469,7 +472,7 @@ def _monitor_exit_code(status: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT")
+    parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT")
     parser.add_argument("--output-dir", default="results/friday-monitor")
     args = parser.parse_args()
     try:

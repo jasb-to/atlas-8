@@ -27,9 +27,15 @@ class FridayMonitorTests(unittest.TestCase):
     def test_duplicate_aliases_do_not_create_duplicate_market_scans(self):
         self.assertEqual(validate_friday_pairs(["XBTUSD", "XBTUSDT", "ETHUSDT", "SUIUSDT", "SUIUSD"]), ["XBTUSDT", "ETHUSDT", "SUIUSDT"])
 
+    def test_new_liquid_markets_are_approved_and_btc_alias_is_canonical(self):
+        self.assertEqual(
+            validate_friday_pairs(["BTCUSDT", "XRPUSD", "ADAUSDT", "AVAXUSD", "BNBUSD"]),
+            ["XBTUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT"],
+        )
+
     def test_unknown_usd_pair_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
-            validate_friday_pairs(["AVAXUSD"])
+            validate_friday_pairs(["UNKNOWNUSD"])
 
     def test_scan_exit_code_is_success_when_ai_review_is_temporarily_unavailable(self):
         # AI unavailability must not kill the scheduled market scan. It is still
