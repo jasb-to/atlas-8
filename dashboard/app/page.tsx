@@ -9,6 +9,7 @@ const fmtTime = (v?: string) => v ? new Date(v).toLocaleString([], { dateStyle: 
 const fmtPrice = (v: unknown) => typeof v === "number" ? v.toLocaleString(undefined, { maximumFractionDigits: 6 }) : typeof v === "string" ? v : "—";
 const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object" ? row.payload : {};
 const clean = (v: unknown) => String(v ?? "unknown").replaceAll("_", " ");
+const displayPair = (value: unknown) => { const pair = String(value ?? "").toUpperCase(); return ["XBTUSDT", "XBTUSD", "BTCUSD"].includes(pair) ? "BTCUSDT" : pair; };
 
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
@@ -31,8 +32,24 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const pairs = useMemo(() => ["ALL", ...Array.from(new Set([...data.events.map(x => x.pair), ...((data.runs[0]?.pair_results ?? []).map((x: Row) => x.pair))].filter(Boolean)))], [data.events, data.runs]);
-  const events = useMemo(() => selectedPair === "ALL" ? data.events : data.events.filter(x => x.pair === selectedPair), [data.events, selectedPair]);
+  const pairs = useMemo(() => ["ALL", ...Array.from(new Set([...data.events.map(x => displayPair(x.pair)), ...((data.runs[0]?.pair_results ?? []).map((x: Row) => displayPair(x.pair)))].filter(Boolean)))], [data.events, data.runs]);
+  const events = useMemo(() => {
+    const filtered = selectedPair === "ALL" ? data.events : data.events.filter(x => displayPair(x.pair) === selectedPair);
+    const groups = new Map<string, Row>();
+    for (const event of filtered) {
+      const pair = displayPair(event.pair);
+      const key = [pair, event.timeframe, event.event_type, event.direction, event.signal_time, event.entry_reference].join("|");
+      const existing = groups.get(key);
+      const line = { line_kind: event.line_kind, line_price: event.line_price, touch_count: event.evidence?.touch_count ?? event.evidence?.touch_count };
+      if (existing) {
+        existing.supporting_line_count += 1;
+        existing.supporting_lines.push(line);
+      } else {
+        groups.set(key, { ...event, pair, supporting_line_count: 1, supporting_lines: [line] });
+      }
+    }
+    return Array.from(groups.values()).sort((a, b) => new Date(b.signal_time ?? 0).getTime() - new Date(a.signal_time ?? 0).getTime());
+  }, [data.events, selectedPair]);
   const snapshot = data.snapshots[0];
   const snapshotData = payloadOf(snapshot);
   const latestRun = data.runs[0];
@@ -64,8 +81,8 @@ export default function Home() {
         <div className="radar-stage">
           <div className="scanner-market-grid">
             {pairScans.length ? pairScans.map((scan, i) => {
-              const symbol = String(scan.pair ?? "UNKNOWN").toUpperCase();
-              const display = symbol === "XBTUSDT" || symbol === "XBTUSD" ? "BTC" : symbol.replace(/USDT$/, "");
+              const symbol = displayPair(scan.pair);
+              const display = symbol.replace(/USDT$/, "");
               return <div className={`scanner-market ${scan.status === "ok" ? "market-ok" : "market-error"}`} key={symbol}>
                 <div className="scanner-market-top"><b>{display}</b><span>{scan.status === "ok" ? "SCANNED" : "ERROR"}</span></div>
                 <strong>{fmtPrice(scan.last_close)}</strong>
@@ -147,7 +164,7 @@ export default function Home() {
         <label className="filter-label">PAIR <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}>{pairs.map(p => <option key={p} value={p}>{p}</option>)}</select></label>
       </div>
       <div className="feed-table-wrap"><table><thead><tr><th>TIME / MARKET</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th><th>RETEST</th><th>CONTINUATION</th></tr></thead><tbody>
-        {latestEvents.length ? latestEvents.map((event, i) => <tr key={event.event_key ?? i}><td><b>{event.pair}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}</td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{clean(event.outcome)}</span></td><td>{fmtPrice(event.entry_reference)}</td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{fmtTime(event.continuation_add_time)}</td></tr>) : <tr><td colSpan={7}><div className="empty-row">No trade lifecycle events persisted yet.</div></td></tr>}
+        {latestEvents.length ? latestEvents.map((event, i) => <tr key={event.event_key ?? i}><td><b>{event.pair}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}{event.supporting_line_count > 1 ? <small>{event.supporting_line_count} supporting lines grouped</small> : null}</td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{clean(event.outcome)}</span></td><td>{fmtPrice(event.entry_reference)}</td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{fmtTime(event.continuation_add_time)}</td></tr>) : <tr><td colSpan={7}><div className="empty-row">No trade lifecycle events persisted yet.</div></td></tr>}
       </tbody></table></div>
       <div className="feed-foot"><span>{latestEvents.length} of up to 50 recent lifecycle events</span><span>Last dashboard refresh: {fmtTime(data.fetched_at)}</span></div>
     </section>
