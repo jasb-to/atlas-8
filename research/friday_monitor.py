@@ -406,6 +406,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         })
                         continue
                     alert_event = dict(event)
+                    alert_event["higher_timeframe_thesis"] = daily_thesis
                     alert_event["paper_stop"] = float(stop)
                     alert_event["paper_target"] = float(target)
                     alert_event["paper_reward_risk"] = round(rr, 3)
