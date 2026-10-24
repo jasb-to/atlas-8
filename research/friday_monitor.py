@@ -159,7 +159,15 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 "market_started_at": pair_started,
                 "last_completed_candle_utc": latest.isoformat(),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
+                "latest_setup_message": result["latest_setup_state"].get("message"),
                 "friday_decision": result["friday_decision"].get("state"),
+                "friday_decision_reason": result["friday_decision"].get("reason") or result["friday_decision"].get("message"),
+                "scan_diagnostic": (
+                    result["friday_decision"].get("reason")
+                    or result["friday_decision"].get("message")
+                    or result["latest_setup_state"].get("message")
+                    or "No fresh actionable entry on the latest completed candle."
+                ),
                 "multitimeframe_state": mtf.get("state"),
                 "multitimeframe_direction": mtf.get("thesis_direction"),
                 "ai_review_status": result.get("model_review", {}).get("status", "missing"),
