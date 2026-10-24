@@ -367,7 +367,7 @@ class RepoFolderFridayStore:
             if not post_launch(record.get("signal_time")):
                 continue
             snapshots.append(record)
-            if len(snapshots) == 12:
+            if len(snapshots) == 25:
                 break
 
         events = [

@@ -58,12 +58,22 @@ def review_decision(
             if not proxy_response.ok:
                 try:
                     error_body = proxy_response.json()
-                    detail = error_body.get("error", error_body.get("message", error_body))
                 except Exception:
-                    detail = proxy_response.text
-                raise RuntimeError(
-                    f"Vercel review proxy HTTP {proxy_response.status_code}: {str(detail)[:180]}"
-                )
+                    error_body = {}
+                if not isinstance(error_body, dict):
+                    error_body = {}
+                detail = error_body.get("error", error_body.get("message", proxy_response.text))
+                return {
+                    "status": "error",
+                    "provider": error_body.get("provider", "huggingface"),
+                    "model_id": error_body.get("model_id", model),
+                    "response": None,
+                    "latency_ms": error_body.get(
+                        "latency_ms", round((time.monotonic() - started) * 1000)
+                    ),
+                    "error_category": error_body.get("error_category"),
+                    "error": f"Vercel review proxy HTTP {proxy_response.status_code}: {str(detail)[:180]}",
+                }
             proxy_body = proxy_response.json()
             if not isinstance(proxy_body, dict) or proxy_body.get("status") != "ok":
                 raise ValueError("Vercel review proxy returned an invalid review response")
@@ -75,7 +85,7 @@ def review_decision(
                 if not isinstance(parsed.get(field), list):
                     raise ValueError(f"Vercel review proxy field {field} must be an array")
             return {
-                "status": "ok", "provider": "huggingface",
+                "status": "ok", "provider": proxy_body.get("provider", "huggingface"),
                 "model_id": proxy_body.get("model_id", model),
                 "response": parsed,
                 "latency_ms": proxy_body.get("latency_ms", round((time.monotonic() - started) * 1000)),
