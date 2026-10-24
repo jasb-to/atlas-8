@@ -12,6 +12,44 @@ const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/head
 const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
+// Retry only transient transport/provider failures. Each attempt gets its own
+// timeout so an expired AbortSignal cannot make every retry fail immediately.
+// Two bounded attempts fit within this route's 30-second Vercel duration.
+async function fetchWithTransientRetry(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  provider: string,
+): Promise<Response> {
+  const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
+  const maxAttempts = 2;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(input, {
+        ...init,
+        signal: AbortSignal.timeout(12000),
+      });
+      const retryAfter = Number(response.headers.get("retry-after") ?? "0");
+      const canRetry = attempt < maxAttempts
+        && retryableStatuses.has(response.status)
+        && !(response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 1);
+      if (!canRetry) return response;
+      console.warn("[FRIDAY AI review] transient provider response; retrying", {
+        provider, attempt, status: response.status,
+      });
+      await response.body?.cancel().catch(() => undefined);
+    } catch (error) {
+      const name = error instanceof Error ? error.name : "UnknownError";
+      const retryable = name === "TypeError" || name === "TimeoutError" || name === "AbortError";
+      if (attempt >= maxAttempts || !retryable) throw error;
+      console.warn("[FRIDAY AI review] transient provider transport failure; retrying", {
+        provider, attempt, error_class: name,
+      });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+  }
+  throw new Error("Provider retry loop exhausted");
+}
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
 }
@@ -99,7 +137,7 @@ export async function POST(request: Request) {
     let body: any;
     let raw: any;
     if (provider === "gemini") {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      response = await fetchWithTransientRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
         method: "POST",
         headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,10 +161,10 @@ export async function POST(request: Request) {
             }
           }
         }),
-        signal: AbortSignal.timeout(25000)
-      });
+        signal: AbortSignal.timeout(12000)
+      }, provider);
     } else {
-      response = await fetch(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
+      response = await fetchWithTransientRetry(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -138,16 +176,33 @@ export async function POST(request: Request) {
             { role: "user", content: JSON.stringify(prompt) }
           ]
         }),
-        signal: AbortSignal.timeout(25000)
-      });
+        signal: AbortSignal.timeout(12000)
+      }, provider);
     }
     if (!response.ok) {
-      const upstreamError = (await response.text()).slice(0, 180);
+      // Do not expose provider response bodies to the caller; record actionable,
+      // non-secret diagnostics in Vercel logs and return a stable error category.
+      const status = response.status;
+      const category = status === 402 ? "quota_or_billing"
+        : status === 401 || status === 403 ? "provider_auth"
+        : status === 404 ? "model_or_endpoint_not_found"
+        : status === 408 ? "provider_timeout"
+        : status === 429 ? "rate_limit_or_quota"
+        : status >= 500 ? "provider_unavailable"
+        : "provider_rejected_request";
+      const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\s+)[^\s,"]+/gi, "$1[REDACTED]");
+      console.error("[FRIDAY AI review] upstream request failed", {
+        provider, model_id: model, upstream_status: status, category,
+        latency_ms: Date.now() - started, response_excerpt: upstreamError,
+      });
       return json({
         status: "error",
-        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${response.status}: ${upstreamError}`,
+        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
+        error_category: category,
+        upstream_status: status,
         provider,
-        model_id: model
+        model_id: model,
+        latency_ms: Date.now() - started,
       }, 502);
     }
     body = await response.json();
@@ -182,6 +237,21 @@ export async function POST(request: Request) {
     return json({ status: "ok", provider, model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Model review failed";
-    return json({ status: "error", provider, model_id: model, response: null, latency_ms: Date.now() - started, error: message.slice(0, 200) }, 502);
+    const category = error instanceof Error && error.name === "TimeoutError"
+      ? "provider_timeout"
+      : error instanceof Error && error.name === "SyntaxError"
+        ? "invalid_provider_response"
+        : "provider_transport_or_parse_error";
+    console.error("[FRIDAY AI review] request failed", {
+      provider, model_id: model, category,
+      error_class: error instanceof Error ? error.name : "UnknownError",
+      latency_ms: Date.now() - started,
+      message: message.slice(0, 160),
+    });
+    return json({
+      status: "error", provider, model_id: model, response: null,
+      latency_ms: Date.now() - started, error_category: category,
+      error: message.slice(0, 200),
+    }, 502);
   }
 }

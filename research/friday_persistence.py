@@ -477,7 +477,9 @@ class RepoFolderFridayStore:
         for row in rows:
             if row.get("alert_key") == alert_key:
                 row.update({"status": status, "telegram_message_id": message_id, "error": error, "updated_at": utc_now()})
-        self._write("alerts.json", rows[:10])
+        # Keep the durable audit history; the dashboard projection independently
+        # limits the visible alert list to the most recent ten records.
+        self._write("alerts.json", rows[:5000])
         self._refresh_dashboard()
 
 

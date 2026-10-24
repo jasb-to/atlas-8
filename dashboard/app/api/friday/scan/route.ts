@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { randomUUID, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +54,8 @@ async function triggerScan(request: NextRequest) {
     }, 503);
   }
 
+  const scanRunId = randomUUID();
+  const requestStartedAt = new Date().toISOString();
   try {
     const upstream = await fetch(GITHUB_DISPATCH_URL, {
       method: "POST",
@@ -65,7 +67,7 @@ async function triggerScan(request: NextRequest) {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT" },
+        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT", scan_id: scanRunId },
       }),
       cache: "no-store",
     });
@@ -73,6 +75,8 @@ async function triggerScan(request: NextRequest) {
     console.info("[FRIDAY scan] Dispatching research workflow", {
       workflow: "friday-monitor.yml",
       ref: "main",
+      scan_run_id: scanRunId,
+      requested_at: requestStartedAt,
       pairs: ["BTC", "ETH", "SOL", "XRP", "ADA", "AVAX", "BNB", "VIRTUAL", "HYPE", "DOGE", "LINK", "ZEC", "NEAR", "SUI", "LIT"],
     });
 
@@ -110,6 +114,8 @@ async function triggerScan(request: NextRequest) {
     return json({
       ok: true,
       status: "accepted",
+      scan_run_id: scanRunId,
+      requested_at: requestStartedAt,
       message: "FRIDAY research workflow dispatch accepted by GitHub Actions.",
       workflow: "friday-monitor.yml",
       ref: "main",
