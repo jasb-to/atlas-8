@@ -237,10 +237,16 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     and not fresh_entry1
                     and latest_setup_time == signal_ts
                     and str(latest_setup.get("state", "")).upper() == "RETEST_HELD_WAITING_CONTINUATION"
+                ) and not any(
+                    item.get("type") == "ENTRY_1"
+                    and item.get("status") == "not_sent_break_no_longer_fresh"
+                    and item.get("signal_time") == signal_ts.isoformat()
+                    for item in row["alert_results"]
                 ):
                     row["alert_results"].append({
                         "type": "ENTRY_1", "sent": False,
                         "status": "not_sent_break_no_longer_fresh",
+                        "signal_time": signal_ts.isoformat(),
                         "reason": (
                             f"Break candle {signal_ts.isoformat()} is older than the latest completed candle "
                             f"{latest.isoformat()}; FRIDAY only sends Entry 1 alerts on the break candle, "
