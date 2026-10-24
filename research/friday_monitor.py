@@ -101,7 +101,7 @@ def _is_live_lifecycle_event(pair: str, event: dict, tracking_start: str | None 
 
 
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
-    run_id = f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
+    run_id = os.getenv("FRIDAY_SCAN_RUN_ID", "").strip() or f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
     store = create_friday_store()
     pair_results = []
