@@ -20,18 +20,19 @@ async function fetchWithTransientRetry(
   input: RequestInfo | URL,
   init: RequestInit,
   provider: string,
+  maxAttempts = 2,
+  timeoutMs = 8000,
 ): Promise<Response> {
   const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
-  const maxAttempts = 2;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const attemptStarted = Date.now();
     console.info("[FRIDAY AI review] provider attempt started", {
-      provider, attempt, max_attempts: maxAttempts, timeout_ms: 8000,
+      provider, attempt, max_attempts: maxAttempts, timeout_ms: timeoutMs,
     });
     try {
       const response = await fetch(input, {
         ...init,
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       console.info("[FRIDAY AI review] provider attempt completed", {
         provider, attempt, upstream_status: response.status,
@@ -142,52 +143,69 @@ export async function POST(request: Request) {
     frozen_decision: input.decision
   };
   const started = Date.now();
+  let activeProvider = provider;
+  let activeModel = model;
   try {
     let response: Response;
     let body: any;
     let raw: any;
+    const hfModel = process.env.FRIDAY_HF_MODEL_ID || DEFAULT_MODEL;
+    const hfEndpoint = process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions";
+    const sendHuggingFace = () => fetchWithTransientRetry(hfEndpoint, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + hfKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: hfModel, temperature: 0, response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
+          { role: "user", content: JSON.stringify(prompt) }
+        ]
+      })
+    }, "huggingface", 1, 6500);
     if (provider === "gemini") {
-      response = await fetchWithTransientRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-        method: "POST",
-        headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
-          contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
-          generationConfig: {
-            temperature: 0,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                assessment: { type: "STRING", enum: ["supportive", "mixed", "caution", "insufficient_evidence"] },
-                priority_candidate: { type: "STRING", nullable: true },
-                confidence: { type: "STRING", enum: ["low", "medium", "high"] },
-                supporting_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                counter_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                missing_evidence: { type: "ARRAY", items: { type: "STRING" } },
-                rationale: { type: "STRING" }
-              },
-              required: ["assessment", "priority_candidate", "confidence", "supporting_evidence", "counter_evidence", "missing_evidence", "rationale"]
+      try {
+        response = await fetchWithTransientRetry("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+          method: "POST",
+          headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
+            contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
+            generationConfig: {
+              temperature: 0, responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  assessment: { type: "STRING", enum: ["supportive", "mixed", "caution", "insufficient_evidence"] },
+                  priority_candidate: { type: "STRING", nullable: true },
+                  confidence: { type: "STRING", enum: ["low", "medium", "high"] },
+                  supporting_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                  counter_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                  missing_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                  rationale: { type: "STRING" }
+                },
+                required: ["assessment", "priority_candidate", "confidence", "supporting_evidence", "counter_evidence", "missing_evidence", "rationale"]
+              }
             }
-          }
-        }),
-        signal: AbortSignal.timeout(12000)
-      }, provider);
+          })
+        }, "gemini", 1, 6500);
+      } catch (error) {
+        if (!hfKey) throw error;
+        console.warn("[FRIDAY AI review] Gemini transport failure; starting Hugging Face fallback", { error_class: error instanceof Error ? error.name : "UnknownError" });
+        activeProvider = "huggingface"; activeModel = hfModel;
+        response = await sendHuggingFace();
+        console.info("[FRIDAY AI review] Hugging Face fallback response received", { upstream_status: response.status });
+      }
+      const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
+      if (activeProvider === "gemini" && !response.ok && retryableStatuses.has(response.status) && hfKey) {
+        const geminiStatus = response.status;
+        await response.body?.cancel().catch(() => undefined);
+        console.warn("[FRIDAY AI review] Gemini transient HTTP failure; starting Hugging Face fallback", { upstream_status: geminiStatus });
+        activeProvider = "huggingface"; activeModel = hfModel;
+        response = await sendHuggingFace();
+        console.info("[FRIDAY AI review] Hugging Face fallback response received", { upstream_status: response.status });
+      }
     } else {
-      response = await fetchWithTransientRetry(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          temperature: 0,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
-            { role: "user", content: JSON.stringify(prompt) }
-          ]
-        }),
-        signal: AbortSignal.timeout(12000)
-      }, provider);
+      response = await sendHuggingFace();
     }
     if (!response.ok) {
       // Do not expose provider response bodies to the caller; record actionable,
@@ -202,21 +220,21 @@ export async function POST(request: Request) {
         : "provider_rejected_request";
       const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\s+)[^\s,"]+/gi, "$1[REDACTED]");
       console.error("[FRIDAY AI review] upstream request failed", {
-        provider, model_id: model, upstream_status: status, category,
+        provider: activeProvider, model_id: activeModel, upstream_status: status, category,
         latency_ms: Date.now() - started, response_excerpt: upstreamError,
       });
       return json({
         status: "error",
-        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
+        error: `${activeProvider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
         error_category: category,
         upstream_status: status,
-        provider,
-        model_id: model,
+        provider: activeProvider,
+        model_id: activeModel,
         latency_ms: Date.now() - started,
       }, 502);
     }
     body = await response.json();
-    if (provider === "gemini") {
+    if (activeProvider === "gemini") {
       raw = body?.candidates?.[0]?.content?.parts?.map((part: any) => typeof part.text === "string" ? part.text : "").join("");
       if (typeof raw !== "string" || !raw.trim()) throw new Error("Gemini response had no text content");
     } else {
@@ -244,7 +262,7 @@ export async function POST(request: Request) {
     if (parsed.confidence !== "low" && parsed.confidence !== "medium" && parsed.confidence !== "high") parsed.confidence = "low";
     if (parsed.priority_candidate !== null && typeof parsed.priority_candidate !== "string") parsed.priority_candidate = null;
     if (typeof parsed.rationale !== "string") parsed.rationale = "";
-    return json({ status: "ok", provider, model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
+    return json({ status: "ok", provider: activeProvider, model_id: activeModel, response: parsed, latency_ms: Date.now() - started, error: null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Model review failed";
     const category = error instanceof Error && error.name === "TimeoutError"
@@ -253,13 +271,13 @@ export async function POST(request: Request) {
         ? "invalid_provider_response"
         : "provider_transport_or_parse_error";
     console.error("[FRIDAY AI review] request failed", {
-      provider, model_id: model, category,
+      provider: activeProvider, model_id: activeModel, category,
       error_class: error instanceof Error ? error.name : "UnknownError",
       latency_ms: Date.now() - started,
       message: message.slice(0, 160),
     });
     return json({
-      status: "error", provider, model_id: model, response: null,
+      status: "error", provider: activeProvider, model_id: activeModel, response: null,
       latency_ms: Date.now() - started, error_category: category,
       error: message.slice(0, 200),
     }, 502);
