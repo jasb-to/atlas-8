@@ -13,52 +13,6 @@ const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/head
 const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
-// Each provider gets one bounded attempt. Sequential failover must fit within
-// Vercel's 20-second route budget; retries are less useful than trying a backup.
-async function fetchWithTransientRetry(
-  input: RequestInfo | URL,
-  init: RequestInit,
-  provider: string,
-): Promise<Response> {
-  const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
-  const maxAttempts = 1;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const attemptStarted = Date.now();
-    console.info("[FRIDAY AI review] provider attempt started", {
-      provider, attempt, max_attempts: maxAttempts, timeout_ms: 5000,
-    });
-    try {
-      const response = await fetch(input, {
-        ...init,
-        signal: AbortSignal.timeout(5000),
-      });
-      console.info("[FRIDAY AI review] provider attempt completed", {
-        provider, attempt, upstream_status: response.status,
-        attempt_latency_ms: Date.now() - attemptStarted,
-      });
-      const retryAfter = Number(response.headers.get("retry-after") ?? "0");
-      const canRetry = attempt < maxAttempts
-        && retryableStatuses.has(response.status)
-        && !(response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 1);
-      if (!canRetry) return response;
-      console.warn("[FRIDAY AI review] transient provider response; retrying", {
-        provider, attempt, status: response.status,
-      });
-      await response.body?.cancel().catch(() => undefined);
-    } catch (error) {
-      const name = error instanceof Error ? error.name : "UnknownError";
-      const retryable = name === "TypeError" || name === "TimeoutError" || name === "AbortError";
-      console.error("[FRIDAY AI review] provider attempt failed", {
-        provider, attempt, attempt_latency_ms: Date.now() - attemptStarted,
-        error_class: name, retrying: attempt < maxAttempts && retryable,
-      });
-      if (attempt >= maxAttempts || !retryable) throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
-  }
-  throw new Error("Provider retry loop exhausted");
-}
-
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
 }
@@ -147,7 +101,7 @@ export async function POST(request: Request) {
   let activeProvider = provider;
   let activeModel = model;
   try {
-    let response: Response;
+    let response: Response | null = null;
     let body: any;
     let raw: any;
     const providers = [
@@ -243,6 +197,7 @@ export async function POST(request: Request) {
       }
     }
     if (!gotResponse && lastTransportError) throw lastTransportError;
+    if (!response) throw new Error("No AI provider returned a response");
     if (!response.ok) {
       // Do not expose provider response bodies to the caller; record actionable,
       // non-secret diagnostics in Vercel logs and return a stable error category.
@@ -261,11 +216,11 @@ export async function POST(request: Request) {
       });
       return json({
         status: "error",
-        error: `${activeProvider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
+        error: `${activeProvider === "gemini" ? "Gemini" : activeProvider === "groq" ? "Groq" : "Hugging Face"} returned HTTP ${status}`,
         error_category: category,
         upstream_status: status,
-        provider,
-        model_id: model,
+        provider: activeProvider,
+        model_id: activeModel,
         latency_ms: Date.now() - started,
       }, 502);
     }
