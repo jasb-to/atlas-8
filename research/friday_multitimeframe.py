@@ -219,7 +219,7 @@ def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.Dat
     h4 = _snapshot(four_hour, "4H")
     daily_thesis_lifecycle = _daily_thesis_lifecycle(daily)
     if daily_thesis_lifecycle.get("state") in {"WAITING_FOR_RETEST", "RETEST_HELD"}:
-        thesis_direction = daily_thesis_lifecycle["direction"]
+        thesis_direction = "bullish" if daily_thesis_lifecycle["direction"] == "long" else "bearish"
     else:
         thesis_direction = d1["state"] if d1["state"] in ("bullish", "bearish") else "neutral"
     daily_breaks = [x for x in d1.get("confirmed_breaks", []) if x["direction"] == thesis_direction.replace("bullish", "long").replace("bearish", "short")]
