@@ -16,6 +16,10 @@ on:
         description: Comma-separated Kraken pairs
         required: false
         default: XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT
+      scan_id:
+        description: Correlation ID supplied by the production scan trigger
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -43,6 +47,7 @@ jobs:
         env:
           FRIDAY_STORAGE_BACKEND: repo
           FRIDAY_REPO_DATA_DIR: testing/friday/data
+          FRIDAY_SCAN_RUN_ID: ${{ github.event.inputs.scan_id || format('friday-gha-{0}-{1}', github.run_id, github.run_attempt) }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
