@@ -25,6 +25,9 @@ class FridayMarketDataTests(unittest.TestCase):
         mixed_short = {"status": "ok", "response": {"assessment": "mixed", "priority_candidate": "short"}}
         self.assertEqual(_ai_candidate_pass(mixed_short, "friday-price-action-v2", "short"),
                          (True, "ai_selected_direction_with_caveats"))
+        qualified_short = {"status": "ok", "response": {"assessment": "mixed", "priority_candidate": "structural_trade_plans.short"}}
+        self.assertEqual(_ai_candidate_pass(qualified_short, "friday-price-action-v2", "short"),
+                         (True, "ai_selected_direction_with_caveats"))
         self.assertFalse(_ai_candidate_pass(mixed_short, "friday-price-action-v2", "long")[0])
         caution = {"status": "ok", "response": {"assessment": "caution", "priority_candidate": "short"}}
         self.assertFalse(_ai_candidate_pass(caution, "friday-price-action-v2", "short")[0])
