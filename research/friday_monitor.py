@@ -22,6 +22,12 @@ from research.friday_multitimeframe import analyse_pair
 from research.friday_paper_trades import register_paper_trade, update_paper_trades
 
 
+def _display_pair(pair: str) -> str:
+    """Use BTC for user-facing labels while retaining Kraken's XBT code internally."""
+    value = str(pair).strip().upper()
+    return "BTCUSDT" if value in {"XBTUSDT", "XBTUSD", "BTCUSD"} else value
+
+
 def _utc(value) -> pd.Timestamp:
     stamp = pd.Timestamp(value)
     if stamp.tzinfo is None:
@@ -202,6 +208,26 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
 
                 fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest and signal_ts is not None and signal_ts >= tracking_cutoff
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest and add_ts is not None and add_ts >= tracking_cutoff
+                # Make the lifecycle/notification distinction explicit. A break found
+                # on an older candle must not be sent later as if it were a fresh entry.
+                latest_setup = result.get("latest_setup_state", {}) or {}
+                latest_setup_time = _utc(latest_setup["signal_time"]) if latest_setup.get("signal_time") else None
+                if (
+                    event.get("event") == "BREAK_CLOSE_PROBE"
+                    and signal_ts is not None and signal_ts >= tracking_cutoff
+                    and not fresh_entry1
+                    and latest_setup_time == signal_ts
+                    and str(latest_setup.get("state", "")).upper() == "RETEST_HELD_WAITING_CONTINUATION"
+                ):
+                    row["alert_results"].append({
+                        "type": "ENTRY_1", "sent": False,
+                        "status": "not_sent_break_no_longer_fresh",
+                        "reason": (
+                            f"Break candle {signal_ts.isoformat()} is older than the latest completed candle "
+                            f"{latest.isoformat()}; FRIDAY only sends Entry 1 alerts on the break candle, "
+                            "so it will not send a delayed entry. Retest is held and continuation is still pending."
+                        ),
+                    })
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
                     ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
@@ -257,7 +283,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     if fresh_entry2:
                         alert_event["event_add"] = "CONTINUATION_ADD_CONFIRMED"
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
-                    message = build_signal_alert(alert_event, pair=pair, timeframe="4H")
+                    message = build_signal_alert(alert_event, pair=_display_pair(pair), timeframe="4H")
                     try:
                         alert = send_telegram_alert(message)
                         if alert.get("sent"):
@@ -328,7 +354,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             from research.friday_alerts import build_momentum_reversal_alert
                             try:
                                 alert = send_telegram_alert(
-                                    build_momentum_reversal_alert(reversal, pair=pair, timeframe="4H")
+                                    build_momentum_reversal_alert(reversal, pair=_display_pair(pair), timeframe="4H")
                                 )
                                 if alert.get("sent"):
                                     store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
