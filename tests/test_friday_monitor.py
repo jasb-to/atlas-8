@@ -3,7 +3,7 @@ from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
-from research.friday_monitor import _display_pair, _utc, run_monitor, validate_friday_pairs
+from research.friday_monitor import _display_pair, _signal_timing, _utc, run_monitor, validate_friday_pairs
 from research.friday_persistence import RepoFolderFridayStore
 
 
@@ -18,6 +18,22 @@ class FridayMonitorTests(unittest.TestCase):
 
     def test_utc_normalizes_offset_timestamp(self):
         self.assertEqual(_utc("2026-10-21T13:00:00+01:00").isoformat(), "2026-10-21T12:00:00+00:00")
+
+    def test_signal_timing_measures_age_from_four_hour_candle_close(self):
+        timing = _signal_timing(
+            "2026-10-24T12:00:00+00:00",
+            observed_at="2026-10-24T16:15:00+00:00",
+        )
+        self.assertEqual(timing["signal_candle_open_utc"], "2026-10-24T12:00:00+00:00")
+        self.assertEqual(timing["signal_candle_close_utc"], "2026-10-24T16:00:00+00:00")
+        self.assertEqual(timing["signal_age_minutes"], 15.0)
+
+    def test_signal_timing_does_not_report_negative_age_before_candle_close(self):
+        timing = _signal_timing(
+            "2026-10-24T12:00:00+00:00",
+            observed_at="2026-10-24T15:59:00+00:00",
+        )
+        self.assertEqual(timing["signal_age_seconds"], 0.0)
 
     def test_legacy_usd_inputs_are_canonicalized_to_usdt(self):
         self.assertEqual(
