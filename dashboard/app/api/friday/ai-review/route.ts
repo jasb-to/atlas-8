@@ -180,12 +180,29 @@ export async function POST(request: Request) {
       });
     }
     if (!response.ok) {
-      const upstreamError = (await response.text()).slice(0, 180);
+      // Do not expose provider response bodies to the caller; record actionable,
+      // non-secret diagnostics in Vercel logs and return a stable error category.
+      const status = response.status;
+      const category = status === 402 ? "quota_or_billing"
+        : status === 401 || status === 403 ? "provider_auth"
+        : status === 404 ? "model_or_endpoint_not_found"
+        : status === 408 ? "provider_timeout"
+        : status === 429 ? "rate_limit_or_quota"
+        : status >= 500 ? "provider_unavailable"
+        : "provider_rejected_request";
+      const upstreamError = (await response.text()).slice(0, 180).replace(/(Bearer\\s+)[^\\s,"]+/gi, "$1[REDACTED]");
+      console.error("[FRIDAY AI review] upstream request failed", {
+        provider, model_id: model, upstream_status: status, category,
+        latency_ms: Date.now() - started, response_excerpt: upstreamError,
+      });
       return json({
         status: "error",
-        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${response.status}: ${upstreamError}`,
+        error: `${provider === "gemini" ? "Gemini" : "Hugging Face"} returned HTTP ${status}`,
+        error_category: category,
+        upstream_status: status,
         provider,
-        model_id: model
+        model_id: model,
+        latency_ms: Date.now() - started,
       }, 502);
     }
     body = await response.json();
@@ -220,6 +237,21 @@ export async function POST(request: Request) {
     return json({ status: "ok", provider, model_id: model, response: parsed, latency_ms: Date.now() - started, error: null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Model review failed";
-    return json({ status: "error", provider, model_id: model, response: null, latency_ms: Date.now() - started, error: message.slice(0, 200) }, 502);
+    const category = error instanceof Error && error.name === "TimeoutError"
+      ? "provider_timeout"
+      : error instanceof Error && error.name === "SyntaxError"
+        ? "invalid_provider_response"
+        : "provider_transport_or_parse_error";
+    console.error("[FRIDAY AI review] request failed", {
+      provider, model_id: model, category,
+      error_class: error instanceof Error ? error.name : "UnknownError",
+      latency_ms: Date.now() - started,
+      message: message.slice(0, 160),
+    });
+    return json({
+      status: "error", provider, model_id: model, response: null,
+      latency_ms: Date.now() - started, error_category: category,
+      error: message.slice(0, 200),
+    }, 502);
   }
 }
