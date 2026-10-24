@@ -29,7 +29,7 @@ class FridayMonitorTests(unittest.TestCase):
 
     def test_unknown_usd_pair_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
-            validate_friday_pairs(["DOGEUSD"])
+            validate_friday_pairs(["AVAXUSD"])
 
     def test_scan_exit_code_is_success_when_ai_review_is_temporarily_unavailable(self):
         # AI unavailability must not kill the scheduled market scan. It is still
