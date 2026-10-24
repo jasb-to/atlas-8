@@ -189,15 +189,19 @@ def _snapshot(frame: pd.DataFrame, timeframe: str) -> dict:
     macd_bearish_change = hist < old_hist
     volume_ratio = (float(row.volume) / float(row.volume_sma20)
                     if np.isfinite(row.volume_sma20) and float(row.volume_sma20) > 0 else None)
+    # Trendline pivots and line indices are relative to this 180-candle sample.
+    # Keep all line evaluation and anchor lookup in that same coordinate system;
+    # indicator values above still use the full available history.
+    line_frame = f.tail(180).reset_index(drop=True)
     lines = _line_candidates(f)
     nearby = []
     breaks = []
     for line in lines:
-        i = len(f) - 1
+        i = len(line_frame) - 1
         level = float(line.value_at(i))
         distance = (close - level) / max(abs(level), 1e-9) * 100
         previous_level = float(line.value_at(i - 1))
-        previous_close = float(f.iloc[-2].close)
+        previous_close = float(line_frame.iloc[-2].close)
         if line.kind == "resistance":
             crossed = close > level * (1 + BREAK_BUFFER) and previous_close <= previous_level * (1 + BREAK_BUFFER)
             direction = "long"
@@ -207,8 +211,8 @@ def _snapshot(frame: pd.DataFrame, timeframe: str) -> dict:
         item = {
             "kind": line.kind, "price": round(level, 6), "distance_pct": round(distance, 3),
             "touches": len(line.touch_indices),
-            "start_time": f.iloc[line.start.index].timestamp.isoformat(),
-            "end_time": f.iloc[line.end.index].timestamp.isoformat(),
+            "start_time": line_frame.iloc[line.start.index].timestamp.isoformat(),
+            "end_time": line_frame.iloc[line.end.index].timestamp.isoformat(),
             "start_price": float(line.start.price), "end_price": float(line.end.price),
             "slope_per_candle": float(line.slope_per_bar),
         }
