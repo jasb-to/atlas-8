@@ -7,7 +7,7 @@ export const revalidate = 0;
 export const maxDuration = 20;
 
 const ISSUER = "https://token.actions.githubusercontent.com";
-const AUDIENCE = "friday-huggingface-review";
+const AUDIENCE = "friday-ai-review";
 const REPOSITORY = "jasb-to/atlas-8";
 const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/heads/main";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
