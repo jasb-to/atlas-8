@@ -548,7 +548,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"status=ok close={row['last_close']} candle={row['last_completed_candle_utc']} "
                 f"setup={row['latest_setup_state']} decision={row['friday_decision']} "
                 f"ai={row['ai_review_status']}/{row['ai_review_assessment'] or 'n/a'} "
-                f"events={row['break_event_count']} outcome={alert_text} duration={elapsed:.1f}s",
+                f"events={row['break_event_count']} signal_age_min={row.get('signal_age_minutes', 'n/a')} "
+                f"outcome={alert_text} duration={elapsed:.1f}s",
                 flush=True,
             )
         except Exception as exc:
