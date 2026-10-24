@@ -84,6 +84,41 @@ class FridayHuggingFaceTests(unittest.TestCase):
         self.assertEqual(result["model_id"], "gemini-3.5-flash-lite")
         self.assertEqual(result["latency_ms"], 1234)
 
+    def test_proxy_error_preserves_actual_provider_model_and_category(self):
+        oidc_response = Mock()
+        oidc_response.raise_for_status.return_value = None
+        oidc_response.json.return_value = {"value": "test-oidc-token"}
+        proxy_response = Mock()
+        proxy_response.ok = False
+        proxy_response.status_code = 502
+        proxy_response.text = "upstream error"
+        proxy_response.json.return_value = {
+            "status": "error",
+            "provider": "gemini",
+            "model_id": "gemini-3.5-flash-lite",
+            "error_category": "provider_unavailable",
+            "latency_ms": 9876,
+            "error": "Gemini returned HTTP 503",
+        }
+        session = Mock()
+        session.get.return_value = oidc_response
+        session.post.return_value = proxy_response
+        env = {
+            "HUGGINGFACE_API_KEY": "",
+            "HF_TOKEN": "",
+            "FRIDAY_AI_REVIEW_URL": "https://example.test/api/friday/ai-review",
+            "ACTIONS_ID_TOKEN_REQUEST_URL": "https://actions.example.test/oidc",
+            "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "test-request-token",
+        }
+        with patch.dict("os.environ", env, clear=False):
+            result = review_decision({}, session=session)
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["provider"], "gemini")
+        self.assertEqual(result["model_id"], "gemini-3.5-flash-lite")
+        self.assertEqual(result["error_category"], "provider_unavailable")
+        self.assertEqual(result["latency_ms"], 9876)
+        self.assertIn("HTTP 502", result["error"])
+
     def test_bad_model_output_fails_soft(self):
         response = Mock()
         response.raise_for_status.return_value = None
