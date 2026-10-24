@@ -112,7 +112,6 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         event, entry_type=alert_type, thesis=mtf, trade_plan=trade_plan,
                     )
                     normalized["entry_gate"] = gate
-                    row_event["payload"]["entry_gate"] = gate if isinstance(row_event.get("payload"), dict) else gate
                     row["alert_results"].append({
                         "type": alert_type,
                         "sent": False,
@@ -120,13 +119,13 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         "gate": gate,
                     })
                     if store.configured:
+                        gate_signal_time = event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")
                         gate_key = hashlib.sha256(
-                            f"{row_event['event_key']}|entry_gate|{alert_type}|{alert_timestamp if 'alert_timestamp' in locals() else (event.get('continuation_add_time') if fresh_entry2 else event.get('signal_time'))}".encode()
+                            f"{row_event['event_key']}|entry_gate|{alert_type}|{gate_signal_time}".encode()
                         ).hexdigest()
                         store.record_archive(make_archive_record(
                             record_key=gate_key, record_type="entry_gate_decision",
-                            pair=pair, timeframe="4H",
-                            signal_time=(event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
+                            pair=pair, timeframe="4H", signal_time=gate_signal_time,
                             payload={"event": normalized, "entry_gate": gate, "thesis": mtf.get("daily_thesis", {})},
                         ))
                     if not gate["eligible"]:
