@@ -121,9 +121,9 @@ export default function Home() {
               const ts = new Date(event.signal_time ?? 0).getTime();
               const outcome = String(event.outcome ?? "").toLowerCase();
               return Number.isFinite(ts) && ts >= cutoff && ["pending", "candidate", "active", "open"].includes(outcome);
-            }).filter(event => !data.paper_trades.some(trade => trade.pair === event.pair && trade.status === "OPEN" && trade.signal_time === event.signal_time)).slice(0, 3);
+            }).filter(event => !data.paper_trades.some(trade => displayPair(trade.pair) === displayPair(event.pair) && trade.status === "OPEN" && trade.signal_time === event.signal_time)).slice(0, 3);
             return watch.length ? <details className="history-details"><summary>Near-ready watchlist ({watch.length})</summary>{watch.map((event, i) => <article className="candidate" key={event.event_key ?? i}>
-              <div className="candidate-top"><b>{event.pair}</b><span className={String(event.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(event.direction ?? "unknown").toUpperCase()}</span></div>
+              <div className="candidate-top"><b>{displayPair(event.pair).replace(/USDT$/, "")}</b><span className={String(event.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(event.direction ?? "unknown").toUpperCase()}</span></div>
               <div className="candidate-title">WATCH · NOT YET QUALIFIED</div>
               <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(event.signal_time)}</span></div>
               <p className="candidate-reason">A recent event only. It is not promoted to a qualified trade without a validated structural risk plan and the required filters.</p>
@@ -134,7 +134,7 @@ export default function Home() {
               const entry2 = event.evidence?.event_add === "CONTINUATION_ADD_CONFIRMED";
               const direction = String(event.direction ?? "").toLowerCase();
               return <article className="candidate" key={event.event_key ?? i}>
-                <div className="candidate-top"><b>{event.pair}</b><span className={direction === "long" ? "direction long" : direction === "short" ? "direction short" : "direction"}>{direction || "direction pending"}</span></div>
+                <div className="candidate-top"><b>{displayPair(event.pair).replace(/USDT$/, "")}</b><span className={direction === "long" ? "direction long" : direction === "short" ? "direction short" : "direction"}>{direction || "direction pending"}</span></div>
                 <div className="candidate-title">{entry2 ? "ENTRY 2 · CONTINUATION" : "ENTRY 1 · BREAK CLOSE"}</div>
                 <div className="candidate-stats"><div><span>REFERENCE</span><b>{fmtPrice(entry2 ? event.continuation_add_close : event.entry_reference)}</b></div><div><span>STRUCTURE</span><b>{fmtPrice(event.line_price)}</b></div></div>
                 <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(entry2 ? event.continuation_add_time : event.signal_time)}</span></div>
@@ -151,7 +151,7 @@ export default function Home() {
       <div className="section-head"><div><span className="section-kicker">03 / PAPER TRADE MANAGEMENT</span><h2>Stops & targets</h2><p>Open paper positions are checked against each newly closed 4H candle. If stop and target hit in the same candle, stop is recorded first conservatively.</p></div></div>
       <div className="feed-table-wrap"><table><thead><tr><th>MARKET / STRATEGY</th><th>DIRECTION</th><th>STATUS</th><th>ENTRY</th><th>STOP LOSS</th><th>TAKE PROFIT</th><th>AI REVIEW</th><th>EXIT / RESULT</th></tr></thead><tbody>
         {data.paper_trades.length ? data.paper_trades.slice(0, 100).map((trade, i) => <tr key={trade.trade_id ?? i}>
-          <td><b>{trade.pair}</b><small>{clean(trade.strategy)} · {fmtTime(trade.signal_time)}</small></td>
+          <td><b>{displayPair(trade.pair).replace(/USDT$/, "")}</b><small>{clean(trade.strategy)} · {fmtTime(trade.signal_time)}</small></td>
           <td><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{trade.direction}</span></td>
           <td><span className={"state-pill " + (trade.status === "OPEN" ? "good" : "")}>{trade.status}</span></td>
           <td>{fmtPrice(trade.entry)}</td><td>{fmtPrice(trade.stop_loss)}</td><td>{fmtPrice(trade.take_profit)}</td>
