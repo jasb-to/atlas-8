@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       "Do not invent prices, indicators, probabilities, or future outcomes.",
       "Do not invent candidates, prices, direction, stops, targets, or future outcomes. Only discuss candidates explicitly present in candidate_universe or frozen_decision.",
       "Evaluate candidate_universe independently from rule_decision. A NO_TRADE rule_decision does not automatically disqualify a separate candidate that is explicitly marked eligible in candidate_universe.",
-      "Set priority_candidate to the exact identifier of the supplied candidate: structural_trade_plans.long, structural_trade_plans.short, momentum_reversal.long, or momentum_reversal.short. Use null if no eligible candidate exists. Do not return a bare direction or free-form explanation in this field.",
+      "Set priority_candidate to the exact identifier of the supplied candidate: structural_trade_plans.long, structural_trade_plans.short, momentum_reversal_candidate.long, or momentum_reversal_candidate.short. Use null if no eligible candidate exists. Do not return a bare direction or free-form explanation in this field.",
       "Treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
       "A supportive AI opinion cannot promote a blocked candidate or bypass any hard gate.",
       "Identify missing evidence, contradictory evidence, and likely false-break risks.",
