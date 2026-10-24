@@ -448,6 +448,29 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
                 else:
                     row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
+            # Ensure the most relevant lifecycle blocker is visible even if the
+            # older event loop did not emit a notification outcome for this setup.
+            latest_setup = result.get("latest_setup_state", {}) or {}
+            latest_setup_state = str(latest_setup.get("state", "")).upper()
+            latest_setup_time = _utc(latest_setup["signal_time"]) if latest_setup.get("signal_time") else None
+            if latest_setup_state == "RETEST_HELD_WAITING_CONTINUATION" and latest_setup_time and latest_setup_time < latest:
+                if not any(
+                    item.get("type") == "ENTRY_1"
+                    and item.get("status") == "not_sent_break_no_longer_fresh"
+                    and item.get("signal_time") == latest_setup_time.isoformat()
+                    for item in row["alert_results"]
+                ):
+                    row["alert_results"].append({
+                        "type": "ENTRY_1",
+                        "sent": False,
+                        "status": "not_sent_break_no_longer_fresh",
+                        "signal_time": latest_setup_time.isoformat(),
+                        "reason": (
+                            f"Break candle {latest_setup_time.isoformat()} is older than the latest completed candle "
+                            f"{latest.isoformat()}; the retest is held but continuation has not been confirmed. "
+                            "No delayed Entry 1 alert is sent; wait for a fresh continuation signal."
+                        ),
+                    })
             (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
             alert_text = "; ".join(
