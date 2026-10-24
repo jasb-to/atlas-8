@@ -108,7 +108,10 @@ class SupabaseFridayStore:
             "select": "alert_key,status", "alert_key": f"eq.{alert_key}", "limit": "1"
         })
         if existing:
-            if existing[0].get("status") == "sent":
+            # A "sending" row may represent a Telegram request that succeeded
+            # just before the worker crashed. Never reclaim it automatically:
+            # duplicate notifications are worse than a manually reconciled stale row.
+            if existing[0].get("status") in {"sent", "sending"}:
                 return False
             self._request("PATCH", ALERTS_TABLE,
                 params={"alert_key": f"eq.{alert_key}"},
@@ -463,12 +466,17 @@ class RepoFolderFridayStore:
 
     def claim_alert(self, *, alert_key: str, pair: str, alert_type: str, signal_time: str | None) -> bool:
         rows = self._read("alerts.json")
-        if any(r.get("alert_key") == alert_key and r.get("status") == "sent" for r in rows):
+        existing = next((r for r in rows if r.get("alert_key") == alert_key), None)
+        if existing and existing.get("status") in {"sent", "sending"}:
+            # A sending row may mean Telegram accepted the message before a crash.
+            # Fail closed to avoid duplicate notifications on the next scan.
             return False
-        if not any(r.get("alert_key") == alert_key for r in rows):
+        if existing:
+            existing.update({"status": "sending", "error": None, "updated_at": utc_now()})
+        else:
             rows.insert(0, {"alert_key": alert_key, "pair": pair, "alert_type": alert_type,
                             "signal_time": signal_time, "status": "sending", "updated_at": utc_now()})
-            self._write("alerts.json", rows[:5000])
+        self._write("alerts.json", rows[:5000])
         self._refresh_dashboard()
         return True
 
