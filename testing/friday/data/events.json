@@ -1,5 +1,199 @@
 [
   {
+    "event_key": "a396523236f6959db202c0a89ba1547b7dd971d45df061c5ab0af4b97ee95e53",
+    "pair": "LITUSDT",
+    "timeframe": "4H",
+    "strategy_version": "friday-stoch-rsi-structural-reversal-v1",
+    "event_type": "MOMENTUM_REVERSAL_CANDIDATE",
+    "direction": "LONG",
+    "signal_time": "2026-10-24T16:00:00+00:00",
+    "entry_reference": 3.2087,
+    "line_kind": "momentum_reversal",
+    "line_price": null,
+    "outcome": "candidate",
+    "retest_confirmed": false,
+    "continuation_add_time": null,
+    "continuation_add_close": null,
+    "failure_time": null,
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
+    "evidence": {
+      "event": "MOMENTUM_REVERSAL_CANDIDATE",
+      "signal_time": "2026-10-24T16:00:00+00:00",
+      "direction": "long",
+      "line_kind": "momentum_reversal",
+      "anchor_start_time": "2026-10-24T16:00:00+00:00",
+      "anchor_end_time": "2026-10-24T16:00:00+00:00",
+      "close_at_break": 3.2087,
+      "outcome": "candidate",
+      "retest_confirmed": false,
+      "evidence": {
+        "strategy": "stoch-rsi-structural-reversal-v1",
+        "pair": "LITUSDT",
+        "state": "ENTRY_CANDIDATE",
+        "direction": "long",
+        "signal_time": "2026-10-24T16:00:00+00:00",
+        "entry": 3.2087,
+        "stop": 3.0796461569,
+        "target": 3.7107,
+        "reward_risk": 3.8898,
+        "eligible": true,
+        "blockers": [],
+        "research_only": true,
+        "stoch_rsi_k": 12.155,
+        "stoch_rsi_d": 4.0517,
+        "ema8": 3.1957097114,
+        "ema21": 3.2975377181,
+        "macd_hist": -0.0499228683,
+        "exhaustion_filter": {
+          "state": "possible_bullish_turn",
+          "aligned_score": 3,
+          "opposing_score": 0,
+          "evidence": {
+            "bullish": [
+              "rsi_recovering",
+              "closed_above_previous_candle_high",
+              "close_reclaimed_ema8_while_ema_was_flat_or_falling"
+            ],
+            "bearish": []
+          },
+          "passed": true
+        },
+        "trade_plan": {
+          "eligible": true,
+          "direction": "long",
+          "entry": 3.2087,
+          "atr14": 0.1390256209,
+          "stop": 3.0796461569,
+          "target": 3.7107,
+          "target_source": "confirmed_structure",
+          "risk_per_unit": 0.1290538431,
+          "reward_per_unit": 0.502,
+          "reward_risk": 3.8898,
+          "min_reward_risk": 1.5,
+          "fib": {
+            "retracements": {
+              "0.382": 3.6494694,
+              "0.5": 3.54465,
+              "0.618": 3.4398305999999996,
+              "0.786": 3.2905961999999995
+            },
+            "extensions": {
+              "1.272": 4.2304176,
+              "1.618": 4.5377694
+            }
+          },
+          "confirmed_swing_high": {
+            "index": 281,
+            "price": 3.9888
+          },
+          "confirmed_swing_low": {
+            "index": 274,
+            "price": 3.1005
+          },
+          "blockers": [],
+          "research_only": true
+        }
+      }
+    }
+  },
+  {
+    "event_key": "c553bff26bfa9fcdef81fe1c1ac67d3fdb6ca26e3e4f42cc88d87f7cc956e9b6",
+    "pair": "ZECUSDT",
+    "timeframe": "4H",
+    "strategy_version": "friday-stoch-rsi-structural-reversal-v1",
+    "event_type": "MOMENTUM_REVERSAL_CANDIDATE",
+    "direction": "LONG",
+    "signal_time": "2026-10-24T16:00:00+00:00",
+    "entry_reference": 1190.19,
+    "line_kind": "momentum_reversal",
+    "line_price": null,
+    "outcome": "candidate",
+    "retest_confirmed": false,
+    "continuation_add_time": null,
+    "continuation_add_close": null,
+    "failure_time": null,
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
+    "evidence": {
+      "event": "MOMENTUM_REVERSAL_CANDIDATE",
+      "signal_time": "2026-10-24T16:00:00+00:00",
+      "direction": "long",
+      "line_kind": "momentum_reversal",
+      "anchor_start_time": "2026-10-24T16:00:00+00:00",
+      "anchor_end_time": "2026-10-24T16:00:00+00:00",
+      "close_at_break": 1190.19,
+      "outcome": "candidate",
+      "retest_confirmed": false,
+      "evidence": {
+        "strategy": "stoch-rsi-structural-reversal-v1",
+        "pair": "ZECUSDT",
+        "state": "ENTRY_CANDIDATE",
+        "direction": "long",
+        "signal_time": "2026-10-24T16:00:00+00:00",
+        "entry": 1190.19,
+        "stop": 1181.1863210719,
+        "target": 1219.68,
+        "reward_risk": 3.2753,
+        "eligible": true,
+        "blockers": [],
+        "research_only": true,
+        "stoch_rsi_k": 21.2981,
+        "stoch_rsi_d": 7.0994,
+        "ema8": 1183.2525140924,
+        "ema21": 1204.5756747723,
+        "macd_hist": -10.9394709831,
+        "exhaustion_filter": {
+          "state": "possible_bullish_turn",
+          "aligned_score": 3,
+          "opposing_score": 0,
+          "evidence": {
+            "bullish": [
+              "rsi_recovering",
+              "closed_above_previous_candle_high",
+              "close_reclaimed_ema8_while_ema_was_flat_or_falling"
+            ],
+            "bearish": []
+          },
+          "passed": true
+        },
+        "trade_plan": {
+          "eligible": true,
+          "direction": "long",
+          "entry": 1190.19,
+          "atr14": 42.6911928538,
+          "stop": 1181.1863210719,
+          "target": 1219.68,
+          "target_source": "confirmed_structure",
+          "risk_per_unit": 9.0036789281,
+          "reward_per_unit": 29.49,
+          "reward_risk": 3.2753,
+          "min_reward_risk": 1.5,
+          "fib": {
+            "retracements": {
+              "0.382": 1231.5854199999999,
+              "0.5": 1223.185,
+              "0.618": 1214.78458,
+              "0.786": 1202.82466
+            },
+            "extensions": {
+              "1.272": 1278.14368,
+              "1.618": 1302.77542
+            }
+          },
+          "confirmed_swing_high": {
+            "index": 291,
+            "price": 1258.78
+          },
+          "confirmed_swing_low": {
+            "index": 286,
+            "price": 1187.59
+          },
+          "blockers": [],
+          "research_only": true
+        }
+      }
+    }
+  },
+  {
     "event_key": "a21e952bb768b65ccd238d2cb5a9161dbdf09d2f2a680bccaf108e91cd129fc9",
     "pair": "AVAXUSDT",
     "timeframe": "4H",
@@ -15,7 +209,7 @@
     "continuation_add_time": null,
     "continuation_add_close": null,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T04:00:00+00:00",
@@ -40,17 +234,17 @@
       "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
       "retest_deadline": "2026-10-27T04:00:00+00:00",
       "outcome": "pending",
-      "forward_bars_checked": 2,
+      "forward_bars_checked": 3,
       "anchor_start_time": "2026-09-25T04:00:00+00:00",
       "anchor_end_time": "2026-10-22T16:00:00+00:00",
-      "forward_3_bar_return_pct": 1.9085,
-      "forward_3_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_6_bar_return_pct": 1.9085,
-      "forward_6_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_12_bar_return_pct": 1.9085,
-      "forward_12_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_18_bar_return_pct": 1.9085,
-      "forward_18_bar_end_time": "2026-10-24T12:00:00+00:00",
+      "forward_3_bar_return_pct": 0.5134,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": 0.5134,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": 0.5134,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": 0.5134,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   },
@@ -70,7 +264,7 @@
     "continuation_add_time": null,
     "continuation_add_close": null,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T12:00:00+00:00",
@@ -102,9 +296,17 @@
       "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
       "retest_deadline": "2026-10-27T12:00:00+00:00",
       "outcome": "pending",
-      "forward_bars_checked": 0,
+      "forward_bars_checked": 1,
       "anchor_start_time": "2026-10-15T00:00:00+00:00",
       "anchor_end_time": "2026-10-23T20:00:00+00:00",
+      "forward_3_bar_return_pct": -1.4678,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": -1.4678,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": -1.4678,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": -1.4678,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   },
@@ -119,12 +321,12 @@
     "entry_reference": 2306.21,
     "line_kind": "support",
     "line_price": 2349.017391304348,
-    "outcome": "pending",
-    "retest_confirmed": false,
+    "outcome": "retest_held_waiting_continuation",
+    "retest_confirmed": true,
     "continuation_add_time": null,
     "continuation_add_close": null,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T12:00:00+00:00",
@@ -155,10 +357,25 @@
       },
       "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
       "retest_deadline": "2026-10-27T12:00:00+00:00",
-      "outcome": "pending",
-      "forward_bars_checked": 0,
+      "outcome": "retest_held_waiting_continuation",
+      "forward_bars_checked": 1,
       "anchor_start_time": "2026-10-20T00:00:00+00:00",
       "anchor_end_time": "2026-10-23T20:00:00+00:00",
+      "retest_confirmed": true,
+      "retest_confirmed_time": "2026-10-24T16:00:00+00:00",
+      "retest_confirmed_bar_index": 719,
+      "retest_close": 2340.06,
+      "retest_high": 2342.2,
+      "retest_low": 2295.5,
+      "outcome_bars": 1,
+      "forward_3_bar_return_pct": -1.4678,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": -1.4678,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": -1.4678,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": -1.4678,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   },
@@ -178,7 +395,7 @@
     "continuation_add_time": null,
     "continuation_add_close": null,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T12:00:00+00:00",
@@ -203,9 +420,17 @@
       "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
       "retest_deadline": "2026-10-27T12:00:00+00:00",
       "outcome": "pending",
-      "forward_bars_checked": 0,
+      "forward_bars_checked": 1,
       "anchor_start_time": "2026-10-16T16:00:00+00:00",
       "anchor_end_time": "2026-10-18T20:00:00+00:00",
+      "forward_3_bar_return_pct": -0.8401,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": -0.8401,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": -0.8401,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": -0.8401,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   },
@@ -225,7 +450,7 @@
     "continuation_add_time": "2026-10-24T12:00:00+00:00",
     "continuation_add_close": 79834.9,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T04:00:00+00:00",
@@ -262,7 +487,7 @@
       "anchor_end_time": "2026-10-22T16:00:00+00:00",
       "retest_confirmed": true,
       "retest_confirmed_time": "2026-10-24T08:00:00+00:00",
-      "retest_confirmed_bar_index": 718,
+      "retest_confirmed_bar_index": 717,
       "retest_close": 80593.4,
       "retest_high": 80810.0,
       "retest_low": 80470.0,
@@ -271,14 +496,14 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "continuation_trigger": 80470.0,
-      "forward_3_bar_return_pct": 1.1035,
-      "forward_3_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_6_bar_return_pct": 1.1035,
-      "forward_6_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_12_bar_return_pct": 1.1035,
-      "forward_12_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_18_bar_return_pct": 1.1035,
-      "forward_18_bar_end_time": "2026-10-24T12:00:00+00:00",
+      "forward_3_bar_return_pct": 0.2727,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": 0.2727,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": 0.2727,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": 0.2727,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   },
@@ -298,7 +523,7 @@
     "continuation_add_time": "2026-10-24T12:00:00+00:00",
     "continuation_add_close": 79834.9,
     "failure_time": null,
-    "run_id": "d35bbd13-6215-43a0-9d3b-b8af6143902d",
+    "run_id": "05323fa0-f313-4245-9d63-3771243e8837",
     "evidence": {
       "event": "BREAK_CLOSE_PROBE",
       "signal_time": "2026-10-24T04:00:00+00:00",
@@ -335,7 +560,7 @@
       "anchor_end_time": "2026-10-22T16:00:00+00:00",
       "retest_confirmed": true,
       "retest_confirmed_time": "2026-10-24T08:00:00+00:00",
-      "retest_confirmed_bar_index": 718,
+      "retest_confirmed_bar_index": 717,
       "retest_close": 80593.4,
       "retest_high": 80810.0,
       "retest_low": 80470.0,
@@ -344,14 +569,14 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "continuation_trigger": 80470.0,
-      "forward_3_bar_return_pct": 1.1035,
-      "forward_3_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_6_bar_return_pct": 1.1035,
-      "forward_6_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_12_bar_return_pct": 1.1035,
-      "forward_12_bar_end_time": "2026-10-24T12:00:00+00:00",
-      "forward_18_bar_return_pct": 1.1035,
-      "forward_18_bar_end_time": "2026-10-24T12:00:00+00:00",
+      "forward_3_bar_return_pct": 0.2727,
+      "forward_3_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_6_bar_return_pct": 0.2727,
+      "forward_6_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_12_bar_return_pct": 0.2727,
+      "forward_12_bar_end_time": "2026-10-24T16:00:00+00:00",
+      "forward_18_bar_return_pct": 0.2727,
+      "forward_18_bar_end_time": "2026-10-24T16:00:00+00:00",
       "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
     }
   }
