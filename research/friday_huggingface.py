@@ -75,7 +75,7 @@ def review_decision(
                 if not isinstance(parsed.get(field), list):
                     raise ValueError(f"Vercel review proxy field {field} must be an array")
             return {
-                "status": "ok", "provider": "huggingface",
+                "status": "ok", "provider": proxy_body.get("provider", "huggingface"),
                 "model_id": proxy_body.get("model_id", model),
                 "response": parsed,
                 "latency_ms": proxy_body.get("latency_ms", round((time.monotonic() - started) * 1000)),
