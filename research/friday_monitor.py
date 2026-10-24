@@ -112,14 +112,43 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    for pair in pairs:
+    print(
+        f"[FRIDAY] RUN_START id={run_id} markets={len(pairs)} "
+        f"pairs={','.join(_display_pair(pair).replace('USDT', '') for pair in pairs)} "
+        f"started_at={started_at}",
+        flush=True,
+    )
+    for index, pair in enumerate(pairs, start=1):
         pair_started = utc_now()
+        display_pair = _display_pair(pair).replace("USDT", "")
+        print(
+            f"[FRIDAY MARKET {index}/{len(pairs)}] START pair={display_pair} "
+            f"venue_symbol={pair} interval=4H thesis=1D+4H",
+            flush=True,
+        )
         try:
             pair_dir = out / pair.lower()
             pair_dir.mkdir(parents=True, exist_ok=True)
             result = build_preview(pair=pair, interval=240, output_dir=str(pair_dir))
+            print(
+                f"[FRIDAY MARKET {index}/{len(pairs)}] DATA_OK pair={display_pair} "
+                f"close={result.get('last_close', 'n/a')} "
+                f"last_closed_candle={result.get('last_completed_candle_utc', 'n/a')}",
+                flush=True,
+            )
             # Daily thesis + 4H execution scan uses completed candles from Kraken.
             mtf = analyse_pair(pair=pair)
+            print(
+                f"[FRIDAY MARKET {index}/{len(pairs)}] ANALYSIS_OK pair={display_pair} "
+                f"setup={(result.get('latest_setup_state') or {}).get('state', 'UNKNOWN')} "
+                f"decision={(result.get('friday_decision') or {}).get('state', 'UNKNOWN')} "
+                f"daily_4h_state={mtf.get('state', 'UNKNOWN')} "
+                f"direction={mtf.get('thesis_direction', 'none')} "
+                f"ai_status={(result.get('model_review') or {}).get('status', 'missing')} "
+                f"ai_assessment=((result.get('model_review') or {}).get('response') or {}).get('assessment', 'n/a') "
+                f"break_events={result.get('event_count', 0)}",
+                flush=True,
+            )
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
             candles = pd.DataFrame(result.get("closed_candles", []))
@@ -421,12 +450,32 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
             (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
+            alert_text = "; ".join(
+                f"{item.get('type', 'candidate')}={item.get('status', 'unknown')}"
+                + (f" reason={item['reason']}" if item.get("reason") else "")
+                for item in row["alert_results"]
+            ) or "no actionable candidate on latest completed candle"
+            elapsed = (pd.Timestamp(utc_now()) - pd.Timestamp(pair_started)).total_seconds()
+            print(
+                f"[FRIDAY MARKET {index}/{len(pairs)}] COMPLETE pair={display_pair} "
+                f"status=ok close={row['last_close']} candle={row['last_completed_candle_utc']} "
+                f"setup={row['latest_setup_state']} decision={row['friday_decision']} "
+                f"ai={row['ai_review_status']}/{row['ai_review_assessment'] or 'n/a'} "
+                f"events={row['break_event_count']} outcome={alert_text} duration={elapsed:.1f}s",
+                flush=True,
+            )
         except Exception as exc:
-            failures.append(f"{pair}: {type(exc).__name__}: {exc}")
+            error_text = f"{type(exc).__name__}: {exc}"
+            failures.append(f"{pair}: {error_text}")
             pair_results.append({
                 "pair": pair, "status": "error", "started_at": pair_started,
-                "error": f"{type(exc).__name__}: {exc}",
+                "error": error_text,
             })
+            print(
+                f"[FRIDAY MARKET {index}/{len(pairs)}] FAILED pair={display_pair} "
+                f"error={error_text}",
+                flush=True,
+            )
 
     status = "success" if not failures else ("partial_failure" if len(failures) < len(pairs) else "failure")
     if not store.configured:
@@ -451,7 +500,15 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     # Database logging must not be silently reported as successful if missing.
     if store.configured:
         store.record_cron_run(run_record)
-    print(json.dumps(run_record, indent=2, allow_nan=False))
+    print(
+        f"[FRIDAY] RUN_FINISHED id={run_id} status={status} "
+        f"markets={len(pair_results)}/{len(pairs)} failed={len(failures)} "
+        f"ai_ok={sum(1 for row in pair_results if row.get('status') == 'ok' and row.get('ai_review_status') == 'ok')} "
+        f"events={len(all_rows)} persisted={run_record['live_events_persisted']} "
+        f"duration={(pd.Timestamp(run_record['finished_at']) - pd.Timestamp(started_at)).total_seconds():.1f}s",
+        flush=True,
+    )
+    print(json.dumps(run_record, indent=2, allow_nan=False), flush=True)
     return run_record
 
 
