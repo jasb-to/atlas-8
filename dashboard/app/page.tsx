@@ -120,13 +120,13 @@ export default function Home() {
             const watch = events.filter(event => {
               const ts = new Date(event.signal_time ?? 0).getTime();
               const outcome = String(event.outcome ?? "").toLowerCase();
-              return Number.isFinite(ts) && ts >= cutoff && ["pending", "candidate", "active", "open"].includes(outcome);
+              return Number.isFinite(ts) && ts >= cutoff && ["pending", "candidate", "active", "open", "retest_held_waiting_continuation"].includes(outcome);
             }).filter(event => !data.paper_trades.some(trade => displayPair(trade.pair) === displayPair(event.pair) && trade.status === "OPEN" && trade.signal_time === event.signal_time)).slice(0, 3);
             return watch.length ? <details className="history-details"><summary>Near-ready watchlist ({watch.length})</summary>{watch.map((event, i) => <article className="candidate" key={event.event_key ?? i}>
               <div className="candidate-top"><b>{displayPair(event.pair).replace(/USDT$/, "")}</b><span className={String(event.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(event.direction ?? "unknown").toUpperCase()}</span></div>
-              <div className="candidate-title">WATCH · NOT YET QUALIFIED</div>
+              <div className="candidate-title">{String(event.outcome ?? "").toLowerCase() === "retest_held_waiting_continuation" ? "RETEST HELD · WAITING CONTINUATION" : "WATCH · NOT YET QUALIFIED"}</div>
               <div className="candidate-bottom"><span className="state-pill">{clean(event.outcome)}</span><span>{fmtTime(event.signal_time)}</span></div>
-              <p className="candidate-reason">A recent event only. It is not promoted to a qualified trade without a validated structural risk plan and the required filters.</p>
+              <p className="candidate-reason">{String(event.outcome ?? "").toLowerCase() === "retest_held_waiting_continuation" ? "The retest held, but a subsequent closed candle has not yet confirmed continuation through the reaction extreme. No Entry 2 add is confirmed." : "A recent event only. It is not promoted to a qualified trade without a validated structural risk plan and the required filters."}</p>
             </article>)}</details> : null;
           })()}
           <details className="history-details"><summary>Historical setup events ({candidates.length + (reversalCandidate.eligible ? 1 : 0)})</summary><p className="panel-intro">Historical break/retest and Stoch RSI events are retained for review, not presented as current opportunities.</p>
@@ -164,10 +164,10 @@ export default function Home() {
 
     <section className="feed-section">
       <div className="section-head"><div><span className="section-kicker">04 / SCAN & TRADE LEDGER</span><h2>What FRIDAY has recorded</h2><p>New records appear after persistence succeeds. Refreshes automatically every 30 seconds.</p></div>
-        <label className="filter-label">PAIR <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}>{pairs.map(p => <option key={p} value={p}>{p}</option>)}</select></label>
+        <label className="filter-label">PAIR <select value={selectedPair} onChange={e => setSelectedPair(e.target.value)}>{pairs.map(p => <option key={p} value={p}>{p === "ALL" ? p : displayPair(p).replace(/USDT$/, "")}</option>)}</select></label>
       </div>
       <div className="feed-table-wrap"><table><thead><tr><th>TIME / MARKET</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th><th>RETEST</th><th>CONTINUATION</th></tr></thead><tbody>
-        {latestEvents.length ? latestEvents.map((event, i) => <tr key={event.event_key ?? i}><td><b>{event.pair}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}{event.supporting_line_count > 1 ? <small>{event.supporting_line_count} supporting lines grouped</small> : null}</td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{clean(event.outcome)}</span></td><td>{fmtPrice(event.entry_reference)}</td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{fmtTime(event.continuation_add_time)}</td></tr>) : <tr><td colSpan={7}><div className="empty-row">No trade lifecycle events persisted yet.</div></td></tr>}
+        {latestEvents.length ? latestEvents.map((event, i) => <tr key={event.event_key ?? i}><td><b>{displayPair(event.pair).replace(/USDT$/, "")}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}{event.supporting_line_count > 1 ? <small>{event.supporting_line_count} supporting lines grouped</small> : null}</td><td><span className={String(event.direction ?? "").toLowerCase() === "long" ? "direction long" : String(event.direction ?? "").toLowerCase() === "short" ? "direction short" : "direction"}>{event.direction ?? "—"}</span></td><td><span className="state-pill">{clean(event.outcome)}</span></td><td>{fmtPrice(event.entry_reference)}</td><td>{event.retest_confirmed ? <span className="yes">HELD</span> : "—"}</td><td>{fmtTime(event.continuation_add_time)}</td></tr>) : <tr><td colSpan={7}><div className="empty-row">No trade lifecycle events persisted yet.</div></td></tr>}
       </tbody></table></div>
       <div className="feed-foot"><span>{latestEvents.length} of up to 50 recent lifecycle events</span><span>Last dashboard refresh: {fmtTime(data.fetched_at)}</span></div>
     </section>
