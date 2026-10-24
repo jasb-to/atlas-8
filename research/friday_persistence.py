@@ -292,6 +292,17 @@ class UpstashFridayStore:
                 break
         return rows
 
+    def get_archive(self, record_key: str) -> dict[str, Any] | None:
+        """Read one durable archive record by its stable key."""
+        stored = self._command("GET", f"FRIDAY:archive:{record_key}")
+        if not stored:
+            return None
+        try:
+            value = json.loads(stored)
+        except (TypeError, json.JSONDecodeError):
+            return None
+        return value if isinstance(value, dict) else None
+
     def claim_alert(self, *, alert_key: str, pair: str, alert_type: str,
                     signal_time: str | None) -> bool:
         row = {"alert_key": alert_key, "pair": pair, "alert_type": alert_type,
@@ -453,6 +464,11 @@ class RepoFolderFridayStore:
         self._write("archive.json", rows[:1000])
         self._refresh_dashboard()
         return {"persisted": True, "table": "archive.json"}
+
+    def get_archive(self, record_key: str) -> dict[str, Any] | None:
+        """Read one durable archive record by its stable key."""
+        return next((row for row in self._read("archive.json")
+                     if row.get("record_key") == record_key), None)
 
     def record_cron_run(self, record: Mapping[str, Any]) -> dict[str, Any]:
         rows = [r for r in self._read("runs.json") if r.get("run_id") != record.get("run_id")]
