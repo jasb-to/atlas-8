@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 
 from research.friday_monitor import _display_pair, _utc, run_monitor, validate_friday_pairs
+from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMonitorTests(unittest.TestCase):
@@ -63,7 +64,42 @@ class FridayMonitorTests(unittest.TestCase):
                         result = run_monitor(["XBTUSD"], tmp)
             self.assertEqual(result["status"], "persistence_not_configured")
             self.assertEqual(result["pair_results"][0]["latest_setup_state"], "NO_SETUP")
+            self.assertTrue(result["run_id"])
+            self.assertEqual(result["markets_requested"], 1)
+            self.assertEqual(result["markets_succeeded"], 1)
+            self.assertEqual(result["alert_outcomes_total"], 0)
+            self.assertEqual(result["pair_results"][0]["run_id"], result["run_id"])
             self.assertTrue(Path(tmp, "cron_run.json").exists())
+
+    def test_failed_market_writes_a_per_market_summary(self):
+        with TemporaryDirectory() as tmp:
+            with patch("research.friday_monitor.build_preview", side_effect=RuntimeError("fixture failure")):
+                with patch("research.friday_monitor.create_friday_store") as store_factory:
+                    store_factory.return_value.configured = False
+                    result = run_monitor(["XBTUSDT"], tmp)
+            summary_path = Path(tmp, "xbtusdt", "monitor_summary.json")
+            self.assertTrue(summary_path.exists())
+            import json
+            summary = json.loads(summary_path.read_text())
+            self.assertEqual(summary["status"], "error")
+            self.assertEqual(summary["run_id"], result["run_id"])
+            self.assertEqual(result["markets_failed"], 1)
+
+    def test_alert_delivery_history_is_not_truncated_to_dashboard_window(self):
+        import json
+        with TemporaryDirectory() as tmp:
+            store = RepoFolderFridayStore(root=tmp)
+            for index in range(12):
+                key = f"alert-{index}"
+                self.assertTrue(store.claim_alert(
+                    alert_key=key, pair="ETHUSDT", alert_type="ENTRY_1",
+                    signal_time=f"2026-10-24T{index:02d}:00:00+00:00",
+                ))
+                store.finish_alert(key, status="sent", message_id=index + 1)
+            durable = json.loads(Path(tmp, "alerts.json").read_text())
+            dashboard = json.loads(Path(tmp, "dashboard.json").read_text())
+            self.assertEqual(len(durable), 12)
+            self.assertEqual(len(dashboard["alerts"]), 10)
 
 
 if __name__ == "__main__":

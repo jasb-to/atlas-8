@@ -101,7 +101,7 @@ def _is_live_lifecycle_event(pair: str, event: dict, tracking_start: str | None 
 
 
 def run_monitor(pairs: list[str], output_dir: str) -> dict:
-    run_id = f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
+    run_id = os.getenv("FRIDAY_SCAN_RUN_ID", "").strip() or f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
     store = create_friday_store()
     pair_results = []
@@ -126,6 +126,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             f"venue_symbol={pair} interval=4H thesis=1D+4H",
             flush=True,
         )
+        row = None
         try:
             pair_dir = out / pair.lower()
             pair_dir.mkdir(parents=True, exist_ok=True)
@@ -154,12 +155,26 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             candles = pd.DataFrame(result.get("closed_candles", []))
             paper_updates = update_paper_trades(store, pair=pair, candles=candles) if store.configured and hasattr(store, "paper_trades") else []
             row = {
-                "pair": pair, "status": "ok", "last_completed_candle_utc": latest.isoformat(),
+                "run_id": run_id,
+                "pair": pair, "status": "ok",
+                "market_started_at": pair_started,
+                "last_completed_candle_utc": latest.isoformat(),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
+                "latest_setup_message": result["latest_setup_state"].get("message"),
                 "friday_decision": result["friday_decision"].get("state"),
+                "friday_decision_reason": result["friday_decision"].get("reason") or result["friday_decision"].get("message"),
+                "scan_diagnostic": (
+                    result["friday_decision"].get("reason")
+                    or result["friday_decision"].get("message")
+                    or result["latest_setup_state"].get("message")
+                    or "No fresh actionable entry on the latest completed candle."
+                ),
                 "multitimeframe_state": mtf.get("state"),
                 "multitimeframe_direction": mtf.get("thesis_direction"),
                 "ai_review_status": result.get("model_review", {}).get("status", "missing"),
+                "ai_review_latency_ms": result.get("model_review", {}).get("latency_ms"),
+                "ai_review_error": result.get("model_review", {}).get("error"),
+                "ai_review_error_category": result.get("model_review", {}).get("error_category"),
                 "ai_model_id": result.get("model_review", {}).get("model_id"),
                 "ai_review_assessment": (result.get("model_review", {}).get("response") or {}).get("assessment"),
                 "reversal_context": result.get("reversal_context", {}).get("state", "unavailable"),
@@ -373,6 +388,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         })
                     except Exception as alert_exc:
                         store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": False, "status": "failed",
+                            "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                        })
                         raise
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
@@ -443,6 +462,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                                 })
                             except Exception as alert_exc:
                                 store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                                row["alert_results"].append({
+                                    "type": "MOMENTUM_REVERSAL", "sent": False, "status": "failed",
+                                    "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                                })
                                 raise
                         else:
                             row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
@@ -471,6 +494,11 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             "No delayed Entry 1 alert is sent; wait for a fresh continuation signal."
                         ),
                     })
+            row["market_finished_at"] = utc_now()
+            row["duration_seconds"] = round((pd.Timestamp(row["market_finished_at"]) - pd.Timestamp(pair_started)).total_seconds(), 3)
+            row["alert_outcomes_total"] = len(row["alert_results"])
+            row["alert_outcomes_sent"] = sum(1 for item in row["alert_results"] if item.get("sent") is True)
+            row["alert_outcomes_blocked"] = sum(1 for item in row["alert_results"] if item.get("sent") is False)
             (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
             pair_results.append(row)
             alert_text = "; ".join(
@@ -489,14 +517,28 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
         except Exception as exc:
             error_text = f"{type(exc).__name__}: {exc}"
+            failed_at = utc_now()
             failures.append(f"{pair}: {error_text}")
-            pair_results.append({
-                "pair": pair, "status": "error", "started_at": pair_started,
-                "error": error_text,
-            })
+            partial_alert_results = list((row or {}).get("alert_results") or [])
+            failed_row = {
+                "run_id": run_id, "pair": pair, "status": "error",
+                "market_started_at": pair_started, "market_finished_at": failed_at,
+                "duration_seconds": round((pd.Timestamp(failed_at) - pd.Timestamp(pair_started)).total_seconds(), 3),
+                "error": error_text, "scan_diagnostic": error_text,
+                "alert_results": partial_alert_results,
+                "alert_outcomes_total": len(partial_alert_results),
+                "alert_outcomes_sent": sum(1 for item in partial_alert_results if item.get("sent") is True),
+                "alert_outcomes_blocked": sum(1 for item in partial_alert_results if item.get("sent") is False),
+            }
+            pair_results.append(failed_row)
+            # Failed markets must have the same durable summary artifact as
+            # successful markets, otherwise the workflow summary silently omits them.
+            failure_dir = out / pair.lower()
+            failure_dir.mkdir(parents=True, exist_ok=True)
+            (failure_dir / "monitor_summary.json").write_text(json.dumps(failed_row, indent=2, allow_nan=False))
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] FAILED pair={display_pair} "
-                f"error={error_text}",
+                f"run_id={run_id} duration={failed_row['duration_seconds']:.1f}s error={error_text}",
                 flush=True,
             )
 
@@ -519,14 +561,36 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_record["live_events_persisted"] = len(all_rows) if store.configured else 0
     run_record["historical_replay_events_ignored"] = historical_rows_ignored
     run_record["persistence_configured"] = store.configured
+    run_record["markets_requested"] = len(pairs)
+    run_record["markets_succeeded"] = sum(1 for row in pair_results if row.get("status") == "ok")
+    run_record["markets_failed"] = sum(1 for row in pair_results if row.get("status") != "ok")
+    all_alert_outcomes = [item for row in pair_results for item in (row.get("alert_results") or [])]
+    run_record["alert_outcomes_total"] = len(all_alert_outcomes)
+    run_record["alert_outcomes_sent"] = sum(1 for item in all_alert_outcomes if item.get("sent") is True)
+    run_record["alert_outcomes_blocked"] = sum(1 for item in all_alert_outcomes if item.get("sent") is False)
+    run_record["ai_reviews_ok"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") == "ok")
+    run_record["ai_reviews_failed"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") != "ok")
     (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
-    # Database logging must not be silently reported as successful if missing.
+    # Database/repository logging failures must remain visible in the local
+    # artifact and Actions log instead of aborting before RUN_FINISHED.
+    run_record["run_ledger_persisted"] = bool(store.configured)
     if store.configured:
-        store.record_cron_run(run_record)
+        try:
+            store.record_cron_run(run_record)
+        except Exception as persist_exc:
+            run_record["run_ledger_persisted"] = False
+            run_record["persistence_error"] = f"{type(persist_exc).__name__}: {persist_exc}"
+            if status in {"success", "scan_complete_ai_unavailable"}:
+                status = "partial_failure"
+            run_record["status"] = status
+            run_record["error"] = "; ".join(filter(None, [run_record.get("error"), run_record["persistence_error"]]))
+            print(f"[FRIDAY] RUN_LEDGER_PERSIST_FAILED id={run_id} error={run_record['persistence_error']}", flush=True)
+    (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
     print(
         f"[FRIDAY] RUN_FINISHED id={run_id} status={status} "
         f"markets={len(pair_results)}/{len(pairs)} failed={len(failures)} "
-        f"ai_ok={sum(1 for row in pair_results if row.get('status') == 'ok' and row.get('ai_review_status') == 'ok')} "
+        f"ai_ok={run_record['ai_reviews_ok']} ai_failed={run_record['ai_reviews_failed']} "
+        f"alerts_sent={run_record['alert_outcomes_sent']} alert_outcomes={run_record['alert_outcomes_total']} "
         f"events={len(all_rows)} persisted={run_record['live_events_persisted']} "
         f"duration={(pd.Timestamp(run_record['finished_at']) - pd.Timestamp(started_at)).total_seconds():.1f}s",
         flush=True,

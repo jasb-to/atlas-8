@@ -182,6 +182,46 @@ export default function Home() {
         <div><span>ALERT RECORDS</span><b>{data.alerts.length}</b></div>
       </div>
     </section>
+    <section className="feed-section">
+      <div className="section-head">
+        <div>
+          <span className="section-kicker">06 / LATEST SCAN TRACE</span>
+          <h2>Every market examined</h2>
+          <p>Per-market outcomes from the latest completed run, including AI failures and the exact reason a Telegram alert was blocked or not sent.</p>
+        </div>
+        <div className="feed-foot">
+          <span>Run ID: {clean(latestRun?.run_id)}</span>
+          <span>Started: {fmtTime(latestRun?.started_at)}</span>
+        </div>
+      </div>
+      <div className="diagnostic-grid">
+        <div><span>MARKETS REQUESTED</span><b>{latestRun?.markets_requested ?? latestRun?.pairs_checked ?? pairScans.length}</b></div>
+        <div><span>MARKETS FAILED</span><b className={Number(latestRun?.markets_failed ?? 0) > 0 ? "value-bad" : "value-good"}>{latestRun?.markets_failed ?? pairScans.filter(x => x.status !== "ok").length}</b></div>
+        <div><span>ALERT OUTCOMES</span><b>{latestRun?.alert_outcomes_total ?? 0}</b></div>
+        <div><span>TELEGRAM SENT</span><b>{latestRun?.alert_outcomes_sent ?? data.alerts.filter(x => x.status === "sent").length}</b></div>
+        <div><span>BLOCKED / NOT SENT</span><b>{latestRun?.alert_outcomes_blocked ?? 0}</b></div>
+      </div>
+      <div className="feed-table-wrap"><table><thead><tr><th>MARKET</th><th>SCAN</th><th>SETUP / DECISION</th><th>AI REVIEW</th><th>ALERT OUTCOME / REASON</th><th>DURATION</th></tr></thead><tbody>
+        {pairScans.length ? pairScans.map((scan: Row) => {
+          const outcomes = Array.isArray(scan.alert_results) ? scan.alert_results : [];
+          const outcomeText = outcomes.map((item: Row) =>
+            `${clean(item.type)}: ${clean(item.status)}${item.reason ? " — " + clean(item.reason) : ""}`
+          ).join(" · ") || clean(scan.scan_diagnostic || "No fresh actionable alert candidate on the latest completed candle");
+          const aiText = scan.ai_review_status === "ok"
+            ? `OK · ${clean(scan.ai_review_assessment)}`
+            : `${clean(scan.ai_review_status)}${scan.ai_review_error_category ? " · " + clean(scan.ai_review_error_category) : ""}${scan.ai_review_error ? " · " + clean(scan.ai_review_error) : ""}`;
+          return <tr key={scan.pair}>
+            <td><b>{displayPair(scan.pair).replace(/USDT$/, "")}</b></td>
+            <td><span className={scan.status === "ok" ? "state-pill good" : "state-pill bad"}>{clean(scan.status).toUpperCase()}</span></td>
+            <td>{clean(scan.latest_setup_state)} / {clean(scan.friday_decision)}</td>
+            <td>{aiText}</td>
+            <td className="candidate-reason">{outcomeText}</td>
+            <td>{typeof scan.duration_seconds === "number" ? `${scan.duration_seconds.toFixed(1)}s` : "—"}</td>
+          </tr>;
+        }) : <tr><td colSpan={6}><div className="empty-row">No completed scan detail is available yet. A 202 response confirms dispatch only; the run appears here after GitHub Actions publishes its summary.</div></td></tr>}
+      </tbody></table></div>
+      <div className="feed-foot"><span>Run status: {clean(latestRun?.status)}</span><span>Finished: {fmtTime(latestRun?.finished_at)}</span></div>
+    </section>
     <footer><span className="footer-brand">FRIDAY<span> / RESEARCH CONTROL ROOM</span></span><span>Built for transparent decisions, not unattended trading.</span><span>REFRESH · 30 SEC</span></footer>
   </main>;
 }
