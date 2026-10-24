@@ -206,7 +206,7 @@ export default function Home() {
           const outcomes = Array.isArray(scan.alert_results) ? scan.alert_results : [];
           const outcomeText = outcomes.map((item: Row) =>
             `${clean(item.type)}: ${clean(item.status)}${item.reason ? " — " + clean(item.reason) : ""}`
-          ).join(" · ") || "No alert candidate recorded on the latest completed candle";
+          ).join(" · ") || clean(scan.scan_diagnostic || "No fresh actionable alert candidate on the latest completed candle");
           const aiText = scan.ai_review_status === "ok"
             ? `OK · ${clean(scan.ai_review_assessment)}`
             : `${clean(scan.ai_review_status)}${scan.ai_review_error_category ? " · " + clean(scan.ai_review_error_category) : ""}${scan.ai_review_error ? " · " + clean(scan.ai_review_error) : ""}`;
