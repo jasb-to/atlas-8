@@ -12,6 +12,44 @@ const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/head
 const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
+// Retry only transient transport/provider failures. Each attempt gets its own
+// timeout so an expired AbortSignal cannot make every retry fail immediately.
+// Two bounded attempts fit within this route's 30-second Vercel duration.
+async function fetchWithTransientRetry(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  provider: string,
+): Promise<Response> {
+  const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
+  const maxAttempts = 2;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(input, {
+        ...init,
+        signal: AbortSignal.timeout(12000),
+      });
+      const retryAfter = Number(response.headers.get("retry-after") ?? "0");
+      const canRetry = attempt < maxAttempts
+        && retryableStatuses.has(response.status)
+        && !(response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 1);
+      if (!canRetry) return response;
+      console.warn("[FRIDAY AI review] transient provider response; retrying", {
+        provider, attempt, status: response.status,
+      });
+      await response.body?.cancel().catch(() => undefined);
+    } catch (error) {
+      const name = error instanceof Error ? error.name : "UnknownError";
+      const retryable = name === "TypeError" || name === "TimeoutError" || name === "AbortError";
+      if (attempt >= maxAttempts || !retryable) throw error;
+      console.warn("[FRIDAY AI review] transient provider transport failure; retrying", {
+        provider, attempt, error_class: name,
+      });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+  }
+  throw new Error("Provider retry loop exhausted");
+}
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
 }
@@ -99,7 +137,7 @@ export async function POST(request: Request) {
     let body: any;
     let raw: any;
     if (provider === "gemini") {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      response = await fetchWithTransientRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
         method: "POST",
         headers: { "x-goog-api-key": geminiKey!, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,10 +161,10 @@ export async function POST(request: Request) {
             }
           }
         }),
-        signal: AbortSignal.timeout(25000)
-      });
+        signal: AbortSignal.timeout(12000)
+      }, provider);
     } else {
-      response = await fetch(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
+      response = await fetchWithTransientRetry(process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${hfKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
