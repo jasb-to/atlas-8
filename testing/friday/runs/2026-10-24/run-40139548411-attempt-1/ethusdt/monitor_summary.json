@@ -1,0 +1,38 @@
+{
+  "run_id": "d60aab9b-45ad-4381-9f86-f650ab3117b1",
+  "pair": "ETHUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-24T22:40:58.232964+00:00",
+  "last_completed_candle_utc": "2026-10-24T16:00:00+00:00",
+  "last_close": 2340.06,
+  "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+  "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_MAJOR_MOVE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "error",
+  "ai_review_latency_ms": 260,
+  "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+  "ai_review_error_category": "quota_or_billing",
+  "ai_model_id": "openai/gpt-oss-120b:cheapest",
+  "ai_review_assessment": null,
+  "reversal_context": "no_clear_reversal_evidence",
+  "break_event_count": 54,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "not_sent_break_no_longer_fresh",
+      "signal_time": "2026-10-24T12:00:00+00:00",
+      "reason": "Break candle 2026-10-24T12:00:00+00:00 is older than the latest completed candle 2026-10-24T16:00:00+00:00; FRIDAY only sends Entry 1 alerts on the break candle, so it will not send a delayed entry. Retest is held and continuation is still pending."
+    }
+  ],
+  "market_finished_at": "2026-10-24T22:41:12.544333+00:00",
+  "duration_seconds": 14.311,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}
