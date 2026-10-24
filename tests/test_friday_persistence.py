@@ -131,6 +131,26 @@ class FridayPersistenceTests(unittest.TestCase):
             self.assertEqual([row["record_key"] for row in dashboard["snapshots"]], ["new-usdt"])
             self.assertEqual([row["run_id"] for row in dashboard["runs"]], ["clean-run"])
 
+    def test_dashboard_shows_all_15_scanned_market_snapshots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = RepoFolderFridayStore(root=directory)
+            for index in range(15):
+                store.record_archive(make_archive_record(
+                    record_key=f"snapshot-{index}",
+                    record_type="decision_snapshot",
+                    pair=f"COIN{index}USDT",
+                    timeframe="4H",
+                    signal_time="2026-10-24T12:00:00Z",
+                    payload={"index": index},
+                ))
+            with open(f"{directory}/dashboard.json", encoding="utf-8") as handle:
+                dashboard = json.load(handle)
+            self.assertEqual(len(dashboard["snapshots"]), 15)
+            self.assertEqual(
+                {row["pair"] for row in dashboard["snapshots"]},
+                {f"COIN{index}USDT" for index in range(15)},
+            )
+
     def test_unconfigured_store_does_not_claim_success(self):
         store = SupabaseFridayStore(url="", key="")
         self.assertFalse(store.configured)
