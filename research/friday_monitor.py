@@ -57,16 +57,34 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     return not blockers, blockers
 
 
-def _ai_candidate_pass(review: dict | None, expected_strategy: str) -> tuple[bool, str]:
-    """Require AI to positively select this supplied strategy before paper promotion."""
+def _ai_candidate_pass(
+    review: dict | None,
+    expected_strategy: str,
+    expected_direction: str | None = None,
+) -> tuple[bool, str]:
+    """Use the AI review as a directional confirmation, not a string-name mismatch gate.
+
+    The reviewer returns a direction such as "short" in priority_candidate, not
+    necessarily the internal strategy ID. "Mixed" is allowed only when it explicitly
+    selects the expected direction; caution/rejection/insufficient evidence remain blocked.
+    """
     if not isinstance(review, dict) or review.get("status") != "ok":
         return False, "ai_review_not_completed"
     response = review.get("response") or {}
-    if response.get("assessment") != "supportive":
-        return False, f"ai_assessment_{response.get('assessment', 'missing')}"
+    assessment = str(response.get("assessment", "missing")).lower()
+    if assessment not in {"supportive", "mixed"}:
+        return False, f"ai_assessment_{assessment}"
     priority = response.get("priority_candidate")
-    if not isinstance(priority, str) or expected_strategy not in priority:
-        return False, "ai_did_not_select_this_strategy"
+    if not isinstance(priority, str):
+        return False, "ai_priority_candidate_missing"
+    priority_normalized = priority.strip().lower()
+    direction_normalized = str(expected_direction or "").strip().lower()
+    strategy_selected = expected_strategy.lower() in priority_normalized
+    direction_selected = bool(direction_normalized) and priority_normalized == direction_normalized
+    if not (strategy_selected or direction_selected):
+        return False, "ai_did_not_select_expected_strategy_or_direction"
+    if assessment == "mixed":
+        return True, "ai_selected_direction_with_caveats"
     return True, "ai_selected_supportive"
 
 
@@ -155,7 +173,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
-                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
+                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
                 if not ai_pass:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                     continue
@@ -305,7 +323,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 reversal_ts is not None and reversal_ts >= tracking_cutoff
                 and pair.upper().endswith("USDT")
             )
-            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1")
+            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1", reversal.get("direction"))
             if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and ai_pass and store.configured and hasattr(store, "paper_trades"):
                 register_paper_trade(
                     store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
