@@ -151,8 +151,14 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"last_closed_candle={result.get('last_completed_candle_utc', 'n/a')}",
                 flush=True,
             )
-            # Daily thesis + 4H execution scan uses completed candles from Kraken.
-            mtf = analyse_pair(pair=pair)
+            # Reuse the exact completed 4H candle snapshot used by the trendline
+            # preview. This avoids a second 4H network fetch and prevents the two
+            # analyses from silently evaluating different market snapshots.
+            candles = pd.DataFrame(result.get("closed_candles", []))
+            mtf = analyse_pair(
+                pair=pair,
+                four_hour=candles if not candles.empty else None,
+            )
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] ANALYSIS_OK pair={display_pair} "
                 f"setup={(result.get('latest_setup_state') or {}).get('state', 'UNKNOWN')} "
@@ -166,7 +172,6 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
-            candles = pd.DataFrame(result.get("closed_candles", []))
             paper_updates = update_paper_trades(store, pair=pair, candles=candles) if store.configured and hasattr(store, "paper_trades") else []
             row = {
                 "run_id": run_id,
