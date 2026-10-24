@@ -83,10 +83,13 @@ export default function Home() {
             {pairScans.length ? pairScans.map((scan, i) => {
               const symbol = displayPair(scan.pair);
               const display = symbol.replace(/USDT$/, "");
+              const alertReason = Array.isArray(scan.alert_results) ? scan.alert_results.find((x: Row) => x.reason)?.reason : null;
               return <div className={`scanner-market ${scan.status === "ok" ? "market-ok" : "market-error"}`} key={symbol}>
                 <div className="scanner-market-top"><b>{display}</b><span>{scan.status === "ok" ? "SCANNED" : "ERROR"}</span></div>
                 <strong>{fmtPrice(scan.last_close)}</strong>
                 <small>{clean(scan.latest_setup_state ?? "waiting")}</small>
+                <small>AI: {clean(scan.ai_review_assessment ?? scan.ai_review_status ?? "unknown")}</small>
+                {alertReason ? <small title={alertReason}>Alert: {String(alertReason)}</small> : null}
               </div>;
             }) : <div className="scanner-empty">No per-market results have been published yet.</div>}
           </div>
@@ -105,7 +108,7 @@ export default function Home() {
             const reward = String(trade.direction).toLowerCase() === "long" ? Number(trade.take_profit) - Number(trade.entry) : Number(trade.entry) - Number(trade.take_profit);
             const rr = risk > 0 && Number.isFinite(reward) ? reward / risk : Number(trade.reward_risk);
             return <article className="candidate" key={trade.trade_id ?? i}>
-              <div className="candidate-top"><b>{trade.pair}</b><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(trade.direction).toUpperCase()}</span></div>
+              <div className="candidate-top"><b>{displayPair(trade.pair).replace(/USDT$/, "")}</b><span className={String(trade.direction).toLowerCase() === "long" ? "direction long" : "direction short"}>{String(trade.direction).toUpperCase()}</span></div>
               <div className="candidate-title">QUALIFIED · OPEN PAPER TRADE</div>
               <div className="candidate-stats"><div><span>ENTRY</span><b>{fmtPrice(trade.entry)}</b></div><div><span>STOP LOSS</span><b>{fmtPrice(trade.stop_loss)}</b></div><div><span>TARGET</span><b>{fmtPrice(trade.take_profit)}</b></div><div><span>REWARD / RISK</span><b>{Number.isFinite(rr) ? rr.toFixed(2) + "R" : "—"}</b></div></div>
               <div className="candidate-bottom"><span className="state-pill good">filters passed</span><span>{fmtTime(trade.signal_time)}</span></div>
