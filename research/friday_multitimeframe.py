@@ -11,6 +11,7 @@ import pandas as pd
 
 from research.trendlines import find_wick_pivots, fit_touch_trendlines
 from research.friday_market_data import fetch_ohlc
+from research.structure_lifecycle import evaluate_structure
 
 BREAK_BUFFER = 0.0015
 LINE_TOL = 0.0015
@@ -56,6 +57,91 @@ def _line_candidates(frame: pd.DataFrame) -> list:
     return [line for line in lines
             if line.end.confirmed_at <= last_i
             and abs(line.value_at(last_i) - close) / max(abs(close), 1e-9) <= MAX_LINE_DISTANCE]
+
+
+
+
+def _daily_thesis_lifecycle(daily: pd.DataFrame) -> dict:
+    """Recover the latest confirmed daily trendline break and its subsequent lifecycle.
+
+    Unlike the nearby-line dashboard, this intentionally retains broken lines up to
+    20% from price so a valid thesis does not vanish merely because price moved away.
+    All decisions use completed daily candles supplied by the caller.
+    """
+    frame = daily.sort_values("timestamp").tail(180).reset_index(drop=True).copy()
+    if len(frame) < 60:
+        return {"state": "NO_THESIS", "reason": "insufficient_daily_history"}
+    structure = evaluate_structure(
+        frame, lookback=180, min_touches=3, break_buffer_pct=BREAK_BUFFER,
+        max_distance_pct=0.20,
+    )
+    if not structure.broken_lines:
+        return {"state": "NO_THESIS", "reason": "no_confirmed_daily_trendline_break"}
+
+    latest_close = float(frame.iloc[-1].close)
+    candidates = []
+    for line in structure.broken_lines:
+        br = line.get("break") or {}
+        break_index = int(br.get("break_index", -1))
+        if break_index < 0 or break_index >= len(frame):
+            continue
+        direction = str(br.get("direction", ""))
+        if direction not in {"long", "short"}:
+            continue
+        start_index = int(line.get("anchor_start_index", -1))
+        start_price = float(line.get("anchor_start_wick", 0))
+        slope = float(line.get("slope_per_bar", 0))
+        if start_index < 0 or start_price <= 0:
+            continue
+
+        state = "WAITING_FOR_RETEST"
+        retest_time = None
+        invalidation_time = None
+        for i in range(break_index + 1, len(frame)):
+            row = frame.iloc[i]
+            level = start_price + slope * (i - start_index)
+            close = float(row.close)
+            if direction == "short":
+                invalid = close > level * 1.003
+                retest = float(row.high) >= level * 0.995 and close <= level
+            else:
+                invalid = close < level * 0.997
+                retest = float(row.low) <= level * 1.005 and close >= level
+            if invalid:
+                state = "INVALIDATED"
+                invalidation_time = pd.Timestamp(row.timestamp).isoformat()
+                break
+            if retest and state == "WAITING_FOR_RETEST":
+                state = "RETEST_HELD"
+                retest_time = pd.Timestamp(row.timestamp).isoformat()
+
+        current_level = start_price + slope * (len(frame) - 1 - start_index)
+        if state != "INVALIDATED":
+            if direction == "short" and latest_close > current_level * 1.003:
+                state = "INVALIDATED"
+                invalidation_time = pd.Timestamp(frame.iloc[-1].timestamp).isoformat()
+            elif direction == "long" and latest_close < current_level * 0.997:
+                state = "INVALIDATED"
+                invalidation_time = pd.Timestamp(frame.iloc[-1].timestamp).isoformat()
+
+        break_time = br.get("break_time") or pd.Timestamp(frame.iloc[break_index].timestamp).isoformat()
+        candidates.append({
+            "state": state, "direction": direction, "timeframe": "1D",
+            "break_time": break_time, "break_close": float(br.get("close", frame.iloc[break_index].close)),
+            "line_price_at_break": float(br.get("line_price", current_level)),
+            "line_price_current": float(current_level),
+            "line_kind": line.get("kind"), "touch_count": int(line.get("touch_count", 0)),
+            "anchor_start_time": line.get("anchor_start_time"),
+            "anchor_end_time": line.get("anchor_end_time"),
+            "anchor_start_wick": start_price, "anchor_end_wick": line.get("anchor_end_wick"),
+            "slope_per_candle": slope, "retest_time": retest_time,
+            "invalidation_time": invalidation_time,
+            "thesis_id": "|".join([direction, str(break_time), str(line.get("anchor_start_time")), str(line.get("anchor_end_time"))]),
+        })
+    if not candidates:
+        return {"state": "NO_THESIS", "reason": "no_valid_confirmed_break_records"}
+    latest = max(candidates, key=lambda item: item["break_time"])
+    return latest
 
 
 def _snapshot(frame: pd.DataFrame, timeframe: str) -> dict:
@@ -131,7 +217,11 @@ def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.Dat
     four_hour = four_hour if four_hour is not None else fetch_ohlc(pair=pair, interval=240)
     d1 = _snapshot(daily, "1D")
     h4 = _snapshot(four_hour, "4H")
-    thesis_direction = d1["state"] if d1["state"] in ("bullish", "bearish") else "neutral"
+    daily_thesis_lifecycle = _daily_thesis_lifecycle(daily)
+    if daily_thesis_lifecycle.get("state") in {"WAITING_FOR_RETEST", "RETEST_HELD"}:
+        thesis_direction = daily_thesis_lifecycle["direction"]
+    else:
+        thesis_direction = d1["state"] if d1["state"] in ("bullish", "bearish") else "neutral"
     daily_breaks = [x for x in d1.get("confirmed_breaks", []) if x["direction"] == thesis_direction.replace("bullish", "long").replace("bearish", "short")]
     matching_h4_breaks = [x for x in h4.get("confirmed_breaks", []) if x["direction"] == thesis_direction.replace("bullish", "long").replace("bearish", "short")]
     # A daily EMA regime can start the watch; a confirmed daily trendline break is
@@ -152,7 +242,8 @@ def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.Dat
         "pair": pair, "strategy": "daily-thesis-4h-execution-v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "state": state, "thesis_direction": thesis_direction,
-        "daily_thesis": d1, "four_hour_execution": h4,
+        "daily_thesis": d1, "daily_thesis_lifecycle": daily_thesis_lifecycle,
+        "four_hour_execution": h4,
         "daily_directional_breaks": daily_breaks,
         "aligned_4h_breaks": matching_h4_breaks,
         "entry1_alert_eligible": state == "ENTRY_1_CANDIDATE",
