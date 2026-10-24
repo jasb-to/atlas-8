@@ -112,12 +112,11 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         event, entry_type=alert_type, thesis=mtf, trade_plan=trade_plan,
                     )
                     normalized["entry_gate"] = gate
-                    row["alert_results"].append({
-                        "type": alert_type,
-                        "sent": False,
-                        "status": "eligible" if gate["eligible"] else "entry_gate_blocked",
-                        "gate": gate,
-                    })
+                    if not gate["eligible"]:
+                        row["alert_results"].append({
+                            "type": alert_type, "sent": False,
+                            "status": "entry_gate_blocked", "gate": gate,
+                        })
                     if store.configured:
                         gate_signal_time = event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")
                         gate_key = hashlib.sha256(
