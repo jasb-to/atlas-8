@@ -61,7 +61,7 @@ def _line_candidates(frame: pd.DataFrame) -> list:
 
 
 
-def _daily_thesis_lifecycle(daily: pd.DataFrame) -> dict:
+def _daily_thesis_lifecycle(daily: pd.DataFrame, previous: dict | None = None) -> dict:
     """Recover the latest confirmed daily trendline break and its subsequent lifecycle.
 
     Unlike the nearby-line dashboard, this intentionally retains broken lines up to
@@ -75,10 +75,38 @@ def _daily_thesis_lifecycle(daily: pd.DataFrame) -> dict:
         frame, lookback=180, min_touches=3, break_buffer_pct=BREAK_BUFFER,
         max_distance_pct=0.20,
     )
+    latest_close = float(frame.iloc[-1].close)
     if not structure.broken_lines:
+        # If the original line has moved outside the broad search window, carry
+        # forward its last persisted lifecycle and still check the newest completed
+        # daily candle for retest or invalidation.
+        if isinstance(previous, dict) and previous.get("state") in {"WAITING_FOR_RETEST", "RETEST_HELD"}:
+            try:
+                anchor_time = pd.Timestamp(previous["anchor_start_time"])
+                current_time = pd.Timestamp(frame.iloc[-1].timestamp)
+                bars_from_anchor = int(round((current_time - anchor_time).total_seconds() / 86400))
+                level = float(previous["anchor_start_wick"]) + float(previous["slope_per_candle"]) * bars_from_anchor
+                close = latest_close
+                last = frame.iloc[-1]
+                direction = str(previous["direction"])
+                invalid = close > level * 1.003 if direction == "short" else close < level * 0.997
+                state = "INVALIDATED" if invalid else previous["state"]
+                retest_time = previous.get("retest_time")
+                if not invalid and state == "WAITING_FOR_RETEST":
+                    touched = (float(last.high) >= level * 0.9985 and close <= level) if direction == "short" else (float(last.low) <= level * 1.0015 and close >= level)
+                    if touched:
+                        state, retest_time = "RETEST_HELD", pd.Timestamp(last.timestamp).isoformat()
+                return {
+                    **previous, "state": state, "line_price_current": float(level),
+                    "invalidation_time": pd.Timestamp(last.timestamp).isoformat() if invalid else previous.get("invalidation_time"),
+                    "retest_time": retest_time,
+                    "last_evaluated_candle": pd.Timestamp(last.timestamp).isoformat(),
+                    "carried_forward": True,
+                }
+            except (KeyError, TypeError, ValueError, OverflowError):
+                pass
         return {"state": "NO_THESIS", "reason": "no_confirmed_daily_trendline_break"}
 
-    latest_close = float(frame.iloc[-1].close)
     candidates = []
     for line in structure.broken_lines:
         br = line.get("break") or {}
@@ -136,6 +164,7 @@ def _daily_thesis_lifecycle(daily: pd.DataFrame) -> dict:
             "anchor_start_wick": start_price, "anchor_end_wick": line.get("anchor_end_wick"),
             "slope_per_candle": slope, "retest_time": retest_time,
             "invalidation_time": invalidation_time,
+            "last_evaluated_candle": pd.Timestamp(frame.iloc[-1].timestamp).isoformat(),
             "thesis_id": "|".join([direction, str(break_time), str(line.get("anchor_start_time")), str(line.get("anchor_end_time"))]),
         })
     if not candidates:
@@ -211,13 +240,13 @@ def _finite(value):
         return None
 
 
-def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.DataFrame | None = None) -> dict:
+def analyse_pair(pair: str, daily: pd.DataFrame | None = None, four_hour: pd.DataFrame | None = None, previous_thesis: dict | None = None) -> dict:
     """Build a causal daily thesis and 4H trigger summary for one Kraken spot pair."""
     daily = daily if daily is not None else fetch_ohlc(pair=pair, interval=1440)
     four_hour = four_hour if four_hour is not None else fetch_ohlc(pair=pair, interval=240)
     d1 = _snapshot(daily, "1D")
     h4 = _snapshot(four_hour, "4H")
-    daily_thesis_lifecycle = _daily_thesis_lifecycle(daily)
+    daily_thesis_lifecycle = _daily_thesis_lifecycle(daily, previous_thesis)
     if daily_thesis_lifecycle.get("state") in {"WAITING_FOR_RETEST", "RETEST_HELD"}:
         thesis_direction = "bullish" if daily_thesis_lifecycle["direction"] == "long" else "bearish"
     else:
