@@ -35,6 +35,13 @@ def _utc(value) -> pd.Timestamp:
     return stamp.tz_convert("UTC")
 
 
+def _thesis_matches_event(event: dict, thesis: dict) -> bool:
+    """Only associate an execution trigger with a still-valid same-direction daily thesis."""
+    if not isinstance(thesis, dict) or thesis.get("state") not in {"WAITING_FOR_RETEST", "RETEST_HELD"}:
+        return False
+    return str(event.get("direction", "")).lower() == str(thesis.get("direction", "")).lower()
+
+
 def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     """Hard-gate new price-action entries on directional momentum and exhaustion."""
     direction = str(event.get("direction", "")).lower()
@@ -139,6 +146,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
             # Daily thesis + 4H execution scan uses completed candles from Kraken.
             mtf = analyse_pair(pair=pair)
+            daily_thesis = mtf.get("daily_thesis_lifecycle") or {}
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] ANALYSIS_OK pair={display_pair} "
                 f"setup={(result.get('latest_setup_state') or {}).get('state', 'UNKNOWN')} "
@@ -171,6 +179,11 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 ),
                 "multitimeframe_state": mtf.get("state"),
                 "multitimeframe_direction": mtf.get("thesis_direction"),
+                "daily_thesis_state": daily_thesis.get("state", "NO_THESIS"),
+                "daily_thesis_direction": daily_thesis.get("direction"),
+                "daily_thesis_id": daily_thesis.get("thesis_id"),
+                "daily_thesis_break_time": daily_thesis.get("break_time"),
+                "daily_thesis_line_price_at_break": daily_thesis.get("line_price_at_break"),
                 "ai_review_status": result.get("model_review", {}).get("status", "missing"),
                 "ai_review_latency_ms": result.get("model_review", {}).get("latency_ms"),
                 "ai_review_error": result.get("model_review", {}).get("error"),
@@ -200,10 +213,12 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 ))
             # Persist the cross-timeframe thesis independently of 4H lifecycle events.
             if store.configured:
-                mtf_key = hashlib.sha256(f"{pair}|1D-4H|{mtf.get('generated_at_utc')}|thesis".encode()).hexdigest()
+                # Stable key updates the current thesis record instead of creating
+                # an unbounded series of unrelated snapshots with no active lifecycle.
+                mtf_key = hashlib.sha256(f"{pair}|1D+4H|daily-thesis-lifecycle".encode()).hexdigest()
                 store.record_archive(make_archive_record(
                     record_key=mtf_key, record_type="multitimeframe_thesis", pair=pair,
-                    timeframe="1D+4H", signal_time=mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
+                    timeframe="1D+4H", signal_time=daily_thesis.get("break_time") or mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
                     payload=mtf,
                 ))
             # Register fresh price-action entries only when directional momentum
@@ -216,6 +231,16 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_time == latest
                 )
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
+                    continue
+                if not _thesis_matches_event(event, daily_thesis):
+                    row["alert_results"].append({
+                        "type": "PAPER_ENTRY", "sent": False, "status": "no_matching_daily_thesis",
+                        "reason": (
+                            f"4H {event.get('direction')} trigger is not associated with an active same-direction "
+                            f"daily thesis (state={daily_thesis.get('state', 'NO_THESIS')}, "
+                            f"direction={daily_thesis.get('direction', 'none')})."
+                        ),
+                    })
                     continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
                 ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
@@ -321,6 +346,18 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         ),
                     })
                 if fresh_entry1 or fresh_entry2:
+                    if not _thesis_matches_event(event, daily_thesis):
+                        row["alert_results"].append({
+                            "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
+                            "status": "no_matching_daily_thesis",
+                            "signal_time": (event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
+                            "reason": (
+                                f"4H {event.get('direction')} trigger is not associated with an active same-direction "
+                                f"daily thesis (state={daily_thesis.get('state', 'NO_THESIS')}, "
+                                f"direction={daily_thesis.get('direction', 'none')}); no unrelated 4H break alert sent."
+                            ),
+                        })
+                        continue
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
                     ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
                     if not ai_pass:
