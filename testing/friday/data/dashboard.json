@@ -292,24 +292,26 @@
           "provider": "huggingface",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "insufficient_evidence",
+            "assessment": "caution",
             "priority_candidate": null,
             "confidence": "high",
             "supporting_evidence": [
-              "Rule decision indicates NO_TRADE due to price not touching any confirmed 0.382/0.5/0.618 pullback zones.",
-              "Exhaustion context registers mixed early reversal evidence with both lower wick rejection and a close below the previous candle low."
+              "Daily bias is bearish",
+              "EMA 8 and EMA 21 are aligned downward with price trading below them"
             ],
             "counter_evidence": [
-              "Both long and short candidate trade plans are marked ineligible due to failing the minimum reward-to-risk ratio requirement (>=1.5R) and missing valid structural stops.",
-              "Momentum indicators show no active Stoch RSI or MACD expansion triggers."
+              "All structural trade plans are marked ineligible with explicit blockers such as reward_risk_below_minimum and no_valid_confirmed_structural_stop",
+              "Momentum reversal candidate state is NO_SETUP",
+              "Rule decision indicates NO_TRADE due to unreached Fib pullback zones"
             ],
             "missing_evidence": [
-              "A confirmed pullback to valid Fibonacci retracement zones with proper confluence and price reaction.",
-              "An eligible structural trade setup meeting the minimum reward-to-risk gate."
+              "Confirmed structural stop placement for long setups",
+              "Target meeting minimum reward-to-risk ratio of 1.5",
+              "Fresh extreme zone stoch RSI cross for reversal setup"
             ],
-            "rationale": "No eligible candidates exist within the candidate universe. All potential trade plans are blocked by deterministic safety gates such as insufficient reward-to-risk ratios and missing valid structural stops. Therefore, the priority candidate is null and the assessment remains insufficient evidence for trade execution."
+            "rationale": "No candidate is eligible due to hard gate failures including insufficient reward-to-risk ratios and missing structural stops. The rule decision and candidate universe both indicate a state of no trade, warranting extreme caution and a null priority candidate."
           },
-          "latency_ms": 8734,
+          "latency_ms": 2312,
           "error": null
         },
         "momentum_reversal": {
@@ -333,7 +335,7 @@
         "multitimeframe_scan": {
           "pair": "LITUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:44:37.380231+00:00",
+          "generated_at_utc": "2026-10-24T13:48:51.511668+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -693,26 +695,25 @@
           "model_id": "gemini-3.5-flash-lite",
           "response": {
             "assessment": "mixed",
-            "priority_candidate": "short",
+            "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "Short structural trade plan satisfies the >=1.5R minimum reward-to-risk gate with a 2.38 R/R ratio.",
-              "Short candidate is explicitly marked as eligible with no blocking factors in candidate_universe.",
-              "Daily bias is noted as bearish in the setup lifecycle and indicators context.",
-              "MACD histogram shows bearish expansion (-0.0051 vs -0.0048)."
+              "structural_trade_plans.short is explicitly marked eligible with zero blockers.",
+              "Reward-to-risk ratio of 2.3801 meets the minimum threshold of 1.5.",
+              "Daily bias is bearish and MACD histogram shows bearish expansion (-0.0051).",
+              "Close price (0.9481) is below both EMA8 (0.9664) and EMA21 (0.9840)."
             ],
             "counter_evidence": [
-              "Stoch RSI K (1.7594) and D (2.5646) are heavily oversold, indicating near-term exhaustion risk for shorts.",
-              "RSI 14 is at 32.91, approaching oversold territory where downside momentum could slow down.",
-              "Exhaustion context registers lower wick rejection alongside bearish continuation signs."
+              "RSI14 sits at 32.92, approaching oversold conditions which could invite counter-trend bounces.",
+              "Exhaustion context lists lower wick rejection as bullish early reversal evidence."
             ],
             "missing_evidence": [
-              "Confirmed multi-timeframe volume confirmation for breakdown continuation.",
-              "Real-time order book liquidity distribution data around entry and stop zones."
+              "Confirmed retest or continuation breakdown confirmation on a closed candle basis.",
+              "Broader market structural volume confirmation."
             ],
-            "rationale": "The short candidate inside structural_trade_plans is currently the only eligible setup meeting all hard gates, including a valid stop, target, and a reward-to-risk ratio above the 1.5R threshold (2.38R). However, mixed momentum signals like oversold Stoch RSI readings introduce exhaustion risks that temper overall confidence, warranting a mixed assessment."
+            "rationale": "The short structural trade plan satisfies all hard gates, including eligibility and a 2.38 reward-to-risk ratio, supported by bearish daily bias and moving average alignments. However, mixed exhaustion signals and low RSI advise caution against immediate unconfirmed market entries."
           },
-          "latency_ms": 6975,
+          "latency_ms": 3028,
           "error": null
         },
         "momentum_reversal": {
@@ -736,7 +737,7 @@
         "multitimeframe_scan": {
           "pair": "SUIUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:44:20.255546+00:00",
+          "generated_at_utc": "2026-10-24T13:48:41.121876+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1095,26 +1096,25 @@
           "model_id": "gemini-3.5-flash-lite",
           "response": {
             "assessment": "mixed",
-            "priority_candidate": "short",
+            "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "Short candidate in structural_trade_plans is marked eligible with zero blockers.",
-              "Reward-to-risk ratio is 2.1864, satisfying the >= 1.5R hard gate requirement.",
-              "MACD bearish expansion and negative histogram indicate ongoing downward momentum.",
-              "Exhaustion context indicates short reversal score of 2 with RSI fading and closing below previous candle low."
+              "structural_trade_plans.short is explicitly marked as eligible with no active blockers.",
+              "The reward-to-risk ratio of 2.1864 satisfies the minimum 1.5R threshold.",
+              "MACD histogram shows bearish expansion supporting downward momentum context."
             ],
             "counter_evidence": [
-              "Rule decision status is NO_TRADE with no order submitted because the pullback zone was not touched.",
-              "Daily bias is noted as bullish, creating a potential conflict with the short direction.",
-              "RSI14 is at 30.25, approaching oversold territory, which could increase the risk of a bounce or false break."
+              "Daily bias is marked as bullish against the short direction.",
+              "RSI14 is at 30.25, approaching oversold territory, which increases bounce or exhaustion risks.",
+              "Rule decision indicates NO_TRADE due to un-touched Fibonacci retracement zones."
             ],
             "missing_evidence": [
-              "Higher timeframe confirmation of support levels below current price.",
-              "Volume profile data supporting the move away from the impulse extreme."
+              "Confirmation of price reaching and reacting from the designated Fibonacci retracement zones.",
+              "Higher timeframe structural alignment with the short trade plan."
             ],
-            "rationale": "While the rule decision results in a NO_TRADE state due to price not reaching the designated retracement entry zones, the independent candidate universe explicitly flags the short structural trade plan as eligible with a reward-to-risk ratio of 2.186, clearing the 1.5R gate without blockers. However, mixed signals such as a bullish daily bias and low RSI require caution regarding potential exhaustion."
+            "rationale": "The short structural trade plan is mathematically eligible and exceeds the 1.5R requirement, and bearish momentum indicators align. However, mixed signals such as a bullish daily bias, low RSI nearing oversold levels, and rule-level hesitation regarding un-touched Fib zones introduce caution."
           },
-          "latency_ms": 6048,
+          "latency_ms": 5863,
           "error": null
         },
         "momentum_reversal": {
@@ -1138,7 +1138,7 @@
         "multitimeframe_scan": {
           "pair": "NEARUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:44:05.082115+00:00",
+          "generated_at_utc": "2026-10-24T13:48:29.956834+00:00",
           "state": "WATCH_NEUTRAL",
           "thesis_direction": "neutral",
           "daily_thesis": {
@@ -1494,20 +1494,22 @@
             "priority_candidate": null,
             "confidence": "high",
             "supporting_evidence": [
-              "Rule decision indicates NO_TRADE due to lack of a confirmed 0.382/0.5/0.618 pullback zone touch.",
-              "All candidate trade plans in candidate_universe are marked ineligible with explicit blockers such as missing structural stops and reward/risk ratios below the 1.5R minimum."
+              "No eligible candidates exist in the candidate universe as all potential setups are blocked by deterministic hard gates."
             ],
             "counter_evidence": [
-              "Daily bias is bearish and EMAs are not aligned for a long setup.",
-              "Exhaustion context indicates a possible bearish turn with RSI fading and closing below previous candle low."
+              "Structural trade plans for both long and short are explicitly marked ineligible with active blockers.",
+              "The long structural plan lacks a valid confirmed structural stop and fails minimum reward-to-risk constraints.",
+              "The short structural plan fails minimum reward-to-risk constraints (0.2214 vs 1.5 minimum).",
+              "Momentum reversal candidate is in NO_SETUP state with blocker no_fresh_extreme_zone_stoch_rsi_cross.",
+              "Rule decision indicates NO_TRADE due to unreached pullback zones."
             ],
             "missing_evidence": [
-              "No valid confirmed structural stop or target meeting minimum reward-to-risk criteria.",
-              "Absence of a fresh extreme-zone Stoch RSI cross for the momentum reversal candidate."
+              "Confirmed Fibonacci pullback zone touch and reaction.",
+              "Valid stop-loss geometry and minimum 1.5 reward-to-risk profile for structural candidates."
             ],
-            "rationale": "The deterministic candidate universe and rule decision both confirm that no eligible trade setup exists. All structural trade plans fail hard gates, including reward-to-risk requirements and valid structural stop definitions. Therefore, no priority candidate can be selected."
+            "rationale": "All candidates within the candidate universe are explicitly ineligible due to hard blockers such as insufficient reward-to-risk ratios, invalid stops, and unreached pullback levels. Consequently, no priority candidate can be selected."
           },
-          "latency_ms": 5228,
+          "latency_ms": 5345,
           "error": null
         },
         "momentum_reversal": {
@@ -1531,7 +1533,7 @@
         "multitimeframe_scan": {
           "pair": "ZECUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:43:50.367068+00:00",
+          "generated_at_utc": "2026-10-24T13:48:15.776510+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1988,27 +1990,25 @@
           "provider": "huggingface",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
-            "priority_candidate": "short",
+            "assessment": "supportive",
+            "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "The short structural trade plan is explicitly marked eligible within the candidate universe.",
-              "Calculated reward-to-risk ratio for the short candidate is 1.5395, satisfying the >= 1.5R minimum threshold requirement.",
-              "Momentum context displays a MACD bearish expansion with a declining histogram (-0.056 vs previous -0.0468), supporting downward pressure.",
-              "Exhaustion context indicates a short reversal score of 2 with bearish evidence including RSI fading and closing below the previous candle's low.",
-              "Daily bias is noted as bearish across the setup lifecycle and indicators."
+              "structural_trade_plans.short is explicitly marked eligible with zero blockers.",
+              "reward_risk ratio is 1.5395, which successfully meets or exceeds the minimum threshold of 1.5.",
+              "Exhaustion context indicates a possible bearish turn state with bearish evidence including rsi_fading and closed_below_previous_candle_low.",
+              "Daily bias is bearish and MACD histogram exhibits bearish expansion."
             ],
             "counter_evidence": [
-              "The frozen decision rule plan leaned towards a long bias using a Fibonacci retracement entry plan, which ultimately resulted in no trade due to unreached pullback levels.",
-              "Current price action (11.59926) is close to prior broken support levels, creating potential false-break or bounce risks."
+              "Price is near lower structural bounds and local support zones, presenting potential false-break or bounce risks."
             ],
             "missing_evidence": [
-              "Uncalibrated historical probability metrics for the specific short structural setup.",
-              "Walk-forward replay data validating the persistence of the short impulse move."
+              "Confirmed volume expansion supporting continuation downwards.",
+              "Follow-through candle close below immediate support levels."
             ],
-            "rationale": "Independent evaluation of the candidate universe reveals that while the frozen rule decision focused on an unfulfilled long pullback setup, the short structural trade plan is fully eligible, meets the strict >= 1.5R gate requirement (1.5395R), and is backed by bearish MACD expansion, RSI fading, and a bearish daily bias context. The short candidate therefore warrants priority attention despite conflicting rule decision biases."
+            "rationale": "The structural short trade plan is fully eligible, satisfies the minimum reward-to-risk gate, and aligns with the prevailing bearish daily bias, MACD bearish expansion, and short exhaustion indicators. While cautious monitoring for false breaks is warranted, the candidate meets all deterministic criteria for review."
           },
-          "latency_ms": 3720,
+          "latency_ms": 3725,
           "error": null
         },
         "momentum_reversal": {
@@ -2032,7 +2032,7 @@
         "multitimeframe_scan": {
           "pair": "LINKUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:43:36.499765+00:00",
+          "generated_at_utc": "2026-10-24T13:48:01.946110+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2453,27 +2453,25 @@
           "provider": "huggingface",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
-            "priority_candidate": "short",
+            "assessment": "caution",
+            "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "Short structural trade plan is explicitly marked eligible in candidate_universe with zero blockers.",
-              "Reward-to-risk ratio for the short plan is 1.559, meeting the minimum >=1.5R gate.",
-              "Daily bias is noted as bearish across multiple rule contexts.",
-              "MACD bearish expansion is active with negative histogram expansion."
+              "structural_trade_plans.short is explicitly marked eligible with zero blockers.",
+              "Reward-to-risk ratio of 1.559 meets the minimum threshold of 1.5.",
+              "Daily bias is bearish and MACD bearish expansion supports downside continuation."
             ],
             "counter_evidence": [
-              "Rule decision indicates DOGEUSDT rule decision is NO_TRADE due to unreached pullback levels.",
-              "RSI14 is at 35.32, which borders on oversold territory and increases bounce or exhaustion risks for a short entry.",
-              "Lower wick rejection noted in exhaustion context provides conflicting bullish signals."
+              "Rule decision indicates a NO_TRADE state due to pullback zones not being touched.",
+              "Exhaustion context indicates RSI is low at 35.32, carrying potential bounce or mean-reversion risk."
             ],
             "missing_evidence": [
-              "Calibrated historical probabilities for the short structural trade plan.",
-              "Confirmed candle close breakdown below structural support matching the entry point."
+              "Calibrated historical probabilities for the short trade setup.",
+              "Confirmation of sustained volume supporting downside breakdown."
             ],
-            "rationale": "The candidate universe marks the short structural trade plan as eligible with a valid 1.559 reward-to-risk ratio and zero blockers, aligning with bearish daily bias and MACD bearish expansion. However, overall rule decisions and context indicators show conflicting signals such as lower wick rejections and low RSI values, resulting in a mixed assessment where the short setup takes priority under strict deterministic constraints."
+            "rationale": "The structural short candidate is technically eligible and meets minimum reward-to-risk criteria with supportive daily bearish bias and MACD expansion. However, overall market state is cautious due to a NO_TRADE rule decision and low RSI readings suggesting potential exhaustion near current levels."
           },
-          "latency_ms": 1665,
+          "latency_ms": 5828,
           "error": null
         },
         "momentum_reversal": {
@@ -2497,7 +2495,7 @@
         "multitimeframe_scan": {
           "pair": "DOGEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:43:21.282775+00:00",
+          "generated_at_utc": "2026-10-24T13:47:47.399408+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2931,20 +2929,20 @@
             "priority_candidate": null,
             "confidence": "high",
             "supporting_evidence": [
-              "MACD histogram shows bearish expansion (-0.269)",
-              "Exhaustion context indicates a possible bearish turn with bearish indicators including rsi_fading and closed_below_previous_candle_low",
-              "Both long and short structural trade plans in the candidate universe are explicitly marked ineligible due to failing hard gates such as reward_risk_below_minimum and missing valid stops"
+              "MACD histogram shows bearish expansion and Stoch RSI indicates low levels (K: 3.29, D: 4.32)",
+              "Exhaustion context indicates possible bearish turn with rsi_fading and closed_below_previous_candle_low"
             ],
             "counter_evidence": [
-              "Daily bias is bearish while prior retest setups attempted to find long continuations, creating directional conflict"
+              "Daily bias is bearish and EMA8 is below EMA21, conflicting with long setups",
+              "All candidates in the candidate universe are explicitly marked ineligible due to missing valid stops, inadequate targets, or failing minimum reward-to-risk constraints"
             ],
             "missing_evidence": [
-              "No confirmed 0.382/0.5/0.618 pullback zone touched in the current execution state",
-              "Lack of fresh extreme zone stoch-rsi cross for reversal candidate setup"
+              "No confirmed 0.382/0.5/0.618 pullback zone touched in the current structural leg",
+              "Lack of fresh extreme zone stoch rsi cross for reversal setup"
             ],
-            "rationale": "No eligible candidate exists in the deterministic candidate universe as all potential trades are blocked by hard risk-reward gates and missing valid structural stops. Exhaustion context confirms a possible bearish turn under fading momentum, requiring strict adherence to the NO_TRADE state."
+            "rationale": "All trade candidates within the deterministic candidate universe are explicitly ineligible due to blocked status, failing reward-to-risk gates, or missing structural requirements. Technical indicators and exhaustion context point toward bearish continuation or lack of supportive structure for longs, resulting in a cautious stance with no priority candidate."
           },
-          "latency_ms": 1409,
+          "latency_ms": 5854,
           "error": null
         },
         "momentum_reversal": {
@@ -2968,7 +2966,7 @@
         "multitimeframe_scan": {
           "pair": "HYPEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:43:07.970195+00:00",
+          "generated_at_utc": "2026-10-24T13:47:30.529937+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3385,25 +3383,27 @@
           "provider": "huggingface",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
-            "priority_candidate": "short",
+            "assessment": "caution",
+            "priority_candidate": "structural_trade_plans.short",
             "confidence": "low",
             "supporting_evidence": [
-              "Short candidate in structural_trade_plans is marked eligible with a reward-to-risk ratio of 1.502, meeting the minimum 1.5R threshold.",
-              "Daily bias is explicitly noted as bearish across multiple contexts.",
-              "EMA alignment and indicators show bearish momentum with macd_bearish_expansion active."
+              "structural_trade_plans.short meets the minimum reward-to-risk ratio of 1.5 with a calculated value of 1.502",
+              "structural_trade_plans.short has no active blockers in the candidate universe evaluation",
+              "Daily bias is reported as bearish",
+              "MACD histogram shows bearish expansion"
             ],
             "counter_evidence": [
-              "Stochastic RSI values are very low (k: 5.3048, d: 7.3453), suggesting potential exhaustion or oversold conditions despite bearish trend alignment.",
-              "Current close price (0.6312) sits below the impulse low context used in certain long rule decisions, indicating complex overlapping structural interpretations."
+              "The rule_decision context evaluated a long trade setup which was rejected due to lack of pullback touch",
+              "Stochastic RSI K and D lines are deeply oversold at 5.30 and 7.34, posing potential mean-reversion risks for a short entry",
+              "RSI 14 is at 35.89, indicating nearing oversold territory"
             ],
             "missing_evidence": [
-              "Lack of a fresh extreme-zone Stoch RSI cross to validate secondary reversal entries.",
-              "Unconfirmed historical probability and uncalibrated walk-forward replay metrics for bounce ranking levels."
+              "Confirmation of sustained price momentum below the entry level",
+              "Higher timeframe structural confirmation for the short direction"
             ],
-            "rationale": "The short structural trade candidate meets the deterministic eligibility and >=1.5R hard gates with a calculated 1.502 reward-risk ratio, supported by bearish daily bias and MACD expansion. However, low Stochastic RSI readings inject caution regarding potential near-term exhaustion, restricting confidence to low."
+            "rationale": "While structural_trade_plans.short is marked eligible and clears the minimum reward-to-risk threshold of 1.502 without active blockers, overall momentum indicators like the Stoch RSI are deeply oversold, creating a notable risk of a counter-trend bounce or false break. Consequently, caution is warranted, and the assessment reflects mixed signals despite the technical eligibility."
           },
-          "latency_ms": 1637,
+          "latency_ms": 3817,
           "error": null
         },
         "momentum_reversal": {
@@ -3427,7 +3427,7 @@
         "multitimeframe_scan": {
           "pair": "VIRTUALUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:42:58.206269+00:00",
+          "generated_at_utc": "2026-10-24T13:47:16.556427+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3476,1741 +3476,6 @@
             "volume": 27530.93997,
             "volume_vs_20_candle_average": 3.977927,
             "nearby_trendlines": [],
-            "confirmed_breaks": []
-          },
-          "daily_directional_breaks": [],
-          "aligned_4h_breaks": [],
-          "entry1_alert_eligible": false,
-          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-          "limitations": [
-            "Research signal only; it never executes trades.",
-            "Indicator confluence is evidence, not a calibrated probability.",
-            "Trendlines are algorithmic candidates and need walk-forward validation.",
-            "Daily context uses only the latest completed daily candle.",
-            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-          ]
-        }
-      }
-    },
-    {
-      "record_key": "1814d9ccb79e286f41cc5e73b9ea398468e913fd2ee4d204a56d666500ee9fd7",
-      "record_type": "decision_snapshot",
-      "pair": "SOLUSDT",
-      "timeframe": "4H",
-      "strategy_version": "friday-price-action-v2",
-      "signal_time": "2026-10-24T08:00:00+00:00",
-      "payload": {
-        "latest_setup_state": {
-          "direction": "long",
-          "signal_time": "2026-10-18T20:00:00+00:00",
-          "line_kind": "resistance",
-          "line_price_at_break": 103.5903,
-          "touch_count": 3,
-          "daily_bias": "bearish",
-          "ema_aligned": false,
-          "momentum_context": {
-            "stoch_bullish_cross": true,
-            "stoch_bearish_cross": false,
-            "macd_bullish_expansion": false,
-            "macd_bearish_expansion": false,
-            "macd_histogram": -0.0078,
-            "macd_histogram_previous": -0.1455
-          },
-          "age_hours": 132.0,
-          "outcome": "no_retest_within_window",
-          "state": "EXPIRED",
-          "message": "No qualifying retest held within 72 hours."
-        },
-        "friday_decision": {
-          "decision_time": "2026-10-24T08:00:00+00:00",
-          "direction": "long",
-          "impulse_origin": {
-            "kind": "low",
-            "index": 709,
-            "price": 103.04,
-            "pivot_time": "2026-10-22T16:00:00+00:00",
-            "confirmed_at": "2026-10-23T04:00:00+00:00",
-            "confirmation_index": 712
-          },
-          "impulse_extreme": {
-            "kind": "high",
-            "index": 714,
-            "price": 105.24,
-            "pivot_time": "2026-10-23T12:00:00+00:00",
-            "confirmed_at": "2026-10-24T00:00:00+00:00",
-            "confirmation_index": 717
-          },
-          "fib_entry_plan": {
-            "direction": "long",
-            "entry_1": {
-              "fib": 0.0,
-              "price": 103.04,
-              "role": "early_probe_area"
-            },
-            "entry_2_candidates": [
-              {
-                "fib": 0.382,
-                "price": 104.39959999999999,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.5,
-                "price": 104.14,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.618,
-                "price": 103.88040000000001,
-                "role": "retest_add_candidate"
-              }
-            ],
-            "impulse_range": 2.1999999999999886,
-            "status": "retest_levels_ready"
-          },
-          "retracement_levels": [
-            {
-              "fib": 0.382,
-              "price": 104.39959999999999,
-              "bounce_ranking": {
-                "fib": 0.382,
-                "price": 104.39959999999999,
-                "confluence_score": 3.0,
-                "rank": 2,
-                "heuristic_reasons": [
-                  "overlaps support zone with 12 prior touches"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 2.178
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 100.98829,
-              "risk_pct": 0.5433425251132558,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 104.39959999999999,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 104.255,
-                  "touches": 6,
-                  "kind": "both",
-                  "low": 104.08,
-                  "high": 104.48
-                },
-                "liquidity_reference": 101.76,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": false,
-                "atr": 1.3128571428571416,
-                "confluence_score": 2,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.5,
-              "price": 104.14,
-              "bounce_ranking": {
-                "fib": 0.5,
-                "price": 104.14,
-                "confluence_score": 3.0,
-                "rank": 1,
-                "heuristic_reasons": [
-                  "overlaps support zone with 18 prior touches"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 1.98
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 100.98829,
-              "risk_pct": 0.5433425251132558,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 104.14,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 104.255,
-                  "touches": 6,
-                  "kind": "both",
-                  "low": 104.08,
-                  "high": 104.48
-                },
-                "liquidity_reference": 101.76,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": false,
-                "atr": 1.3128571428571416,
-                "confluence_score": 2,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.618,
-              "price": 103.88040000000001,
-              "bounce_ranking": {
-                "fib": 0.618,
-                "price": 103.88040000000001,
-                "confluence_score": 3.0,
-                "rank": 3,
-                "heuristic_reasons": [
-                  "overlaps support zone with 18 prior touches"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 1.783
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 100.98829,
-              "risk_pct": 0.5433425251132558,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 103.88040000000001,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 103.75,
-                  "touches": 13,
-                  "kind": "support",
-                  "low": 103.5,
-                  "high": 103.99
-                },
-                "liquidity_reference": 101.76,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": false,
-                "atr": 1.3128571428571416,
-                "confluence_score": 2,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            }
-          ],
-          "bounce_level_ranking": [
-            {
-              "fib": 0.5,
-              "price": 104.14,
-              "confluence_score": 3.0,
-              "rank": 1,
-              "heuristic_reasons": [
-                "overlaps support zone with 18 prior touches"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 1.98
-            },
-            {
-              "fib": 0.382,
-              "price": 104.39959999999999,
-              "confluence_score": 3.0,
-              "rank": 2,
-              "heuristic_reasons": [
-                "overlaps support zone with 12 prior touches"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 2.178
-            },
-            {
-              "fib": 0.618,
-              "price": 103.88040000000001,
-              "confluence_score": 3.0,
-              "rank": 3,
-              "heuristic_reasons": [
-                "overlaps support zone with 18 prior touches"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 1.783
-            }
-          ],
-          "execution": "no trade; no order submitted",
-          "state": "NO_TRADE",
-          "close": 101.54,
-          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
-        },
-        "reversal_context": {
-          "status": "ok",
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "state": "possible_bearish_turn",
-          "long_reversal_score": 0,
-          "short_reversal_score": 2,
-          "score_note": "Evidence count only; not a probability and not an entry gate.",
-          "atr14": 1.472683238560493,
-          "rsi14": 33.1945214333455,
-          "ema8": 102.92539117006447,
-          "ema21": 104.01444758420276,
-          "evidence": {
-            "bullish": [],
-            "bearish": [
-              "rsi_fading",
-              "closed_below_previous_candle_low"
-            ]
-          },
-          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
-        },
-        "current_indicators": {
-          "ema8_4h": 102.9254,
-          "ema21_4h": 104.0144,
-          "daily_bias": "bearish",
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 0.2968,
-          "atr14": 1.4727
-        },
-        "structure_lifecycle": {
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "active_lines": [],
-          "broken_lines": [],
-          "latest_support": null,
-          "latest_resistance": null,
-          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
-        },
-        "model_review": {
-          "status": "ok",
-          "provider": "huggingface",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "mixed",
-            "priority_candidate": "structural_trade_plans.short",
-            "confidence": "medium",
-            "supporting_evidence": [
-              "Short candidate is explicitly marked eligible in candidate_universe with zero blockers.",
-              "Reward-to-risk ratio of 1.5532 meets the minimum >=1.5R gate requirement.",
-              "Daily bias is bearish, aligning with the short direction.",
-              "Exhaustion context shows a bearish turn state with rsi_fading and closed_below_previous_candle_low.",
-              "MACD histogram expansion confirms bearish momentum context (-0.3697 vs -0.3373)."
-            ],
-            "counter_evidence": [
-              "Rule decision indicates a NO_TRADE status for the long fib_entry_plan, reflecting lack of pullback touches.",
-              "Stoch RSI K is at 0, indicating oversold local momentum conditions which could introduce bounce risk for shorts."
-            ],
-            "missing_evidence": [
-              "Uncalibrated historical probability status for structural setups requires walk-forward replay.",
-              "Confirmation of sustained lower timeframe trend continuation past immediate support."
-            ],
-            "rationale": "The short structural trade plan satisfies all deterministic gates including the >=1.5R minimum requirement, supported by bearish daily bias, MACD bearish expansion, and exhaustion context. Although the rule decision evaluated a long pullback setup that resulted in NO_TRADE, the independent candidate universe explicitly qualifies the short plan. Therefore, the short candidate deserves attention while maintaining caution due to oversold Stoch RSI conditions."
-          },
-          "latency_ms": 1705,
-          "error": null
-        },
-        "momentum_reversal": {
-          "strategy": "stoch-rsi-structural-reversal-v1",
-          "pair": "SOLUSDT",
-          "state": "NO_SETUP",
-          "direction": null,
-          "signal_time": null,
-          "entry": null,
-          "stop": null,
-          "target": null,
-          "reward_risk": null,
-          "eligible": false,
-          "blockers": [
-            "no_fresh_extreme_zone_stoch_rsi_cross"
-          ],
-          "research_only": true,
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 0.2968
-        },
-        "multitimeframe_scan": {
-          "pair": "SOLUSDT",
-          "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:42:47.642236+00:00",
-          "state": "WATCH_MAJOR_MOVE",
-          "thesis_direction": "bearish",
-          "daily_thesis": {
-            "timeframe": "1D",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-            "close": 102.85,
-            "ema5": 104.40668381830862,
-            "ema13": 106.27235657556443,
-            "ema8": 105.02210582435787,
-            "ema21": 107.78562633257192,
-            "ema_5_13_spread_pct": -1.7556,
-            "ema_8_21_spread_pct": -2.5639,
-            "stoch_k": 40.270701,
-            "stoch_d": 45.980559,
-            "stoch_cross_up": false,
-            "stoch_cross_down": true,
-            "macd": -2.165131,
-            "macd_signal": -1.511564,
-            "macd_hist": -0.653567,
-            "macd_hist_change": "improving",
-            "volume": 11779.46983996,
-            "volume_vs_20_candle_average": 0.562962,
-            "nearby_trendlines": [],
-            "confirmed_breaks": []
-          },
-          "four_hour_execution": {
-            "timeframe": "4H",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
-            "close": 101.54,
-            "ema5": 102.43009156044329,
-            "ema13": 103.49847264906889,
-            "ema8": 102.92539117006447,
-            "ema21": 104.01444758420276,
-            "ema_5_13_spread_pct": -1.0323,
-            "ema_8_21_spread_pct": -1.047,
-            "stoch_k": 0.0,
-            "stoch_d": 0.296824,
-            "stoch_cross_up": false,
-            "stoch_cross_down": false,
-            "macd": -0.81127,
-            "macd_signal": -0.44156,
-            "macd_hist": -0.369709,
-            "macd_hist_change": "deteriorating",
-            "volume": 1290.27880429,
-            "volume_vs_20_candle_average": 0.595891,
-            "nearby_trendlines": [],
-            "confirmed_breaks": []
-          },
-          "daily_directional_breaks": [],
-          "aligned_4h_breaks": [],
-          "entry1_alert_eligible": false,
-          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-          "limitations": [
-            "Research signal only; it never executes trades.",
-            "Indicator confluence is evidence, not a calibrated probability.",
-            "Trendlines are algorithmic candidates and need walk-forward validation.",
-            "Daily context uses only the latest completed daily candle.",
-            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-          ]
-        }
-      }
-    },
-    {
-      "record_key": "61b9a9a398f03b0ca3fdc130d80697ca2357b611014e28fb828a8aa23cfdd9b2",
-      "record_type": "decision_snapshot",
-      "pair": "ETHUSDT",
-      "timeframe": "4H",
-      "strategy_version": "friday-price-action-v2",
-      "signal_time": "2026-10-24T08:00:00+00:00",
-      "payload": {
-        "latest_setup_state": {
-          "direction": "long",
-          "signal_time": "2026-10-21T12:00:00+00:00",
-          "line_kind": "resistance",
-          "line_price_at_break": 2469.5286,
-          "touch_count": 3,
-          "daily_bias": "bearish",
-          "ema_aligned": true,
-          "momentum_context": {
-            "stoch_bullish_cross": false,
-            "stoch_bearish_cross": false,
-            "macd_bullish_expansion": true,
-            "macd_bearish_expansion": false,
-            "macd_histogram": 11.861,
-            "macd_histogram_previous": 8.9753
-          },
-          "age_hours": 68.0,
-          "outcome": "failed_break",
-          "state": "INVALIDATED",
-          "message": "The breakout failed its close-based invalidation rule."
-        },
-        "friday_decision": {
-          "decision_time": "2026-10-24T08:00:00+00:00",
-          "direction": "short",
-          "impulse_origin": {
-            "kind": "high",
-            "index": 703,
-            "price": 2525.79,
-            "pivot_time": "2026-10-21T16:00:00+00:00",
-            "confirmed_at": "2026-10-22T04:00:00+00:00",
-            "confirmation_index": 706
-          },
-          "impulse_extreme": {
-            "kind": "low",
-            "index": 709,
-            "price": 2362.0,
-            "pivot_time": "2026-10-22T16:00:00+00:00",
-            "confirmed_at": "2026-10-23T04:00:00+00:00",
-            "confirmation_index": 712
-          },
-          "fib_entry_plan": {
-            "direction": "short",
-            "entry_1": {
-              "fib": 0.0,
-              "price": 2525.79,
-              "role": "early_probe_area"
-            },
-            "entry_2_candidates": [
-              {
-                "fib": 0.382,
-                "price": 2424.56778,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.5,
-                "price": 2443.895,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.618,
-                "price": 2463.22222,
-                "role": "retest_add_candidate"
-              }
-            ],
-            "impulse_range": 163.78999999999996,
-            "status": "retest_levels_ready"
-          },
-          "retracement_levels": [
-            {
-              "fib": 0.382,
-              "price": 2424.56778,
-              "bounce_ranking": {
-                "fib": 0.382,
-                "price": 2424.56778,
-                "confluence_score": 4.75,
-                "rank": 1,
-                "heuristic_reasons": [
-                  "overlaps resistance zone with 7 prior touches",
-                  "overlaps prior confirmed-style swing structure",
-                  "level not decisively lost at current close"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 2.178
-              },
-              "touched": false,
-              "reaction": true,
-              "invalidation": 2379.553985,
-              "risk_pct": 0.5788163712138454,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 2424.56778,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 2429.81,
-                  "touches": 6,
-                  "kind": "both",
-                  "low": 2425.69,
-                  "high": 2434.8
-                },
-                "liquidity_reference": 2525.79,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": true,
-                "atr": 26.96071428571427,
-                "confluence_score": 3,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.5,
-              "price": 2443.895,
-              "bounce_ranking": {
-                "fib": 0.5,
-                "price": 2443.895,
-                "confluence_score": 3.5,
-                "rank": 2,
-                "heuristic_reasons": [
-                  "overlaps resistance zone with 7 prior touches",
-                  "level not decisively lost at current close"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 2.894
-              },
-              "touched": false,
-              "reaction": true,
-              "invalidation": 2379.553985,
-              "risk_pct": 0.5788163712138454,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 2443.895,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 2444.55,
-                  "touches": 5,
-                  "kind": "both",
-                  "low": 2438.4,
-                  "high": 2448.19
-                },
-                "liquidity_reference": 2525.79,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": true,
-                "atr": 26.96071428571427,
-                "confluence_score": 3,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.618,
-              "price": 2463.22222,
-              "bounce_ranking": {
-                "fib": 0.618,
-                "price": 2463.22222,
-                "confluence_score": 3.5,
-                "rank": 3,
-                "heuristic_reasons": [
-                  "overlaps resistance zone with 6 prior touches",
-                  "level not decisively lost at current close"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 3.611
-              },
-              "touched": false,
-              "reaction": true,
-              "invalidation": 2379.553985,
-              "risk_pct": 0.5788163712138454,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 2463.22222,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 2459.882,
-                  "touches": 5,
-                  "kind": "both",
-                  "low": 2455.28,
-                  "high": 2464.78
-                },
-                "liquidity_reference": 2525.79,
-                "liquidity_sweep_and_reclaim": false,
-                "rejection_or_reclaim_candle": true,
-                "atr": 26.96071428571427,
-                "confluence_score": 3,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            }
-          ],
-          "bounce_level_ranking": [
-            {
-              "fib": 0.382,
-              "price": 2424.56778,
-              "confluence_score": 4.75,
-              "rank": 1,
-              "heuristic_reasons": [
-                "overlaps resistance zone with 7 prior touches",
-                "overlaps prior confirmed-style swing structure",
-                "level not decisively lost at current close"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 2.178
-            },
-            {
-              "fib": 0.5,
-              "price": 2443.895,
-              "confluence_score": 3.5,
-              "rank": 2,
-              "heuristic_reasons": [
-                "overlaps resistance zone with 7 prior touches",
-                "level not decisively lost at current close"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 2.894
-            },
-            {
-              "fib": 0.618,
-              "price": 2463.22222,
-              "confluence_score": 3.5,
-              "rank": 3,
-              "heuristic_reasons": [
-                "overlaps resistance zone with 6 prior touches",
-                "level not decisively lost at current close"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 3.611
-            }
-          ],
-          "execution": "no trade; no order submitted",
-          "state": "NO_TRADE",
-          "close": 2365.86,
-          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
-        },
-        "reversal_context": {
-          "status": "ok",
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "state": "possible_bearish_turn",
-          "long_reversal_score": 0,
-          "short_reversal_score": 2,
-          "score_note": "Evidence count only; not a probability and not an entry gate.",
-          "atr14": 29.664636228491013,
-          "rsi14": 37.226540573213654,
-          "ema8": 2386.39652725232,
-          "ema21": 2404.8376532577854,
-          "evidence": {
-            "bullish": [],
-            "bearish": [
-              "rsi_fading",
-              "closed_below_previous_candle_low"
-            ]
-          },
-          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
-        },
-        "current_indicators": {
-          "ema8_4h": 2386.3965,
-          "ema21_4h": 2404.8377,
-          "daily_bias": "bearish",
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 2.4324,
-          "atr14": 29.6646
-        },
-        "structure_lifecycle": {
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "active_lines": [
-            {
-              "kind": "support",
-              "line_price": 2354.7369811320755,
-              "distance_pct": 0.4723677827736454,
-              "touch_count": 3,
-              "anchor_start_index": 123,
-              "anchor_end_index": 176,
-              "anchor_start_time": "2026-10-15T00:00:00+00:00",
-              "anchor_end_time": "2026-10-23T20:00:00+00:00",
-              "anchor_start_wick": 2318.58,
-              "anchor_end_wick": 2352.8,
-              "slope_per_bar": 0.6456603773584954,
-              "status": "active"
-            },
-            {
-              "kind": "support",
-              "line_price": 2349.963043478261,
-              "distance_pct": 0.6764768733643285,
-              "touch_count": 3,
-              "anchor_start_index": 153,
-              "anchor_end_index": 176,
-              "anchor_start_time": "2026-10-20T00:00:00+00:00",
-              "anchor_end_time": "2026-10-23T20:00:00+00:00",
-              "anchor_start_wick": 2374.55,
-              "anchor_end_wick": 2352.8,
-              "slope_per_bar": -0.9456521739130435,
-              "status": "active"
-            }
-          ],
-          "broken_lines": [
-            {
-              "kind": "resistance",
-              "line_price": 2326.521000000001,
-              "distance_pct": 1.6908938281665633,
-              "touch_count": 3,
-              "anchor_start_index": 30,
-              "anchor_end_index": 40,
-              "anchor_start_time": "2026-09-29T12:00:00+00:00",
-              "anchor_end_time": "2026-10-01T04:00:00+00:00",
-              "anchor_start_wick": 2748.34,
-              "anchor_end_wick": 2720.03,
-              "slope_per_bar": -2.8309999999999946,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 45,
-                "break_time": "2026-10-02T00:00:00+00:00",
-                "line_price": 2705.875,
-                "close": 2719.86,
-                "direction": "long",
-                "anchor_start_index": 30,
-                "anchor_end_index": 40,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 2362.61,
-              "distance_pct": 0.13755973266853183,
-              "touch_count": 3,
-              "anchor_start_index": 119,
-              "anchor_end_index": 149,
-              "anchor_start_time": "2026-10-14T08:00:00+00:00",
-              "anchor_end_time": "2026-10-19T08:00:00+00:00",
-              "anchor_start_wick": 2529.53,
-              "anchor_end_wick": 2446.07,
-              "slope_per_bar": -2.7820000000000014,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 156,
-                "break_time": "2026-10-20T12:00:00+00:00",
-                "line_price": 2426.596,
-                "close": 2441.12,
-                "direction": "long",
-                "anchor_start_index": 119,
-                "anchor_end_index": 149,
-                "touch_count": 3
-              }
-            }
-          ],
-          "latest_support": {
-            "kind": "support",
-            "line_price": 2354.7369811320755,
-            "distance_pct": 0.4723677827736454,
-            "touch_count": 3,
-            "anchor_start_index": 123,
-            "anchor_end_index": 176,
-            "anchor_start_time": "2026-10-15T00:00:00+00:00",
-            "anchor_end_time": "2026-10-23T20:00:00+00:00",
-            "anchor_start_wick": 2318.58,
-            "anchor_end_wick": 2352.8,
-            "slope_per_bar": 0.6456603773584954,
-            "status": "active"
-          },
-          "latest_resistance": null,
-          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
-        },
-        "model_review": {
-          "status": "ok",
-          "provider": "huggingface",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "mixed",
-            "priority_candidate": "long",
-            "confidence": "medium",
-            "supporting_evidence": [
-              "Structural long trade plan is marked eligible with zero blockers.",
-              "Reward-to-risk ratio for the long candidate is 3.64, exceeding the minimum 1.5R gate.",
-              "Active support line presence near current price (2354.74 vs current close 2365.86).",
-              "Stoch RSI K (0) and D (2.43) indicate deeply oversold momentum levels near the local low."
-            ],
-            "counter_evidence": [
-              "Daily bias is explicitly bearish.",
-              "EMA8 (2386.40) is below EMA21 (2404.84), showing a short-term bearish alignment.",
-              "Exhaustion context indicates bearish continuation signals including RSI fading and closing below previous candle low."
-            ],
-            "missing_evidence": [
-              "Confirmed bullish reversal candlestick pattern on the 4-hour timeframe.",
-              "Higher timeframe trend alignment supporting a sustained long bounce."
-            ],
-            "rationale": "The structural long candidate is fully eligible within the candidate universe with an attractive 3.64 reward-to-risk ratio and proximity to active support, making it the priority focus. However, the broader trend context remains bearish with negative EMA alignment and declining momentum, warranting a mixed assessment until confirmed structure verifies the reversal."
-          },
-          "latency_ms": 1666,
-          "error": null
-        },
-        "momentum_reversal": {
-          "strategy": "stoch-rsi-structural-reversal-v1",
-          "pair": "ETHUSDT",
-          "state": "NO_SETUP",
-          "direction": null,
-          "signal_time": null,
-          "entry": null,
-          "stop": null,
-          "target": null,
-          "reward_risk": null,
-          "eligible": false,
-          "blockers": [
-            "no_fresh_extreme_zone_stoch_rsi_cross"
-          ],
-          "research_only": true,
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 2.4324
-        },
-        "multitimeframe_scan": {
-          "pair": "ETHUSDT",
-          "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:42:34.898530+00:00",
-          "state": "WATCH_MAJOR_MOVE",
-          "thesis_direction": "bearish",
-          "daily_thesis": {
-            "timeframe": "1D",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-            "close": 2387.39,
-            "ema5": 2413.3733396664165,
-            "ema13": 2448.968605763764,
-            "ema8": 2425.2421095446534,
-            "ema21": 2480.636228712868,
-            "ema_5_13_spread_pct": -1.4535,
-            "ema_8_21_spread_pct": -2.2331,
-            "stoch_k": 44.031687,
-            "stoch_d": 55.377001,
-            "stoch_cross_up": false,
-            "stoch_cross_down": true,
-            "macd": -47.459395,
-            "macd_signal": -38.151552,
-            "macd_hist": -9.307843,
-            "macd_hist_change": "improving",
-            "volume": 886.35302776,
-            "volume_vs_20_candle_average": 0.508314,
-            "nearby_trendlines": [],
-            "confirmed_breaks": []
-          },
-          "four_hour_execution": {
-            "timeframe": "4H",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
-            "close": 2365.86,
-            "ema5": 2379.3299030830553,
-            "ema13": 2395.6439199266274,
-            "ema8": 2386.39652725232,
-            "ema21": 2404.8376532577854,
-            "ema_5_13_spread_pct": -0.681,
-            "ema_8_21_spread_pct": -0.7668,
-            "stoch_k": 0.0,
-            "stoch_d": 2.432383,
-            "stoch_cross_up": false,
-            "stoch_cross_down": false,
-            "macd": -14.679336,
-            "macd_signal": -9.397588,
-            "macd_hist": -5.281748,
-            "macd_hist_change": "deteriorating",
-            "volume": 89.57995817,
-            "volume_vs_20_candle_average": 0.50512,
-            "nearby_trendlines": [
-              {
-                "kind": "support",
-                "price": 2703.393585,
-                "distance_pct": -12.486,
-                "touches": 3,
-                "start_time": "2026-07-17T00:00:00+00:00",
-                "end_time": "2026-07-25T20:00:00+00:00",
-                "start_price": 2318.58,
-                "end_price": 2352.8,
-                "slope_per_candle": 0.6456603773584954
-              },
-              {
-                "kind": "support",
-                "price": 1839.31087,
-                "distance_pct": 28.628,
-                "touches": 3,
-                "start_time": "2026-07-22T00:00:00+00:00",
-                "end_time": "2026-07-25T20:00:00+00:00",
-                "start_price": 2374.55,
-                "end_price": 2352.8,
-                "slope_per_candle": -0.9456521739130435
-              },
-              {
-                "kind": "resistance",
-                "price": 1706.312045,
-                "distance_pct": 38.653,
-                "touches": 3,
-                "start_time": "2026-07-15T04:00:00+00:00",
-                "end_time": "2026-07-22T12:00:00+00:00",
-                "start_price": 2538.04,
-                "end_price": 2477.75,
-                "slope_per_candle": -1.370227272727272
-              },
-              {
-                "kind": "resistance",
-                "price": 860.33,
-                "distance_pct": 174.994,
-                "touches": 3,
-                "start_time": "2026-07-16T08:00:00+00:00",
-                "end_time": "2026-07-21T08:00:00+00:00",
-                "start_price": 2529.53,
-                "end_price": 2446.07,
-                "slope_per_candle": -2.7820000000000014
-              },
-              {
-                "kind": "resistance",
-                "price": 797.781,
-                "distance_pct": 196.555,
-                "touches": 3,
-                "start_time": "2026-07-01T12:00:00+00:00",
-                "end_time": "2026-07-03T04:00:00+00:00",
-                "start_price": 2748.34,
-                "end_price": 2720.03,
-                "slope_per_candle": -2.8309999999999946
-              }
-            ],
-            "confirmed_breaks": []
-          },
-          "daily_directional_breaks": [],
-          "aligned_4h_breaks": [],
-          "entry1_alert_eligible": false,
-          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-          "limitations": [
-            "Research signal only; it never executes trades.",
-            "Indicator confluence is evidence, not a calibrated probability.",
-            "Trendlines are algorithmic candidates and need walk-forward validation.",
-            "Daily context uses only the latest completed daily candle.",
-            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-          ]
-        }
-      }
-    },
-    {
-      "record_key": "7991aefb9e1ed9a888f820705461e31331fa71fffba6a929d3ba13139f3f2630",
-      "record_type": "decision_snapshot",
-      "pair": "XBTUSDT",
-      "timeframe": "4H",
-      "strategy_version": "friday-price-action-v2",
-      "signal_time": "2026-10-24T08:00:00+00:00",
-      "payload": {
-        "latest_setup_state": {
-          "direction": "short",
-          "signal_time": "2026-10-24T04:00:00+00:00",
-          "line_kind": "support",
-          "line_price_at_break": 80956.9483,
-          "touch_count": 3,
-          "daily_bias": "bearish",
-          "ema_aligned": true,
-          "momentum_context": {
-            "stoch_bullish_cross": false,
-            "stoch_bearish_cross": false,
-            "macd_bullish_expansion": false,
-            "macd_bearish_expansion": true,
-            "macd_histogram": -177.6767,
-            "macd_histogram_previous": -171.4953
-          },
-          "age_hours": 4.0,
-          "outcome": "retest_held_waiting_continuation",
-          "state": "RETEST_HELD_WAITING_CONTINUATION",
-          "retest_confirmed_time": "2026-10-24T08:00:00+00:00",
-          "message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add."
-        },
-        "friday_decision": {
-          "decision_time": "2026-10-24T08:00:00+00:00",
-          "direction": "long",
-          "impulse_origin": {
-            "kind": "low",
-            "index": 709,
-            "price": 80933.3,
-            "pivot_time": "2026-10-22T16:00:00+00:00",
-            "confirmed_at": "2026-10-23T04:00:00+00:00",
-            "confirmation_index": 712
-          },
-          "impulse_extreme": {
-            "kind": "high",
-            "index": 714,
-            "price": 82043.4,
-            "pivot_time": "2026-10-23T12:00:00+00:00",
-            "confirmed_at": "2026-10-24T00:00:00+00:00",
-            "confirmation_index": 717
-          },
-          "fib_entry_plan": {
-            "direction": "long",
-            "entry_1": {
-              "fib": 0.0,
-              "price": 80933.3,
-              "role": "early_probe_area"
-            },
-            "entry_2_candidates": [
-              {
-                "fib": 0.382,
-                "price": 81619.3418,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.5,
-                "price": 81488.35,
-                "role": "retest_add_candidate"
-              },
-              {
-                "fib": 0.618,
-                "price": 81357.3582,
-                "role": "retest_add_candidate"
-              }
-            ],
-            "impulse_range": 1110.0999999999913,
-            "status": "retest_levels_ready"
-          },
-          "retracement_levels": [
-            {
-              "fib": 0.382,
-              "price": 81619.3418,
-              "bounce_ranking": {
-                "fib": 0.382,
-                "price": 81619.3418,
-                "confluence_score": 4.0,
-                "rank": 3,
-                "heuristic_reasons": [
-                  "overlaps support zone with 18 prior touches",
-                  "overlaps prior confirmed-style swing structure"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 1.621
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 80349.295,
-              "risk_pct": 0.3028846034538758,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 81619.3418,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 81679.24615384615,
-                  "touches": 12,
-                  "kind": "both",
-                  "low": 81475.7,
-                  "high": 81901.9
-                },
-                "liquidity_reference": 80519.3,
-                "liquidity_sweep_and_reclaim": true,
-                "rejection_or_reclaim_candle": false,
-                "atr": 632.77857142857,
-                "confluence_score": 4,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.5,
-              "price": 81488.35,
-              "bounce_ranking": {
-                "fib": 0.5,
-                "price": 81488.35,
-                "confluence_score": 4.75,
-                "rank": 1,
-                "heuristic_reasons": [
-                  "overlaps support zone with 18 prior touches",
-                  "overlaps prior confirmed-style swing structure",
-                  "within 1.5 ATR"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 1.414
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 80349.295,
-              "risk_pct": 0.3028846034538758,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 81488.35,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 81679.24615384615,
-                  "touches": 12,
-                  "kind": "both",
-                  "low": 81475.7,
-                  "high": 81901.9
-                },
-                "liquidity_reference": 80519.3,
-                "liquidity_sweep_and_reclaim": true,
-                "rejection_or_reclaim_candle": false,
-                "atr": 632.77857142857,
-                "confluence_score": 4,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            },
-            {
-              "fib": 0.618,
-              "price": 81357.3582,
-              "bounce_ranking": {
-                "fib": 0.618,
-                "price": 81357.3582,
-                "confluence_score": 4.75,
-                "rank": 2,
-                "heuristic_reasons": [
-                  "overlaps support zone with 12 prior touches",
-                  "overlaps prior confirmed-style swing structure",
-                  "within 1.5 ATR"
-                ],
-                "historical_probability": null,
-                "probability_status": "uncalibrated_requires_walk_forward_replay",
-                "warning": "Ranking is not a statistically calibrated probability.",
-                "distance_atr": 1.207
-              },
-              "touched": false,
-              "reaction": false,
-              "invalidation": 80349.295,
-              "risk_pct": 0.3028846034538758,
-              "risk_ok": true,
-              "evidence": {
-                "fib_zero": 81357.3582,
-                "fib_area_touched": false,
-                "near_support_resistance": true,
-                "nearest_level": {
-                  "price": 81190.77272727272,
-                  "touches": 11,
-                  "kind": "both",
-                  "low": 80933.3,
-                  "high": 81340.8
-                },
-                "liquidity_reference": 80519.3,
-                "liquidity_sweep_and_reclaim": true,
-                "rejection_or_reclaim_candle": false,
-                "atr": 632.77857142857,
-                "confluence_score": 4,
-                "entry1_candidate": false,
-                "status": "WAIT_FOR_CONFLUENCE"
-              },
-              "eligible": false
-            }
-          ],
-          "bounce_level_ranking": [
-            {
-              "fib": 0.5,
-              "price": 81488.35,
-              "confluence_score": 4.75,
-              "rank": 1,
-              "heuristic_reasons": [
-                "overlaps support zone with 18 prior touches",
-                "overlaps prior confirmed-style swing structure",
-                "within 1.5 ATR"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 1.414
-            },
-            {
-              "fib": 0.618,
-              "price": 81357.3582,
-              "confluence_score": 4.75,
-              "rank": 2,
-              "heuristic_reasons": [
-                "overlaps support zone with 12 prior touches",
-                "overlaps prior confirmed-style swing structure",
-                "within 1.5 ATR"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 1.207
-            },
-            {
-              "fib": 0.382,
-              "price": 81619.3418,
-              "confluence_score": 4.0,
-              "rank": 3,
-              "heuristic_reasons": [
-                "overlaps support zone with 18 prior touches",
-                "overlaps prior confirmed-style swing structure"
-              ],
-              "historical_probability": null,
-              "probability_status": "uncalibrated_requires_walk_forward_replay",
-              "warning": "Ranking is not a statistically calibrated probability.",
-              "distance_atr": 1.621
-            }
-          ],
-          "execution": "no trade; no order submitted",
-          "state": "NO_TRADE",
-          "close": 80593.4,
-          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
-        },
-        "reversal_context": {
-          "status": "ok",
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "state": "possible_bearish_turn",
-          "long_reversal_score": 0,
-          "short_reversal_score": 2,
-          "score_note": "Evidence count only; not a probability and not an entry gate.",
-          "atr14": 697.5963748785888,
-          "rsi14": 34.75987325389387,
-          "ema8": 81141.16633054888,
-          "ema21": 81705.3777939971,
-          "evidence": {
-            "bullish": [],
-            "bearish": [
-              "rsi_fading",
-              "closed_below_previous_candle_low"
-            ]
-          },
-          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
-        },
-        "current_indicators": {
-          "ema8_4h": 81141.1663,
-          "ema21_4h": 81705.3778,
-          "daily_bias": "bearish",
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 0.0385,
-          "atr14": 697.5964
-        },
-        "structure_lifecycle": {
-          "as_of": "2026-10-24T08:00:00+00:00",
-          "active_lines": [
-            {
-              "kind": "support",
-              "line_price": 80412.40769230768,
-              "distance_pct": 0.22508007518549775,
-              "touch_count": 3,
-              "anchor_start_index": 133,
-              "anchor_end_index": 146,
-              "anchor_start_time": "2026-10-16T16:00:00+00:00",
-              "anchor_end_time": "2026-10-18T20:00:00+00:00",
-              "anchor_start_wick": 80807.3,
-              "anchor_end_wick": 80695.7,
-              "slope_per_bar": -8.584615384615832,
-              "status": "active"
-            }
-          ],
-          "broken_lines": [
-            {
-              "kind": "resistance",
-              "line_price": 79863.38372093023,
-              "distance_pct": 0.9140813287109016,
-              "touch_count": 3,
-              "anchor_start_index": 63,
-              "anchor_end_index": 106,
-              "anchor_start_time": "2026-10-05T00:00:00+00:00",
-              "anchor_end_time": "2026-10-12T04:00:00+00:00",
-              "anchor_start_wick": 86990.1,
-              "anchor_end_wick": 84348.3,
-              "slope_per_bar": -61.43720930232565,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 146,
-                "break_time": "2026-10-18T20:00:00+00:00",
-                "line_price": 81890.81162790698,
-                "close": 82104.7,
-                "direction": "long",
-                "anchor_start_index": 63,
-                "anchor_end_index": 106,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 80404.548,
-              "distance_pct": 0.2348772609230997,
-              "touch_count": 3,
-              "anchor_start_index": 63,
-              "anchor_end_index": 113,
-              "anchor_start_time": "2026-10-05T00:00:00+00:00",
-              "anchor_end_time": "2026-10-13T08:00:00+00:00",
-              "anchor_start_wick": 86990.1,
-              "anchor_end_wick": 84151.5,
-              "slope_per_bar": -56.77200000000012,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 147,
-                "break_time": "2026-10-19T00:00:00+00:00",
-                "line_price": 82221.252,
-                "close": 82517.3,
-                "direction": "long",
-                "anchor_start_index": 63,
-                "anchor_end_index": 113,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 81047.37857142856,
-              "distance_pct": -0.5601397348446852,
-              "touch_count": 3,
-              "anchor_start_index": 63,
-              "anchor_end_index": 119,
-              "anchor_start_time": "2026-10-05T00:00:00+00:00",
-              "anchor_end_time": "2026-10-14T08:00:00+00:00",
-              "anchor_start_wick": 86990.1,
-              "anchor_end_wick": 84121.2,
-              "slope_per_bar": -51.2303571428573,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 156,
-                "break_time": "2026-10-20T12:00:00+00:00",
-                "line_price": 82225.67678571428,
-                "close": 82617.4,
-                "direction": "long",
-                "anchor_start_index": 63,
-                "anchor_end_index": 119,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 82289.00476190475,
-              "distance_pct": -2.060548388950417,
-              "touch_count": 4,
-              "anchor_start_index": 106,
-              "anchor_end_index": 148,
-              "anchor_start_time": "2026-10-12T04:00:00+00:00",
-              "anchor_end_time": "2026-10-19T04:00:00+00:00",
-              "anchor_start_wick": 84348.3,
-              "anchor_end_wick": 83163.5,
-              "slope_per_bar": -28.20952380952388,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 158,
-                "break_time": "2026-10-20T20:00:00+00:00",
-                "line_price": 82881.40476190476,
-                "close": 83024.7,
-                "direction": "long",
-                "anchor_start_index": 106,
-                "anchor_end_index": 148,
-                "touch_count": 4
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 82288.41428571429,
-              "distance_pct": -2.059845605760514,
-              "touch_count": 3,
-              "anchor_start_index": 113,
-              "anchor_end_index": 148,
-              "anchor_start_time": "2026-10-13T08:00:00+00:00",
-              "anchor_end_time": "2026-10-19T04:00:00+00:00",
-              "anchor_start_wick": 84151.5,
-              "anchor_end_wick": 83163.5,
-              "slope_per_bar": -28.228571428571428,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 158,
-                "break_time": "2026-10-20T20:00:00+00:00",
-                "line_price": 82881.21428571429,
-                "close": 83024.7,
-                "direction": "long",
-                "anchor_start_index": 113,
-                "anchor_end_index": 148,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 81767.91647058823,
-              "distance_pct": -1.4364025907529463,
-              "touch_count": 3,
-              "anchor_start_index": 63,
-              "anchor_end_index": 148,
-              "anchor_start_time": "2026-10-05T00:00:00+00:00",
-              "anchor_end_time": "2026-10-19T04:00:00+00:00",
-              "anchor_start_wick": 86990.1,
-              "anchor_end_wick": 83163.5,
-              "slope_per_bar": -45.01882352941183,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 158,
-                "break_time": "2026-10-20T20:00:00+00:00",
-                "line_price": 82713.31176470588,
-                "close": 83024.7,
-                "direction": "long",
-                "anchor_start_index": 63,
-                "anchor_end_index": 148,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "resistance",
-              "line_price": 82535.5752688172,
-              "distance_pct": -2.353137132068899,
-              "touch_count": 3,
-              "anchor_start_index": 63,
-              "anchor_end_index": 156,
-              "anchor_start_time": "2026-10-05T00:00:00+00:00",
-              "anchor_end_time": "2026-10-20T12:00:00+00:00",
-              "anchor_start_wick": 86990.1,
-              "anchor_end_wick": 83418.8,
-              "slope_per_bar": -38.40107526881724,
-              "status": "broken",
-              "break": {
-                "kind": "resistance",
-                "break_index": 161,
-                "break_time": "2026-10-21T08:00:00+00:00",
-                "line_price": 83226.79462365592,
-                "close": 83501.1,
-                "direction": "long",
-                "anchor_start_index": 63,
-                "anchor_end_index": 156,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "support",
-              "line_price": 82563.84444444445,
-              "distance_pct": -2.3865706081193023,
-              "touch_count": 3,
-              "anchor_start_index": 126,
-              "anchor_end_index": 153,
-              "anchor_start_time": "2026-10-15T12:00:00+00:00",
-              "anchor_end_time": "2026-10-20T00:00:00+00:00",
-              "anchor_start_wick": 79783.7,
-              "anchor_end_wick": 81200.0,
-              "slope_per_bar": 52.45555555555566,
-              "status": "broken",
-              "break": {
-                "kind": "support",
-                "break_index": 167,
-                "break_time": "2026-10-22T08:00:00+00:00",
-                "line_price": 81934.37777777777,
-                "close": 81752.0,
-                "direction": "short",
-                "anchor_start_index": 126,
-                "anchor_end_index": 153,
-                "touch_count": 3
-              }
-            },
-            {
-              "kind": "support",
-              "line_price": 80968.3,
-              "distance_pct": -0.46302071304449854,
-              "touch_count": 4,
-              "anchor_start_index": 133,
-              "anchor_end_index": 169,
-              "anchor_start_time": "2026-10-16T16:00:00+00:00",
-              "anchor_end_time": "2026-10-22T16:00:00+00:00",
-              "anchor_start_wick": 80807.3,
-              "anchor_end_wick": 80933.3,
-              "slope_per_bar": 3.5,
-              "status": "broken",
-              "break": {
-                "kind": "support",
-                "break_index": 178,
-                "break_time": "2026-10-24T04:00:00+00:00",
-                "line_price": 80964.8,
-                "close": 80725.7,
-                "direction": "short",
-                "anchor_start_index": 133,
-                "anchor_end_index": 169,
-                "touch_count": 4
-              }
-            },
-            {
-              "kind": "support",
-              "line_price": 80959.57586206897,
-              "distance_pct": -0.4522946892568143,
-              "touch_count": 3,
-              "anchor_start_index": 140,
-              "anchor_end_index": 169,
-              "anchor_start_time": "2026-10-17T20:00:00+00:00",
-              "anchor_end_time": "2026-10-22T16:00:00+00:00",
-              "anchor_start_wick": 80857.1,
-              "anchor_end_wick": 80933.3,
-              "slope_per_bar": 2.6275862068964515,
-              "status": "broken",
-              "break": {
-                "kind": "support",
-                "break_index": 178,
-                "break_time": "2026-10-24T04:00:00+00:00",
-                "line_price": 80956.94827586207,
-                "close": 80725.7,
-                "direction": "short",
-                "anchor_start_index": 140,
-                "anchor_end_index": 169,
-                "touch_count": 3
-              }
-            }
-          ],
-          "latest_support": {
-            "kind": "support",
-            "line_price": 80412.40769230768,
-            "distance_pct": 0.22508007518549775,
-            "touch_count": 3,
-            "anchor_start_index": 133,
-            "anchor_end_index": 146,
-            "anchor_start_time": "2026-10-16T16:00:00+00:00",
-            "anchor_end_time": "2026-10-18T20:00:00+00:00",
-            "anchor_start_wick": 80807.3,
-            "anchor_end_wick": 80695.7,
-            "slope_per_bar": -8.584615384615832,
-            "status": "active"
-          },
-          "latest_resistance": null,
-          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
-        },
-        "model_review": {
-          "status": "ok",
-          "provider": "huggingface",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "mixed",
-            "priority_candidate": "short",
-            "confidence": "medium",
-            "supporting_evidence": [
-              "The short structural trade plan is explicitly marked eligible in candidate_universe with zero blockers.",
-              "Reward-to-risk ratio for the short setup is 1.7643, clearing the >=1.5R hard gate.",
-              "Daily bias is bearish, EMAs are aligned downward, and MACD bearish expansion is active.",
-              "Exhaustion context indicates a possible bearish turn with RSI fading at 34.76 and price closing below the previous candle low."
-            ],
-            "counter_evidence": [
-              "Active support line detected near 80,412.41, sitting only ~0.22% away from current price, presenting a near-term downside barrier.",
-              "Stochastic RSI values are extremely low (k=0, d=0.0385), indicating near-term oversold conditions that could spark a mean-reversion bounce."
-            ],
-            "missing_evidence": [
-              "Lack of a higher-timeframe volume profile confirmation to validate breakdown continuation past immediate support.",
-              "Absence of calibrated historical probability metrics for the specific short geometry."
-            ],
-            "rationale": "The candidate universe identifies an eligible short trade plan with a favorable reward-to-risk ratio (1.7643) that clears the 1.5R threshold without blockers. Daily bearish bias, EMA alignment, and expanding MACD histogram support the downside continuation stance. However, caution is warranted due to nearby active support at 80,412.41 and oversold Stochastic RSI levels. This review treats the configuration strictly as a deterministic research candidate rather than an execution instruction."
-          },
-          "latency_ms": 1802,
-          "error": null
-        },
-        "momentum_reversal": {
-          "strategy": "stoch-rsi-structural-reversal-v1",
-          "pair": "XBTUSDT",
-          "state": "NO_SETUP",
-          "direction": null,
-          "signal_time": null,
-          "entry": null,
-          "stop": null,
-          "target": null,
-          "reward_risk": null,
-          "eligible": false,
-          "blockers": [
-            "no_fresh_extreme_zone_stoch_rsi_cross"
-          ],
-          "research_only": true,
-          "stoch_rsi_k": 0.0,
-          "stoch_rsi_d": 0.0385
-        },
-        "multitimeframe_scan": {
-          "pair": "XBTUSDT",
-          "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:42:19.504711+00:00",
-          "state": "WATCH_MAJOR_MOVE",
-          "thesis_direction": "bearish",
-          "daily_thesis": {
-            "timeframe": "1D",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-            "close": 81172.2,
-            "ema5": 82001.55453132353,
-            "ema13": 82368.89757213452,
-            "ema8": 82163.00982732477,
-            "ema21": 82483.37769168534,
-            "ema_5_13_spread_pct": -0.446,
-            "ema_8_21_spread_pct": -0.3884,
-            "stoch_k": 33.333333,
-            "stoch_d": 51.996373,
-            "stoch_cross_up": false,
-            "stoch_cross_down": true,
-            "macd": -53.53356,
-            "macd_signal": 195.440104,
-            "macd_hist": -248.973664,
-            "macd_hist_change": "deteriorating",
-            "volume": 173.35664496,
-            "volume_vs_20_candle_average": 1.308637,
-            "nearby_trendlines": [],
-            "confirmed_breaks": []
-          },
-          "four_hour_execution": {
-            "timeframe": "4H",
-            "state": "bearish",
-            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
-            "close": 80593.4,
-            "ema5": 80925.99214891312,
-            "ema13": 81429.05837195477,
-            "ema8": 81141.16633054888,
-            "ema21": 81705.3777939971,
-            "ema_5_13_spread_pct": -0.6178,
-            "ema_8_21_spread_pct": -0.6905,
-            "stoch_k": 0.0,
-            "stoch_d": 0.038455,
-            "stoch_cross_up": false,
-            "stoch_cross_down": false,
-            "macd": -427.261955,
-            "macd_signal": -248.439499,
-            "macd_hist": -178.822457,
-            "macd_hist_change": "deteriorating",
-            "volume": 6.88712673,
-            "volume_vs_20_candle_average": 0.217891,
-            "nearby_trendlines": [
-              {
-                "kind": "support",
-                "price": 82378.472414,
-                "distance_pct": -2.167,
-                "touches": 3,
-                "start_time": "2026-07-19T20:00:00+00:00",
-                "end_time": "2026-07-24T16:00:00+00:00",
-                "start_price": 80857.1,
-                "end_price": 80933.3,
-                "slope_per_candle": 2.6275862068964515
-              },
-              {
-                "kind": "support",
-                "price": 82858.3,
-                "distance_pct": -2.733,
-                "touches": 4,
-                "start_time": "2026-07-18T16:00:00+00:00",
-                "end_time": "2026-07-24T16:00:00+00:00",
-                "start_price": 80807.3,
-                "end_price": 80933.3,
-                "slope_per_candle": 3.5
-              },
-              {
-                "kind": "support",
-                "price": 75776.715385,
-                "distance_pct": 6.356,
-                "touches": 3,
-                "start_time": "2026-07-18T16:00:00+00:00",
-                "end_time": "2026-07-20T20:00:00+00:00",
-                "start_price": 80807.3,
-                "end_price": 80695.7,
-                "slope_per_candle": -8.584615384615832
-              },
-              {
-                "kind": "resistance",
-                "price": 73825.54186,
-                "distance_pct": 9.167,
-                "touches": 3,
-                "start_time": "2026-07-15T08:00:00+00:00",
-                "end_time": "2026-07-22T12:00:00+00:00",
-                "start_price": 84151.5,
-                "end_price": 83418.8,
-                "slope_per_candle": -17.03953488372086
-              },
-              {
-                "kind": "resistance",
-                "price": 73639.661538,
-                "distance_pct": 9.443,
-                "touches": 3,
-                "start_time": "2026-07-14T04:00:00+00:00",
-                "end_time": "2026-07-16T08:00:00+00:00",
-                "start_price": 84348.3,
-                "end_price": 84121.2,
-                "slope_per_candle": -17.469230769231217
-              },
-              {
-                "kind": "resistance",
-                "price": 72952.63,
-                "distance_pct": 10.474,
-                "touches": 4,
-                "start_time": "2026-07-14T04:00:00+00:00",
-                "end_time": "2026-07-22T12:00:00+00:00",
-                "start_price": 84348.3,
-                "end_price": 83418.8,
-                "slope_per_candle": -18.59
-              },
-              {
-                "kind": "resistance",
-                "price": 67055.861905,
-                "distance_pct": 20.188,
-                "touches": 4,
-                "start_time": "2026-07-14T04:00:00+00:00",
-                "end_time": "2026-07-21T04:00:00+00:00",
-                "start_price": 84348.3,
-                "end_price": 83163.5,
-                "slope_per_candle": -28.20952380952388
-              },
-              {
-                "kind": "resistance",
-                "price": 67044.985714,
-                "distance_pct": 20.208,
-                "touches": 3,
-                "start_time": "2026-07-15T08:00:00+00:00",
-                "end_time": "2026-07-21T04:00:00+00:00",
-                "start_price": 84151.5,
-                "end_price": 83163.5,
-                "slope_per_candle": -28.228571428571428
-              }
-            ],
             "confirmed_breaks": []
           },
           "daily_directional_breaks": [],
@@ -5624,23 +3889,23 @@
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "medium",
             "supporting_evidence": [
-              "Structural long trade plan is marked eligible with no blockers present in candidate_universe.",
-              "Reward-to-risk ratio of 1.7686 exceeds the mandatory >= 1.5R minimum gate.",
-              "Price is testing the 0.618 Fibonacci retracement area (735.9485), aligning with structural retest zones.",
-              "MACD histogram shows previous expansion context and the setup has historical impulse points defined by swing low 727.64 and swing high 749.39."
+              "structural_trade_plans.long meets deterministic eligibility with reward-risk ratio 1.7686 exceeding the 1.5 minimum threshold",
+              "Active resistance structure and impulse range from confirmed swing low 727.64 to swing high 749.39 provide concrete geometrical boundaries",
+              "MACD histogram and expansion indicators are present in the dataset context"
             ],
             "counter_evidence": [
-              "Daily bias is currently bearish, creating counter-trend friction for a long setup.",
-              "Exhaustion context indicates 'possible_bearish_turn' with bearish evidence including rsi_fading and closed_below_previous_candle_low.",
-              "MACD histogram has turned bearishly expanding (-1.0114 vs previous -0.4516) at the latest snapshot."
+              "Daily bias is explicitly bearish across multiple technical records",
+              "Exhaustion context indicates a possible bearish turn with RSI fading and price closing below previous candle low",
+              "Rule decision execution state indicates no trade with incomplete reaction or confluence checks"
             ],
             "missing_evidence": [
-              "Lack of a confirmed rejection or reclaim candle at the Fibonacci entry levels to confirm structural support holding.",
-              "Stochastic RSI lacks a fresh extreme zone bullish cross (stoch_rsi_k at 25.05, d at 34.19 without an active bullish cross)."
+              "Confirmed bounce reaction at specific retracement support levels",
+              "Calibrated historical probabilities for the fib retracement bounce rankings",
+              "Fresh extreme zone Stoch-RSI cross for momentum reversal validation"
             ],
-            "rationale": "Although the structural long plan clears all deterministic candidate universe gates (including an acceptable 1.768R and zero blockers), the broader context exhibits bearish daily bias, declining MACD histogram expansion, and fading RSI momentum. The long candidate is eligible to be highlighted for research priority given its mathematical and structural compliance, but the setup requires strict caution due to conflicting momentum exhaustion indicators."
+            "rationale": "The structural long trade plan is formally eligible within the deterministic candidate universe and satisfies the minimum 1.5 R:R constraint. However, the broader context exhibits mixed signals, including a bearish daily bias, exhaustion indicators pointing toward a potential bearish turn, and unconfirmed bounce reactions at retracement levels. As a cautious research review, the candidate remains conditionally tracked but carries conflicting momentum and trend headwinds."
           },
-          "latency_ms": 3340,
+          "latency_ms": 3683,
           "error": null
         },
         "momentum_reversal": {
@@ -5664,7 +3929,7 @@
         "multitimeframe_scan": {
           "pair": "BNBUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-24T13:39:40.518645+00:00",
+          "generated_at_utc": "2026-10-24T13:47:04.189886+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -5819,9 +4084,1334 @@
           ]
         }
       }
+    },
+    {
+      "record_key": "3bfd814305c802dcdad0c8237b3fb0b3d9671d6c6366b110e1741777448b6ff3",
+      "record_type": "decision_snapshot",
+      "pair": "AVAXUSDT",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-24T08:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "short",
+          "signal_time": "2026-10-24T04:00:00+00:00",
+          "line_kind": "support",
+          "line_price_at_break": 9.0019,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": true,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": true,
+            "macd_histogram": -0.0204,
+            "macd_histogram_previous": -0.0195
+          },
+          "age_hours": 4.0,
+          "outcome": "pending",
+          "state": "ENTRY_PROBE_WAITING_RETEST",
+          "retest_deadline": "2026-10-27T04:00:00+00:00",
+          "message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-24T08:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 709,
+            "price": 9.058,
+            "pivot_time": "2026-10-22T16:00:00+00:00",
+            "confirmed_at": "2026-10-23T04:00:00+00:00",
+            "confirmation_index": 712
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 712,
+            "price": 9.349,
+            "pivot_time": "2026-10-23T04:00:00+00:00",
+            "confirmed_at": "2026-10-23T16:00:00+00:00",
+            "confirmation_index": 715
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 9.058,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 9.237838,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 9.2035,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 9.169162,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 0.29100000000000037,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 9.237838,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 9.237838,
+                "confluence_score": 3.0,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 6 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 2.212
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 8.803774500000001,
+              "risk_pct": 1.35826890756302,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 9.237838,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 9.2736,
+                  "touches": 5,
+                  "kind": "both",
+                  "low": 9.253,
+                  "high": 9.291
+                },
+                "liquidity_reference": 8.865,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.14142857142857146,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 9.2035,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 9.2035,
+                "confluence_score": 3.0,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 7 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.969
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 8.803774500000001,
+              "risk_pct": 1.35826890756302,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 9.2035,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 9.17057142857143,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 9.145,
+                  "high": 9.194
+                },
+                "liquidity_reference": 8.865,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.14142857142857146,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 9.169162,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 9.169162,
+                "confluence_score": 3.0,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 7 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.726
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 8.803774500000001,
+              "risk_pct": 1.35826890756302,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 9.169162,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 9.17057142857143,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 9.145,
+                  "high": 9.194
+                },
+                "liquidity_reference": 8.865,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.14142857142857146,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 9.2035,
+              "confluence_score": 3.0,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 7 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.969
+            },
+            {
+              "fib": 0.382,
+              "price": 9.237838,
+              "confluence_score": 3.0,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 6 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 2.212
+            },
+            {
+              "fib": 0.618,
+              "price": 9.169162,
+              "confluence_score": 3.0,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 7 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.726
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "NO_TRADE",
+          "close": 8.925,
+          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "state": "possible_bearish_turn",
+          "long_reversal_score": 1,
+          "short_reversal_score": 2,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 0.17168079856411675,
+          "rsi14": 30.927159539374472,
+          "ema8": 9.05835371187618,
+          "ema21": 9.25101468400371,
+          "evidence": {
+            "bullish": [
+              "lower_wick_rejection"
+            ],
+            "bearish": [
+              "rsi_fading",
+              "closed_below_previous_candle_low"
+            ]
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 9.0584,
+          "ema21_4h": 9.251,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 5.2937,
+          "stoch_rsi_d": 8.5871,
+          "atr14": 0.1717
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [
+            {
+              "kind": "support",
+              "line_price": 8.995696969696969,
+              "distance_pct": -0.7858976345592646,
+              "touch_count": 3,
+              "anchor_start_index": 4,
+              "anchor_end_index": 169,
+              "anchor_start_time": "2026-09-25T04:00:00+00:00",
+              "anchor_end_time": "2026-10-22T16:00:00+00:00",
+              "anchor_start_wick": 10.086,
+              "anchor_end_wick": 9.058,
+              "slope_per_bar": -0.006230303030303033,
+              "status": "broken",
+              "break": {
+                "kind": "support",
+                "break_index": 178,
+                "break_time": "2026-10-24T04:00:00+00:00",
+                "line_price": 9.001927272727272,
+                "close": 8.96,
+                "direction": "short",
+                "anchor_start_index": 4,
+                "anchor_end_index": 169,
+                "touch_count": 3
+              }
+            }
+          ],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "ok",
+          "provider": "huggingface",
+          "model_id": "gemini-3.5-flash-lite",
+          "response": {
+            "assessment": "caution",
+            "priority_candidate": "structural_trade_plans.short",
+            "confidence": "medium",
+            "supporting_evidence": [
+              "The short candidate under structural_trade_plans is explicitly marked eligible with zero blockers.",
+              "Reward-to-risk ratio for the short trade plan is 2.428, satisfying the minimum 1.5R requirement.",
+              "Daily bias is bearish with MACD bearish expansion present."
+            ],
+            "counter_evidence": [
+              "RSI14 is at 30.92, indicating approaching oversold conditions which could increase bounce or false-break risk.",
+              "Stochastic RSI K and D are very low (5.29 and 8.58), signalling potential exhaustion of downward momentum."
+            ],
+            "missing_evidence": [
+              "Confirmed retest of the broken support line prior to entry execution.",
+              "Higher timeframe volume confirmation supporting the breakdown."
+            ],
+            "rationale": "The short candidate is deterministically eligible and satisfies all structural hard gates including the minimum reward-to-risk ratio. However, low RSI and stochastic levels indicate potential exhaustion risks near current prices, necessitating a cautious stance and strict adherence to retest rules."
+          },
+          "latency_ms": 4392,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "AVAXUSDT",
+          "state": "NO_SETUP",
+          "direction": null,
+          "signal_time": null,
+          "entry": null,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "no_fresh_extreme_zone_stoch_rsi_cross"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 5.2937,
+          "stoch_rsi_d": 8.5871
+        },
+        "multitimeframe_scan": {
+          "pair": "AVAXUSDT",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-24T13:46:48.435943+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 9.062,
+            "ema5": 9.380132951470383,
+            "ema13": 9.764103070899695,
+            "ema8": 9.551666299122651,
+            "ema21": 9.909989275861198,
+            "ema_5_13_spread_pct": -3.9325,
+            "ema_8_21_spread_pct": -3.6158,
+            "stoch_k": 1.367495,
+            "stoch_d": 3.719491,
+            "stoch_cross_up": false,
+            "stoch_cross_down": true,
+            "macd": -0.177876,
+            "macd_signal": 0.018946,
+            "macd_hist": -0.196822,
+            "macd_hist_change": "deteriorating",
+            "volume": 22298.7200705,
+            "volume_vs_20_candle_average": 0.86031,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
+            "close": 8.925,
+            "ema5": 9.006511451192726,
+            "ema13": 9.14015821255873,
+            "ema8": 9.05835371187618,
+            "ema21": 9.25101468400371,
+            "ema_5_13_spread_pct": -1.4622,
+            "ema_8_21_spread_pct": -2.0826,
+            "stoch_k": 5.293656,
+            "stoch_d": 8.587119,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -0.185558,
+            "macd_signal": -0.164828,
+            "macd_hist": -0.02073,
+            "macd_hist_change": "deteriorating",
+            "volume": 3515.59812302,
+            "volume_vs_20_candle_average": 1.238926,
+            "nearby_trendlines": [
+              {
+                "kind": "support",
+                "price": 5.631333,
+                "distance_pct": 58.488,
+                "touches": 3,
+                "start_time": "2026-06-27T04:00:00+00:00",
+                "end_time": "2026-07-24T16:00:00+00:00",
+                "start_price": 10.086,
+                "end_price": 9.058,
+                "slope_per_candle": -0.006230303030303033
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "a4359b4a6c7af187120eae7030b6edb26177d92b47bbd9e8cabe0fde253e24a2",
+      "record_type": "decision_snapshot",
+      "pair": "ADAUSDT",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-24T08:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "short",
+          "signal_time": "2026-10-18T16:00:00+00:00",
+          "line_kind": "support",
+          "line_price_at_break": 0.2137,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": true,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": true,
+            "macd_histogram": -0.0005,
+            "macd_histogram_previous": -0.0002
+          },
+          "age_hours": 136.0,
+          "outcome": "failed_break",
+          "state": "INVALIDATED",
+          "message": "The breakout failed its close-based invalidation rule."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-24T08:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 709,
+            "price": 0.20975,
+            "pivot_time": "2026-10-22T16:00:00+00:00",
+            "confirmed_at": "2026-10-23T04:00:00+00:00",
+            "confirmation_index": 712
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 714,
+            "price": 0.21945,
+            "pivot_time": "2026-10-23T12:00:00+00:00",
+            "confirmed_at": "2026-10-24T00:00:00+00:00",
+            "confirmation_index": 717
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 0.20975,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 0.2157446,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 0.2146,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 0.2134554,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 0.009700000000000014,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 0.2157446,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 0.2157446,
+                "confluence_score": 4.0,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 8 prior touches",
+                  "overlaps prior confirmed-style swing structure"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.83
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 0.205886706,
+              "risk_pct": 1.0583423439009239,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.2157446,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.21594000000000002,
+                  "touches": 3,
+                  "kind": "support",
+                  "low": 0.215498,
+                  "high": 0.216229
+                },
+                "liquidity_reference": 0.206297,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.004183285714285717,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 0.2146,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 0.2146,
+                "confluence_score": 4.0,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 8 prior touches",
+                  "overlaps prior confirmed-style swing structure"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.556
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 0.205886706,
+              "risk_pct": 1.0583423439009239,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.2146,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.21475442857142854,
+                  "touches": 7,
+                  "kind": "both",
+                  "low": 0.21433,
+                  "high": 0.215103
+                },
+                "liquidity_reference": 0.206297,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.004183285714285717,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 0.2134554,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 0.2134554,
+                "confluence_score": 3.5,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 7 prior touches",
+                  "within 1.5 ATR"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.283
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 0.205886706,
+              "risk_pct": 1.0583423439009239,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 0.2134554,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 0.21239966666666665,
+                  "touches": 6,
+                  "kind": "both",
+                  "low": 0.211885,
+                  "high": 0.212838
+                },
+                "liquidity_reference": 0.206297,
+                "liquidity_sweep_and_reclaim": true,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.004183285714285717,
+                "confluence_score": 4,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 0.2146,
+              "confluence_score": 4.0,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 8 prior touches",
+                "overlaps prior confirmed-style swing structure"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.556
+            },
+            {
+              "fib": 0.382,
+              "price": 0.2157446,
+              "confluence_score": 4.0,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 8 prior touches",
+                "overlaps prior confirmed-style swing structure"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.83
+            },
+            {
+              "fib": 0.618,
+              "price": 0.2134554,
+              "confluence_score": 3.5,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 7 prior touches",
+                "within 1.5 ATR"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.283
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "NO_TRADE",
+          "close": 0.208089,
+          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "state": "mixed_early_reversal_evidence",
+          "long_reversal_score": 1,
+          "short_reversal_score": 1,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 0.004232205930881583,
+          "rsi14": 32.37632168766105,
+          "ema8": 0.21176191681189044,
+          "ema21": 0.21545086201448327,
+          "evidence": {
+            "bullish": [
+              "lower_wick_rejection"
+            ],
+            "bearish": [
+              "closed_below_previous_candle_low"
+            ]
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 0.2118,
+          "ema21_4h": 0.2155,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 4.6084,
+          "stoch_rsi_d": 6.4122,
+          "atr14": 0.0042
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "ok",
+          "provider": "huggingface",
+          "model_id": "gemini-3.5-flash-lite",
+          "response": {
+            "assessment": "mixed",
+            "priority_candidate": "structural_trade_plans.short",
+            "confidence": "medium",
+            "supporting_evidence": [
+              "structural_trade_plans.short meets the minimum reward-to-risk threshold with an RR of 1.5244",
+              "Daily bias is bearish and EMAs are aligned downwards (ema8_4h at 0.2118 vs ema21_4h at 0.2155)",
+              "MACD histogram shows bearish expansion"
+            ],
+            "counter_evidence": [
+              "Stoch RSI K and D values are deeply oversold at 4.6084 and 6.4122, increasing false-break and bounce risks",
+              "RSI14 is at 32.37, approaching oversold territory where continuation downside momentum can wane",
+              "Bullish exhaustion context notes lower wick rejection"
+            ],
+            "missing_evidence": [
+              "Fresh extreme zone Stoch RSI crossover confirming momentum reversal for short entry",
+              "Cleaner confirmation of sustained selling pressure below structural support"
+            ],
+            "rationale": "The candidate structural_trade_plans.short is explicitly marked eligible in the candidate universe, passes the required >=1.5R gate with 1.5244 RR, and aligns with the prevailing daily bearish bias and MACD expansion. However, conflicting oversold Stoch RSI readings and lower-wick rejection signs introduce notable false-break and exhaustion risks, rendering the overall setup mixed and demanding caution."
+          },
+          "latency_ms": 5732,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "ADAUSDT",
+          "state": "NO_SETUP",
+          "direction": null,
+          "signal_time": null,
+          "entry": null,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "no_fresh_extreme_zone_stoch_rsi_cross"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 4.6084,
+          "stoch_rsi_d": 6.4122
+        },
+        "multitimeframe_scan": {
+          "pair": "ADAUSDT",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-24T13:46:32.274518+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 0.210499,
+            "ema5": 0.21691547393476482,
+            "ema13": 0.22498039685210658,
+            "ema8": 0.22028380575141907,
+            "ema21": 0.2291811583206856,
+            "ema_5_13_spread_pct": -3.5847,
+            "ema_8_21_spread_pct": -3.8822,
+            "stoch_k": 10.224027,
+            "stoch_d": 14.899049,
+            "stoch_cross_up": false,
+            "stoch_cross_down": true,
+            "macd": -0.005968,
+            "macd_signal": -0.002561,
+            "macd_hist": -0.003407,
+            "macd_hist_change": "deteriorating",
+            "volume": 2129793.26119953,
+            "volume_vs_20_candle_average": 0.639444,
+            "nearby_trendlines": [
+              {
+                "kind": "support",
+                "price": 0.567373,
+                "distance_pct": -62.899,
+                "touches": 3,
+                "start_time": "2025-02-24T00:00:00+00:00",
+                "end_time": "2025-04-26T00:00:00+00:00",
+                "start_price": 0.171337,
+                "end_price": 0.211202,
+                "slope_per_candle": 0.0006535245901639346
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
+            "close": 0.208089,
+            "ema5": 0.21038435254859522,
+            "ema13": 0.21351702593135627,
+            "ema8": 0.21176191681189044,
+            "ema21": 0.21545086201448327,
+            "ema_5_13_spread_pct": -1.4672,
+            "ema_8_21_spread_pct": -1.7122,
+            "stoch_k": 4.608413,
+            "stoch_d": 6.412178,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -0.003198,
+            "macd_signal": -0.002397,
+            "macd_hist": -0.000801,
+            "macd_hist_change": "deteriorating",
+            "volume": 215323.50204585,
+            "volume_vs_20_candle_average": 0.645447,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
+    },
+    {
+      "record_key": "ecdc788d57323c92cee37840e7a75c011e7a1beb6999c9ef7d0f8837e478cba2",
+      "record_type": "decision_snapshot",
+      "pair": "XRPUSDT",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "signal_time": "2026-10-24T08:00:00+00:00",
+      "payload": {
+        "latest_setup_state": {
+          "direction": "short",
+          "signal_time": "2026-10-18T16:00:00+00:00",
+          "line_kind": "support",
+          "line_price_at_break": 1.266,
+          "touch_count": 3,
+          "daily_bias": "bearish",
+          "ema_aligned": true,
+          "momentum_context": {
+            "stoch_bullish_cross": false,
+            "stoch_bearish_cross": false,
+            "macd_bullish_expansion": false,
+            "macd_bearish_expansion": true,
+            "macd_histogram": -0.002,
+            "macd_histogram_previous": -0.0006
+          },
+          "age_hours": 136.0,
+          "outcome": "failed_break",
+          "state": "INVALIDATED",
+          "message": "The breakout failed its close-based invalidation rule."
+        },
+        "friday_decision": {
+          "decision_time": "2026-10-24T08:00:00+00:00",
+          "direction": "long",
+          "impulse_origin": {
+            "kind": "low",
+            "index": 710,
+            "price": 1.29567,
+            "pivot_time": "2026-10-22T20:00:00+00:00",
+            "confirmed_at": "2026-10-23T08:00:00+00:00",
+            "confirmation_index": 713
+          },
+          "impulse_extreme": {
+            "kind": "high",
+            "index": 712,
+            "price": 1.33058,
+            "pivot_time": "2026-10-23T04:00:00+00:00",
+            "confirmed_at": "2026-10-23T16:00:00+00:00",
+            "confirmation_index": 715
+          },
+          "fib_entry_plan": {
+            "direction": "long",
+            "entry_1": {
+              "fib": 0.0,
+              "price": 1.29567,
+              "role": "early_probe_area"
+            },
+            "entry_2_candidates": [
+              {
+                "fib": 0.382,
+                "price": 1.31724438,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.5,
+                "price": 1.313125,
+                "role": "retest_add_candidate"
+              },
+              {
+                "fib": 0.618,
+                "price": 1.3090056200000002,
+                "role": "retest_add_candidate"
+              }
+            ],
+            "impulse_range": 0.03491,
+            "status": "retest_levels_ready"
+          },
+          "retracement_levels": [
+            {
+              "fib": 0.382,
+              "price": 1.31724438,
+              "bounce_ranking": {
+                "fib": 0.382,
+                "price": 1.31724438,
+                "confluence_score": 3.0,
+                "rank": 2,
+                "heuristic_reasons": [
+                  "overlaps support zone with 14 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 2.156
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 1.2716896000000002,
+              "risk_pct": 0.8104330462997559,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 1.31724438,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 1.314761,
+                  "touches": 10,
+                  "kind": "both",
+                  "low": 1.31084,
+                  "high": 1.31773
+                },
+                "liquidity_reference": 1.28247,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.016313571428571403,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.5,
+              "price": 1.313125,
+              "bounce_ranking": {
+                "fib": 0.5,
+                "price": 1.313125,
+                "confluence_score": 3.0,
+                "rank": 1,
+                "heuristic_reasons": [
+                  "overlaps support zone with 14 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.903
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 1.2716896000000002,
+              "risk_pct": 0.8104330462997559,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 1.313125,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 1.314761,
+                  "touches": 10,
+                  "kind": "both",
+                  "low": 1.31084,
+                  "high": 1.31773
+                },
+                "liquidity_reference": 1.28247,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.016313571428571403,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            },
+            {
+              "fib": 0.618,
+              "price": 1.3090056200000002,
+              "bounce_ranking": {
+                "fib": 0.618,
+                "price": 1.3090056200000002,
+                "confluence_score": 3.0,
+                "rank": 3,
+                "heuristic_reasons": [
+                  "overlaps support zone with 14 prior touches"
+                ],
+                "historical_probability": null,
+                "probability_status": "uncalibrated_requires_walk_forward_replay",
+                "warning": "Ranking is not a statistically calibrated probability.",
+                "distance_atr": 1.651
+              },
+              "touched": false,
+              "reaction": false,
+              "invalidation": 1.2716896000000002,
+              "risk_pct": 0.8104330462997559,
+              "risk_ok": true,
+              "evidence": {
+                "fib_zero": 1.3090056200000002,
+                "fib_area_touched": false,
+                "near_support_resistance": true,
+                "nearest_level": {
+                  "price": 1.3067025,
+                  "touches": 4,
+                  "kind": "both",
+                  "low": 1.30571,
+                  "high": 1.30783
+                },
+                "liquidity_reference": 1.28247,
+                "liquidity_sweep_and_reclaim": false,
+                "rejection_or_reclaim_candle": false,
+                "atr": 0.016313571428571403,
+                "confluence_score": 2,
+                "entry1_candidate": false,
+                "status": "WAIT_FOR_CONFLUENCE"
+              },
+              "eligible": false
+            }
+          ],
+          "bounce_level_ranking": [
+            {
+              "fib": 0.5,
+              "price": 1.313125,
+              "confluence_score": 3.0,
+              "rank": 1,
+              "heuristic_reasons": [
+                "overlaps support zone with 14 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.903
+            },
+            {
+              "fib": 0.382,
+              "price": 1.31724438,
+              "confluence_score": 3.0,
+              "rank": 2,
+              "heuristic_reasons": [
+                "overlaps support zone with 14 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 2.156
+            },
+            {
+              "fib": 0.618,
+              "price": 1.3090056200000002,
+              "confluence_score": 3.0,
+              "rank": 3,
+              "heuristic_reasons": [
+                "overlaps support zone with 14 prior touches"
+              ],
+              "historical_probability": null,
+              "probability_status": "uncalibrated_requires_walk_forward_replay",
+              "warning": "Ranking is not a statistically calibrated probability.",
+              "distance_atr": 1.651
+            }
+          ],
+          "execution": "no trade; no order submitted",
+          "state": "NO_TRADE",
+          "close": 1.28208,
+          "reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib."
+        },
+        "reversal_context": {
+          "status": "ok",
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "state": "possible_bearish_turn",
+          "long_reversal_score": 1,
+          "short_reversal_score": 2,
+          "score_note": "Evidence count only; not a probability and not an entry gate.",
+          "atr14": 0.018229703702825527,
+          "rsi14": 35.24397926722867,
+          "ema8": 1.2979757987991645,
+          "ema21": 1.3123715949596266,
+          "evidence": {
+            "bullish": [
+              "lower_wick_rejection"
+            ],
+            "bearish": [
+              "rsi_fading",
+              "closed_below_previous_candle_low"
+            ]
+          },
+          "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+        },
+        "current_indicators": {
+          "ema8_4h": 1.298,
+          "ema21_4h": 1.3124,
+          "daily_bias": "bearish",
+          "stoch_rsi_k": 0.0,
+          "stoch_rsi_d": 0.0,
+          "atr14": 0.0182
+        },
+        "structure_lifecycle": {
+          "as_of": "2026-10-24T08:00:00+00:00",
+          "active_lines": [],
+          "broken_lines": [],
+          "latest_support": null,
+          "latest_resistance": null,
+          "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+        },
+        "model_review": {
+          "status": "ok",
+          "provider": "huggingface",
+          "model_id": "gemini-3.5-flash-lite",
+          "response": {
+            "assessment": "supportive",
+            "priority_candidate": "structural_trade_plans.short",
+            "confidence": "medium",
+            "supporting_evidence": [
+              "structural_trade_plans.short is explicitly marked eligible with no blockers",
+              "reward_risk ratio is 2.9892 which successfully satisfies the >= 1.5R minimum gate",
+              "daily bias is bearish and EMAs are aligned downward",
+              "macd_bearish_expansion is present with negative and expanding histogram"
+            ],
+            "counter_evidence": [
+              "exhaustion_context notes lower_wick_rejection as a minor bullish context signal",
+              "rsi14 is at 35.24 which approaches oversold territory, raising potential bounce risks"
+            ],
+            "missing_evidence": [
+              "higher timeframe confirmation of continuation past local swing lows",
+              "volume confirmation on the short expansion leg"
+            ],
+            "rationale": "The short candidate under structural_trade_plans meets all deterministic eligibility criteria, featuring a valid risk-reward profile above the 1.5R minimum threshold and alignment with the broader bearish daily bias and MACD expansion. Other candidates are either blocked or non-eligible."
+          },
+          "latency_ms": 7282,
+          "error": null
+        },
+        "momentum_reversal": {
+          "strategy": "stoch-rsi-structural-reversal-v1",
+          "pair": "XRPUSDT",
+          "state": "NO_SETUP",
+          "direction": null,
+          "signal_time": null,
+          "entry": null,
+          "stop": null,
+          "target": null,
+          "reward_risk": null,
+          "eligible": false,
+          "blockers": [
+            "no_fresh_extreme_zone_stoch_rsi_cross"
+          ],
+          "research_only": true,
+          "stoch_rsi_k": 0.0,
+          "stoch_rsi_d": 0.0
+        },
+        "multitimeframe_scan": {
+          "pair": "XRPUSDT",
+          "strategy": "daily-thesis-4h-execution-v1",
+          "generated_at_utc": "2026-10-24T13:46:15.835796+00:00",
+          "state": "WATCH_MAJOR_MOVE",
+          "thesis_direction": "bearish",
+          "daily_thesis": {
+            "timeframe": "1D",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
+            "close": 1.29515,
+            "ema5": 1.3165448133821516,
+            "ema13": 1.3399938137109348,
+            "ema8": 1.3239914929244354,
+            "ema21": 1.3619791728857658,
+            "ema_5_13_spread_pct": -1.7499,
+            "ema_8_21_spread_pct": -2.7892,
+            "stoch_k": 59.13409,
+            "stoch_d": 63.93866,
+            "stoch_cross_up": false,
+            "stoch_cross_down": true,
+            "macd": -0.033588,
+            "macd_signal": -0.028017,
+            "macd_hist": -0.005572,
+            "macd_hist_change": "deteriorating",
+            "volume": 756771.88308522,
+            "volume_vs_20_candle_average": 0.688877,
+            "nearby_trendlines": [
+              {
+                "kind": "support",
+                "price": 2.72999,
+                "distance_pct": -52.558,
+                "touches": 3,
+                "start_time": "2025-01-02T00:00:00+00:00",
+                "end_time": "2025-01-19T00:00:00+00:00",
+                "start_price": 1.01,
+                "end_price": 1.05437,
+                "slope_per_candle": 0.002610000000000001
+              }
+            ],
+            "confirmed_breaks": []
+          },
+          "four_hour_execution": {
+            "timeframe": "4H",
+            "state": "bearish",
+            "last_closed_candle_utc": "2026-10-24T08:00:00+00:00",
+            "close": 1.28208,
+            "ema5": 1.2912454501414876,
+            "ema13": 1.3059715672541259,
+            "ema8": 1.2979757987991645,
+            "ema21": 1.3123715949596266,
+            "ema_5_13_spread_pct": -1.1276,
+            "ema_8_21_spread_pct": -1.0969,
+            "stoch_k": 0.0,
+            "stoch_d": 0.0,
+            "stoch_cross_up": false,
+            "stoch_cross_down": false,
+            "macd": -0.009885,
+            "macd_signal": -0.004028,
+            "macd_hist": -0.005857,
+            "macd_hist_change": "deteriorating",
+            "volume": 1143616.55088195,
+            "volume_vs_20_candle_average": 4.329235,
+            "nearby_trendlines": [],
+            "confirmed_breaks": []
+          },
+          "daily_directional_breaks": [],
+          "aligned_4h_breaks": [],
+          "entry1_alert_eligible": false,
+          "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+          "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+          "limitations": [
+            "Research signal only; it never executes trades.",
+            "Indicator confluence is evidence, not a calibrated probability.",
+            "Trendlines are algorithmic candidates and need walk-forward validation.",
+            "Daily context uses only the latest completed daily candle.",
+            "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+          ]
+        }
+      }
     }
   ],
   "events": [
+    {
+      "event_key": "a21e952bb768b65ccd238d2cb5a9161dbdf09d2f2a680bccaf108e91cd129fc9",
+      "pair": "AVAXUSDT",
+      "timeframe": "4H",
+      "strategy_version": "friday-price-action-v2",
+      "event_type": "BREAK_CLOSE_PROBE",
+      "direction": "SHORT",
+      "signal_time": "2026-10-24T04:00:00+00:00",
+      "entry_reference": 8.96,
+      "line_kind": "support",
+      "line_price": 9.001927272727272,
+      "outcome": "pending",
+      "retest_confirmed": false,
+      "continuation_add_time": null,
+      "continuation_add_close": null,
+      "failure_time": null,
+      "run_id": "friday-20261024T134511Z-00ca2526",
+      "evidence": {
+        "event": "BREAK_CLOSE_PROBE",
+        "signal_time": "2026-10-24T04:00:00+00:00",
+        "direction": "short",
+        "line_kind": "support",
+        "line_price_at_break": 9.001927272727272,
+        "close_at_break": 8.96,
+        "touch_count": 3,
+        "daily_bias": "bearish",
+        "ema_aligned": true,
+        "stoch_k": 9.2912,
+        "stoch_d": 10.1433,
+        "momentum_context": {
+          "stoch_bullish_cross": false,
+          "stoch_bearish_cross": false,
+          "macd_bullish_expansion": false,
+          "macd_bearish_expansion": true,
+          "macd_histogram": -0.0204,
+          "macd_histogram_previous": -0.0195
+        },
+        "converging_wedge": null,
+        "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+        "retest_deadline": "2026-10-27T04:00:00+00:00",
+        "outcome": "pending",
+        "forward_bars_checked": 1,
+        "anchor_start_time": "2026-09-25T04:00:00+00:00",
+        "anchor_end_time": "2026-10-22T16:00:00+00:00",
+        "forward_3_bar_return_pct": 0.3906,
+        "forward_3_bar_end_time": "2026-10-24T08:00:00+00:00",
+        "forward_6_bar_return_pct": 0.3906,
+        "forward_6_bar_end_time": "2026-10-24T08:00:00+00:00",
+        "forward_12_bar_return_pct": 0.3906,
+        "forward_12_bar_end_time": "2026-10-24T08:00:00+00:00",
+        "forward_18_bar_return_pct": 0.3906,
+        "forward_18_bar_end_time": "2026-10-24T08:00:00+00:00",
+        "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+      }
+    },
     {
       "event_key": "3d65e1778a5da8cf6a1bb249158ec4b949eeeff8a15cd79820ab472ef6a0abe2",
       "pair": "XBTUSDT",
@@ -5838,7 +5428,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261024T134206Z-9bbc3c06",
+      "run_id": "friday-20261024T134511Z-00ca2526",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -5907,7 +5497,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "friday-20261024T134206Z-9bbc3c06",
+      "run_id": "friday-20261024T134511Z-00ca2526",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -5959,64 +5549,286 @@
         "forward_18_bar_end_time": "2026-10-24T08:00:00+00:00",
         "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
       }
-    },
-    {
-      "event_key": "a21e952bb768b65ccd238d2cb5a9161dbdf09d2f2a680bccaf108e91cd129fc9",
-      "pair": "AVAXUSDT",
-      "timeframe": "4H",
-      "strategy_version": "friday-price-action-v2",
-      "event_type": "BREAK_CLOSE_PROBE",
-      "direction": "SHORT",
-      "signal_time": "2026-10-24T04:00:00+00:00",
-      "entry_reference": 8.96,
-      "line_kind": "support",
-      "line_price": 9.001927272727272,
-      "outcome": "pending",
-      "retest_confirmed": false,
-      "continuation_add_time": null,
-      "continuation_add_close": null,
-      "failure_time": null,
-      "run_id": "friday-20261024T133806Z-d8c02c4e",
-      "evidence": {
-        "event": "BREAK_CLOSE_PROBE",
-        "signal_time": "2026-10-24T04:00:00+00:00",
-        "direction": "short",
-        "line_kind": "support",
-        "line_price_at_break": 9.001927272727272,
-        "close_at_break": 8.96,
-        "touch_count": 3,
-        "daily_bias": "bearish",
-        "ema_aligned": true,
-        "stoch_k": 9.2912,
-        "stoch_d": 10.1433,
-        "momentum_context": {
-          "stoch_bullish_cross": false,
-          "stoch_bearish_cross": false,
-          "macd_bullish_expansion": false,
-          "macd_bearish_expansion": true,
-          "macd_histogram": -0.0204,
-          "macd_histogram_previous": -0.0195
-        },
-        "converging_wedge": null,
-        "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
-        "retest_deadline": "2026-10-27T04:00:00+00:00",
-        "outcome": "pending",
-        "forward_bars_checked": 1,
-        "anchor_start_time": "2026-09-25T04:00:00+00:00",
-        "anchor_end_time": "2026-10-22T16:00:00+00:00",
-        "forward_3_bar_return_pct": 0.3906,
-        "forward_3_bar_end_time": "2026-10-24T08:00:00+00:00",
-        "forward_6_bar_return_pct": 0.3906,
-        "forward_6_bar_end_time": "2026-10-24T08:00:00+00:00",
-        "forward_12_bar_return_pct": 0.3906,
-        "forward_12_bar_end_time": "2026-10-24T08:00:00+00:00",
-        "forward_18_bar_return_pct": 0.3906,
-        "forward_18_bar_end_time": "2026-10-24T08:00:00+00:00",
-        "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
-      }
     }
   ],
   "runs": [
+    {
+      "run_id": "friday-20261024T134511Z-00ca2526",
+      "started_at": "2026-10-24T13:45:11.095629+00:00",
+      "finished_at": "2026-10-24T13:48:52.009788+00:00",
+      "status": "scan_complete_ai_unavailable",
+      "pairs_checked": 15,
+      "pair_results": [
+        {
+          "pair": "XBTUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 80593.4,
+          "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "supportive",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 63,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "ENTRY_1",
+              "sent": false,
+              "status": "not_sent_break_no_longer_fresh",
+              "signal_time": "2026-10-24T04:00:00+00:00",
+              "reason": "Break candle 2026-10-24T04:00:00+00:00 is older than the latest completed candle 2026-10-24T08:00:00+00:00; FRIDAY only sends Entry 1 alerts on the break candle, so it will not send a delayed entry. Retest is held and continuation is still pending."
+            }
+          ]
+        },
+        {
+          "pair": "ETHUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 2365.86,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 52,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "SOLUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 101.54,
+          "latest_setup_state": "EXPIRED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 44,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "XRPUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 1.28208,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "supportive",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 51,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "ADAUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 0.208089,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 29,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "AVAXUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 8.925,
+          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 35,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "BNBUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 731.75,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "friday_decision": "WATCHING",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 84,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "VIRTUALUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 0.6312,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 12,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "HYPEUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 75.698,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 6,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "DOGEUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 0.07759,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 33,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "LINKUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 11.59926,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "supportive",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 52,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "ZECUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 1155.97,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "insufficient_evidence",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 4,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "NEARUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 4.499,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_NEUTRAL",
+          "multitimeframe_direction": "neutral",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "SUIUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 0.9481,
+          "latest_setup_state": "INVALIDATED",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 8,
+          "persistence": "configured",
+          "alert_results": []
+        },
+        {
+          "pair": "LITUSDT",
+          "status": "ok",
+          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
+          "last_close": 3.0976,
+          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+          "friday_decision": "NO_TRADE",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": []
+        }
+      ],
+      "trade_events_seen": 3,
+      "live_events_persisted": 3,
+      "historical_replay_events_ignored": 484,
+      "error": null,
+      "persistence_configured": true
+    },
     {
       "run_id": "friday-20261024T134206Z-9bbc3c06",
       "started_at": "2026-10-24T13:42:06.217572+00:00",
@@ -7956,210 +7768,9 @@
       "historical_replay_events_ignored": 286,
       "error": null,
       "persistence_configured": true
-    },
-    {
-      "run_id": "friday-20261024T130110Z-e31e210a",
-      "started_at": "2026-10-24T13:01:10.005842+00:00",
-      "finished_at": "2026-10-24T13:04:10.469613+00:00",
-      "status": "success",
-      "pairs_checked": 11,
-      "pair_results": [
-        {
-          "pair": "XBTUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 80593.4,
-          "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 63,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "ETHUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 2365.86,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 52,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "SOLUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 101.54,
-          "latest_setup_state": "EXPIRED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 44,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "VIRTUALUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 0.6312,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 12,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "HYPEUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 75.698,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 6,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "DOGEUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 0.07759,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 33,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "LINKUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 11.59926,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 52,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "ZECUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 1155.97,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "insufficient_evidence",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 4,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "NEARUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 4.499,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_NEUTRAL",
-          "multitimeframe_direction": "neutral",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "SUIUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 0.9481,
-          "latest_setup_state": "INVALIDATED",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 8,
-          "persistence": "configured",
-          "alert_results": []
-        },
-        {
-          "pair": "LITUSDT",
-          "status": "ok",
-          "last_completed_candle_utc": "2026-10-24T08:00:00+00:00",
-          "last_close": 3.0976,
-          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
-          "friday_decision": "NO_TRADE",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "insufficient_evidence",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": []
-        }
-      ],
-      "trade_events_seen": 2,
-      "live_events_persisted": 2,
-      "historical_replay_events_ignored": 286,
-      "error": null,
-      "persistence_configured": true
     }
   ],
   "alerts": [],
   "paper_trades": [],
-  "fetched_at": "2026-10-24T13:44:37.986467+00:00"
+  "fetched_at": "2026-10-24T13:48:52.083750+00:00"
 }
