@@ -46,6 +46,7 @@ def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = 
         f"Signal candle: {signal_time}",
         f"Reference close: {entry}",
         f"Trendline at break: {line}",
+        *([f"Higher-timeframe thesis: {event['higher_timeframe_thesis'].get('direction', 'unknown').upper()} from daily break at {event['higher_timeframe_thesis'].get('break_time', 'unknown')} (line {event['higher_timeframe_thesis'].get('line_price_at_break', 'unknown')}); lifecycle={event['higher_timeframe_thesis'].get('state', 'unknown')}"] if isinstance(event.get("higher_timeframe_thesis"), dict) else []),
         *([f"Structural stop: {event.get('paper_stop')}", f"Target: {event.get('paper_target')}", f"Reward/risk: {event.get('paper_reward_risk')}R"] if event.get("paper_stop") is not None else []),
         *[f"• {item}" for item in why],
         "Risk-defined paper candidate only; no order submitted.",
