@@ -9,7 +9,7 @@ on:
       - "tests/test_friday_monitor.py"
       - ".github/workflows/friday-monitor.yml"
   schedule:
-    - cron: "17 */4 * * *"
+    - cron: "5 */4 * * *"
   workflow_dispatch:
     inputs:
       pairs:
@@ -58,8 +58,8 @@ jobs:
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
           PAIRS="$(python -c 'import os; from research.friday_monitor import validate_friday_pairs; print(",".join(validate_friday_pairs(os.environ["REQUESTED_PAIRS"].split(","))))')"
           echo "============================================================"
-          echo "[FRIDAY] Scan started | Scan ID=${FRIDAY_SCAN_RUN_ID} | GitHub Actions Run=${GITHUB_RUN_ID} | Markets=${PAIRS}"
-          echo "[FRIDAY] Analysis: completed 1D thesis + 4H execution scan"
+          echo "[FRIDAY] Scan started | Scan ID=${FRIDAY_SCAN_RUN_ID} | GitHub Actions Run=${GITHUB_RUN_ID} | Trigger=${GITHUB_EVENT_NAME} | Markets=${PAIRS}"
+          echo "[FRIDAY] Analysis: completed 1D thesis + 4H execution scan | Scheduled at minute 5 after each 4H boundary"
           echo "============================================================"
 
           # Always print the human-readable run summary, even if the monitor exits non-zero.
@@ -123,10 +123,12 @@ jobs:
               ai_assessment = row.get("ai_review_assessment") or "not available"
               close = row.get("last_close", "n/a")
               candle = row.get("last_completed_candle_utc", "n/a")
+              candle_close = row.get("signal_candle_close_utc", "n/a")
+              signal_age = row.get("signal_age_minutes", "n/a")
               events = row.get("break_event_count", 0)
               alerts = row.get("alert_results") or []
 
-              print(f"[FRIDAY SCAN] {pair} | Close={close} | Candle={candle}")
+              print(f"[FRIDAY SCAN] {pair} | Close={close} | CandleOpen={candle} | CandleClose={candle_close} | SignalAgeMin={signal_age}")
               print(f"  Setup={show(setup)} | Decision={show(decision)}")
               print(f"  1D/4H thesis={show(mtf_state)} ({show(direction, 'no direction')})")
               print(f"  AI review={ai_status} | Assessment={ai_assessment} | Break events={events}")

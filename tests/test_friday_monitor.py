@@ -3,7 +3,7 @@ from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
-from research.friday_monitor import _display_pair, _utc, run_monitor, validate_friday_pairs
+from research.friday_monitor import _display_pair, _signal_timing, _utc, run_monitor, validate_friday_pairs
 from research.friday_persistence import RepoFolderFridayStore
 
 
@@ -18,6 +18,22 @@ class FridayMonitorTests(unittest.TestCase):
 
     def test_utc_normalizes_offset_timestamp(self):
         self.assertEqual(_utc("2026-10-21T13:00:00+01:00").isoformat(), "2026-10-21T12:00:00+00:00")
+
+    def test_signal_timing_measures_age_from_four_hour_candle_close(self):
+        timing = _signal_timing(
+            "2026-10-24T12:00:00+00:00",
+            observed_at="2026-10-24T16:15:00+00:00",
+        )
+        self.assertEqual(timing["signal_candle_open_utc"], "2026-10-24T12:00:00+00:00")
+        self.assertEqual(timing["signal_candle_close_utc"], "2026-10-24T16:00:00+00:00")
+        self.assertEqual(timing["signal_age_minutes"], 15.0)
+
+    def test_signal_timing_does_not_report_negative_age_before_candle_close(self):
+        timing = _signal_timing(
+            "2026-10-24T12:00:00+00:00",
+            observed_at="2026-10-24T15:59:00+00:00",
+        )
+        self.assertEqual(timing["signal_age_seconds"], 0.0)
 
     def test_legacy_usd_inputs_are_canonicalized_to_usdt(self):
         self.assertEqual(
@@ -55,10 +71,14 @@ class FridayMonitorTests(unittest.TestCase):
             "friday_decision": {"state": "NO_TRADE"},
             "event_count": 0,
             "break_events": [],
+            "closed_candles": [{
+                "timestamp": "2026-10-21T12:00:00+00:00",
+                "open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0,
+            }],
         }
         with TemporaryDirectory() as tmp:
             with patch("research.friday_monitor.build_preview", return_value=preview):
-                with patch("research.friday_monitor.analyse_pair", return_value={"state": "WATCH_NEUTRAL", "thesis_direction": "neutral", "generated_at_utc": "2026-10-21T12:00:00Z", "four_hour_execution": {"last_closed_candle_utc": "2026-10-21T12:00:00Z"}}):
+                with patch("research.friday_monitor.analyse_pair", return_value={"state": "WATCH_NEUTRAL", "thesis_direction": "neutral", "generated_at_utc": "2026-10-21T12:00:00Z", "four_hour_execution": {"last_closed_candle_utc": "2026-10-21T12:00:00Z"}}) as analyse_mock:
                     with patch("research.friday_monitor.create_friday_store") as store_factory:
                         store_factory.return_value.configured = False
                         result = run_monitor(["XBTUSD"], tmp)
@@ -70,6 +90,9 @@ class FridayMonitorTests(unittest.TestCase):
             self.assertEqual(result["alert_outcomes_total"], 0)
             self.assertEqual(result["pair_results"][0]["run_id"], result["run_id"])
             self.assertTrue(Path(tmp, "cron_run.json").exists())
+            passed_candles = analyse_mock.call_args.kwargs["four_hour"]
+            self.assertEqual(len(passed_candles), 1)
+            self.assertEqual(float(passed_candles.iloc[0]["close"]), 100.0)
 
     def test_failed_market_writes_a_per_market_summary(self):
         with TemporaryDirectory() as tmp:

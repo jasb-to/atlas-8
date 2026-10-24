@@ -34,6 +34,20 @@ def _utc(value) -> pd.Timestamp:
         return stamp.tz_localize("UTC")
     return stamp.tz_convert("UTC")
 
+def _signal_timing(signal_time, *, observed_at=None, timeframe_minutes: int = 240) -> dict:
+    """Measure signal age from candle close, not candle open; never suppress a signal."""
+    if not signal_time:
+        return {}
+    signal_open = _utc(signal_time)
+    candle_close = signal_open + pd.Timedelta(minutes=timeframe_minutes)
+    observed = _utc(observed_at or utc_now())
+    return {
+        "signal_candle_open_utc": signal_open.isoformat(),
+        "signal_candle_close_utc": candle_close.isoformat(),
+        "signal_age_seconds": round(max(0.0, (observed - candle_close).total_seconds()), 3),
+        "signal_age_minutes": round(max(0.0, (observed - candle_close).total_seconds()) / 60, 2),
+    }
+
 
 def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     """Hard-gate new price-action entries on directional momentum and exhaustion."""
@@ -137,8 +151,14 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"last_closed_candle={result.get('last_completed_candle_utc', 'n/a')}",
                 flush=True,
             )
-            # Daily thesis + 4H execution scan uses completed candles from Kraken.
-            mtf = analyse_pair(pair=pair)
+            # Reuse the exact completed 4H candle snapshot used by the trendline
+            # preview. This avoids a second 4H network fetch and prevents the two
+            # analyses from silently evaluating different market snapshots.
+            candles = pd.DataFrame(result.get("closed_candles", []))
+            mtf = analyse_pair(
+                pair=pair,
+                four_hour=candles if not candles.empty else None,
+            )
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] ANALYSIS_OK pair={display_pair} "
                 f"setup={(result.get('latest_setup_state') or {}).get('state', 'UNKNOWN')} "
@@ -152,13 +172,13 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
-            candles = pd.DataFrame(result.get("closed_candles", []))
             paper_updates = update_paper_trades(store, pair=pair, candles=candles) if store.configured and hasattr(store, "paper_trades") else []
             row = {
                 "run_id": run_id,
                 "pair": pair, "status": "ok",
                 "market_started_at": pair_started,
                 "last_completed_candle_utc": latest.isoformat(),
+                **_signal_timing(latest, observed_at=utc_now()),
                 "last_close": result["last_close"], "latest_setup_state": result["latest_setup_state"].get("state", "UNKNOWN"),
                 "latest_setup_message": result["latest_setup_state"].get("message"),
                 "friday_decision": result["friday_decision"].get("state"),
@@ -377,20 +397,39 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
                     message = build_signal_alert(alert_event, pair=_display_pair(pair), timeframe="4H")
                     try:
+                        send_started_at = utc_now()
                         alert = send_telegram_alert(message)
+                        send_finished_at = utc_now()
+                        timing = _signal_timing(alert_timestamp, observed_at=send_finished_at)
+                        send_duration_seconds = round((pd.Timestamp(send_finished_at) - pd.Timestamp(send_started_at)).total_seconds(), 3)
                         if alert.get("sent"):
                             store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
                         else:
                             store.finish_alert(alert_key, status="failed", error=alert.get("reason"))
-                        row["alert_results"].append({
+                        delivery = {
                             "type": alert_type, "sent": alert.get("sent", False), "status": alert.get("status"),
-                            "reason": alert.get("reason"),
-                        })
+                            "reason": alert.get("reason"), "send_started_at": send_started_at,
+                            "send_finished_at": send_finished_at, "send_duration_seconds": send_duration_seconds,
+                            **timing,
+                        }
+                        row["alert_results"].append(delivery)
+                        print(
+                            f"[FRIDAY ALERT] run_id={run_id} pair={display_pair} type={alert_type} "
+                            f"status={alert.get('status', 'unknown')} sent={bool(alert.get('sent'))} "
+                            f"signal_open={timing.get('signal_candle_open_utc', 'n/a')} "
+                            f"signal_close={timing.get('signal_candle_close_utc', 'n/a')} "
+                            f"signal_age_minutes={timing.get('signal_age_minutes', 'n/a')} "
+                            f"send_duration_seconds={send_duration_seconds}",
+                            flush=True,
+                        )
                     except Exception as alert_exc:
+                        send_finished_at = utc_now()
+                        timing = _signal_timing(alert_timestamp, observed_at=send_finished_at)
                         store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
                         row["alert_results"].append({
                             "type": alert_type, "sent": False, "status": "failed",
                             "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                            "send_finished_at": send_finished_at, **timing,
                         })
                         raise
             # Separate Stoch RSI reversal archetype: notify only when a fresh
@@ -495,6 +534,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         ),
                     })
             row["market_finished_at"] = utc_now()
+            # Recompute age at completion so this captures data/analysis/AI time too.
+            row.update(_signal_timing(latest, observed_at=row["market_finished_at"]))
             row["duration_seconds"] = round((pd.Timestamp(row["market_finished_at"]) - pd.Timestamp(pair_started)).total_seconds(), 3)
             row["alert_outcomes_total"] = len(row["alert_results"])
             row["alert_outcomes_sent"] = sum(1 for item in row["alert_results"] if item.get("sent") is True)
@@ -512,7 +553,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 f"status=ok close={row['last_close']} candle={row['last_completed_candle_utc']} "
                 f"setup={row['latest_setup_state']} decision={row['friday_decision']} "
                 f"ai={row['ai_review_status']}/{row['ai_review_assessment'] or 'n/a'} "
-                f"events={row['break_event_count']} outcome={alert_text} duration={elapsed:.1f}s",
+                f"events={row['break_event_count']} signal_age_min={row.get('signal_age_minutes', 'n/a')} "
+                f"outcome={alert_text} duration={elapsed:.1f}s",
                 flush=True,
             )
         except Exception as exc:
@@ -563,6 +605,20 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
     run_record["persistence_configured"] = store.configured
     run_record["markets_requested"] = len(pairs)
     run_record["markets_succeeded"] = sum(1 for row in pair_results if row.get("status") == "ok")
+    run_record["scan_finished_at"] = utc_now()
+    run_record["market_timings"] = [
+        {
+            "pair": row.get("pair"),
+            "status": row.get("status"),
+            "market_started_at": row.get("market_started_at"),
+            "market_finished_at": row.get("market_finished_at"),
+            "duration_seconds": row.get("duration_seconds"),
+            "signal_candle_open_utc": row.get("signal_candle_open_utc"),
+            "signal_candle_close_utc": row.get("signal_candle_close_utc"),
+            "signal_age_minutes": row.get("signal_age_minutes"),
+        }
+        for row in pair_results
+    ]
     run_record["markets_failed"] = sum(1 for row in pair_results if row.get("status") != "ok")
     all_alert_outcomes = [item for row in pair_results for item in (row.get("alert_results") or [])]
     run_record["alert_outcomes_total"] = len(all_alert_outcomes)
