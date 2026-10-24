@@ -58,7 +58,7 @@ jobs:
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
           PAIRS="$(python -c 'import os; from research.friday_monitor import validate_friday_pairs; print(",".join(validate_friday_pairs(os.environ["REQUESTED_PAIRS"].split(","))))')"
           echo "============================================================"
-          echo "[FRIDAY] Scan started | Run ID=${GITHUB_RUN_ID} | Markets=${PAIRS}"
+          echo "[FRIDAY] Scan started | Scan ID=${FRIDAY_SCAN_RUN_ID} | GitHub Actions Run=${GITHUB_RUN_ID} | Markets=${PAIRS}"
           echo "[FRIDAY] Analysis: completed 1D thesis + 4H execution scan"
           echo "============================================================"
 
