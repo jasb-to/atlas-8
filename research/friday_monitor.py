@@ -19,6 +19,7 @@ from research.friday_persistence import (
 )
 from research.strategy_preview import build_preview
 from research.friday_multitimeframe import analyse_pair
+from research.friday_entry_gates import evaluate_entry_gate
 
 
 def _utc(value) -> pd.Timestamp:
@@ -105,6 +106,31 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest
                 if fresh_entry1 or fresh_entry2:
                     alert_type = "ENTRY_2" if fresh_entry2 else "ENTRY_1"
+                    direction = event.get("direction")
+                    trade_plan = (result.get("trade_plans") or {}).get(direction, {})
+                    gate = evaluate_entry_gate(
+                        event, entry_type=alert_type, thesis=mtf, trade_plan=trade_plan,
+                    )
+                    normalized["entry_gate"] = gate
+                    row_event["payload"]["entry_gate"] = gate if isinstance(row_event.get("payload"), dict) else gate
+                    row["alert_results"].append({
+                        "type": alert_type,
+                        "sent": False,
+                        "status": "eligible" if gate["eligible"] else "entry_gate_blocked",
+                        "gate": gate,
+                    })
+                    if store.configured:
+                        gate_key = hashlib.sha256(
+                            f"{row_event['event_key']}|entry_gate|{alert_type}|{alert_timestamp if 'alert_timestamp' in locals() else (event.get('continuation_add_time') if fresh_entry2 else event.get('signal_time'))}".encode()
+                        ).hexdigest()
+                        store.record_archive(make_archive_record(
+                            record_key=gate_key, record_type="entry_gate_decision",
+                            pair=pair, timeframe="4H",
+                            signal_time=(event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
+                            payload={"event": normalized, "entry_gate": gate, "thesis": mtf.get("daily_thesis", {})},
+                        ))
+                    if not gate["eligible"]:
+                        continue
                     if not store.configured:
                         row["alert_results"].append({
                             "type": alert_type, "sent": False, "status": "persistence_not_configured",
