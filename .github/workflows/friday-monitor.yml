@@ -52,8 +52,121 @@ jobs:
           # Never interpolate workflow_dispatch input into shell source. The Python
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
           PAIRS="$(python -c 'import os; from research.friday_monitor import validate_friday_pairs; print(",".join(validate_friday_pairs(os.environ["REQUESTED_PAIRS"].split(","))))')"
-          echo "Scanning canonical USDT markets: $PAIRS"
+          echo "============================================================"
+          echo "[FRIDAY] Scan started | Run ID=${GITHUB_RUN_ID} | Markets=${PAIRS}"
+          echo "[FRIDAY] Analysis: completed 1D thesis + 4H execution scan"
+          echo "============================================================"
+
+          # Always print the human-readable run summary, even if the monitor exits non-zero.
+          set +e
           python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
+          MONITOR_EXIT=$?
+          set -e
+
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+
+          root = Path("results/friday-monitor")
+          run_file = root / "cron_run.json"
+
+          def show(value, default="n/a"):
+              if value is None or value == "":
+                  return default
+              if isinstance(value, dict):
+                  return value.get("state") or value.get("decision") or value.get("status") or str(value)
+              return str(value)
+
+          def reason_of(*values):
+              for value in values:
+                  if isinstance(value, dict):
+                      reason = value.get("reason") or value.get("blocker") or value.get("why")
+                      if reason:
+                          return str(reason)
+              return ""
+
+          summaries = []
+          if root.exists():
+              for path in sorted(root.glob("*/monitor_summary.json")):
+                  try:
+                      summaries.append(json.loads(path.read_text()))
+                  except Exception as exc:
+                      print(f"[FRIDAY SCAN] {path.parent.name.upper()} | SUMMARY_READ_ERROR={exc}")
+
+          run = {}
+          if run_file.exists():
+              try:
+                  run = json.loads(run_file.read_text())
+              except Exception as exc:
+                  print(f"[FRIDAY] Could not read cron_run.json: {exc}")
+
+          print("\n================ FRIDAY MARKET SCAN ================")
+          if not summaries:
+              print("[FRIDAY] No per-market summaries were written.")
+          for row in summaries:
+              pair = row.get("pair", "UNKNOWN")
+              if row.get("status") != "ok":
+                  print(f"[FRIDAY SCAN] {pair} | ERROR | {row.get('error', 'No error details recorded')}")
+                  continue
+
+              setup = row.get("latest_setup_state")
+              decision = row.get("friday_decision")
+              mtf_state = row.get("multitimeframe_state")
+              direction = row.get("multitimeframe_direction")
+              ai_status = row.get("ai_review_status", "missing")
+              ai_assessment = row.get("ai_review_assessment") or "not available"
+              close = row.get("last_close", "n/a")
+              candle = row.get("last_completed_candle_utc", "n/a")
+              events = row.get("break_event_count", 0)
+              alerts = row.get("alert_results") or []
+
+              print(f"[FRIDAY SCAN] {pair} | Close={close} | Candle={candle}")
+              print(f"  Setup={show(setup)} | Decision={show(decision)}")
+              print(f"  1D/4H thesis={show(mtf_state)} ({show(direction, 'no direction')})")
+              print(f"  AI review={ai_status} | Assessment={ai_assessment} | Break events={events}")
+
+              alert_summary = []
+              for alert in alerts:
+                  kind = alert.get("type", "candidate")
+                  status = alert.get("status", "unknown")
+                  why = alert.get("reason")
+                  alert_summary.append(f"{kind}:{status}" + (f" ({why})" if why else ""))
+              if alert_summary:
+                  print("  Candidate/alert outcomes=" + "; ".join(alert_summary))
+              else:
+                  why = reason_of(decision, setup)
+                  print("  Candidate/alert outcomes=none" + (f" | Reason={why}" if why else ""))
+
+          pair_results = run.get("pair_results") or []
+          errors = [r for r in pair_results if r.get("status") == "error"]
+          ai_ok = sum(1 for r in summaries if r.get("ai_review_status") == "ok")
+          ai_bad = sum(1 for r in summaries if r.get("status") == "ok" and r.get("ai_review_status") != "ok")
+          candidates = sum(1 for r in summaries for a in (r.get("alert_results") or []) if a.get("type") in {"ENTRY_1", "ENTRY_2", "PAPER_ENTRY", "MOMENTUM_REVERSAL"})
+          alerts_sent = sum(1 for r in summaries for a in (r.get("alert_results") or []) if a.get("sent") is True)
+          alerts_blocked = sum(1 for r in summaries for a in (r.get("alert_results") or []) if a.get("sent") is False)
+
+          duration = "n/a"
+          try:
+              start = datetime.fromisoformat(run["started_at"].replace("Z", "+00:00"))
+              end = datetime.fromisoformat(run["finished_at"].replace("Z", "+00:00"))
+              duration = f"{(end - start).total_seconds():.1f}s"
+          except Exception:
+              pass
+
+          print("\n================ FRIDAY RUN SUMMARY ================")
+          print(f"[FRIDAY] Status={run.get('status', 'summary_missing')} | Markets requested={len(run.get('pair_results', []))} | Summaries written={len(summaries)} | Failed={len(errors)}")
+          print(f"[FRIDAY] AI reviews OK={ai_ok} | AI review missing/failed={ai_bad} | Candidate outcomes={candidates}")
+          print(f"[FRIDAY] Alerts sent={alerts_sent} | Candidate/alert outcomes blocked or not sent={alerts_blocked}")
+          print(f"[FRIDAY] Research events seen={run.get('trade_events_seen', 0)} | Duration={duration}")
+          if run.get("error"):
+              print(f"[FRIDAY] Run error={run['error']}")
+          if errors:
+              print("[FRIDAY] Failed markets=" + ", ".join(r.get("pair", "UNKNOWN") for r in errors))
+          print("====================================================")
+          PY
+
+          exit "$MONITOR_EXIT"
       - name: Generate per-pair learning reports
         if: always()
         run: |
