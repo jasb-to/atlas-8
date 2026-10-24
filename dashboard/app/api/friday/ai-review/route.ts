@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       "Do not invent prices, indicators, probabilities, or future outcomes.",
       "Do not invent candidates, prices, direction, stops, targets, or future outcomes. Only discuss candidates explicitly present in candidate_universe or frozen_decision.",
       "Evaluate candidate_universe independently from rule_decision. A NO_TRADE rule_decision does not automatically disqualify a separate candidate that is explicitly marked eligible in candidate_universe.",
-      "Identify which supplied candidate deserves the most attention and why, using its supplied strategy and signal time in priority_candidate. If no eligible candidate exists, use null.",
+      "Set priority_candidate to the exact identifier of the supplied candidate: structural_trade_plans.long, structural_trade_plans.short, momentum_reversal.long, or momentum_reversal.short. Use null if no eligible candidate exists. Do not return a bare direction or free-form explanation in this field.",
       "Treat deterministic eligibility, directional momentum, exhaustion filters, stop/target geometry, and >=1.5R as hard gates.",
       "A supportive AI opinion cannot promote a blocked candidate or bypass any hard gate.",
       "Identify missing evidence, contradictory evidence, and likely false-break risks.",
@@ -105,7 +105,23 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." }] },
           contents: [{ role: "user", parts: [{ text: JSON.stringify(prompt) }] }],
-          generationConfig: { temperature: 0, responseMimeType: "application/json" }
+          generationConfig: {
+            temperature: 0,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                assessment: { type: "STRING", enum: ["supportive", "mixed", "caution", "insufficient_evidence"] },
+                priority_candidate: { type: "STRING", nullable: true },
+                confidence: { type: "STRING", enum: ["low", "medium", "high"] },
+                supporting_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                counter_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                missing_evidence: { type: "ARRAY", items: { type: "STRING" } },
+                rationale: { type: "STRING" }
+              },
+              required: ["assessment", "priority_candidate", "confidence", "supporting_evidence", "counter_evidence", "missing_evidence", "rationale"]
+            }
+          }
         }),
         signal: AbortSignal.timeout(25000)
       });
@@ -116,6 +132,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           model,
           temperature: 0,
+          response_format: { type: "json_object" },
           messages: [
             { role: "system", content: "You are Friday's cautious, evidence-bound research reviewer. Output JSON only." },
             { role: "user", content: JSON.stringify(prompt) }
@@ -143,7 +160,17 @@ export async function POST(request: Request) {
     }
     if (typeof raw !== "string") throw new Error("Model response had no text content");
     raw = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-    const parsed = JSON.parse(raw);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Some compatible routers wrap a valid JSON object in explanatory text.
+      // Recover only a complete object; never infer or repair individual fields.
+      const firstObject = raw.indexOf("{");
+      const lastObject = raw.lastIndexOf("}");
+      if (firstObject < 0 || lastObject <= firstObject) throw new Error("Model response was not valid JSON");
+      parsed = JSON.parse(raw.slice(firstObject, lastObject + 1));
+    }
     const assessments = ["supportive", "mixed", "caution", "insufficient_evidence"];
     if (!parsed || typeof parsed !== "object" || !assessments.includes(parsed.assessment)) throw new Error("Model response assessment failed schema validation");
     for (const field of ["supporting_evidence", "counter_evidence", "missing_evidence"]) {
