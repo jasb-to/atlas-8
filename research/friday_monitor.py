@@ -253,9 +253,32 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             "so it will not send a delayed entry. Retest is held and continuation is still pending."
                         ),
                     })
+                latest_setup_add_time = _utc(latest_setup["add_signal_time"]) if latest_setup.get("add_signal_time") else None
+                if (
+                    event.get("event_add") == "CONTINUATION_ADD_CONFIRMED"
+                    and add_ts is not None and add_ts >= tracking_cutoff
+                    and not fresh_entry2
+                    and latest_setup_add_time == add_ts
+                    and str(latest_setup.get("state", "")).upper() == "CONTINUATION_ADD_CONFIRMED"
+                ) and not any(
+                    item.get("type") == "ENTRY_2"
+                    and item.get("status") == "not_sent_continuation_no_longer_fresh"
+                    and item.get("signal_time") == add_ts.isoformat()
+                    for item in row["alert_results"]
+                ):
+                    row["alert_results"].append({
+                        "type": "ENTRY_2", "sent": False,
+                        "status": "not_sent_continuation_no_longer_fresh",
+                        "signal_time": add_ts.isoformat(),
+                        "reason": (
+                            f"Continuation candle {add_ts.isoformat()} is older than the latest completed candle "
+                            f"{latest.isoformat()}; FRIDAY does not send delayed Entry 2 alerts. "
+                            "The historical continuation remains in the ledger, but is not a fresh entry."
+                        ),
+                    })
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
-                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2")
+                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
                     if not ai_pass:
                         row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
                         continue
