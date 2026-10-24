@@ -88,6 +88,13 @@ class SupabaseFridayStore:
         )
         return {"persisted": True, "table": ARCHIVE_TABLE, "result": result}
 
+    def get_archive(self, record_key: str) -> dict[str, Any] | None:
+        """Read one durable archive record by its stable key."""
+        rows = self._request("GET", ARCHIVE_TABLE, params={
+            "select": "*", "record_key": f"eq.{record_key}", "limit": "1",
+        })
+        return rows[0] if rows else None
+
     def recent_50_trades(self) -> list[dict[str, Any]]:
         result = self._request(
             "GET", TRADES_TABLE,
