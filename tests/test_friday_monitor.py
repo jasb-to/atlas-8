@@ -101,6 +101,22 @@ class FridayMonitorTests(unittest.TestCase):
             self.assertEqual(len(durable), 12)
             self.assertEqual(len(dashboard["alerts"]), 10)
 
+    def test_alert_claim_prevents_duplicates_but_retries_known_failures(self):
+        with TemporaryDirectory() as tmp:
+            store = RepoFolderFridayStore(root=tmp)
+            args = {
+                "alert_key": "stable-alert-key", "pair": "BTCUSDT",
+                "alert_type": "ENTRY_1", "signal_time": "2026-10-24T12:00:00+00:00",
+            }
+            self.assertTrue(store.claim_alert(**args))
+            # A second scan must not reclaim a potentially in-flight Telegram send.
+            self.assertFalse(store.claim_alert(**args))
+            store.finish_alert(args["alert_key"], status="failed", error="Telegram timeout")
+            # An explicit failed delivery is safe to retry on a later scan.
+            self.assertTrue(store.claim_alert(**args))
+            store.finish_alert(args["alert_key"], status="sent", message_id=123)
+            self.assertFalse(store.claim_alert(**args))
+
 
 if __name__ == "__main__":
     unittest.main()
