@@ -59,7 +59,7 @@ jobs:
 
           # Always print the human-readable run summary, even if the monitor exits non-zero.
           set +e
-          python -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
+          python -u -m research.friday_monitor --pairs "$PAIRS" --output-dir results/friday-monitor
           MONITOR_EXIT=$?
           set -e
 
