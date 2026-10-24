@@ -78,9 +78,10 @@ def _ai_candidate_pass(
     if not isinstance(priority, str):
         return False, "ai_priority_candidate_missing"
     priority_normalized = priority.strip().lower()
+    priority_direction = priority_normalized.rsplit(".", 1)[-1]
     direction_normalized = str(expected_direction or "").strip().lower()
     strategy_selected = expected_strategy.lower() in priority_normalized
-    direction_selected = bool(direction_normalized) and priority_normalized == direction_normalized
+    direction_selected = bool(direction_normalized) and priority_direction == direction_normalized
     if not (strategy_selected or direction_selected):
         return False, "ai_did_not_select_expected_strategy_or_direction"
     if assessment == "mixed":
