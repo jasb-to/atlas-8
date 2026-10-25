@@ -1,9 +1,10 @@
 import unittest
+import os
 from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 
-from research.friday_monitor import _display_pair, _utc, run_monitor, validate_friday_pairs
+from research.friday_monitor import _ai_candidate_pass, _display_pair, _utc, run_monitor, validate_friday_pairs
 from research.friday_persistence import RepoFolderFridayStore
 
 
@@ -118,6 +119,24 @@ class FridayMonitorTests(unittest.TestCase):
             self.assertTrue(store.claim_alert(**args))
             store.finish_alert(args["alert_key"], status="sent", message_id=123)
             self.assertFalse(store.claim_alert(**args))
+
+
+    def test_ai_review_disabled_does_not_block_deterministic_paper_candidate(self):
+        with patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "false"}, clear=False):
+            passed, reason = _ai_candidate_pass(
+                {"status": "error", "error": "HTTP 402 Payment Required"},
+                "friday-price-action-v2",
+                "short",
+            )
+        self.assertTrue(passed)
+        self.assertEqual(reason, "ai_review_disabled_advisory_only")
+
+    def test_ai_review_can_be_explicitly_enabled(self):
+        with patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False):
+            passed, reason = _ai_candidate_pass(None, "friday-price-action-v2", "short")
+        self.assertFalse(passed)
+        self.assertEqual(reason, "ai_review_not_completed")
+
 
 
 if __name__ == "__main__":

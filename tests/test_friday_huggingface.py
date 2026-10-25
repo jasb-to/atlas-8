@@ -1,50 +1,30 @@
-import json
 import unittest
 from unittest.mock import Mock, patch
 
-from research.friday_huggingface import DEFAULT_ENDPOINT, DEFAULT_MODEL_ID, review_decision
+from research.friday_huggingface import review_decision
 
 
-class FridayHuggingFaceTests(unittest.TestCase):
-    def test_missing_token_is_safe_and_skipped(self):
-        with patch.dict("os.environ", {"HUGGINGFACE_API_KEY": "", "HF_TOKEN": "", "FRIDAY_HF_MODEL_ID": ""}, clear=False):
-            result = review_decision({}, token="", model_id="", session=Mock())
+class FridayAIReviewTests(unittest.TestCase):
+    def test_review_is_disabled_by_default_without_network_calls(self):
+        session = Mock()
+        with patch.dict("os.environ", {"FRIDAY_AI_REVIEW_ENABLED": "false"}, clear=False):
+            result = review_decision({"state": "WATCHING"}, session=session)
+        self.assertEqual(result["status"], "disabled")
+        session.get.assert_not_called()
+        session.post.assert_not_called()
+
+    def test_explicitly_enabled_review_requires_actions_oidc(self):
+        session = Mock()
+        env = {
+            "FRIDAY_AI_REVIEW_ENABLED": "true",
+            "ACTIONS_ID_TOKEN_REQUEST_URL": "",
+            "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "",
+        }
+        with patch.dict("os.environ", env, clear=False):
+            result = review_decision({}, token="must-not-be-used-for-direct-provider", session=session)
         self.assertEqual(result["status"], "not_configured")
-
-    def test_free_account_default_configuration_is_available_without_model_vars(self):
-        self.assertEqual(DEFAULT_ENDPOINT, "https://router.huggingface.co/v1/chat/completions")
-        self.assertEqual(DEFAULT_MODEL_ID, "openai/gpt-oss-120b:cheapest")
-        response = Mock()
-        response.raise_for_status.return_value = None
-        response.json.return_value = {"choices": [{"message": {"content": json.dumps({
-            "assessment": "mixed", "confidence": "low",
-            "supporting_evidence": ["closed break"], "counter_evidence": [],
-            "missing_evidence": ["volume"], "rationale": "Mixed evidence."
-        })}}]}
-        session = Mock()
-        session.post.return_value = response
-        with patch.dict("os.environ", {"FRIDAY_HF_MODEL_ID": "", "FRIDAY_HF_ENDPOINT": ""}, clear=False):
-            result = review_decision({"state": "WATCHING"}, token="test-token", session=session)
-        self.assertEqual(result["status"], "ok")
-        self.assertEqual(session.post.call_args.args[0], DEFAULT_ENDPOINT)
-        self.assertEqual(session.post.call_args.kwargs["json"]["model"], DEFAULT_MODEL_ID)
-
-    def test_valid_review_is_parsed_and_advisory(self):
-        response = Mock()
-        response.raise_for_status.return_value = None
-        response.json.return_value = {"choices": [{"message": {"content": json.dumps({
-            "assessment": "mixed", "confidence": "low",
-            "supporting_evidence": ["closed break"], "counter_evidence": [],
-            "missing_evidence": ["volume"], "rationale": "Mixed evidence."
-        })}}]}
-        session = Mock()
-        session.post.return_value = response
-        result = review_decision({"state": "WATCHING"}, token="test-token", model_id="test/model", session=session)
-        self.assertEqual(result["status"], "ok")
-        self.assertEqual(result["response"]["assessment"], "mixed")
-        sent = session.post.call_args.kwargs["json"]
-        self.assertEqual(sent["model"], "test/model")
-        self.assertNotIn("test-token", str(sent))
+        self.assertIn("direct provider calls are disabled", result["error"])
+        session.post.assert_not_called()
 
     def test_proxy_uses_actual_provider_and_model_metadata(self):
         oidc_response = Mock()
@@ -71,20 +51,20 @@ class FridayHuggingFaceTests(unittest.TestCase):
         session.get.return_value = oidc_response
         session.post.return_value = proxy_response
         env = {
-            "HUGGINGFACE_API_KEY": "",
-            "HF_TOKEN": "",
+            "FRIDAY_AI_REVIEW_ENABLED": "true",
             "FRIDAY_AI_REVIEW_URL": "https://example.test/api/friday/ai-review",
             "ACTIONS_ID_TOKEN_REQUEST_URL": "https://actions.example.test/oidc",
             "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "test-request-token",
         }
         with patch.dict("os.environ", env, clear=False):
-            result = review_decision({}, session=session)
+            result = review_decision({"state": "WATCHING"}, session=session)
         self.assertEqual(result["status"], "ok")
         self.assertEqual(result["provider"], "gemini")
         self.assertEqual(result["model_id"], "gemini-3.5-flash-lite")
         self.assertEqual(result["latency_ms"], 1234)
+        self.assertNotIn("HUGGINGFACE_API_KEY", str(session.post.call_args.kwargs["json"]))
 
-    def test_proxy_error_preserves_actual_provider_model_and_category(self):
+    def test_proxy_error_preserves_provider_metadata_and_category(self):
         oidc_response = Mock()
         oidc_response.raise_for_status.return_value = None
         oidc_response.json.return_value = {"value": "test-oidc-token"}
@@ -94,18 +74,17 @@ class FridayHuggingFaceTests(unittest.TestCase):
         proxy_response.text = "upstream error"
         proxy_response.json.return_value = {
             "status": "error",
-            "provider": "gemini",
-            "model_id": "gemini-3.5-flash-lite",
+            "provider": "groq",
+            "model_id": "openai/gpt-oss-120b",
             "error_category": "provider_unavailable",
             "latency_ms": 9876,
-            "error": "Gemini returned HTTP 503",
+            "error": "Groq returned HTTP 503",
         }
         session = Mock()
         session.get.return_value = oidc_response
         session.post.return_value = proxy_response
         env = {
-            "HUGGINGFACE_API_KEY": "",
-            "HF_TOKEN": "",
+            "FRIDAY_AI_REVIEW_ENABLED": "true",
             "FRIDAY_AI_REVIEW_URL": "https://example.test/api/friday/ai-review",
             "ACTIONS_ID_TOKEN_REQUEST_URL": "https://actions.example.test/oidc",
             "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "test-request-token",
@@ -113,19 +92,30 @@ class FridayHuggingFaceTests(unittest.TestCase):
         with patch.dict("os.environ", env, clear=False):
             result = review_decision({}, session=session)
         self.assertEqual(result["status"], "error")
-        self.assertEqual(result["provider"], "gemini")
-        self.assertEqual(result["model_id"], "gemini-3.5-flash-lite")
+        self.assertEqual(result["provider"], "groq")
+        self.assertEqual(result["model_id"], "openai/gpt-oss-120b")
         self.assertEqual(result["error_category"], "provider_unavailable")
         self.assertEqual(result["latency_ms"], 9876)
         self.assertIn("HTTP 502", result["error"])
 
-    def test_bad_model_output_fails_soft(self):
-        response = Mock()
-        response.raise_for_status.return_value = None
-        response.json.return_value = {"choices": [{"message": {"content": "not json"}}]}
+    def test_invalid_proxy_schema_fails_soft(self):
+        oidc_response = Mock()
+        oidc_response.raise_for_status.return_value = None
+        oidc_response.json.return_value = {"value": "test-oidc-token"}
+        proxy_response = Mock()
+        proxy_response.ok = True
+        proxy_response.json.return_value = {"status": "ok", "provider": "gemini", "model_id": "model", "response": {"assessment": "bad"}}
         session = Mock()
-        session.post.return_value = response
-        result = review_decision({}, token="test-token", model_id="test/model", session=session)
+        session.get.return_value = oidc_response
+        session.post.return_value = proxy_response
+        env = {
+            "FRIDAY_AI_REVIEW_ENABLED": "true",
+            "FRIDAY_AI_REVIEW_URL": "https://example.test/api/friday/ai-review",
+            "ACTIONS_ID_TOKEN_REQUEST_URL": "https://actions.example.test/oidc",
+            "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "test-request-token",
+        }
+        with patch.dict("os.environ", env, clear=False):
+            result = review_decision({}, session=session)
         self.assertEqual(result["status"], "error")
         self.assertIsNone(result["response"])
 
