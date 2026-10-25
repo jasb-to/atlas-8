@@ -241,7 +241,7 @@ def evaluate_sheldon_thesis(
             weekly_stoch_aligned=bool(w_k is not None and w_d is not None and w_k > w_d),
         )
 
-    if None in (w_ema200, d_ema50, w_k, w_d, w_macd_hist):
+    if None in (w_ema200, d_ema50, w_macd_hist):
         return result("insufficient_data", None,
                       "Weekly EMA 200, Stoch RSI/MACD, or daily EMA 50 is not valid.")
 
@@ -253,8 +253,8 @@ def evaluate_sheldon_thesis(
     # OR-based momentum signals can overlap when Stoch RSI and MACD disagree.
     # Resolve that conflict deterministically in favour of Stoch RSI K/D; use
     # MACD histogram when K and D are equal. This avoids an impossible dual state.
-    stoch_bear = w_k < w_d
-    stoch_bull = w_k > w_d
+    stoch_bear = (w_k < w_d) if w_k is not None and w_d is not None else (w_macd_hist < 0)
+    stoch_bull = (w_k > w_d) if w_k is not None and w_d is not None else (w_macd_hist > 0)
     macd_bear = w_macd_hist < 0
     macd_bull = w_macd_hist > 0
     momentum_bearish = stoch_bear or macd_bear
