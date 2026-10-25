@@ -1,0 +1,37 @@
+{
+  "run_id": "4853bf62-8fe6-4f5c-bf77-98b26b1a8fae",
+  "pair": "SOLUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-25T16:11:18.879332+00:00",
+  "last_completed_candle_utc": "2026-10-25T12:00:00+00:00",
+  "last_close": 101.61,
+  "latest_setup_state": "EXPIRED",
+  "latest_setup_message": "No qualifying retest held within 72 hours.",
+  "friday_decision": "WATCHING",
+  "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "multitimeframe_state": "WATCH_STRUCTURE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "error",
+  "ai_review_latency_ms": 226,
+  "ai_review_error": "Vercel review proxy HTTP 502: Groq returned HTTP 429",
+  "ai_review_error_category": "rate_limit_or_quota",
+  "ai_model_id": "openai/gpt-oss-120b",
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 44,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "SCAN",
+      "sent": false,
+      "status": "no_actionable_signal",
+      "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=EXPIRED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+    }
+  ],
+  "market_finished_at": "2026-10-25T16:11:30.215543+00:00",
+  "duration_seconds": 11.336,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}
