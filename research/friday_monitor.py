@@ -19,6 +19,7 @@ from research.friday_persistence import (
 )
 from research.strategy_preview import build_preview
 from research.friday_multitimeframe import analyse_pair
+from research.weekly_thesis import evaluate_sheldon_thesis
 from research.friday_paper_trades import register_paper_trade, update_paper_trades
 
 
@@ -161,6 +162,50 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
+            # Persist the weekly/daily regime for dashboard visibility only. This
+            # is deliberately advisory: it never skips or changes the 4H engine.
+            if store.configured:
+                try:
+                    weekly_thesis = evaluate_sheldon_thesis(pair, as_of=latest)
+                except Exception as thesis_error:
+                    weekly_thesis = {
+                        "pair": pair.upper(),
+                        "status": "unavailable",
+                        "direction": None,
+                        "reason": f"weekly_thesis_evaluation_error: {type(thesis_error).__name__}: {thesis_error}",
+                        "generated_at_utc": utc_now(),
+                    }
+                    print(
+                        f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_UNAVAILABLE "
+                        f"pair={display_pair} reason={type(thesis_error).__name__}: {thesis_error}",
+                        flush=True,
+                    )
+                thesis_key = hashlib.sha256(
+                    f"{pair}|weekly_thesis|{latest.isoformat()}".encode()
+                ).hexdigest()
+                try:
+                    store.record_archive(make_archive_record(
+                        record_key=thesis_key,
+                        record_type="weekly_thesis_snapshot",
+                        pair=pair,
+                        timeframe="1W+1D",
+                        signal_time=latest.isoformat(),
+                        payload=weekly_thesis,
+                    ))
+                    print(
+                        f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_SAVED "
+                        f"pair={display_pair} status={weekly_thesis.get('status')} "
+                        f"direction={weekly_thesis.get('direction') or 'none'} "
+                        f"reason={weekly_thesis.get('reason') or 'n/a'}",
+                        flush=True,
+                    )
+                except Exception as thesis_store_error:
+                    # Persistence trouble must not abort or gate the 4H scan.
+                    print(
+                        f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_SAVE_FAILED "
+                        f"pair={display_pair} reason={type(thesis_store_error).__name__}: {thesis_store_error}",
+                        flush=True,
+                    )
             candles = pd.DataFrame(result.get("closed_candles", []))
             # Apply thesis invalidation before scanning later candles for stop/target,
             # so a failed structure cannot be retroactively treated as a live trade.
