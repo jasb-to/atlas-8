@@ -98,8 +98,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: dashboard/package-lock.json
 
       - name: Build dashboard
         id: dashboard_build
@@ -107,7 +105,10 @@ jobs:
         working-directory: dashboard
         run: |
           set -euo pipefail
-          npm ci 2>&1 | tee ../dashboard-build.log
+          if [ ! -f package-lock.json ]; then
+            npm install --package-lock-only --ignore-scripts 2>&1 | tee ../dashboard-build.log
+          fi
+          npm ci 2>&1 | tee -a ../dashboard-build.log
           npm run build 2>&1 | tee -a ../dashboard-build.log
 
       - name: Read-only BTC monitor smoke test
