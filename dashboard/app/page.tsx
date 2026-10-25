@@ -64,26 +64,19 @@ export default function Home() {
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
-    const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction ??
-      (thesis?.weekly_ema8 != null && thesis?.weekly_ema21 != null
-        ? Number(thesis.weekly_ema8) > Number(thesis.weekly_ema21) ? "bullish" : "bearish"
+    const weeklyTrend = thesis?.macro_regime ?? thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction ??
+      (thesis?.weekly_ema200 != null && thesis?.weekly_close != null
+        ? Number(thesis.weekly_close) > Number(thesis.weekly_ema200) ? "bullish" : "bearish"
         : undefined);
     const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction ??
-      (thesis?.daily_ema8 != null && thesis?.daily_ema21 != null &&
-       thesis?.daily_stoch_k != null && thesis?.daily_stoch_d != null
-        ? Number(thesis.daily_ema8) > Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) > Number(thesis.daily_stoch_d)
-          ? "bullish"
-          : Number(thesis.daily_ema8) < Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) < Number(thesis.daily_stoch_d)
-            ? "bearish"
-            : "misaligned"
+      (thesis?.daily_ema50 != null && thesis?.daily_close != null
+        ? Number(thesis.daily_close) > Number(thesis.daily_ema50) ? "pass" : "veto"
         : undefined);
-    const weeklyMomentum = thesis?.weekly_stoch_aligned === true
-      ? "K > D"
-      : thesis?.weekly_stoch_aligned === false
-        ? "K < D"
-        : thesis?.weekly_stoch_k != null && thesis?.weekly_stoch_d != null
-          ? Number(thesis.weekly_stoch_k) > Number(thesis.weekly_stoch_d) ? "K > D" : "K < D"
-          : "Not available";
+    const weeklyMomentum = thesis?.wave_state
+      ? `${clean(thesis.wave_state)} (${String(thesis.direction ?? "").toUpperCase()})`
+      : thesis?.weekly_stoch_k != null && thesis?.weekly_stoch_d != null
+        ? Number(thesis.weekly_stoch_k) > Number(thesis.weekly_stoch_d) ? "K > D" : "K < D"
+        : "Not available";
     const active = String(thesis?.status ?? "").toLowerCase() === "active";
     return { pair, thesis, scan, weeklyTrend, dailyTrend, weeklyMomentum, active };
   });
@@ -208,11 +201,18 @@ export default function Home() {
       <div className="thesis-grid">
         {weeklyCards.map(card => {
           const trend = card.weeklyTrend ?? "Unavailable";
-          const dailyPass = (isBull(trend) && isBull(card.dailyTrend)) || (isBear(trend) && isBear(card.dailyTrend));
-          const status = card.active ? "READY" : "SKIPPED";
+          const dailyPass = String(card.dailyTrend ?? "").toLowerCase() === "pass" ||
+            (String(card.dailyTrend ?? "").toLowerCase() !== "veto" && card.active);
+          const status = String(card.thesis?.status ?? "").toLowerCase() === "active"
+            ? "ACTIVE"
+            : String(card.thesis?.status ?? "").toLowerCase() === "veto" ? "VETO" : "SKIPPED";
+          const waveLabel = card.thesis?.wave_state
+            ? `${clean(card.thesis.wave_state)} (${String(card.thesis.direction ?? "").toUpperCase()})`
+            : card.weeklyMomentum;
           return <article className="thesis-card" key={card.pair}>
             <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : "pill neutral"}>{status}</span></div>
-            <div className="thesis-row"><span>WEEKLY TREND</span><b className={isBull(trend) ? "positive-text" : isBear(trend) ? "negative-text" : ""}>{isBull(trend) ? "BULL" : isBear(trend) ? "BEAR" : clean(trend).toUpperCase()}</b></div>
+            <div className="thesis-row"><span>MACRO</span><b className={isBull(trend) ? "positive-text" : isBear(trend) ? "negative-text" : ""}>{isBull(trend) ? "BULLISH" : isBear(trend) ? "BEARISH" : clean(trend).toUpperCase()}</b></div>
+            <div className="thesis-row"><span>WAVE</span><b className={isBear(card.thesis?.direction) ? "negative-text" : isBull(card.thesis?.direction) ? "positive-text" : ""}>{clean(waveLabel).replace(/^./, value => value.toUpperCase())}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={dailyPass ? "positive-text" : "negative-text"}>{dailyPass ? "PASS" : "VETO"}</b></div>
             <div className="thesis-bottom"><span>THESIS STATUS</span><b>{status}</b></div>
           </article>;
@@ -249,7 +249,7 @@ export default function Home() {
       <div className="section-heading"><div><span className="eyebrow">03 / WAITING FOR TRIGGER</span><h2>WATCHLIST</h2><p>Active weekly and daily thesis; waiting for a valid 4H trigger. No entry has been recorded.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
       {watchlist.length ? <div className="watchlist">
         {watchlist.map(card => <article className="watch-row" key={card.pair}>
-          <div className="watch-token"><b>{shortPair(card.pair)}</b><span className={isBull(card.weeklyTrend) ? "direction long" : "direction short"}>{isBull(card.weeklyTrend) ? "LONG BIAS" : "SHORT BIAS"}</span></div>
+          <div className="watch-token"><b>{shortPair(card.pair)}</b><span className={isBull(card.thesis?.direction) ? "direction long" : "direction short"}>{isBull(card.thesis?.direction) ? "LONG BIAS" : "SHORT BIAS"}</span></div>
           <div><span>WEEKLY THESIS</span><b>{clean(card.thesis?.reason ?? (isBull(card.weeklyTrend) ? "Bullish EMA 8/21" : "Bearish EMA 8/21"))}</b></div>
           <div><span>STATUS</span><b>WAITING FOR 4H TRIGGER</b></div>
           <div><span>ENTRY</span><b>—</b></div>
