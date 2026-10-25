@@ -38,7 +38,7 @@ class MonitorGateTests(unittest.TestCase):
         self.assertIn("direction_conflicts_with_weekly_thesis", blockers)
 
     def test_matching_direction_and_rr_at_least_1_5_is_alert_eligible(self):
-        event = {"direction": "short"}
+        event = {"direction": "short", "daily_bias": "bearish"}
         passed, blockers = _entry_filters_pass(event, {}, weekly_direction="short")
         valid_plan, rr = _trade_plan_metrics("short", entry=8.822, stop=9.046, target=8.400)
         send_alert = Mock()
