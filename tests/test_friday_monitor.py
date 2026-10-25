@@ -95,7 +95,7 @@ class FridayMonitorTests(unittest.TestCase):
         from research.friday_monitor import _entry_filters_pass
         passed, blockers = _entry_filters_pass(
             {"direction": "short", "daily_bias": "bearish", "momentum_context": {}},
-            {"short_reversal_score": 0, "long_reversal_score": 5},
+            {"short_reversal_score": 5, "long_reversal_score": 0},
             weekly_direction="short",
         )
         self.assertTrue(passed)
