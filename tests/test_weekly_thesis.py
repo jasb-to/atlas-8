@@ -7,10 +7,12 @@ from research.weekly_thesis import calculate_stoch_rsi, evaluate_sheldon_thesis
 
 
 SCHEMA = {
-    "pair", "status", "direction", "weekly_close", "weekly_ema8", "weekly_ema21",
-    "weekly_stoch_k", "weekly_stoch_d", "daily_close", "daily_ema8", "daily_ema21",
-    "daily_stoch_k", "daily_stoch_d", "weekly_stoch_cross",
-    "weekly_stoch_aligned", "reason", "generated_at_utc",
+    "pair", "status", "direction", "macro_regime", "wave_state",
+    "momentum_bearish", "momentum_bullish", "weekly_close", "weekly_ema8",
+    "weekly_ema21", "weekly_ema200", "weekly_stoch_k", "weekly_stoch_d",
+    "weekly_macd_histogram", "daily_close", "daily_ema8", "daily_ema21",
+    "daily_ema50", "daily_stoch_k", "daily_stoch_d", "daily_alignment",
+    "weekly_stoch_cross", "weekly_stoch_aligned", "reason", "generated_at_utc",
 }
 
 
@@ -64,22 +66,19 @@ class WeeklyThesisTests(unittest.TestCase):
             self.assertEqual(result_with_open[key], result_without_open[key], key)
 
 
-    def test_33_candles_fail_and_34_candles_clear_ema_history_boundary(self):
+    def test_history_boundary_requires_200_weekly_and_50_daily_candles(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
-        daily_times = pd.date_range(end="2026-10-24", periods=40, freq="D", tz="UTC")
-        weekly_times = pd.date_range(end="2026-10-18", periods=34, freq="7D", tz="UTC")
+        daily_times = pd.date_range(end="2026-10-24", periods=60, freq="D", tz="UTC")
+        weekly_times = pd.date_range(end="2026-10-18", periods=200, freq="7D", tz="UTC")
         def frame(times):
             x = np.arange(len(times), dtype=float)
-            return pd.DataFrame({
-                "timestamp": times,
-                "close": 100 + 0.1 * x + 3 * np.sin(x / 3),
-            })
+            return pd.DataFrame({"timestamp": times, "close": 100 + 0.1 * x + 3 * np.sin(x / 3)})
         daily, weekly = frame(daily_times), frame(weekly_times)
         boundary = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly.iloc[:-1], daily_candles=daily, as_of=as_of
         )
         self.assertEqual(boundary["status"], "insufficient_data")
-        self.assertIn("weekly=33", boundary["reason"])
+        self.assertIn("weekly=199", boundary["reason"])
         enough = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
         )
@@ -107,6 +106,54 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertEqual(result["direction"], "long")
         self.assertEqual(result["weekly_stoch_k"], 60.0)
         self.assertEqual(result["weekly_stoch_d"], 50.0)
+
+
+    def test_bullish_macro_bearish_stoch_creates_active_short_pullback(self):
+        weekly_values = np.linspace(100.0, 300.0, 260)
+        weekly_values[-6:] = weekly_values[-7] * np.array([0.995, 0.985, 0.975, 0.965, 0.955, 0.945])
+        daily_values = np.linspace(100.0, 180.0, 100)
+        daily_values[-16:] = daily_values[-17] * np.array(
+            [0.995, 0.990, 0.985, 0.980, 0.975, 0.970, 0.965, 0.960,
+             0.955, 0.950, 0.945, 0.940, 0.935, 0.930, 0.925, 0.920]
+        )
+        weekly = pd.DataFrame({
+            "timestamp": pd.date_range(start="2021-01-04", periods=260, freq="7D", tz="UTC"),
+            "close": weekly_values,
+        })
+        daily = pd.DataFrame({
+            "timestamp": pd.date_range(start="2026-01-01", periods=100, freq="D", tz="UTC"),
+            "close": daily_values,
+        })
+        result = evaluate_sheldon_thesis(
+            "BTCUSDT", weekly_candles=weekly, daily_candles=daily,
+            as_of=pd.Timestamp("2027-01-01T00:00:00Z"),
+        )
+        self.assertEqual(result["macro_regime"], "bullish")
+        self.assertEqual(result["wave_state"], "pullback")
+        self.assertEqual(result["direction"], "short")
+        self.assertEqual(result["status"], "active")
+        self.assertEqual(result["daily_alignment"], "pass")
+
+    def test_daily_ema50_conflict_vetoes_weekly_wave(self):
+        weekly_values = np.linspace(100.0, 300.0, 260)
+        weekly_values[-6:] = weekly_values[-7] * np.array([0.995, 0.985, 0.975, 0.965, 0.955, 0.945])
+        daily_values = np.linspace(100.0, 200.0, 100)
+        daily_values[-5:] = daily_values[-6] * np.array([1.01, 1.015, 1.02, 1.025, 1.03])
+        weekly = pd.DataFrame({
+            "timestamp": pd.date_range(start="2021-01-04", periods=260, freq="7D", tz="UTC"),
+            "close": weekly_values,
+        })
+        daily = pd.DataFrame({
+            "timestamp": pd.date_range(start="2026-01-01", periods=100, freq="D", tz="UTC"),
+            "close": daily_values,
+        })
+        result = evaluate_sheldon_thesis(
+            "BTCUSDT", weekly_candles=weekly, daily_candles=daily,
+            as_of=pd.Timestamp("2027-01-01T00:00:00Z"),
+        )
+        self.assertEqual(result["direction"], "short")
+        self.assertEqual(result["status"], "veto")
+        self.assertEqual(result["reason"], "Daily conflicts with Weekly Wave")
 
 
 
