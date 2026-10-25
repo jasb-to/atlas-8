@@ -9,7 +9,6 @@ from __future__ import annotations
 import pandas as pd
 
 from audits._historical_data import fetch_history
-from research.friday_market_data import fetch_ohlc
 from research.strategy_preview import causal_replay
 from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.weekly_thesis import evaluate_sheldon_thesis
@@ -63,14 +62,16 @@ def main():
         thesis_cache = {}
         for event in in_range:
             signal_time = pd.Timestamp(event["signal_time"])
-            # Evaluate using only candles closed by this 4H signal timestamp.
-            key = signal_time.floor("D").isoformat()
+            # The event timestamp identifies the 4H candle open; the break is
+            # confirmed at that candle's close, four hours later.
+            as_of = signal_time + pd.Timedelta(hours=4)
+            key = as_of.floor("D").isoformat()
             if key not in thesis_cache:
                 thesis_cache[key] = evaluate_sheldon_thesis(
                     pair,
                     weekly_candles=weekly,
                     daily_candles=daily,
-                    as_of=signal_time,
+                    as_of=as_of,
                 )
             thesis = thesis_cache[key]
             if thesis["status"] == "active" and thesis["direction"] == event["direction"]:
