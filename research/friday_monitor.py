@@ -36,8 +36,12 @@ def _utc(value) -> pd.Timestamp:
     return stamp.tz_convert("UTC")
 
 
-def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
-    """Validate direction only; weekly/daily alignment is the higher-timeframe gate.
+def _entry_filters_pass(
+    event: dict,
+    reversal: dict,
+    weekly_direction: str | None = None,
+) -> tuple[bool, list[str]]:
+    """Use the active weekly thesis as direction gate; ignore 4H momentum/exhaustion.
 
     Four-hour Stoch RSI, MACD and reversal/exhaustion scores are advisory only and
     must not veto a confirmed trendline break after the weekly thesis gate passes.
@@ -45,6 +49,9 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     direction = str(event.get("direction", "")).strip().lower()
     if direction not in {"long", "short"}:
         return False, ["direction_missing"]
+    thesis_direction = str(weekly_direction or "").strip().lower()
+    if thesis_direction in {"long", "short"} and direction != thesis_direction:
+        return False, ["direction_conflicts_with_weekly_thesis"]
     return True, []
 
 
@@ -342,7 +349,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 )
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
-                passed, filter_blockers = _entry_filters_pass(event, reversal_context_now)
+                passed, filter_blockers = _entry_filters_pass(event, reversal_context_now, weekly_thesis.get("direction"))
                 ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
                 if not ai_pass:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
@@ -446,7 +453,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                         ),
                     })
                 if fresh_entry1 or fresh_entry2:
-                    passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}))
+                    passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}), weekly_thesis.get("direction"))
                     ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
                     if not ai_pass:
                         row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
