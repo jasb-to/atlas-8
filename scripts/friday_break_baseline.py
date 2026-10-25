@@ -73,6 +73,52 @@ def _forward_returns(frame: pd.DataFrame, signal_time: str, direction: str) -> d
     return values
 
 
+def _replay_reversal_candidate(candidate: dict[str, Any], frame: pd.DataFrame, *, max_hold_bars: int = 18) -> dict[str, Any] | None:
+    """Conservatively replay a reversal signal after its candle has closed."""
+    matches = frame.index[frame["timestamp"] == pd.Timestamp(candidate["signal_time"])]
+    if not len(matches):
+        return None
+    signal_index = int(matches[0])
+    entry_index = signal_index + 1
+    if entry_index >= len(frame):
+        return None
+    direction = str(candidate.get("direction", "")).lower()
+    if direction not in {"long", "short"} or candidate.get("stop") is None or candidate.get("target") is None:
+        return None
+    side = 1 if direction == "long" else -1
+    entry = float(frame.iloc[entry_index]["open"])
+    stop, target = float(candidate["stop"]), float(candidate["target"])
+    risk = side * (entry - stop)
+    if risk <= 0:
+        return {
+            "pair": candidate.get("pair"), "signal_time": candidate["signal_time"],
+            "direction": direction, "eligible": False, "outcome": "invalid_next_open_vs_structural_stop",
+            "entry_price": entry, "stop_price": stop, "target_price": target, "r_multiple": None,
+        }
+    exit_index = min(len(frame) - 1, entry_index + max_hold_bars - 1)
+    exit_price = float(frame.iloc[exit_index]["close"])
+    outcome = "time_exit"
+    for i in range(entry_index, min(len(frame), entry_index + max_hold_bars)):
+        row = frame.iloc[i]
+        stop_hit = float(row["low"]) <= stop if side == 1 else float(row["high"]) >= stop
+        target_hit = float(row["high"]) >= target if side == 1 else float(row["low"]) <= target
+        if stop_hit:
+            exit_index, exit_price, outcome = i, stop, "stop"
+            break
+        if target_hit:
+            exit_index, exit_price, outcome = i, target, "target"
+            break
+    r_multiple = side * (exit_price - entry) / risk
+    return {
+        "pair": candidate.get("pair"), "signal_time": candidate["signal_time"],
+        "direction": direction, "eligible": True, "entry_time": frame.iloc[entry_index]["timestamp"].isoformat(),
+        "entry_price": entry, "stop_price": stop, "target_price": target,
+        "exit_time": frame.iloc[exit_index]["timestamp"].isoformat(), "exit_price": exit_price,
+        "outcome": outcome, "bars_held": exit_index - entry_index + 1,
+        "r_multiple": round(r_multiple, 6), "win": bool(r_multiple > 0),
+    }
+
+
 def _safe_decision(frame: pd.DataFrame) -> dict[str, Any]:
     try:
         return evaluate_friday_decision(frame)
@@ -93,6 +139,7 @@ def run_baseline(
     all_trades: list[dict[str, Any]] = []
     all_decisions: list[dict[str, Any]] = []
     all_reversals: list[dict[str, Any]] = []
+    all_reversal_trades: list[dict[str, Any]] = []
     pair_summaries: list[dict[str, Any]] = []
     missing_coverage: list[str] = []
 
@@ -144,15 +191,18 @@ def run_baseline(
                     prefix, pair=pair, thesis_direction=str(prefix.iloc[-1].get("daily_bias", ""))
                 )
                 if reversal.get("state") == "ENTRY_CANDIDATE":
-                    all_reversals.append({
-                        "pair": pair, "timestamp": candle_time, **reversal,
-                    })
+                    candidate = {"pair": pair, "timestamp": candle_time, **reversal}
+                    all_reversals.append(candidate)
+                    replay = _replay_reversal_candidate(candidate, enriched)
+                    if replay is not None:
+                        all_reversal_trades.append(replay)
 
         pair_events = [event for event in all_events if event["pair"] == pair]
         pair_trades = [trade for trade in all_trades if trade["pair"] == pair]
         continuation = [event for event in pair_events if event.get("outcome") == "continuation_add_confirmed"]
         valid_forward = [event["forward_12_bar_return_pct"] for event in continuation if event.get("forward_12_bar_return_pct") is not None]
         pair_decisions = [row for row in all_decisions if row["pair"] == pair]
+        pair_reversal_trades = [row for row in all_reversal_trades if row["pair"] == pair and row.get("eligible")]
         pair_summaries.append({
             "pair": pair,
             "candles": len(enriched),
@@ -167,6 +217,9 @@ def run_baseline(
             "entry2_trades": sum(t["entry_type"] == "ENTRY_2_CONTINUATION" for t in pair_trades),
             "mean_entry1_r": round(pd.Series([t["net_r_multiple"] for t in pair_trades if t["entry_type"] == "ENTRY_1_BREAK_PROBE"]).mean(), 6) if any(t["entry_type"] == "ENTRY_1_BREAK_PROBE" for t in pair_trades) else None,
             "mean_entry2_r": round(pd.Series([t["net_r_multiple"] for t in pair_trades if t["entry_type"] == "ENTRY_2_CONTINUATION"]).mean(), 6) if any(t["entry_type"] == "ENTRY_2_CONTINUATION" for t in pair_trades) else None,
+            "momentum_reversal_replayed_trades": len(pair_reversal_trades),
+            "momentum_reversal_hit_rate_pct": round(sum(row["win"] for row in pair_reversal_trades) / len(pair_reversal_trades) * 100, 4) if pair_reversal_trades else None,
+            "momentum_reversal_mean_r": round(sum(row["r_multiple"] for row in pair_reversal_trades) / len(pair_reversal_trades), 6) if pair_reversal_trades else None,
             "friday_decision_lifecycle_state_agreement_pct": round(sum(row["state_agreement"] for row in pair_decisions) / len(pair_decisions) * 100, 4) if pair_decisions else None,
             "friday_decision_lifecycle_direction_agreement_pct_when_both_present": round(sum(row["direction_agreement"] for row in pair_decisions) / sum(bool(row["friday_decision_direction"] and row["latest_setup_direction"]) for row in pair_decisions) * 100, 4) if any(row["friday_decision_direction"] and row["latest_setup_direction"] for row in pair_decisions) else None,
         })
@@ -175,6 +228,7 @@ def run_baseline(
     _write_csv(output_dir / "trade_replay.csv", all_trades)
     _write_csv(output_dir / "decision_alignment.csv", all_decisions)
     _write_csv(output_dir / "momentum_reversal_candidates.csv", all_reversals)
+    _write_csv(output_dir / "momentum_reversal_replay.csv", all_reversal_trades)
     _write_csv(output_dir / "pair_summary.csv", pair_summaries)
     report = {
         "research_only": True,
@@ -190,11 +244,13 @@ def run_baseline(
         "trade_replay_entries": len(all_trades),
         "friday_decision_rows": len(all_decisions),
         "momentum_reversal_candidates": len(all_reversals),
-        "outputs": ["break_events.csv", "trade_replay.csv", "decision_alignment.csv", "momentum_reversal_candidates.csv", "pair_summary.csv"],
+        "momentum_reversal_replayed_trades": len(all_reversal_trades),
+        "momentum_reversal_mean_r": round(sum(row["r_multiple"] for row in all_reversal_trades if row.get("eligible")) / sum(bool(row.get("eligible")) for row in all_reversal_trades), 6) if any(row.get("eligible") for row in all_reversal_trades) else None,
+        "outputs": ["break_events.csv", "trade_replay.csv", "decision_alignment.csv", "momentum_reversal_candidates.csv", "momentum_reversal_replay.csv", "pair_summary.csv"],
         "limitations": [
             "This harness requires a pre-downloaded full-window 4H OHLC file per pair; the live Kraken adapter's 720-row cap is insufficient for six months.",
             "Raw directional forward returns are descriptive, not fee-aware; trade_replay uses the existing conservative OHLC replay assumptions.",
-            "A reversal candidate's outcomes need to be joined to a future-aware trade replay before a reversal hit rate can be reported.",
+            "Reversal replay enters at the next candle open, uses the candidate's structural stop/target, and assumes stop first if both are touched in one candle; costs are not included.",
         ],
     }
     (output_dir / "baseline_summary.json").write_text(json.dumps(report, indent=2, allow_nan=False))
