@@ -59,7 +59,7 @@ export default function Home() {
   const snapshots = data.snapshots ?? [];
   const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
   const closedTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "CLOSED").slice(0, 6);
-  const scanByPair = new Map(pairScans.map(scan => [pairName(scan.pair), scan]));
+  const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiQuotaError = pairScans.some(scan => /402|payment required|quota exceeded/i.test(String(scan.ai_review_error ?? "")));
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(snapshots, pair);
