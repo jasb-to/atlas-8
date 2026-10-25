@@ -37,32 +37,15 @@ def _utc(value) -> pd.Timestamp:
 
 
 def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
-    """Hard-gate new price-action entries on directional momentum and exhaustion."""
-    direction = str(event.get("direction", "")).lower()
-    momentum = event.get("momentum_context") or {}
-    if direction == "long":
-        momentum_ok = bool(momentum.get("stoch_bullish_cross") or momentum.get("macd_bullish_expansion"))
-        aligned = int(reversal.get("long_reversal_score", 0) or 0)
-        opposing = int(reversal.get("short_reversal_score", 0) or 0)
-    elif direction == "short":
-        momentum_ok = bool(momentum.get("stoch_bearish_cross") or momentum.get("macd_bearish_expansion"))
-        aligned = int(reversal.get("short_reversal_score", 0) or 0)
-        opposing = int(reversal.get("long_reversal_score", 0) or 0)
-    else:
+    """Validate direction only; weekly/daily alignment is the higher-timeframe gate.
+
+    Four-hour Stoch RSI, MACD and reversal/exhaustion scores are advisory only and
+    must not veto a confirmed trendline break after the weekly thesis gate passes.
+    """
+    direction = str(event.get("direction", "")).strip().lower()
+    if direction not in {"long", "short"}:
         return False, ["direction_missing"]
-    blockers = []
-    daily_bias = str(event.get("daily_bias", "")).strip().lower()
-    if daily_bias not in {"bullish", "bearish"}:
-        blockers.append("daily_bias_unavailable")
-    elif direction == "long" and daily_bias == "bearish":
-        blockers.append("direction_conflicts_with_daily_bias")
-    elif direction == "short" and daily_bias == "bullish":
-        blockers.append("direction_conflicts_with_daily_bias")
-    if not momentum_ok:
-        blockers.append("directional_momentum_filter_failed")
-    if opposing >= 2 and opposing > aligned:
-        blockers.append("opposing_exhaustion_filter_blocked_entry")
-    return not blockers, blockers
+    return True, []
 
 
 def _ai_candidate_pass(
@@ -140,6 +123,58 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
         try:
             pair_dir = out / pair.lower()
             pair_dir.mkdir(parents=True, exist_ok=True)
+
+            # HARD GATE: evaluate completed weekly/daily candles before invoking
+            # any 4H scan. Inactive, vetoed, or unavailable thesis means no 4H work.
+            try:
+                weekly_thesis = evaluate_sheldon_thesis(pair, as_of=pd.Timestamp.now(tz="UTC"))
+            except Exception as thesis_error:
+                weekly_thesis = {
+                    "pair": pair.upper(), "status": "unavailable", "direction": None,
+                    "reason": f"weekly_thesis_evaluation_error: {type(thesis_error).__name__}: {thesis_error}",
+                    "generated_at_utc": utc_now(),
+                }
+            thesis_status = str(weekly_thesis.get("status", "unavailable")).lower()
+            if thesis_status != "active":
+                thesis_reason = str(weekly_thesis.get("reason") or f"Weekly thesis status is {thesis_status}.")
+                row = {
+                    "run_id": run_id, "pair": pair, "status": "weekly_inactive",
+                    "market_started_at": pair_started, "market_finished_at": utc_now(),
+                    "weekly_thesis": weekly_thesis, "weekly_thesis_status": thesis_status,
+                    "latest_setup_state": "SKIPPED_WEEKLY_INACTIVE",
+                    "friday_decision": "SKIPPED_WEEKLY_INACTIVE",
+                    "scan_diagnostic": f"Weekly Inactive — 4H scan skipped. {thesis_reason}",
+                    "ai_review_status": "not_run", "break_event_count": 0,
+                    "persistence": "configured" if store.configured else "not_configured",
+                    "alert_results": [{
+                        "type": "SCAN", "sent": False, "status": "weekly_inactive",
+                        "reason": thesis_reason,
+                    }],
+                }
+                if store.configured:
+                    thesis_key = hashlib.sha256(
+                        f"{pair}|weekly_thesis|{weekly_thesis.get('generated_at_utc')}".encode()
+                    ).hexdigest()
+                    store.record_archive(make_archive_record(
+                        record_key=thesis_key, record_type="weekly_thesis_snapshot",
+                        pair=pair, timeframe="1W+1D",
+                        signal_time=weekly_thesis.get("generated_at_utc"), payload=weekly_thesis,
+                    ))
+                row["duration_seconds"] = round(
+                    (pd.Timestamp(row["market_finished_at"]) - pd.Timestamp(pair_started)).total_seconds(), 3
+                )
+                row["alert_outcomes_total"] = 1
+                row["alert_outcomes_sent"] = 0
+                row["alert_outcomes_blocked"] = 1
+                (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
+                pair_results.append(row)
+                print(
+                    f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY INACTIVE pair={display_pair} "
+                    f"status={thesis_status} action=SKIP_4H reason={thesis_reason}",
+                    flush=True,
+                )
+                continue
+
             result = build_preview(pair=pair, interval=240, output_dir=str(pair_dir))
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] DATA_OK pair={display_pair} "
@@ -162,45 +197,25 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             )
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
-            # Persist the weekly/daily regime for dashboard visibility only. This
-            # is deliberately advisory: it never skips or changes the 4H engine.
+            # Persist the already-evaluated weekly/daily thesis alongside the 4H scan.
             if store.configured:
-                try:
-                    weekly_thesis = evaluate_sheldon_thesis(pair, as_of=latest)
-                except Exception as thesis_error:
-                    weekly_thesis = {
-                        "pair": pair.upper(),
-                        "status": "unavailable",
-                        "direction": None,
-                        "reason": f"weekly_thesis_evaluation_error: {type(thesis_error).__name__}: {thesis_error}",
-                        "generated_at_utc": utc_now(),
-                    }
-                    print(
-                        f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_UNAVAILABLE "
-                        f"pair={display_pair} reason={type(thesis_error).__name__}: {thesis_error}",
-                        flush=True,
-                    )
                 thesis_key = hashlib.sha256(
-                    f"{pair}|weekly_thesis|{latest.isoformat()}".encode()
+                    f"{pair}|weekly_thesis|{weekly_thesis.get('generated_at_utc')}".encode()
                 ).hexdigest()
                 try:
                     store.record_archive(make_archive_record(
-                        record_key=thesis_key,
-                        record_type="weekly_thesis_snapshot",
-                        pair=pair,
-                        timeframe="1W+1D",
-                        signal_time=latest.isoformat(),
-                        payload=weekly_thesis,
+                        record_key=thesis_key, record_type="weekly_thesis_snapshot",
+                        pair=pair, timeframe="1W+1D",
+                        signal_time=weekly_thesis.get("generated_at_utc"), payload=weekly_thesis,
                     ))
                     print(
                         f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_SAVED "
-                        f"pair={display_pair} status={weekly_thesis.get('status')} "
+                        f"pair={display_pair} status=active "
                         f"direction={weekly_thesis.get('direction') or 'none'} "
                         f"reason={weekly_thesis.get('reason') or 'n/a'}",
                         flush=True,
                     )
                 except Exception as thesis_store_error:
-                    # Persistence trouble must not abort or gate the 4H scan.
                     print(
                         f"[FRIDAY MARKET {index}/{len(pairs)}] WEEKLY_THESIS_SAVE_FAILED "
                         f"pair={display_pair} reason={type(thesis_store_error).__name__}: {thesis_store_error}",
@@ -484,7 +499,14 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     if fresh_entry2:
                         alert_event["event_add"] = "CONTINUATION_ADD_CONFIRMED"
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
-                    message = build_signal_alert(alert_event, pair=_display_pair(pair), timeframe="4H")
+                    alert_direction = str(weekly_thesis.get("direction") or "").lower()
+                    daily_bias_for_alert = "bullish" if alert_direction == "long" else "bearish"
+                    alert_event["daily_bias"] = daily_bias_for_alert
+                    message = build_signal_alert(
+                        alert_event, pair=_display_pair(pair), timeframe="4H",
+                        weekly_thesis=weekly_thesis,
+                        daily_context={"bias": daily_bias_for_alert},
+                    )
                     try:
                         alert = send_telegram_alert(message)
                         if alert.get("sent"):
