@@ -372,22 +372,15 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     long_ema_alignment = float(last.close) > max(float(ema5_now.iloc[-1]), float(last.ema8_4h), float(ema13_now.iloc[-1]), float(last.ema21_4h))
     daily_bias = str(last.daily_bias).lower()
     daily_bias_available = daily_bias in ("bullish", "bearish")
-    execution_direction = "short" if stoch_down and short_ema_alignment and daily_bias == "bearish" else (
-        "long" if stoch_up and long_ema_alignment and daily_bias == "bullish" else None
-    )
+    # A completed 4H trendline break is the trigger. Stoch RSI, MACD and
+    # short-term EMA positioning are context only, never entry gates.
+    latest_break = next((
+        event for event in reversed(events)
+        if event.get("signal_time") == last.timestamp.isoformat()
+        and event.get("event") == "BREAK_CLOSE_PROBE"
+    ), None)
+    execution_direction = str(latest_break.get("direction", "")).lower() if latest_break else None
     execution_blockers = []
-    if not daily_bias_available:
-        execution_blockers.append("daily_bias_unavailable")
-    if not (stoch_down or stoch_up):
-        execution_blockers.append("no_fresh_closed_4h_stoch_cross")
-    if stoch_down and not short_ema_alignment:
-        execution_blockers.append("short_price_not_below_all_emas")
-    if stoch_up and not long_ema_alignment:
-        execution_blockers.append("long_price_not_above_all_emas")
-    if stoch_down and daily_bias != "bearish":
-        execution_blockers.append("short_execution_conflicts_with_daily_bias")
-    if stoch_up and daily_bias != "bullish":
-        execution_blockers.append("long_execution_conflicts_with_daily_bias")
     execution_trigger = {
         "signal_time": last.timestamp.isoformat(), "direction": execution_direction,
         "eligible": execution_direction is not None, "daily_bias": daily_bias,
@@ -395,7 +388,7 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
         "ema5": float(ema5_now.iloc[-1]), "ema8": float(last.ema8_4h),
         "ema13": float(ema13_now.iloc[-1]), "ema21": float(last.ema21_4h),
         "below_all_emas": bool(short_ema_alignment), "above_all_emas": bool(long_ema_alignment),
-        "blockers": execution_blockers, "research_only": True,
+        "break_event": latest_break, "blockers": execution_blockers, "research_only": True,
     }
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
         "latest_setup_state":setup_state,
@@ -425,7 +418,7 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
         "latest_momentum_context":momentum_context(frame,len(frame)-1),
         "event_summary":{name:sum(e["outcome"]==name for e in events) for name in
             ("retest_held_waiting_continuation","continuation_add_confirmed","failed_break","no_retest_within_window","pending","no_continuation_within_window")},
-        "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line",
+        "rules":{"probe":"closed 4H close >=0.15% beyond genuine three-touch line; Stoch RSI, MACD and 4H EMA alignment are context only",
             "entry_1":"small research probe candidate after a meaningful closed-candle trendline break; no live order",
             "retest":"within 18 bars / 72h, price revisits the broken line and closes on the breakout side",
             "entry_2":"only after a subsequent closed candle breaks the retest reaction high/low in breakout direction",
