@@ -87,10 +87,18 @@ export default function Home() {
     const active = String(thesis?.status ?? "").toLowerCase() === "active";
     return { pair, thesis, scan, weeklyTrend, dailyTrend, weeklyMomentum, active };
   });
-  const watchlist = weeklyCards.filter(card =>
-    card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
-  );
   const recentEvents = data.events.slice(0, 40);
+  const latestOutcomeByPair = new Map<string, string>();
+  for (const event of data.events) {
+    const pair = pairName(event.pair);
+    if (!latestOutcomeByPair.has(pair)) latestOutcomeByPair.set(pair, String(event.outcome ?? "").toLowerCase());
+  }
+  const suppressedOutcomes = new Set(["invalidated", "expired", "failed_break", "no_retest_within_window", "no_continuation_within_window", "insufficient_data"]);
+  const watchlist = weeklyCards.filter(card =>
+    card.active &&
+    !openTrades.some(trade => pairName(trade.pair) === card.pair) &&
+    !suppressedOutcomes.has(latestOutcomeByPair.get(card.pair) ?? "")
+  );
  client";
 
 import { useEffect, useState } from "react";
