@@ -20,10 +20,10 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -95,7 +95,7 @@ jobs:
           PY
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
 
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload audit logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: friday-full-audit-logs
           if-no-files-found: warn
