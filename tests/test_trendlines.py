@@ -24,7 +24,7 @@ class TrendlineGeometryTests(unittest.TestCase):
             Pivot(5, 10.0, "support", 6),
         ]
         lines = fit_touch_trendlines(
-            frame, pivots, kind="support", min_touches=3, tolerance_pct=0.001
+            frame, pivots, kind="support", min_touches=3, tolerance_pct=0.001, min_touch_spacing=2
         )
         self.assertTrue(lines)
         line = lines[0]
@@ -60,7 +60,7 @@ class TrendlineGeometryTests(unittest.TestCase):
 
     def test_line_confirmation_uses_latest_qualifying_touch(self):
         frame = self.candles(
-            [10.2, 10.0, 10.2, 10.0, 10.2, 10.0, 10.2, 10.0],
+            [10.2, 10.0, 10.2, 10.2, 10.0, 10.2, 10.2, 10.0],
             highs=[11.0] * 8,
             closes=[10.5] * 8,
         )
