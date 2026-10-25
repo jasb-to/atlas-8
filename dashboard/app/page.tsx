@@ -60,8 +60,8 @@ export default function Home() {
   const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
   const closedTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "CLOSED").slice(0, 6);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
-  const aiQuotaError = pairScans.some(scan => /402|payment required|quota exceeded/i.test(String(scan.ai_review_error ?? "")));
-  const aiReviewActive = pairScans.some(scan => scan.ai_review_status && !["disabled", "not_configured"].includes(String(scan.ai_review_status).toLowerCase()));
+  const aiReviewActive = pairScans.some(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
+  const aiProvider = pairScans.find(scan => scan.ai_review_status === "ok" && (scan.ai_review_provider || scan.ai_provider))?.ai_review_provider ?? pairScans.find(scan => scan.ai_review_status === "ok" && scan.ai_provider)?.ai_provider;
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
@@ -109,7 +109,7 @@ export default function Home() {
       <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH INTELLIGENCE</span></span></a>
       <div className="top-actions">
         <span className="mode-chip"><i /> RESEARCH ONLY · NO LIVE ORDERS</span>
-        <span className={aiQuotaError ? "ai-status ai-error" : "ai-status"}><i /> {aiQuotaError ? "AI OFFLINE · QUOTA ERROR" : aiReviewActive ? "AI REVIEW ACTIVE" : "AI REVIEW OFF · RULES FIRST"}</span>
+        <span className="ai-status"><i /> {aiReviewActive ? `AI: ${String(aiProvider ?? "ONLINE").toUpperCase()}` : "AI OFFLINE"}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
@@ -177,17 +177,8 @@ export default function Home() {
         </div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No weekly-approved setups waiting</b><p>There is no persisted active weekly thesis attached to a waiting 4H setup. Candidates will appear here when both records exist.</p></div></div>}
       </section>
 
-      <section className="section-block compact">
-        <div className="section-heading"><div><span className="eyebrow">04 / RECENT RESULTS</span><h2>Recently closed trades</h2></div><span className="section-count">{closedTrades.length} SHOWN</span></div>
-        <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>DIRECTION</th><th>STATUS</th><th>RESULT</th><th>CLOSED</th></tr></thead><tbody>
-          {closedTrades.length ? closedTrades.map((trade, index) => {
-            const result = Number(trade.realized_r_multiple);
-            return <tr key={trade.trade_id ?? index}><td><b>{shortPair(trade.pair)}</b></td><td><span className={direction(trade.direction) === "long" ? "direction long" : "direction short"}>{String(trade.direction ?? "—").toUpperCase()}</span></td><td>{clean(trade.exit_reason ?? "Closed")}</td><td className={Number.isFinite(result) ? result >= 0 ? "positive-text" : "negative-text" : ""}>{Number.isFinite(result) ? (result > 0 ? "+" : "") + result.toFixed(2) + "R" : "—"}</td><td>{fmtTime(trade.exit_time)}</td></tr>;
-          }) : <tr><td colSpan={5} className="table-empty">No closed paper trades have been recorded yet.</td></tr>}
-        </tbody></table></div>
-      </section>
     </> : <>
-      <section className="section-block debug-page">
+      <details className="section-block debug-page debug-section"><summary>🔧 Debug: Scan Trace & Diagnostics</summary>
         <div className="section-heading"><div><span className="eyebrow">DIAGNOSTICS / HIDDEN FROM OVERVIEW</span><h2>Debug & scan evidence</h2><p>Operational details remain available here without overwhelming the scoreboard.</p></div></div>
         <div className="debug-grid">
           <div><span>DATA LINK</span><b className={data.connected ? "positive-text" : "negative-text"}>{data.connected ? "CONNECTED" : clean(data.status).toUpperCase()}</b></div>
@@ -205,7 +196,7 @@ export default function Home() {
         <div className="table-wrap"><table><thead><tr><th>MARKET / TIME</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th></tr></thead><tbody>
           {recentEvents.length ? recentEvents.map((event, index) => <tr key={event.event_key ?? index}><td><b>{shortPair(event.pair)}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}</td><td>{clean(event.direction)}</td><td>{clean(event.outcome)}</td><td>{fmtPrice(event.entry_reference)}</td></tr>) : <tr><td colSpan={5} className="table-empty">No lifecycle events recorded.</td></tr>}
         </tbody></table></div>
-      </section>
+      </details>
     </>}
     <footer><span className="footer-brand">FRIDAY <i>/ RESEARCH CONTROL ROOM</i></span><span>Research only · No exchange orders</span><span>Auto-refresh · 30 sec</span></footer>
   </main>;

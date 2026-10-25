@@ -11,7 +11,7 @@ from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.structure_lifecycle import evaluate_structure
 from research.friday_decision import evaluate_friday_decision
 from research.signal_journal import append_decision, build_decision_record
-from research.friday_huggingface import review_decision
+from research.friday_ai_review import review_decision
 from research.friday_reversal import reversal_context
 from research.friday_trade_plan import build_trade_plan
 from research.friday_momentum_reversal import scan_momentum_reversal
