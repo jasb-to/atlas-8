@@ -114,7 +114,7 @@ class WeeklyThesisTests(unittest.TestCase):
         daily_values = np.linspace(100.0, 180.0, 100)
         daily_values[-16:] = daily_values[-17] * np.array(
             [0.995, 0.990, 0.985, 0.980, 0.975, 0.970, 0.965, 0.960,
-             0.955, 0.950, 0.945, 0.940, 0.935, 0.930, 0.925, 0.920]
+             0.955, 0.950, 0.945, 0.940, 0.935, 0.930, 0.925, 0.910]
         )
         weekly = pd.DataFrame({
             "timestamp": pd.date_range(start="2021-01-04", periods=260, freq="7D", tz="UTC"),
