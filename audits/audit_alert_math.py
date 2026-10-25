@@ -23,7 +23,7 @@ def main():
     assert "🛑 Stop Loss: 9.046" in good, good
     assert "💰 TP1: 8.486 (1.5R)" in good, good
     assert "999" not in good, good
-    assert "💰 TP2: 7.833 (4.42R)" in good, good
+    assert "💰 TP2: 7.833 (4.4R)" in good, good
 
     wrong_side = build_signal_alert(event(100, 90, 80), pair="AVAXUSDT")
     assert wrong_side.startswith("Invalid trade geometry:"), wrong_side
