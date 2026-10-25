@@ -20,7 +20,7 @@ RSI_LENGTH = 14
 STOCH_LENGTH = 14
 STOCH_K_SMOOTH = 3
 STOCH_D_SMOOTH = 3
-DAILY_RECENT_CROSS_BARS = 3
+WEEKLY_RECENT_CROSS_BARS = 3
 
 
 def calculate_stoch_rsi(
@@ -145,8 +145,10 @@ def evaluate_sheldon_thesis(
 ) -> dict[str, Any]:
     """Evaluate completed weekly regime and completed-daily alignment.
 
-    Weekly cross (a fresh cross in the extreme zone) and weekly aligned state
-    are deliberately reported separately. Every return has the same flat schema.
+    Weekly direction uses the 200-SMA plus K>D / K<D or a recent directional
+    cross within three completed weekly candles. The cross is not restricted to
+    the extreme 20/80 zones. Daily alignment requires the 200-SMA and K>D / K<D.
+    Every return has the same flat schema.
     """
     now = pd.Timestamp(as_of or datetime.now(timezone.utc))
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
@@ -192,23 +194,16 @@ def evaluate_sheldon_thesis(
     if None in (w_sma, d_sma, w_k, w_d, d_k, d_d):
         return result("insufficient_data", None, "The 200-SMA or Stoch RSI values are not yet valid.")
 
-    w_k_prev, w_d_prev = _number(weekly_k.iloc[-2]), _number(weekly_d.iloc[-2])
-    bull_cross = (
-        w_k_prev is not None and w_d_prev is not None
-        and w_k_prev <= w_d_prev and w_k > w_d and w_k < 20
-    )
-    bear_cross = (
-        w_k_prev is not None and w_d_prev is not None
-        and w_k_prev >= w_d_prev and w_k < w_d and w_k > 80
-    )
-    bull_aligned = w_k > w_d
-    bear_aligned = w_k < w_d
+    bull_cross = _cross_recently_up(weekly_k, weekly_d, WEEKLY_RECENT_CROSS_BARS)
+    bear_cross = _cross_recently_down(weekly_k, weekly_d, WEEKLY_RECENT_CROSS_BARS)
+    bull_aligned = w_k > w_d or bull_cross
+    bear_aligned = w_k < w_d or bear_cross
     weekly_bullish, weekly_bearish = w_close > w_sma, w_close < w_sma
 
-    if weekly_bullish and (bull_cross or bull_aligned):
-        direction, cross, aligned = "long", bool(bull_cross), bool(bull_aligned)
-    elif weekly_bearish and (bear_cross or bear_aligned):
-        direction, cross, aligned = "short", bool(bear_cross), bool(bear_aligned)
+    if weekly_bullish and bull_aligned:
+        direction, cross, aligned = "long", bool(bull_cross), bool(w_k > w_d)
+    elif weekly_bearish and bear_aligned:
+        direction, cross, aligned = "short", bool(bear_cross), bool(w_k < w_d)
     else:
         return result(
             "inactive", None,
@@ -217,12 +212,8 @@ def evaluate_sheldon_thesis(
             bool((weekly_bullish and bull_aligned) or (weekly_bearish and bear_aligned)),
         )
 
-    daily_bullish = d_close > d_sma and (
-        d_k > d_d or _cross_recently_up(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
-    )
-    daily_bearish = d_close < d_sma and (
-        d_k < d_d or _cross_recently_down(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
-    )
+    daily_bullish = d_close > d_sma and d_k > d_d
+    daily_bearish = d_close < d_sma and d_k < d_d
     daily_aligned = daily_bullish if direction == "long" else daily_bearish
     if not daily_aligned:
         return result(
