@@ -6,7 +6,7 @@ friday_monitor.py, place orders, or authorize production alerts.
 ## 1. Alert geometry (local deterministic check)
 
 ~~~bash
-python audits/audit_alert_math.py
+python -m audits.audit_alert_math
 ~~~
 
 Checks calculated TP1/TP2 R, malformed geometry, wrong-side stops, and sender refusal.
@@ -16,7 +16,7 @@ The exact input entry=8.822, stop=9.046 yields TP1 8.486; using stop
 ## 2. Mid-week freeze
 
 ~~~bash
-python audits/audit_midweek_freeze.py
+python -m audits.audit_midweek_freeze
 ~~~
 
 Fetches recent weekly BTC candles and compares the last completed weekly close,
@@ -28,7 +28,7 @@ or time-zone path is correct.
 ## 3. Daily flip-flop replay
 
 ~~~bash
-python audits/audit_daily_flipflop.py
+python -m audits.audit_daily_flipflop
 ~~~
 
 Fetches paginated OKX history for SOLUSDT and ETHUSDT, replays completed daily
@@ -44,7 +44,7 @@ PR with weekly_thesis=None, keeping candles and replay settings identical. Save
 the two files separately, then run:
 
 ~~~bash
-python audits/audit_trade_diff.py \
+python -m audits.audit_trade_diff \
   --baseline /tmp/main-trade_replay.jsonl \
   --candidate /tmp/pr-filter-disabled-trade_replay.jsonl
 ~~~
@@ -55,7 +55,7 @@ does not claim a pass if either artifact is missing.
 ## 5. Filter-on versus filter-off comparison
 
 ~~~bash
-python audits/backtest_filter_comparison.py
+python -m audits.backtest_filter_comparison
 ~~~
 
 Uses the same causal 4H break detector and replay engine for AVAXUSDT, SOLUSDT and
