@@ -70,9 +70,10 @@ Upstash Redis REST is Friday's primary persistence backend. It is separate from 
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN` (secret; never commit it)
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (optional alert delivery)
-- `HUGGINGFACE_API_KEY` (optional shadow review; never put it in code or logs)
+- `GEMINI_API_KEY` and/or `GROQ_API_KEY` for optional AI shadow review (server-side only; never commit keys or log them)
+- Optional model overrides: `FRIDAY_GEMINI_MODEL` and `FRIDAY_GROQ_MODEL_ID`
 
-Friday defaults to `openai/gpt-oss-120b:cheapest` on the Hugging Face Router endpoint; you only need `HUGGINGFACE_API_KEY`. You may override `FRIDAY_HF_MODEL_ID` or `FRIDAY_HF_ENDPOINT` for testing. Hugging Face free-account inference availability and credits can change; the router is not a promise of unlimited free inference. Extra usage requires purchasing credits, so do not enable paid billing or buy credits for this research project. Friday remains rule-led if the token is absent.
+Friday's optional AI reviewer uses Gemini or Groq only. If neither key is configured, the review reports `not_configured`; deterministic strategy rules remain authoritative.
 
 The workflow maps Upstash credentials to runtime environment variables. Without configured persistent storage, the monitor refuses to send Telegram alerts so it cannot claim reliable deduplication. Run logs and snapshots are also uploaded as GitHub Actions artifacts, retained for 30 days. The dashboard reads the same Upstash data using server-side environment variables; never use a `NEXT_PUBLIC_` prefix for credentials.
 
@@ -92,6 +93,6 @@ GitHub Actions run logs are the first-level cron diagnostics; the artifact conta
 - `research/friday_learning.py` builds a repeatable JSON report from decision-journal JSONL and replay-result JSONL. It tracks NO_TRADE frequency, common blockers, model status, win rate, compounded net return, profit factor, drawdown, exits, target types, direction splits, and available forward-return diagnostics.
 - Example: `python -m research.friday_learning --decisions results/strategy-preview/decision_journal.jsonl --trades results/strategy-preview/trade_replay.jsonl --events results/strategy-preview/break_events.jsonl --output results/friday-learning-report.json`. The trade input must be JSONL replay rows; `--events` accepts lifecycle events containing forward-return diagnostics. Absent inputs are treated as empty.
 - Reports do not automatically tune or promote strategy rules. Candidate changes must beat the baseline in chronological walk-forward testing, with fees/slippage, and must be checked for drawdown and 10%/20% directional-move capture.
-- `research/friday_huggingface.py` is an optional Hugging Face shadow reviewer, wired into the preview journal. It reads `HUGGINGFACE_API_KEY` (or `HF_TOKEN`); model and endpoint defaults are in code. Optional overrides: `FRIDAY_HF_MODEL_ID` and `FRIDAY_HF_ENDPOINT`. It uses the Hugging Face router's OpenAI-compatible chat-completions interface, validates the response schema, records status/model/latency/errors, and fails soft. This is advisory only and is not permitted to change deterministic signals.
+- `research/friday_ai_review.py` calls the server-side AI review endpoint using a GitHub Actions OIDC identity. The endpoint uses Gemini or Groq only, validates the response schema, records status/model/latency/errors, and fails soft. AI review is advisory only and cannot change deterministic eligibility or risk gates.
 - If credentials/model ID are absent, the journal explicitly records `not_configured`. The model can review but cannot change the rule-engine decision, invent a setup, or trigger an order. Model output stays advisory until it demonstrates out-of-sample value.
 - Tests: `python -m unittest discover -s tests -p 'test_*.py' -v`.

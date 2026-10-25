@@ -7,10 +7,9 @@ export const revalidate = 0;
 export const maxDuration = 20;
 
 const ISSUER = "https://token.actions.githubusercontent.com";
-const AUDIENCE = "friday-huggingface-review";
+const AUDIENCE = "friday-ai-review";
 const REPOSITORY = "jasb-to/atlas-8";
 const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/heads/main";
-const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
 function json(body: unknown, status = 200) {
@@ -58,12 +57,11 @@ export async function POST(request: Request) {
     return json({ status: "error", error: message }, 401);
   }
 
-  // Prefer Gemini when configured; retain Hugging Face as a compatibility fallback.
+  // Friday supports Gemini and Groq only. No other provider is built into this route.
   const geminiKey = process.env.GEMINI_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
-  const hfKey = process.env.HUGGINGFACE_API_KEY;
-  const provider = geminiKey ? "gemini" : groqKey ? "groq" : hfKey ? "huggingface" : null;
-  if (!provider) return json({ status: "error", error: "No AI provider configured. Set GEMINI_API_KEY, GROQ_API_KEY, or HUGGINGFACE_API_KEY." }, 503);
+  const provider = geminiKey ? "gemini" : groqKey ? "groq" : null;
+  if (!provider) return json({ status: "error", error: "No AI provider configured. Set GEMINI_API_KEY or GROQ_API_KEY." }, 503);
   // Gemini 2.5 Flash is restricted for new users and returns HTTP 404 on this key.
   // Migrate the legacy default/override to the supported, cost-efficient Flash-Lite model.
   const configuredGeminiModel = process.env.FRIDAY_GEMINI_MODEL;
@@ -72,9 +70,7 @@ export async function POST(request: Request) {
     : configuredGeminiModel;
   const model = provider === "gemini"
     ? geminiModel
-    : provider === "groq"
-      ? (process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b")
-      : (process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest");
+    : (process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b");
   let input: any;
   try { input = await request.json(); } catch { return json({ status: "error", error: "Invalid JSON request" }, 400); }
   if (!input?.decision || typeof input.decision !== "object" || Array.isArray(input.decision)) {
@@ -107,7 +103,6 @@ export async function POST(request: Request) {
     const providers = [
       ...(geminiKey ? [{ provider: "gemini", model: geminiModel }] : []),
       ...(groqKey ? [{ provider: "groq", model: process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b" }] : []),
-      ...(hfKey ? [{ provider: "huggingface", model: process.env.FRIDAY_HF_MODEL_ID || "openai/gpt-oss-120b:cheapest" }] : []),
     ];
     const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
     let lastTransportError: unknown = null;
@@ -149,10 +144,8 @@ export async function POST(request: Request) {
             signal: AbortSignal.timeout(5000),
           });
         } else {
-          const apiKey = activeProvider === "groq" ? groqKey! : hfKey!;
-          const endpoint = activeProvider === "groq"
-            ? "https://api.groq.com/openai/v1/chat/completions"
-            : (process.env.FRIDAY_HF_ENDPOINT || "https://router.huggingface.co/v1/chat/completions");
+          const apiKey = groqKey!;
+          const endpoint = "https://api.groq.com/openai/v1/chat/completions";
           response = await fetch(endpoint, {
             method: "POST",
             headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -216,7 +209,7 @@ export async function POST(request: Request) {
       });
       return json({
         status: "error",
-        error: `${activeProvider === "gemini" ? "Gemini" : activeProvider === "groq" ? "Groq" : "Hugging Face"} returned HTTP ${status}`,
+        error: `${activeProvider === "gemini" ? "Gemini" : "Groq"} returned HTTP ${status}`,
         error_category: category,
         upstream_status: status,
         provider: activeProvider,
@@ -238,7 +231,7 @@ export async function POST(request: Request) {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // Some compatible routers wrap a valid JSON object in explanatory text.
+      // Some compatible model APIs wrap a valid JSON object in explanatory text.
       // Recover only a complete object; never infer or repair individual fields.
       const firstObject = raw.indexOf("{");
       const lastObject = raw.lastIndexOf("}");
