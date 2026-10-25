@@ -166,7 +166,21 @@ def fit_touch_trendlines(
         ),
         reverse=True,
     )
-    deduped: list[Trendline] = []\n    for candidate in lines:\n        candidate_touches = set(candidate.touch_indices)\n        if any(\n            existing.kind == candidate.kind\n            and len(candidate_touches.intersection(existing.touch_indices)) >= max(2, min_touches - 1)\n            and abs(existing.slope_per_bar - candidate.slope_per_bar) <= max(abs(candidate.slope_per_bar), 1.0) * 1e-6\n            and abs(existing.start.price - candidate.start.price) <= max(abs(candidate.start.price), min_price_eps) * tolerance_pct\n            for existing in deduped\n        ):\n            continue\n        deduped.append(candidate)\n        if len(deduped) >= max_lines:\n            break\n    return deduped
+    deduped: list[Trendline] = []
+    for candidate in lines:
+        candidate_touches = set(candidate.touch_indices)
+        if any(
+            existing.kind == candidate.kind
+            and len(candidate_touches.intersection(existing.touch_indices)) >= max(2, min_touches - 1)
+            and abs(existing.slope_per_bar - candidate.slope_per_bar) <= max(abs(candidate.slope_per_bar), 1.0) * 1e-6
+            and abs(existing.start.price - candidate.start.price) <= max(abs(candidate.start.price), min_price_eps) * tolerance_pct
+            for existing in deduped
+        ):
+            continue
+        deduped.append(candidate)
+        if len(deduped) >= max_lines:
+            break
+    return deduped
 
 
 def classify_line_state(
@@ -184,7 +198,9 @@ def classify_line_state(
         raise IndexError("index must reference an existing candle after the first")
     row = candles.iloc[i]
     prev = candles.iloc[i - 1]
-    if retest_lookback_bars < 1:\n        raise ValueError("retest_lookback_bars must be >= 1")\n    line_now = line.value_at(i)
+    if retest_lookback_bars < 1:
+        raise ValueError("retest_lookback_bars must be >= 1")
+    line_now = line.value_at(i)
     line_prev = line.value_at(i - 1)
     tol = abs(line_now) * tolerance_pct
 
@@ -245,7 +261,9 @@ def classify_line_state(
                 break
 
     return {
-        "index": i,\n        "as_of_index": i,\n        "is_latest": i == len(candles) - 1,
+        "index": i,
+        "as_of_index": i,
+        "is_latest": i == len(candles) - 1,
         "line_kind": line.kind,
         "line_value": float(line_now),
         "close": float(row["close"]),
