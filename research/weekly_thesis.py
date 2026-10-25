@@ -108,36 +108,61 @@ def _flat_result(
     weekly_close: float | None = None,
     weekly_ema8: float | None = None,
     weekly_ema21: float | None = None,
+    weekly_ema200: float | None = None,
     weekly_stoch_k: float | None = None,
     weekly_stoch_d: float | None = None,
+    weekly_macd_histogram: float | None = None,
     daily_close: float | None = None,
     daily_ema8: float | None = None,
     daily_ema21: float | None = None,
+    daily_ema50: float | None = None,
     daily_stoch_k: float | None = None,
     daily_stoch_d: float | None = None,
+    macro_regime: str | None = None,
+    wave_state: str | None = None,
+    momentum_bearish: bool = False,
+    momentum_bullish: bool = False,
+    daily_alignment: str = "unavailable",
     weekly_stoch_cross: bool = False,
     weekly_stoch_aligned: bool = False,
 ) -> dict[str, Any]:
-    """Return the same flat schema on every evaluator path."""
+    """Return a stable, flat schema for active, vetoed and unavailable theses."""
     return {
         "pair": pair.upper(),
         "status": status,
         "direction": direction,
+        "macro_regime": macro_regime,
+        "wave_state": wave_state,
+        "momentum_bearish": bool(momentum_bearish),
+        "momentum_bullish": bool(momentum_bullish),
         "weekly_close": weekly_close,
         "weekly_ema8": weekly_ema8,
         "weekly_ema21": weekly_ema21,
+        "weekly_ema200": weekly_ema200,
         "weekly_stoch_k": weekly_stoch_k,
         "weekly_stoch_d": weekly_stoch_d,
+        "weekly_macd_histogram": weekly_macd_histogram,
         "daily_close": daily_close,
         "daily_ema8": daily_ema8,
         "daily_ema21": daily_ema21,
+        "daily_ema50": daily_ema50,
         "daily_stoch_k": daily_stoch_k,
         "daily_stoch_d": daily_stoch_d,
+        "daily_alignment": daily_alignment,
         "weekly_stoch_cross": bool(weekly_stoch_cross),
         "weekly_stoch_aligned": bool(weekly_stoch_aligned),
         "reason": reason,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def _macd_histogram(close: pd.Series) -> pd.Series:
+    """MACD histogram (12, 26, 9), calculated only from the supplied closes."""
+    fast = close.ewm(span=12, adjust=False, min_periods=12).mean()
+    slow = close.ewm(span=26, adjust=False, min_periods=26).mean()
+    macd = fast - slow
+    signal = macd.ewm(span=9, adjust=False, min_periods=9).mean()
+    return macd - signal
 
 
 def evaluate_sheldon_thesis(
@@ -148,11 +173,12 @@ def evaluate_sheldon_thesis(
     fetcher: Callable[..., pd.DataFrame] = fetch_ohlc,
     as_of: datetime | pd.Timestamp | None = None,
 ) -> dict[str, Any]:
-    """Evaluate completed weekly regime and completed-daily alignment.
+    """Evaluate the 3-State Wave Model using completed weekly/daily candles only.
 
-    Weekly direction uses completed-candle EMA 8/21 and Stoch RSI K>D / K<D.
-    Daily alignment also requires completed-candle EMA 8/21 and matching Stoch RSI.
-    Every return has the same flat schema.
+    Macro regime is weekly close versus EMA 200. Weekly momentum is Stoch RSI
+    K/D with MACD histogram as an alternative signal. Bullish macro + bearish
+    momentum is a SHORT pullback; bearish macro + bullish momentum is a LONG
+    pullback. Daily close versus EMA 50 is the direction veto.
     """
     now = pd.Timestamp(as_of or datetime.now(timezone.utc))
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
@@ -164,10 +190,10 @@ def evaluate_sheldon_thesis(
 
     wc = _number(weekly["close"].iloc[-1]) if not weekly.empty else None
     dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
-    if len(weekly) < 34 or len(daily) < 34:
+    if len(weekly) < 200 or len(daily) < 50:
         return _flat_result(
             pair, status="insufficient_data", direction=None,
-            reason=(f"Need at least 34 completed weekly and daily candles; "
+            reason=(f"Need at least 200 completed weekly and 50 completed daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
             weekly_close=wc, daily_close=dc,
         )
@@ -176,61 +202,94 @@ def evaluate_sheldon_thesis(
     daily_close = daily["close"].astype(float)
     weekly_ema8 = weekly_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     weekly_ema21 = weekly_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
+    weekly_ema200 = weekly_close.ewm(span=200, adjust=False, min_periods=200).mean()
     daily_ema8 = daily_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     daily_ema21 = daily_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
+    daily_ema50 = daily_close.ewm(span=50, adjust=False, min_periods=50).mean()
     weekly_k, weekly_d = calculate_stoch_rsi(weekly_close)
     daily_k, daily_d = calculate_stoch_rsi(daily_close)
+    weekly_macd_hist = _macd_histogram(weekly_close)
 
     w_close = float(weekly_close.iloc[-1])
     w_ema8, w_ema21 = _number(weekly_ema8.iloc[-1]), _number(weekly_ema21.iloc[-1])
+    w_ema200 = _number(weekly_ema200.iloc[-1])
     d_close = float(daily_close.iloc[-1])
     d_ema8, d_ema21 = _number(daily_ema8.iloc[-1]), _number(daily_ema21.iloc[-1])
+    d_ema50 = _number(daily_ema50.iloc[-1])
     w_k, w_d = _number(weekly_k.iloc[-1]), _number(weekly_d.iloc[-1])
     d_k, d_d = _number(daily_k.iloc[-1]), _number(daily_d.iloc[-1])
-
-    def result(status: str, direction: str | None, reason: str,
-               cross: bool = False, aligned: bool = False) -> dict[str, Any]:
-        return _flat_result(
-            pair, status=status, direction=direction, reason=reason,
-            weekly_close=w_close, weekly_ema8=w_ema8, weekly_ema21=w_ema21,
-            weekly_stoch_k=w_k, weekly_stoch_d=w_d,
-            daily_close=d_close, daily_ema8=d_ema8, daily_ema21=d_ema21,
-            daily_stoch_k=d_k, daily_stoch_d=d_d,
-            weekly_stoch_cross=cross, weekly_stoch_aligned=aligned,
-        )
-
-    if None in (w_ema8, w_ema21, d_ema8, d_ema21, w_k, w_d, d_k, d_d):
-        return result("insufficient_data", None, "The EMA 8/21 or Stoch RSI values are not yet valid.")
+    w_macd_hist = _number(weekly_macd_hist.iloc[-1])
 
     bull_cross = _cross_recently_up(weekly_k, weekly_d, WEEKLY_RECENT_CROSS_BARS)
     bear_cross = _cross_recently_down(weekly_k, weekly_d, WEEKLY_RECENT_CROSS_BARS)
-    bull_aligned = w_k > w_d or bull_cross
-    bear_aligned = w_k < w_d or bear_cross
-    weekly_bullish, weekly_bearish = w_ema8 > w_ema21, w_ema8 < w_ema21
 
-    if weekly_bullish and bull_aligned:
-        direction, cross, aligned = "long", bool(bull_cross), bool(w_k > w_d)
-    elif weekly_bearish and bear_aligned:
-        direction, cross, aligned = "short", bool(bear_cross), bool(w_k < w_d)
-    else:
-        return result(
-            "inactive", None,
-            "Weekly EMA 8/21 trend and Stoch RSI direction are not aligned.",
-            bool(bull_cross or bear_cross),
-            bool((weekly_bullish and bull_aligned) or (weekly_bearish and bear_aligned)),
+    def result(status: str, direction: str | None, reason: str, *,
+               macro: str | None = None, wave: str | None = None,
+               bearish: bool = False, bullish: bool = False,
+               daily_state: str = "unavailable") -> dict[str, Any]:
+        return _flat_result(
+            pair, status=status, direction=direction, reason=reason,
+            weekly_close=w_close, weekly_ema8=w_ema8, weekly_ema21=w_ema21,
+            weekly_ema200=w_ema200, weekly_stoch_k=w_k, weekly_stoch_d=w_d,
+            weekly_macd_histogram=w_macd_hist,
+            daily_close=d_close, daily_ema8=d_ema8, daily_ema21=d_ema21,
+            daily_ema50=d_ema50, daily_stoch_k=d_k, daily_stoch_d=d_d,
+            macro_regime=macro, wave_state=wave,
+            momentum_bearish=bearish, momentum_bullish=bullish,
+            daily_alignment=daily_state,
+            weekly_stoch_cross=bool(bull_cross or bear_cross),
+            weekly_stoch_aligned=bool(w_k is not None and w_d is not None and w_k > w_d),
         )
 
-    daily_bullish = d_ema8 > d_ema21 and d_k > d_d
-    daily_bearish = d_ema8 < d_ema21 and d_k < d_d
-    daily_aligned = daily_bullish if direction == "long" else daily_bearish
+    if None in (w_ema200, d_ema50, w_k, w_d, w_macd_hist):
+        return result("insufficient_data", None,
+                      "Weekly EMA 200, Stoch RSI/MACD, or daily EMA 50 is not valid.")
+
+    macro_bull = w_close > w_ema200
+    macro_bear = w_close < w_ema200
+    if not macro_bull and not macro_bear:
+        return result("inactive", None, "Weekly close equals the 200 EMA; no macro regime.")
+
+    # OR-based momentum signals can overlap when Stoch RSI and MACD disagree.
+    # Resolve that conflict deterministically in favour of Stoch RSI K/D; use
+    # MACD histogram when K and D are equal. This avoids an impossible dual state.
+    stoch_bear = w_k < w_d
+    stoch_bull = w_k > w_d
+    macd_bear = w_macd_hist < 0
+    macd_bull = w_macd_hist > 0
+    momentum_bearish = stoch_bear or macd_bear
+    momentum_bullish = stoch_bull or macd_bull
+    if stoch_bear != stoch_bull:
+        chosen_bearish = stoch_bear
+    elif macd_bear != macd_bull:
+        chosen_bearish = macd_bear
+    else:
+        return result("inactive", None, "Weekly momentum is neutral; no impulse or pullback state.",
+                      macro="bullish" if macro_bull else "bearish",
+                      bearish=momentum_bearish, bullish=momentum_bullish)
+
+    if macro_bull and not chosen_bearish:
+        thesis_direction, wave_state = "long", "impulse"
+    elif macro_bull and chosen_bearish:
+        thesis_direction, wave_state = "short", "pullback"
+    elif macro_bear and chosen_bearish:
+        thesis_direction, wave_state = "short", "impulse"
+    else:
+        thesis_direction, wave_state = "long", "pullback"
+
+    daily_aligned = d_close < d_ema50 if thesis_direction == "short" else d_close > d_ema50
+    daily_state = "pass" if daily_aligned else "veto"
+    macro = "bullish" if macro_bull else "bearish"
     if not daily_aligned:
         return result(
-            "veto", direction,
-            f"Weekly {direction} regime, but completed daily EMA 8/21/Stoch RSI alignment failed.",
-            cross, aligned,
+            "veto", thesis_direction,
+            "Daily conflicts with Weekly Wave",
+            macro=macro, wave=wave_state, bearish=momentum_bearish,
+            bullish=momentum_bullish, daily_state=daily_state,
         )
     return result(
-        "active", direction,
-        f"Weekly {direction} regime aligned with completed daily EMA 8/21 and Stoch RSI.",
-        cross, aligned,
+        "active", thesis_direction,
+        f"Macro {macro}; {wave_state} wave ({thesis_direction}); daily close aligned with EMA 50.",
+        macro=macro, wave=wave_state, bearish=momentum_bearish,
+        bullish=momentum_bullish, daily_state=daily_state,
     )
