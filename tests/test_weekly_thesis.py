@@ -64,7 +64,7 @@ class WeeklyThesisTests(unittest.TestCase):
             self.assertEqual(result_with_open[key], result_without_open[key], key)
 
 
-    def test_20_candles_fail_and_21_candles_clear_ema_history_boundary(self):
+    def test_33_candles_fail_and_34_candles_clear_ema_history_boundary(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=40, freq="D", tz="UTC")
         weekly_times = pd.date_range(end="2026-10-18", periods=34, freq="7D", tz="UTC")
