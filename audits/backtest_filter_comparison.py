@@ -3,6 +3,9 @@
 Run from the repository root. Uses the same causal 4H event detector and trade
 replay for both scenarios. The only scenario difference is whether a setup is
 retained when the completed-candle weekly/daily thesis is active at signal time.
+The evaluation window starts in 2025 because AVAX and SOL do not have 200 weeks
+of listing history during most of 2023; earlier signals cannot be evaluated by
+the specified 200-week SMA rule and must not be counted as filtered losers.
 """
 from __future__ import annotations
 
@@ -13,11 +16,12 @@ from research.strategy_preview import causal_replay
 from research.sheldon_strategy import consolidate_setups, replay_trades
 from research.weekly_thesis import evaluate_sheldon_thesis
 
-START = pd.Timestamp("2023-01-01T00:00:00Z")
-END = pd.Timestamp("2024-10-02T00:00:00Z")
-DATA_START = "2022-11-01"
+START = pd.Timestamp("2025-01-01T00:00:00Z")
+END = pd.Timestamp("2026-10-01T00:00:00Z")
+DATA_START = "2018-01-01"
 INDICATOR_START = "2018-01-01"
-DATA_END = "2024-10-03"
+# Include extra candles beyond the last signal to resolve the 72-hour max hold.
+DATA_END = "2026-10-06"
 
 
 def metrics(trades: list[dict]) -> dict:
@@ -49,7 +53,6 @@ def main():
         daily = fetch_history(pair, "1D", INDICATOR_START, DATA_END)
         weekly = fetch_history(pair, "1W", INDICATOR_START, DATA_END)
 
-        # causal_replay builds indicators from the full pre-range warm-up history.
         events, _status, frame = causal_replay(candles)
         setups = consolidate_setups(events, frame)
         in_range = [
@@ -59,6 +62,7 @@ def main():
         scenario_a_trades = replay_trades(in_range, frame)
 
         retained, rejected = [], []
+        status_counts: dict[str, int] = {}
         thesis_cache = {}
         for event in in_range:
             signal_time = pd.Timestamp(event["signal_time"])
@@ -74,23 +78,25 @@ def main():
                     as_of=as_of,
                 )
             thesis = thesis_cache[key]
+            status_counts[thesis["status"]] = status_counts.get(thesis["status"], 0) + 1
             if thesis["status"] == "active" and thesis["direction"] == event["direction"]:
                 retained.append(event)
             else:
                 rejected.append((event, thesis))
         scenario_b_trades = replay_trades(retained, frame)
         a, b = metrics(scenario_a_trades), metrics(scenario_b_trades)
-        results.append((pair, a, b, len(in_range), len(retained), len(rejected)))
+        results.append((pair, a, b, len(in_range), len(retained), len(rejected), status_counts))
 
     print("\n## FRIDAY filter comparison")
-    print(f"Date range: {START.date()} to 2024-10-01 (UTC signal timestamps)")
+    print(f"Date range: {START.date()} to 2026-09-30 (UTC signal timestamps)")
     print("Execution: existing causal 4H replay; next-open entry; 1 ATR stop; 2R target; 8 bps fee + 5 bps slippage per side; stop-first same-candle assumption.")
     print("Filter-on retains only setups whose thesis is active and direction-matched at the completed-candle signal timestamp.")
     print("\n| Pair | Scenario | Signals | Trades | Win rate | Net R | Max drawdown | Net equity return |")
     print("|---|---|---:|---:|---:|---:|---:|---:|")
-    for pair, a, b, signals, retained, rejected in results:
+    for pair, a, b, signals, retained, rejected, status_counts in results:
         print(f"| {pair} | A — filter off | {signals} | {a['trades']} | {fmt(a['win_rate_pct'])}% | {fmt(a['net_r'])}R | {fmt(a['max_drawdown_pct'])}% | {fmt(a['net_equity_return_pct'])}% |")
         print(f"| {pair} | B — filter on | {retained} | {b['trades']} | {fmt(b['win_rate_pct'])}% | {fmt(b['net_r'])}R | {fmt(b['max_drawdown_pct'])}% | {fmt(b['net_equity_return_pct'])}% |")
+        print(f"  Thesis status counts for {pair}: {status_counts}")
     print("\nInterpretation: compare net R, drawdown and sample size alongside win rate. A higher win rate alone does not establish alpha.")
     print("Limitations: public exchange history, candle-based fills, no funding/borrow costs, no intrabar order-book data; research only, no orders.")
 
