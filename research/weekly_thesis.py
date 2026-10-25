@@ -213,7 +213,8 @@ def evaluate_sheldon_thesis(
         return result(
             "inactive", None,
             "Weekly 200-SMA trend and Stoch RSI direction are not aligned.",
-            bool(bull_cross or bear_cross), bool(bull_aligned or bear_aligned),
+            bool(bull_cross or bear_cross),
+            bool((weekly_bullish and bull_aligned) or (weekly_bearish and bear_aligned)),
         )
 
     daily_bullish = d_close > d_sma and (
