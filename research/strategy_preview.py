@@ -221,7 +221,7 @@ def causal_replay(raw):
             # Invalidation always wins over a same-candle continuation trigger.
             # This avoids reporting an add after the breakout structure has failed.
             if invalid:
-                e.update({"outcome":"failed_break","outcome_bars":age,"failure_time":row.timestamp.isoformat()})
+                e.update({"outcome":"failed_break","outcome_bars":age,"failure_time":row.timestamp.isoformat(),"failure_close":close_i})
                 active.remove(a); continue
             if e.get("retest_confirmed") and not e.get("continuation_add_time"):
                 trigger = float(e["retest_high"]) if e["direction"]=="long" else float(e["retest_low"])
@@ -326,13 +326,48 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
         "active_lines":list(structure.active_lines), "broken_lines":list(structure.broken_lines),
         "latest_support":structure.latest_support, "latest_resistance":structure.latest_resistance,
         "rebuild_policy":"recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"}
+    close_series = frame.close.astype(float)
+    ema5_now = close_series.ewm(span=5, adjust=False).mean()
+    ema13_now = close_series.ewm(span=13, adjust=False).mean()
+    prev_bar, last_bar = frame.iloc[-2], frame.iloc[-1]
+    stoch_down = bool(np.isfinite([prev_bar.stoch_k, prev_bar.stoch_d, last_bar.stoch_k, last_bar.stoch_d]).all()
+                      and prev_bar.stoch_k >= prev_bar.stoch_d and last_bar.stoch_k < last_bar.stoch_d)
+    stoch_up = bool(np.isfinite([prev_bar.stoch_k, prev_bar.stoch_d, last_bar.stoch_k, last_bar.stoch_d]).all()
+                    and prev_bar.stoch_k <= prev_bar.stoch_d and last_bar.stoch_k > last_bar.stoch_d)
+    short_ema_alignment = float(last.close) < min(float(ema5_now.iloc[-1]), float(last.ema8_4h), float(ema13_now.iloc[-1]), float(last.ema21_4h))
+    long_ema_alignment = float(last.close) > max(float(ema5_now.iloc[-1]), float(last.ema8_4h), float(ema13_now.iloc[-1]), float(last.ema21_4h))
+    daily_bias = str(last.daily_bias).lower()
+    execution_direction = "short" if stoch_down and short_ema_alignment and daily_bias == "bearish" else (
+        "long" if stoch_up and long_ema_alignment and daily_bias == "bullish" else None
+    )
+    execution_blockers = []
+    if not (stoch_down or stoch_up):
+        execution_blockers.append("no_fresh_closed_4h_stoch_cross")
+    if stoch_down and not short_ema_alignment:
+        execution_blockers.append("short_price_not_below_all_emas")
+    if stoch_up and not long_ema_alignment:
+        execution_blockers.append("long_price_not_above_all_emas")
+    if stoch_down and daily_bias != "bearish":
+        execution_blockers.append("short_execution_conflicts_with_daily_bias")
+    if stoch_up and daily_bias != "bullish":
+        execution_blockers.append("long_execution_conflicts_with_daily_bias")
+    execution_trigger = {
+        "signal_time": last.timestamp.isoformat(), "direction": execution_direction,
+        "eligible": execution_direction is not None, "daily_bias": daily_bias,
+        "close": float(last.close), "stoch_bearish_cross": stoch_down, "stoch_bullish_cross": stoch_up,
+        "ema5": float(ema5_now.iloc[-1]), "ema8": float(last.ema8_4h),
+        "ema13": float(ema13_now.iloc[-1]), "ema21": float(last.ema21_4h),
+        "below_all_emas": bool(short_ema_alignment), "above_all_emas": bool(long_ema_alignment),
+        "blockers": execution_blockers, "research_only": True,
+    }
     result={"mode":"research_preview_no_orders","source":"Kraken public Spot OHLC API","pair":pair,
         "latest_setup_state":setup_state,
+        "execution_trigger": execution_trigger,
         "interval_minutes":interval,"generated_at_utc":datetime.now(timezone.utc).isoformat(),
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"walk_forward_split_time":walk_forward_split_time,"last_close":float(last.close),
         "trade_plans":{"long":build_trade_plan(frame, "long"),"short":build_trade_plan(frame, "short")},
         "closed_candles":[{"timestamp":pd.Timestamp(r.timestamp).isoformat(),"open":float(r.open),"high":float(r.high),"low":float(r.low),"close":float(r.close)} for r in raw.tail(100).itertuples(index=False)],
-        "momentum_reversal":scan_momentum_reversal(raw, pair=pair),
+        "momentum_reversal":scan_momentum_reversal(raw, pair=pair, thesis_direction=str(last.daily_bias)),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
