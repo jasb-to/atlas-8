@@ -15,12 +15,13 @@ import sys
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
 
 def fetch_fixture(args: argparse.Namespace) -> None:
+    # Fetching is done from the candidate checkout; replay imports are instead
+    # resolved exclusively from the repository selected by PYTHONPATH.
+    root = Path(__file__).resolve().parents[1]
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
     from audits._historical_data import fetch_history
 
     frame = fetch_history(args.pair, "4H", args.start, args.end)
@@ -32,6 +33,8 @@ def fetch_fixture(args: argparse.Namespace) -> None:
 
 
 def replay_fixture(args: argparse.Namespace) -> None:
+    # Do not add this script's checkout to sys.path: the workflow invokes this
+    # same script from both worktrees and sets PYTHONPATH to select code version.
     from research.strategy_preview import causal_replay
 
     source = Path(args.input)
@@ -56,7 +59,7 @@ def main() -> None:
     fetch = commands.add_parser("fetch", help="Fetch the fixture exactly once")
     fetch.add_argument("--pair", default="AVAXUSDT")
     fetch.add_argument("--start", default="2026-04-01")
-    fetch.add_argument("--end", default="2026-10-02")
+    fetch.add_argument("--end", default="2026-10-06")
     fetch.add_argument("--output", default="data/raw_test.csv")
     fetch.set_defaults(func=fetch_fixture)
     replay = commands.add_parser("replay", help="Replay the frozen fixture with the checked-out code")
