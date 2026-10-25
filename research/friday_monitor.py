@@ -51,7 +51,9 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
         return False, ["direction_missing"]
     blockers = []
     daily_bias = str(event.get("daily_bias", "")).strip().lower()
-    if direction == "long" and daily_bias == "bearish":
+    if daily_bias not in {"bullish", "bearish"}:
+        blockers.append("daily_bias_unavailable")
+    elif direction == "long" and daily_bias == "bearish":
         blockers.append("direction_conflicts_with_daily_bias")
     elif direction == "short" and daily_bias == "bullish":
         blockers.append("direction_conflicts_with_daily_bias")

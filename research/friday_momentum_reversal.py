@@ -63,7 +63,15 @@ def scan_momentum_reversal(
     direction = "short" if cross_down else "long"
     normalized_thesis = str(thesis_direction or "").strip().lower()
     expected_thesis = {"bearish": "short", "short": "short", "bullish": "long", "long": "long"}.get(normalized_thesis)
-    if expected_thesis is not None and direction != expected_thesis:
+    if expected_thesis is None:
+        result.update({
+            "direction": direction,
+            "signal_time": pd.Timestamp(data.timestamp.iloc[-1]).isoformat(),
+            "blockers": ["daily_thesis_unavailable"],
+            "daily_thesis_direction": normalized_thesis or None,
+        })
+        return result
+    if direction != expected_thesis:
         result.update({
             "direction": direction,
             "signal_time": pd.Timestamp(data.timestamp.iloc[-1]).isoformat(),

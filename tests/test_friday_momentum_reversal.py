@@ -9,7 +9,7 @@ from research.friday_monitor import _entry_filters_pass
 class FridayMomentumReversalTests(unittest.TestCase):
     def test_directional_momentum_passes_for_long(self):
         ok, blockers = _entry_filters_pass(
-            {"direction": "long", "momentum_context": {"macd_bullish_expansion": True}},
+            {"direction": "long", "daily_bias": "bullish", "momentum_context": {"macd_bullish_expansion": True}},
             {"long_reversal_score": 1, "short_reversal_score": 0},
         )
         self.assertTrue(ok)
@@ -17,7 +17,7 @@ class FridayMomentumReversalTests(unittest.TestCase):
 
     def test_directional_momentum_passes_for_short(self):
         ok, blockers = _entry_filters_pass(
-            {"direction": "short", "momentum_context": {"stoch_bearish_cross": True}},
+            {"direction": "short", "daily_bias": "bearish", "momentum_context": {"stoch_bearish_cross": True}},
             {"long_reversal_score": 0, "short_reversal_score": 1},
         )
         self.assertTrue(ok)
@@ -25,11 +25,19 @@ class FridayMomentumReversalTests(unittest.TestCase):
 
     def test_opposing_exhaustion_blocks_entry(self):
         ok, blockers = _entry_filters_pass(
-            {"direction": "long", "momentum_context": {"macd_bullish_expansion": True}},
+            {"direction": "long", "daily_bias": "bullish", "momentum_context": {"macd_bullish_expansion": True}},
             {"long_reversal_score": 1, "short_reversal_score": 3},
         )
         self.assertFalse(ok)
         self.assertIn("opposing_exhaustion_filter_blocked_entry", blockers)
+
+    def test_missing_daily_bias_is_blocked(self):
+        ok, blockers = _entry_filters_pass(
+            {"direction": "long", "momentum_context": {"macd_bullish_expansion": True}},
+            {"long_reversal_score": 1, "short_reversal_score": 0},
+        )
+        self.assertFalse(ok)
+        self.assertIn("daily_bias_unavailable", blockers)
 
     def test_long_is_blocked_by_bearish_daily_bias(self):
         ok, blockers = _entry_filters_pass(
