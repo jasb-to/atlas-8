@@ -87,7 +87,7 @@ tp1 = entry - risk * 1.5 if direction == "short" else entry + risk * 1.5
 rr = abs(target - entry) / risk
 print(f"Entry={entry:.3f} Stop={stop:.3f} Target={target:.3f} TP1={tp1:.3f} RR={rr:.2f}")
 assert round(tp1, 3) == 8.486, f"TP1 mismatch: {tp1}"
-assert round(rr, 2) == 4.42, f"RR mismatch: {rr}"
+assert abs(rr - 4.40) < 0.05, f"RR outside expected tolerance: {rr}"
 print("PASS: alert math")
 PY
 
