@@ -88,16 +88,9 @@ export default function Home() {
     const active = String(thesis?.status ?? "").toLowerCase() === "active";
     return { pair, thesis, scan, weeklyTrend, dailyTrend, weeklyMomentum, active };
   });
-  const watchlist = useMemo(() => {
-    return data.events.filter(event => {
-      const pair = pairName(event.pair);
-      const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
-      const outcome = String(event.outcome ?? "").toLowerCase();
-      const open = openTrades.some(trade => pairName(trade.pair) === pair);
-      return thesis?.status === "active" && !open &&
-        ["pending", "candidate", "active", "open", "retest_held_waiting_continuation", "entry_probe_waiting_retest"].includes(outcome);
-    }).slice(0, 8);
-  }, [data.events, data.weekly_theses, snapshots, openTrades]);
+  const watchlist = weeklyCards.filter(card =>
+    card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
+  );
   const recentEvents = data.events.slice(0, 40);
   const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
   const headerDate = new Date().toLocaleString("en-GB", {
@@ -106,98 +99,88 @@ export default function Home() {
 
   return <main className="shell">
     <header className="topbar">
-      <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH INTELLIGENCE</span></span></a>
+      <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH ONLY</span></span></a>
       <div className="top-actions">
-        <span className="mode-chip"><i /> RESEARCH ONLY · NO LIVE ORDERS</span>
-        <span className="ai-status"><i /> {aiReviewActive ? `AI: ${aiProvider} ONLINE` : "AI OFFLINE"}</span>
+        <span className={data.connected ? "pill positive" : "pill neutral"}><i /> DATA: {data.connected ? "ONLINE" : "OFFLINE"}</span>
+        <span className={aiReviewActive && aiProvider === "GROQ" ? "pill positive" : "pill neutral"}><i /> AI: GROQ {aiReviewActive && aiProvider === "GROQ" ? "ONLINE" : "OFFLINE"}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
 
-    <nav className="view-tabs" aria-label="Dashboard views">
-      <button className={view === "overview" ? "tab active" : "tab"} onClick={() => setView("overview")}>Overview</button>
-      <button className={view === "debug" ? "tab active" : "tab"} onClick={() => setView("debug")}>Debug</button>
-      <span className="header-date">{headerDate}</span>
-    </nav>
+    <section className="section-block">
+      <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
+      <div className="thesis-grid">
+        {weeklyCards.map(card => {
+          const trend = card.weeklyTrend ?? "Unavailable";
+          const dailyPass = card.active && (isBull(card.dailyTrend) || isBear(card.dailyTrend));
+          const status = card.active ? "READY" : "SKIPPED";
+          return <article className="thesis-card" key={card.pair}>
+            <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : "pill neutral"}>{status}</span></div>
+            <div className="thesis-row"><span>WEEKLY TREND</span><b className={isBull(trend) ? "positive-text" : isBear(trend) ? "negative-text" : ""}>{isBull(trend) ? "BULL" : isBear(trend) ? "BEAR" : clean(trend).toUpperCase()}</b></div>
+            <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={dailyPass ? "positive-text" : "negative-text"}>{dailyPass ? "PASS" : "VETO"}</b></div>
+            <div className="thesis-bottom"><span>THESIS STATUS</span><b>{status}</b></div>
+          </article>;
+        })}
+      </div>
+    </section>
 
-    {view === "overview" ? <>
-      <section className="hero">
-        <div><span className="eyebrow">THE MARKET, WITHOUT THE NOISE</span><h1>Thesis first.<br /><em>Execution second.</em></h1><p>Completed-candle research · weekly context · 4H structure · paper trades only.</p></div>
-        <div className="hero-state"><span className={data.connected ? "led on" : "led"} /><div><b>{data.connected ? "DATA LINK CONNECTED" : "DATA LINK NOT VERIFIED"}</b><small>{data.connected ? `Last scan ${fmtTime(lastScan)}` : data.message}</small></div></div>
-      </section>
+    <section className="section-block">
+      <div className="section-heading"><div><span className="eyebrow">02 / ACTIVE POSITIONS</span><h2>OPEN PAPER TRADES</h2><p>Only open paper positions appear here. No exchange orders are placed.</p></div><span className="section-count">{openTrades.length} OPEN</span></div>
+      {openTrades.length ? <div className="trade-grid">
+        {openTrades.map((trade, index) => {
+          const dir = direction(trade.direction);
+          const entry = Number(trade.entry);
+          const stop = Number(trade.stop_loss);
+          const target = Number(trade.take_profit);
+          const risk = Math.abs(entry - stop);
+          const tp1 = dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5;
+          return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
+            <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
+            <div className="trade-prices">
+              <div><span>ENTRY</span><b>{fmtPrice(entry)}</b></div>
+              <div><span>SL</span><b>{fmtPrice(stop)}</b></div>
+              <div><span>TP1 · 1.5R</span><b>{fmtPrice(tp1)}</b></div>
+              <div><span>TP2</span><b>{fmtPrice(target)}</b></div>
+            </div>
+            <div className="trade-foot"><span>RESEARCH · PAPER ONLY</span><b>{Number.isFinite(Number(trade.reward_risk)) ? Number(trade.reward_risk).toFixed(2) + "R" : "—"}</b></div>
+            <p>{trade.reason ?? trade.thesis_reason ?? "Confirmed 4H structure aligned with the active higher-timeframe thesis."}</p>
+          </article>;
+        })}
+      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No open paper trades</b><p>FRIDAY will show a position here only after a valid, aligned 4H entry and structural risk plan.</p></div></div>}
+    </section>
 
-      <section className="section-block">
-        <div className="section-heading"><div><span className="eyebrow">01 / BIG PICTURE</span><h2>Weekly thesis</h2><p>Only completed weekly and daily candles count. Missing thesis data is shown as unavailable—not guessed.</p></div><span className="section-count">{weeklyCards.filter(card => card.active).length} ACTIVE</span></div>
-        <div className="thesis-grid">
-          {weeklyCards.map(card => {
-            const trend = card.weeklyTrend ?? "Not evaluated";
-            const daily = card.dailyTrend ?? "Not evaluated";
-            const status = card.thesis?.status ?? "awaiting weekly data";
-            const price = card.scan?.last_close;
-            return <article className="thesis-card" key={card.pair}>
-              <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : "pill neutral"}>{clean(status)}</span></div>
-              <div className="thesis-row"><span>WEEKLY TREND</span><b className={isBull(trend) ? "positive-text" : isBear(trend) ? "negative-text" : ""}>{clean(trend)}</b></div>
-              <div className="thesis-row"><span>WEEKLY MOMENTUM</span><b className={card.thesis?.weekly_stoch_aligned === true ? "positive-text" : card.thesis?.weekly_stoch_aligned === false ? "negative-text" : ""}>{card.weeklyMomentum}</b></div>
-              <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={isBull(daily) ? "positive-text" : isBear(daily) ? "negative-text" : ""}>{clean(daily)}</b></div>
-              <div className="thesis-bottom"><span>LAST PRICE</span><b>{fmtPrice(price)}</b></div>
-              <div className={card.active ? "thesis-status ready" : "thesis-status"}>{card.active ? "READY FOR 4H EXECUTION" : card.thesis?.status ? "WAITING FOR ALIGNMENT" : "WEEKLY FEED NOT CONNECTED"}</div>
-            </article>;
-          })}
-        </div>
-      </section>
+    <section className="section-block">
+      <div className="section-heading"><div><span className="eyebrow">03 / WAITING FOR TRIGGER</span><h2>WATCHLIST</h2><p>Active weekly and daily thesis; waiting for a valid 4H trigger. No entry has been recorded.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
+      {watchlist.length ? <div className="watchlist">
+        {watchlist.map(card => <article className="watch-row" key={card.pair}>
+          <div className="watch-token"><b>{shortPair(card.pair)}</b><span className={isBull(card.weeklyTrend) ? "direction long" : "direction short"}>{isBull(card.weeklyTrend) ? "LONG BIAS" : "SHORT BIAS"}</span></div>
+          <div><span>WEEKLY THESIS</span><b>{clean(card.thesis?.reason ?? (isBull(card.weeklyTrend) ? "Bullish EMA 8/21" : "Bearish EMA 8/21"))}</b></div>
+          <div><span>STATUS</span><b>WAITING FOR 4H TRIGGER</b></div>
+          <div><span>ENTRY</span><b>—</b></div>
+        </article>)}
+      </div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No active thesis waiting for a trigger</b><p>Inactive, vetoed, expired and invalidated states are kept out of the main dashboard.</p></div></div>}
+    </section>
 
-      <section className="section-block">
-        <div className="section-heading"><div><span className="eyebrow">02 / SCOREBOARD</span><h2>Open paper trades</h2><p>Risk-defined positions only. Directional border colour is not a live order status.</p></div><span className="section-count">{openTrades.length} OPEN</span></div>
-        {openTrades.length ? <div className="trade-grid">
-          {openTrades.map((trade, index) => {
-            const dir = direction(trade.direction);
-            const risk = Math.abs(Number(trade.entry) - Number(trade.stop_loss));
-            const reward = dir === "long" ? Number(trade.take_profit) - Number(trade.entry) : Number(trade.entry) - Number(trade.take_profit);
-            const rr = risk > 0 && Number.isFinite(reward) ? reward / risk : Number(trade.reward_risk);
-            return <article className={`trade-card ${dir === "long" ? "trade-long" : "trade-short"}`} key={trade.trade_id ?? index}>
-              <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
-              <div className="trade-prices"><div><span>ENTRY</span><b>{fmtPrice(trade.entry)}</b></div><div><span>STOP</span><b>{fmtPrice(trade.stop_loss)}</b></div><div><span>TARGET</span><b>{fmtPrice(trade.take_profit)}</b></div></div>
-              <div className="trade-foot"><span>MONITORING · PAPER ONLY</span><b>{Number.isFinite(rr) ? rr.toFixed(2) + "R" : "—"} R:R</b></div>
-              <p>{trade.reason ?? trade.thesis_reason ?? "Deterministic structure and risk plan recorded. Thesis explanation is not persisted for this trade."}</p>
-            </article>;
-          })}
-        </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No open paper trades</b><p>Nothing is currently being monitored as an open paper position. A quiet scoreboard is preferable to invented trades.</p></div></div>}
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading"><div><span className="eyebrow">03 / ACTION CENTER</span><h2>Watchlist</h2><p>Weekly-approved candidates waiting for the original 4H break/retest lifecycle to complete.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
-        {watchlist.length ? <div className="watchlist">
-          {watchlist.map((event, index) => <article className="watch-row" key={event.event_key ?? index}>
-            <div className="watch-token"><b>{shortPair(event.pair)}</b><span className={direction(event.direction) === "long" ? "direction long" : "direction short"}>{String(event.direction ?? "—").toUpperCase()}</span></div>
-            <div><span>THESIS</span><b>{clean(thesisFor(snapshots, pairName(event.pair))?.direction ?? "Active")}</b></div>
-            <div><span>WAITING FOR</span><b>{String(event.outcome ?? "").toLowerCase().includes("retest") ? "4H continuation confirmation (Entry 2)" : "4H trendline break / retest (Entry 1)"}</b></div>
-            <div><span>REFERENCE</span><b>{fmtPrice(event.entry_reference ?? event.line_price)}</b></div>
-            <div><span>LAST EVENT</span><b>{fmtTime(event.signal_time)}</b></div>
-          </article>)}
-        </div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No weekly-approved setups waiting</b><p>There is no persisted active weekly thesis attached to a waiting 4H setup. Candidates will appear here when both records exist.</p></div></div>}
-      </section>
-
-    </> : <>
-      <section className="section-block debug-page">
-        <div className="section-heading"><div><span className="eyebrow">DIAGNOSTICS / HIDDEN FROM OVERVIEW</span><h2>Debug & scan evidence</h2><p>Operational details remain available here without overwhelming the scoreboard.</p></div></div>
+    <section className="section-block">
+      <details className="debug-details">
+        <summary>DEBUG · Scan trace, AI errors and invalidations</summary>
         <div className="debug-grid">
-          <div><span>DATA LINK</span><b className={data.connected ? "positive-text" : "negative-text"}>{data.connected ? "CONNECTED" : clean(data.status).toUpperCase()}</b></div>
+          <div><span>DATA LINK</span><b>{data.connected ? "ONLINE" : clean(data.status).toUpperCase()}</b></div>
           <div><span>LAST RUN</span><b>{clean(latestRun?.status).toUpperCase()}</b></div>
           <div><span>MARKETS SCANNED</span><b>{latestRun?.pairs_checked ?? pairScans.length}</b></div>
           <div><span>AI REVIEWS OK</span><b>{pairScans.filter(scan => scan.ai_review_status === "ok").length} / {pairScans.length}</b></div>
-          <div><span>ALERT RECORDS</span><b>{data.alerts.length}</b></div>
           <div><span>LAST REFRESH</span><b>{fmtTime(data.fetched_at)}</b></div>
         </div>
-        <h3>Latest scan trace</h3>
-        <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>SCAN</th><th>SETUP / DECISION</th><th>AI REVIEW</th><th>ALERT OUTCOME</th><th>LAST CANDLE</th></tr></thead><tbody>
-          {pairScans.length ? pairScans.map(scan => <tr key={scan.pair}><td><b>{shortPair(scan.pair)}</b></td><td>{clean(scan.status)}</td><td>{clean(scan.latest_setup_state)} / {clean(scan.friday_decision)}</td><td>{clean(scan.ai_review_status)}{scan.ai_review_error ? <small>{String(scan.ai_review_error)}</small> : null}</td><td>{Array.isArray(scan.alert_results) ? scan.alert_results.map((item: Row) => `${clean(item.type)}: ${clean(item.status)}${item.reason ? " — " + clean(item.reason) : ""}`).join(" · ") : clean(scan.scan_diagnostic)}</td><td>{fmtTime(scan.last_completed_candle_utc)}</td></tr>) : <tr><td colSpan={6} className="table-empty">No scan trace has been published yet.</td></tr>}
+        <h3>Scan trace and errors</h3>
+        <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>SCAN</th><th>DECISION</th><th>AI ERROR</th><th>DETAIL</th><th>LAST CANDLE</th></tr></thead><tbody>
+          {pairScans.length ? pairScans.map(scan => <tr key={scan.pair}><td><b>{shortPair(scan.pair)}</b></td><td>{clean(scan.status)}</td><td>{clean(scan.latest_setup_state)} / {clean(scan.friday_decision)}</td><td>{scan.ai_review_error ? String(scan.ai_review_error) : "—"}</td><td>{clean(scan.scan_diagnostic ?? scan.weekly_thesis?.reason)}</td><td>{fmtTime(scan.last_completed_candle_utc)}</td></tr>) : <tr><td colSpan={6} className="table-empty">No scan trace has been published yet.</td></tr>}
         </tbody></table></div>
-        <h3>Recent lifecycle events</h3>
+        <h3>Invalidations and lifecycle history</h3>
         <div className="table-wrap"><table><thead><tr><th>MARKET / TIME</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th></tr></thead><tbody>
           {recentEvents.length ? recentEvents.map((event, index) => <tr key={event.event_key ?? index}><td><b>{shortPair(event.pair)}</b><small>{fmtTime(event.signal_time)}</small></td><td>{clean(event.event_type)}</td><td>{clean(event.direction)}</td><td>{clean(event.outcome)}</td><td>{fmtPrice(event.entry_reference)}</td></tr>) : <tr><td colSpan={5} className="table-empty">No lifecycle events recorded.</td></tr>}
         </tbody></table></div>
-      </section>
-    </>}
-    <footer><span className="footer-brand">FRIDAY <i>/ RESEARCH CONTROL ROOM</i></span><span>Research only · No exchange orders</span><span>Auto-refresh · 30 sec</span></footer>
+      </details>
+    </section>
+    <footer><span className="footer-brand">FRIDAY <i>/ RESEARCH ONLY</i></span><span>No exchange orders</span><span>Auto-refresh · 30 sec</span></footer>
   </main>;
 }
