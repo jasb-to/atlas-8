@@ -71,7 +71,7 @@ jobs:
       - name: Fetch one frozen OHLC fixture
         run: |
           mkdir -p data
-          python audits/generate_regression_data.py fetch --pair AVAXUSDT --start 2026-04-01 --end 2026-10-02 --output data/raw_test.csv
+          python audits/generate_regression_data.py fetch --pair AVAXUSDT --start 2026-04-01 --end 2026-10-06 --output data/raw_test.csv
       - name: Replay the same fixture on main and PR code, then compare bytes
         shell: bash
         run: |
