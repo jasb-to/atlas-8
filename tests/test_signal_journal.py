@@ -32,7 +32,7 @@ class SignalJournalTests(unittest.TestCase):
                 direction="LONG", entry=100.0, stop=97.0,
                 targets=[{"price": 108.0, "reason": "prior_swing_high"}],
                 evidence={"fib_zero_touched": True, "reclaim": True},
-                model={"status": "skipped", "provider": "huggingface",
+                model={"status": "skipped", "provider": "none",
                        "model_id": None, "response": None, "error": "not_configured"},
             )
             append_decision(path, first)
