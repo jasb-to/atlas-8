@@ -15,7 +15,9 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
-Side = Literal["support", "resistance"]\nMIN_TOUCH_SPACING = 3\nDEFAULT_RETEST_LOOKBACK = 8
+Side = Literal["support", "resistance"]
+MIN_TOUCH_SPACING = 3
+DEFAULT_RETEST_LOOKBACK = 8
 
 
 @dataclass(frozen=True)
