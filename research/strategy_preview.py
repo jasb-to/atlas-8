@@ -1,6 +1,6 @@
 """Causal 4H wick-trendline break preview; research-only, never places orders."""
 from __future__ import annotations
-import argparse, json
+import argparse, json, os
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -441,18 +441,25 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     out=Path(output_dir); out.mkdir(parents=True,exist_ok=True)
     decision_direction = {"long": "LONG", "short": "SHORT"}.get(friday_decision.get("direction"))
     decision_targets = friday_decision.get("target_candidates", [])
-    model_review = review_decision({
-        "pair": pair, "timeframe": f"{interval}m", "candle_time_utc": last.timestamp.isoformat(),
-        "rule_decision": friday_decision, "setup_lifecycle": setup_state,
-        "indicators": result["current_indicators"], "structure": structure_payload,
-        "candidate_universe": {
-            "latest_break_event": next((dict(e, strategy="friday-price-action-v2") for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
-            "momentum_reversal_candidate": result["momentum_reversal"],
-            "structural_trade_plans": result["trade_plans"],
-            "exhaustion_context": result["reversal_context"],
-            "momentum_context": result["latest_momentum_context"],
-        },
-    })
+    if os.getenv("FRIDAY_AI_REVIEW_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}:
+        model_review = review_decision({
+            "pair": pair, "timeframe": f"{interval}m", "candle_time_utc": last.timestamp.isoformat(),
+            "rule_decision": friday_decision, "setup_lifecycle": setup_state,
+            "indicators": result["current_indicators"], "structure": structure_payload,
+            "candidate_universe": {
+                "latest_break_event": next((dict(e, strategy="friday-price-action-v2") for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
+                "momentum_reversal_candidate": result["momentum_reversal"],
+                "structural_trade_plans": result["trade_plans"],
+                "exhaustion_context": result["reversal_context"],
+                "momentum_context": result["latest_momentum_context"],
+            },
+        })
+    else:
+        model_review = {
+            "status": "disabled", "provider": None, "model_id": None,
+            "response": None, "latency_ms": 0, "error": None,
+            "reason": "AI review disabled by FRIDAY_AI_REVIEW_ENABLED; deterministic rule gates remain authoritative.",
+        }
     result["model_review"] = model_review
     journal_record = build_decision_record(
         pair=pair, timeframe=f"{interval}m",
