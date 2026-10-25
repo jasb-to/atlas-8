@@ -1,4 +1,4 @@
-"""Friday signal alerts: deterministic message formatting and Telegram delivery.
+"""Friday signal alerts: compact deterministic formatting and Telegram delivery.
 
 Notifications only. This module cannot place or manage exchange orders.
 """
@@ -10,49 +10,98 @@ from typing import Any, Mapping
 import requests
 
 
-def build_signal_alert(event: Mapping[str, Any], *, pair: str, timeframe: str = "4H") -> str:
-    """Render a compact human-readable alert from a research signal event."""
+def _fmt_price(value: Any) -> str:
+    """Format prices compactly without losing small-token precision."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "n/a" if value is None else str(value)
+    if not (number == number and abs(number) != float("inf")):
+        return "n/a"
+    return f"{number:,.6f}".rstrip("0").rstrip(".")
+
+
+def _bias_label(value: Any, timeframe: str) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"bullish", "bull", "long"}:
+        return f"{timeframe} bullish"
+    if normalized in {"bearish", "bear", "short"}:
+        return f"{timeframe} bearish"
+    return f"{timeframe} filter not applied"
+
+
+def build_signal_alert(
+    event: Mapping[str, Any],
+    *,
+    pair: str,
+    timeframe: str = "4H",
+    weekly_thesis: Mapping[str, Any] | None = None,
+    daily_context: Mapping[str, Any] | None = None,
+) -> str:
+    """Render a two-second, risk-defined paper alert.
+
+    Weekly/daily context is deliberately optional so existing callers remain
+    compatible. If the weekly gate has not been passed in, the alert says so
+    rather than claiming an unverified weekly direction.
+    """
     direction = str(event.get("direction", "")).upper()
     if direction not in {"LONG", "SHORT"}:
         raise ValueError("event direction must be long or short")
+
     kind = event.get("event")
     if event.get("event_add") == "CONTINUATION_ADD_CONFIRMED":
-        title = "ENTRY 2 — CONTINUATION CONFIRMED"
+        title = "ENTRY 2 CONFIRMED"
         entry = event.get("continuation_add_close")
-        line = event.get("line_price_at_break")
-        signal_time = event.get("continuation_add_time")
-        why = [
-            "Breakout retest held on a closed candle.",
-            f"Price then closed beyond the retest reaction extreme ({event.get('continuation_trigger')}).",
-            "This is a research alert, not an order.",
-        ]
-    elif kind == "BREAK_CLOSE_PROBE":
-        title = "ENTRY 1 — TRENDLINE BREAK"
+        signal_time = event.get("continuation_add_time") or event.get("signal_time")
+        execution_reason = "4H trendline break + retest held; continuation confirmed"
+    elif kind in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"}:
+        title = "ENTRY 1 CONFIRMED"
         entry = event.get("close_at_break")
-        line = event.get("line_price_at_break")
         signal_time = event.get("signal_time")
-        why = [
-            f"Closed candle broke {event.get('line_kind')} with {event.get('touch_count')} line touches.",
-            f"Daily bias: {event.get('daily_bias', 'unknown')}; EMA aligned: {event.get('ema_aligned', 'unknown')}.",
-            f"Momentum context: {event.get('momentum_context', {})}.",
-            "Next: monitor for retest; no automatic add on line contact.",
-        ]
+        execution_reason = "4H trendline break confirmed"
     else:
         raise ValueError("event is not an alertable Entry 1 or Entry 2 event")
 
-    lines = [
-        f"FRIDAY | {title}",
-        f"Market: {pair} · Timeframe: {timeframe} · Direction: {direction}",
-        f"Signal candle: {signal_time}",
-        f"Reference close: {entry}",
-        f"Trendline at break: {line}",
-        *([f"Structural stop: {event.get('paper_stop')}", f"Target: {event.get('paper_target')}", f"Reward/risk: {event.get('paper_reward_risk')}R"] if event.get("paper_stop") is not None else []),
-        *[f"• {item}" for item in why],
-        "Risk-defined paper candidate only; no order submitted.",
-        "Mode: research / paper only — no trade submitted.",
-    ]
-    return "\n".join(lines)
+    stop = event.get("paper_stop")
+    target = event.get("paper_target")
+    tp1 = None
+    tp1_rr = 1.5
+    if entry is not None and stop is not None:
+        try:
+            entry_value, stop_value = float(entry), float(stop)
+            risk = abs(entry_value - stop_value)
+            if risk > 0:
+                tp1 = entry_value + (tp1_rr * risk if direction == "LONG" else -tp1_rr * risk)
+        except (TypeError, ValueError):
+            tp1 = None
 
+    weekly_direction = str((weekly_thesis or {}).get("direction", "")).lower()
+    weekly_status = str((weekly_thesis or {}).get("status", "")).lower()
+    if weekly_status == "active" and weekly_direction in {"long", "short", "bullish", "bearish"}:
+        weekly_reason = _bias_label(weekly_direction, "Weekly")
+    else:
+        weekly_reason = "Weekly filter not applied"
+
+    daily_bias = (daily_context or {}).get("bias", event.get("daily_bias"))
+    daily_reason = _bias_label(daily_bias, "Daily")
+    why = f"{weekly_reason}. {daily_reason}. {execution_reason}."
+
+    lines = [
+        f"🚨 FRIDAY | {title}",
+        f"🪙 Token: {pair}",
+        f"📉 Direction: {direction}",
+        "",
+        f"🎯 Entry: {_fmt_price(entry)}",
+        f"🛑 Stop Loss: {_fmt_price(stop)}",
+    ]
+    if tp1 is not None and target is not None:
+        lines.append(f"💰 TP1: {_fmt_price(tp1)} ({tp1_rr:.1f}R)")
+    if target is not None:
+        rr = event.get("paper_reward_risk")
+        rr_text = f" ({float(rr):.1f}R)" if rr is not None else ""
+        lines.append(f"💰 TP2: {_fmt_price(target)}{rr_text}")
+    lines.extend(["", f"🧠 Why: {why}", "", "(Mode: Research / Paper Only)"])
+    return "\n".join(lines)
 
 
 def build_momentum_reversal_alert(candidate: Mapping[str, Any], *, pair: str, timeframe: str = "4H") -> str:
@@ -61,15 +110,17 @@ def build_momentum_reversal_alert(candidate: Mapping[str, Any], *, pair: str, ti
     if direction not in {"LONG", "SHORT"} or not candidate.get("eligible"):
         raise ValueError("candidate must be an eligible long or short plan")
     return "\n".join([
-        "FRIDAY | ENTRY CANDIDATE — STOCH RSI REVERSAL",
-        f"Market: {pair} · Timeframe: {timeframe} · Direction: {direction}",
-        f"Signal candle: {candidate.get('signal_time')}",
-        f"Entry reference: {candidate.get('entry')}",
-        f"Structural stop: {candidate.get('stop')}",
-        f"Target: {candidate.get('target')}",
-        f"Reward/risk: {candidate.get('reward_risk')}R",
-        f"Reason: fresh Stoch RSI cross from an extreme zone with momentum/structure confirmation.",
-        "Mode: research / paper only — no trade submitted.",
+        f"🚨 FRIDAY | REVERSAL CANDIDATE",
+        f"🪙 Token: {pair}",
+        f"📉 Direction: {direction}",
+        "",
+        f"🎯 Entry: {_fmt_price(candidate.get('entry'))}",
+        f"🛑 Stop Loss: {_fmt_price(candidate.get('stop'))}",
+        f"💰 TP2: {_fmt_price(candidate.get('target'))} ({float(candidate.get('reward_risk', 0)):.1f}R)",
+        "",
+        "🧠 Why: Stoch RSI reversal from an extreme with momentum/structure confirmation.",
+        "",
+        "(Mode: Research / Paper Only)",
     ])
 
 
