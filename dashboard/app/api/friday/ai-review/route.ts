@@ -7,7 +7,7 @@ export const revalidate = 0;
 export const maxDuration = 20;
 
 const ISSUER = "https://token.actions.githubusercontent.com";
-const AUDIENCE = "friday-huggingface-review";
+const AUDIENCE = "friday-ai-review";
 const REPOSITORY = "jasb-to/atlas-8";
 const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/heads/main";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
@@ -57,10 +57,10 @@ export async function POST(request: Request) {
     return json({ status: "error", error: message }, 401);
   }
 
-  // Prefer Gemini when configured; retain Hugging Face as a compatibility fallback.
+  // Groq is primary; Gemini is the fallback. No other provider is supported.
   const geminiKey = process.env.GEMINI_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
-  const provider = geminiKey ? "gemini" : groqKey ? "groq" : null;
+  const provider = groqKey ? "groq" : geminiKey ? "gemini" : null;
   if (!provider) return json({ status: "error", error: "No supported AI provider configured. Set GEMINI_API_KEY or GROQ_API_KEY." }, 503);
   // Gemini 2.5 Flash is restricted for new users and returns HTTP 404 on this key.
   // Migrate the legacy default/override to the supported, cost-efficient Flash-Lite model.
@@ -101,8 +101,8 @@ export async function POST(request: Request) {
     let body: any;
     let raw: any;
     const providers = [
-      ...(geminiKey ? [{ provider: "gemini", model: geminiModel }] : []),
       ...(groqKey ? [{ provider: "groq", model: process.env.FRIDAY_GROQ_MODEL_ID || "openai/gpt-oss-120b" }] : []),
+      ...(geminiKey ? [{ provider: "gemini", model: geminiModel }] : []),
     ];
     const retryableStatuses = new Set([408, 429, 500, 502, 503, 504]);
     let lastTransportError: unknown = null;
@@ -209,7 +209,7 @@ export async function POST(request: Request) {
       });
       return json({
         status: "error",
-        error: `${activeProvider === "gemini" ? "Gemini" : activeProvider === "groq" ? "Groq" : "Hugging Face"} returned HTTP ${status}`,
+        error: `${activeProvider === "gemini" ? "Gemini" : activeProvider === "groq" ? "Groq" : "AI provider"} returned HTTP ${status}`,
         error_category: category,
         upstream_status: status,
         provider: activeProvider,
