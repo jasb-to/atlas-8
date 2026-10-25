@@ -408,11 +408,8 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                 signal_time = event.get("continuation_add_time") if event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" else event.get("signal_time")
                 entry_price = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
                 stop, target = float(plan["stop"]), float(plan["target"])
-                risk = abs(entry_price - stop)
-                reward = (target - entry_price) if direction == "long" else (entry_price - target)
-                rr = reward / risk if risk > 0 else 0
-                geometry_ok = (stop < entry_price < target) if direction == "long" else (target < entry_price < stop)
-                if not geometry_ok or rr < 1.5:
+                plan_ok, rr = _trade_plan_metrics(direction, entry_price, stop, target)
+                if not plan_ok:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "blocked_trade_plan", "reason": "entry-adjusted structural plan failed geometry or 1.5R minimum"})
                     continue
                 register_paper_trade(
@@ -511,11 +508,8 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                             "reason": ", ".join(reasons) or "structural trade plan is not eligible",
                         })
                         continue
-                    risk = abs(entry_ref - float(stop))
-                    reward = float(target) - entry_ref if direction == "long" else entry_ref - float(target)
-                    rr = reward / risk if risk > 0 else 0
-                    geometry_ok = (float(stop) < entry_ref < float(target)) if direction == "long" else (float(target) < entry_ref < float(stop))
-                    if not geometry_ok or rr < 1.5:
+                    plan_ok, rr = _trade_plan_metrics(direction, entry_ref, float(stop), float(target))
+                    if not plan_ok:
                         row["alert_results"].append({
                             "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
                             "status": "filtered_or_no_valid_plan",
