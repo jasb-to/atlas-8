@@ -25,7 +25,7 @@ class StructureSnapshot:
 
 def _line_break(candles: pd.DataFrame, line: Trendline, *, buffer_pct: float) -> dict[str, Any] | None:
     """Return the first post-confirmation close crossing; never inspect future bars."""
-    first = max(line.end.confirmed_at, line.end.index + 1)
+    first = max(line.confirmed_at, line.last_touch_index + 1)
     for i in range(first, len(candles)):
         close = float(candles.iloc[i]["close"])
         value = float(line.value_at(i))

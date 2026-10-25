@@ -26,10 +26,13 @@ MAX_LINE_AGE = 90
 MAX_DISTANCE = 0.025
 
 def indicators(frame):
-    out = frame.copy()
+    out = frame.sort_values("timestamp").reset_index(drop=True).copy()
     close = out.close.astype(float)
     out["ema8_4h"] = close.ewm(span=8, adjust=False).mean()
     out["ema21_4h"] = close.ewm(span=21, adjust=False).mean()
+    out["macd"] = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
+    out["macd_signal"] = out["macd"].ewm(span=9, adjust=False).mean()
+    out["macd_hist"] = out["macd"] - out["macd_signal"]
     prev = close.shift(1)
     tr = pd.concat([out.high-out.low, (out.high-prev).abs(), (out.low-prev).abs()], axis=1).max(axis=1)
     out["atr14"] = tr.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
@@ -59,10 +62,17 @@ def break_crossed(frame, line, i):
         return float(row.close) > lv*(1+BREAK_BUFFER) and float(prev.close) <= lp*(1+BREAK_BUFFER)
     return float(row.close) < lv*(1-BREAK_BUFFER) and float(prev.close) >= lp*(1-BREAK_BUFFER)
 
-def line_retest(frame, line, break_i, i):
-    """Return first post-break line contact, contact index, and close-hold status."""
+def line_retest(frame, line, break_i, i, *, origin=0):
+    """Return first post-break contact using absolute frame indices.
+
+    Trendline pivot indices are relative to the prefix used to fit the line;
+    origin maps those coordinates into frame. Pass zero when both share an origin.
+    """
+    def line_value(absolute_index):
+        return line.value_at(absolute_index - origin)
+
     for j in range(break_i+1, min(i, break_i+RETEST_BARS)+1):
-        row, lv = frame.iloc[j], line.value_at(j)
+        row, lv = frame.iloc[j], line_value(j)
         tol = abs(lv)*RETEST_TOL
         if line.kind == "resistance":
             contact, held = float(row.low) <= lv+tol, float(row.close) >= lv
@@ -81,10 +91,14 @@ def momentum_context(frame, i):
     valid = all(np.isfinite(x) for x in (k, d, pk, pd_))
     bull_cross = valid and pk <= pd_ and k > d
     bear_cross = valid and pk >= pd_ and k < d
-    close = frame.close.astype(float)
-    macd = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
-    signal = macd.ewm(span=9, adjust=False).mean()
-    hist = macd - signal
+    if {"macd", "macd_signal", "macd_hist"}.issubset(frame.columns):
+        macd, signal, hist = frame["macd"], frame["macd_signal"], frame["macd_hist"]
+    else:
+        # Compatibility for standalone callers/tests; causal_replay precomputes once.
+        close = frame.close.astype(float)
+        macd = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
+        signal = macd.ewm(span=9, adjust=False).mean()
+        hist = macd - signal
     bull_expansion = hist.iloc[i] > 0 and hist.iloc[i] > hist.iloc[i-1] and macd.iloc[i] > signal.iloc[i]
     bear_expansion = hist.iloc[i] < 0 and hist.iloc[i] < hist.iloc[i-1] and macd.iloc[i] < signal.iloc[i]
     return {"stoch_bullish_cross": bool(bull_cross), "stoch_bearish_cross": bool(bear_cross),
@@ -134,6 +148,7 @@ def write_jsonl(path, rows):
 def causal_replay(raw):
     frame = indicators(raw.sort_values("timestamp").reset_index(drop=True))
     events, active = [], []
+    seen_keys = set()
     status={"state":"no_qualifying_line","message":"No recent three-touch line within 2.5% of close."}
     for i in range(max(90, LOOKBACK//2), len(frame)):
         start=max(0, i-LOOKBACK+1)
@@ -152,12 +167,13 @@ def causal_replay(raw):
             "close":round(close,6),
             "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
         candidates=[line for line in candidates
-            if len(prefix)-1-line.end.confirmed_at <= MAX_LINE_AGE
+            if len(prefix)-1-line.confirmed_at <= MAX_LINE_AGE
             and abs(line.value_at(len(prefix)-1)-close)/close <= MAX_DISTANCE]
         candidates.sort(key=lambda line:(abs(line.value_at(len(prefix)-1)-close)/close,
-            -len(line.touch_indices),-line.end.confirmed_at))
+            -len(line.touch_indices),-line.confirmed_at))
         # Dashboard state uses nearest line, but break detection scans all valid lines.
         wedge = structure_snapshot(prefix, candidates)
+        break_recorded_this_candle = False
         if candidates:
             line=candidates[0]; lv=float(line.value_at(len(prefix)-1))
             status={"state":"watching_resistance" if line.kind=="resistance" else "watching_support",
@@ -175,6 +191,7 @@ def causal_replay(raw):
             for break_line in candidates:
                 if not break_crossed(prefix,break_line,len(prefix)-1):
                     continue
+                break_recorded_this_candle = True
                 direction="long" if break_line.kind=="resistance" else "short"
                 row=prefix.iloc[-1]
                 aligned=(float(row.ema8_4h)>float(row.ema21_4h)) if direction=="long" else (float(row.ema8_4h)<float(row.ema21_4h))
@@ -190,19 +207,26 @@ def causal_replay(raw):
                 event["anchor_start_time"]=prefix.iloc[break_line.start.index].timestamp.isoformat()
                 event["anchor_end_time"]=prefix.iloc[break_line.end.index].timestamp.isoformat()
                 duplicate_key=(event["line_kind"],event["anchor_start_time"],event["anchor_end_time"])
-                seen_keys={(e["line_kind"],e.get("anchor_start_time"),e.get("anchor_end_time")) for e in events}
                 if duplicate_key not in seen_keys:
-                    events.append(event); active.append({"event":event,"line":break_line,"origin":start,"break_i":i})
-                    if i == len(frame)-1 and break_line.kind == line.kind and break_line.start.index == line.start.index and break_line.end.index == line.end.index:
-                        status["state"]="break_close_probe"
+                    seen_keys.add(duplicate_key)
+                    # Freeze line geometry in absolute candle coordinates at break time.
+                    abs_start = start + break_line.start.index
+                    abs_end = start + break_line.end.index
+                    active.append({"event":event,"line":break_line,"origin":start,"break_i":i,
+                                   "abs_start":abs_start,"abs_end":abs_end,
+                                   "abs_slope":break_line.slope_per_bar})
+                    events.append(event)
+        if break_recorded_this_candle:
+            status["state"] = "break_close_probe"
+            status["break_recorded_this_candle"] = True
         # Manage each break against its original line coordinates; only future candles are outcomes.
         for a in list(active):
             age=i-a["break_i"]
             if age <= 0: continue
             e,line=a["event"],a["line"]
             e["forward_bars_checked"]=age
-            global_start=a["origin"]+line.start.index
-            lv=line.start.price+line.slope_per_bar*(i-global_start)
+            # Evaluate the exact frozen line fitted at the original break candle.
+            lv=line.start.price+a["abs_slope"]*(i-a["abs_start"])
             row=frame.iloc[i]; tol=abs(lv)*RETEST_TOL; close_i=float(row.close)
             if line.kind=="resistance":
                 contact=float(row.low)<=lv+tol; held=close_i>=lv
@@ -244,13 +268,15 @@ def causal_replay(raw):
         matches=frame.index[frame.timestamp == pd.Timestamp(e["signal_time"])]
         if not len(matches): continue
         si=int(matches[0]); entry=float(frame.iloc[si].close)
-        for h in (3,6,12,18):
-            end=min(len(frame)-1,si+h)
-            if end>si:
-                ret=(float(frame.iloc[end].close)-entry)/entry*(1 if e["direction"]=="long" else -1)
-                e[f"forward_{h}_bar_return_pct"]=round(ret*100,4)
-                e[f"forward_{h}_bar_end_time"]=frame.iloc[end].timestamp.isoformat()
-        e["forward_returns_note"]="Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+        # Only pending events receive forward returns; terminal outcomes remain lifecycle labels.
+        if e.get("outcome") == "pending":
+            for h in (3,6,12,18):
+                end=min(len(frame)-1,si+h)
+                if end>si:
+                    ret=(float(frame.iloc[end].close)-entry)/entry*(1 if e["direction"]=="long" else -1)
+                    e[f"forward_{h}_bar_return_pct"]=round(ret*100,4)
+                    e[f"forward_{h}_bar_end_time"]=frame.iloc[end].timestamp.isoformat()
+        e["forward_returns_note"]="Raw directional close-to-close diagnostic for pending events only; no fees, slippage, stops or sizing."
     return events,status,frame
 
 def entry2_replay_events(events):
@@ -309,6 +335,11 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     raw=fetch_ohlc(pair=pair,interval=interval)
     events,status,frame=causal_replay(raw)
     setups=consolidate_setups(events,frame)
+    split_index=min(max(int(len(frame)*0.7),1),len(frame)-1)
+    walk_forward_split_time=frame.iloc[split_index].timestamp.isoformat()
+    split_ts = pd.Timestamp(walk_forward_split_time)
+    for setup in setups:
+        setup["in_sample"] = pd.Timestamp(setup["signal_time"]) < split_ts
     trades=replay_trades(setups,frame)
     trades_structural=replay_trades(setups,frame,target_mode="structure_fib")
     # Entry 2 replay enters only after the retest reaction extreme is broken by
@@ -316,9 +347,10 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     entry2_setups=entry2_replay_events(setups)
     entry2_trades=replay_trades(entry2_setups,frame)
     entry2_trades_structural=replay_trades(entry2_setups,frame,target_mode="structure_fib")
+    for replay_rows in (trades, trades_structural, entry2_trades, entry2_trades_structural):
+        for trade in replay_rows:
+            trade["in_sample"] = pd.Timestamp(trade["signal_time"]) < split_ts
     last=frame.iloc[-1]
-    split_index=min(max(int(len(frame)*0.7),1),len(frame)-1)
-    walk_forward_split_time=frame.iloc[split_index].timestamp.isoformat()
     setup_state=latest_setup_state(events, last.timestamp)
     structure=evaluate_structure(raw, lookback=LOOKBACK, min_touches=3, break_buffer_pct=BREAK_BUFFER)
     friday_decision=evaluate_friday_decision(frame)
@@ -329,6 +361,8 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     close_series = frame.close.astype(float)
     ema5_now = close_series.ewm(span=5, adjust=False).mean()
     ema13_now = close_series.ewm(span=13, adjust=False).mean()
+    if len(frame) < 2:
+        raise ValueError("At least two completed candles are required to build a strategy preview.")
     prev_bar, last_bar = frame.iloc[-2], frame.iloc[-1]
     stoch_down = bool(np.isfinite([prev_bar.stoch_k, prev_bar.stoch_d, last_bar.stoch_k, last_bar.stoch_d]).all()
                       and prev_bar.stoch_k >= prev_bar.stoch_d and last_bar.stoch_k < last_bar.stoch_d)
@@ -337,10 +371,13 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     short_ema_alignment = float(last.close) < min(float(ema5_now.iloc[-1]), float(last.ema8_4h), float(ema13_now.iloc[-1]), float(last.ema21_4h))
     long_ema_alignment = float(last.close) > max(float(ema5_now.iloc[-1]), float(last.ema8_4h), float(ema13_now.iloc[-1]), float(last.ema21_4h))
     daily_bias = str(last.daily_bias).lower()
+    daily_bias_available = daily_bias in ("bullish", "bearish")
     execution_direction = "short" if stoch_down and short_ema_alignment and daily_bias == "bearish" else (
         "long" if stoch_up and long_ema_alignment and daily_bias == "bullish" else None
     )
     execution_blockers = []
+    if not daily_bias_available:
+        execution_blockers.append("daily_bias_unavailable")
     if not (stoch_down or stoch_up):
         execution_blockers.append("no_fresh_closed_4h_stoch_cross")
     if stoch_down and not short_ema_alignment:
@@ -439,6 +476,7 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
     # candle window. The durable archive in Supabase retains lifecycle history.
     for filename, rows in (
         ("break_events.jsonl", events),
+        ("consolidated_setups.jsonl", setups),
         ("trade_replay.jsonl", trades),
         ("structural_target_replay.jsonl", trades_structural),
         ("entry2_trade_replay.jsonl", entry2_trades),

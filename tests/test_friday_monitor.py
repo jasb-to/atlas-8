@@ -67,7 +67,9 @@ class FridayMonitorTests(unittest.TestCase):
             self.assertTrue(result["run_id"])
             self.assertEqual(result["markets_requested"], 1)
             self.assertEqual(result["markets_succeeded"], 1)
-            self.assertEqual(result["alert_outcomes_total"], 0)
+            # Every scanned market records an explicit outcome, including no-trade scans.
+            self.assertEqual(result["alert_outcomes_total"], 1)
+            self.assertEqual(result["pair_results"][0]["alert_results"][0]["status"], "no_actionable_signal")
             self.assertEqual(result["pair_results"][0]["run_id"], result["run_id"])
             self.assertTrue(Path(tmp, "cron_run.json").exists())
 

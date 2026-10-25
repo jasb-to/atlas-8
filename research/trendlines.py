@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 
 Side = Literal["support", "resistance"]
+MIN_TOUCH_SPACING = 3
+DEFAULT_RETEST_LOOKBACK = 8
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,19 @@ class Trendline:
     tolerance: float
     touch_indices: tuple[int, ...]
     violations: tuple[int, ...]
+    last_touch_confirmed_at: int | None = None
+
+    @property
+    def last_touch_index(self) -> int:
+        """Position of the latest qualifying confirmed pivot contact."""
+        return self.touch_indices[-1] if self.touch_indices else self.end.index
+
+    @property
+    def confirmed_at(self) -> int:
+        """Candle by which every touch used to qualify the line was confirmed."""
+        if self.last_touch_confirmed_at is not None:
+            return self.last_touch_confirmed_at
+        return max(self.start.confirmed_at, self.end.confirmed_at)
 
     def value_at(self, index: int) -> float:
         return self.start.price + self.slope_per_bar * (index - self.start.index)
@@ -78,6 +93,8 @@ def fit_touch_trendlines(
     tolerance_pct: float = 0.0015,
     max_penetration_pct: float = 0.003,
     max_lines: int = 20,
+    min_touch_spacing: int = MIN_TOUCH_SPACING,
+    min_price_eps: float = 1e-8,
 ) -> list[Trendline]:
     """Build candidate lines through same-kind wick pivots and score real wick contacts.
 
@@ -87,8 +104,10 @@ def fit_touch_trendlines(
     observable and must not erase a historically valid line from the research output.
     """
     _validate_ohlc(candles)
-    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0:
-        raise ValueError("Invalid touch or tolerance parameters")
+    if not candles.index.equals(pd.RangeIndex(len(candles))):
+        raise ValueError("fit_touch_trendlines requires a zero-based positional RangeIndex; reset_index(drop=True) first")
+    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0 or min_touch_spacing < 1 or min_price_eps <= 0 or max_lines < 1:
+        raise ValueError("Invalid touch, spacing, price floor, or tolerance parameters")
     pivots = pivots if pivots is not None else find_wick_pivots(candles)
     points = sorted(
         (p for p in pivots if p.kind == kind),
@@ -110,8 +129,8 @@ def fit_touch_trendlines(
             values = start.price + slope * (idx - start.index)
             relevant_wick = wick[start.index : end.index + 1]
             distance = relevant_wick - values
-            tol = np.maximum(np.abs(values) * tolerance_pct, 1e-12)
-            penetration = np.maximum(np.abs(values) * max_penetration_pct, 1e-12)
+            tol = np.maximum(np.abs(values) * tolerance_pct, min_price_eps)
+            penetration = np.maximum(np.abs(values) * max_penetration_pct, min_price_eps)
 
             if kind == "support":
                 touch_mask = (distance >= -penetration) & (distance <= tol)
@@ -131,8 +150,8 @@ def fit_touch_trendlines(
             pivot_wicks = wick[pivot_indices] if len(pivot_indices) else np.array([])
             pivot_line_values = start.price + slope * (pivot_indices - start.index)
             pivot_distances = pivot_wicks - pivot_line_values
-            pivot_tolerances = np.maximum(np.abs(pivot_line_values) * tolerance_pct, 1e-12)
-            pivot_penetrations = np.maximum(np.abs(pivot_line_values) * max_penetration_pct, 1e-12)
+            pivot_tolerances = np.maximum(np.abs(pivot_line_values) * tolerance_pct, min_price_eps)
+            pivot_penetrations = np.maximum(np.abs(pivot_line_values) * max_penetration_pct, min_price_eps)
             if kind == "resistance":
                 pivot_distances = -pivot_distances
             pivot_touch_mask = (pivot_distances >= -pivot_penetrations) & (pivot_distances <= pivot_tolerances)
@@ -142,15 +161,20 @@ def fit_touch_trendlines(
             # same-side swing pivots, while every intervening candle is checked for penetration.
             if len(touch_indices) < min_touches or violations:
                 continue
+            # Keep distinct contacts structurally separate; nearby ragged pivots
+            # should not satisfy the minimum-touch rule on their own.
+            if any((b - a) < min_touch_spacing for a, b in zip(touch_indices, touch_indices[1:])):
+                continue
             lines.append(
                 Trendline(
                     kind=kind,
                     start=start,
                     end=end,
                     slope_per_bar=float(slope),
-                    tolerance=float(max(np.abs(values).max() * tolerance_pct, 1e-12)),
+                    tolerance=float(max(np.abs(values).max() * tolerance_pct, min_price_eps)),
                     touch_indices=touch_indices,
                     violations=violations,
+                    last_touch_confirmed_at=max(p.confirmed_at for p in points if p.index in touch_indices),
                 )
             )
 
@@ -164,7 +188,21 @@ def fit_touch_trendlines(
         ),
         reverse=True,
     )
-    return lines[:max_lines]
+    deduped: list[Trendline] = []
+    for candidate in lines:
+        candidate_touches = set(candidate.touch_indices)
+        if any(
+            existing.kind == candidate.kind
+            and len(candidate_touches.intersection(existing.touch_indices)) >= max(2, min_touches - 1)
+            and abs(existing.slope_per_bar - candidate.slope_per_bar) <= max(abs(candidate.slope_per_bar), 1.0) * 1e-6
+            and abs(existing.start.price - candidate.start.price) <= max(abs(candidate.start.price), min_price_eps) * tolerance_pct
+            for existing in deduped
+        ):
+            continue
+        deduped.append(candidate)
+        if len(deduped) >= max_lines:
+            break
+    return deduped
 
 
 def classify_line_state(
@@ -173,7 +211,7 @@ def classify_line_state(
     *,
     index: int | None = None,
     tolerance_pct: float = 0.0015,
-    retest_lookahead_bars: int = 8,
+    retest_lookback_bars: int = DEFAULT_RETEST_LOOKBACK,
 ) -> dict:
     """Describe approach/break/retest/hold on closed candles; no orders are generated."""
     _validate_ohlc(candles)
@@ -182,6 +220,8 @@ def classify_line_state(
         raise IndexError("index must reference an existing candle after the first")
     row = candles.iloc[i]
     prev = candles.iloc[i - 1]
+    if retest_lookback_bars < 1:
+        raise ValueError("retest_lookback_bars must be >= 1")
     line_now = line.value_at(i)
     line_prev = line.value_at(i - 1)
     tol = abs(line_now) * tolerance_pct
@@ -191,13 +231,13 @@ def classify_line_state(
         # single candle that first crossed it.
         broken = float(row["close"]) > line_now + tol
         near = abs(float(row["high"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
-        state = "breakout" if broken else ("approaching" if float(row["close"]) < line_now and line_now - float(row["close"]) <= tol * 3 else "watch")
+        state = "breakout" if broken else ("approaching" if float(row["close"]) < line_now and (near or line_now - float(row["close"]) <= tol * 3) else "watch")
         retest_side = "support"
     else:
         # Keep a broken line marked as broken until price closes back across it.
         broken = float(row["close"]) < line_now - tol
         near = abs(float(row["low"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
-        state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and float(row["close"]) - line_now <= tol * 3 else "watch")
+        state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and (near or float(row["close"]) - line_now <= tol * 3) else "watch")
         retest_side = "resistance"
 
     # A retest is only valid after a confirmed close through the line. Find the
@@ -205,7 +245,7 @@ def classify_line_state(
     # ordinary pre-break touch can be mislabeled as a retest.
     retest = False
     retest_index = None
-    scan_start = max(line.end.index + 1, i - retest_lookahead_bars)
+    scan_start = max(line.last_touch_index + 1, i - retest_lookback_bars)
     prior_breaks = []
     for k in range(scan_start, i):
         current = candles.iloc[k]
@@ -244,6 +284,8 @@ def classify_line_state(
 
     return {
         "index": i,
+        "as_of_index": i,
+        "is_latest": i == len(candles) - 1,
         "line_kind": line.kind,
         "line_value": float(line_now),
         "close": float(row["close"]),
