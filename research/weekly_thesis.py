@@ -164,10 +164,10 @@ def evaluate_sheldon_thesis(
 
     wc = _number(weekly["close"].iloc[-1]) if not weekly.empty else None
     dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
-    if len(weekly) < EMA_SLOW_LENGTH or len(daily) < EMA_SLOW_LENGTH:
+    if len(weekly) < 34 or len(daily) < 34:
         return _flat_result(
             pair, status="insufficient_data", direction=None,
-            reason=(f"Need at least 21 completed weekly and daily candles; "
+            reason=(f"Need at least 34 completed weekly and daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
             weekly_close=wc, daily_close=dc,
         )
