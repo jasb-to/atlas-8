@@ -65,8 +65,19 @@ export default function Home() {
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
-    const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction;
-    const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction;
+    const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction ??
+      (thesis?.weekly_close != null && thesis?.weekly_sma != null
+        ? Number(thesis.weekly_close) > Number(thesis.weekly_sma) ? "bullish" : "bearish"
+        : undefined);
+    const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction ??
+      (thesis?.daily_close != null && thesis?.daily_sma != null &&
+       thesis?.daily_stoch_k != null && thesis?.daily_stoch_d != null
+        ? Number(thesis.daily_close) > Number(thesis.daily_sma) && Number(thesis.daily_stoch_k) > Number(thesis.daily_stoch_d)
+          ? "bullish"
+          : Number(thesis.daily_close) < Number(thesis.daily_sma) && Number(thesis.daily_stoch_k) < Number(thesis.daily_stoch_d)
+            ? "bearish"
+            : "misaligned"
+        : undefined);
     const weeklyMomentum = thesis?.weekly_stoch_aligned === true
       ? "K > D"
       : thesis?.weekly_stoch_aligned === false
@@ -80,13 +91,13 @@ export default function Home() {
   const watchlist = useMemo(() => {
     return data.events.filter(event => {
       const pair = pairName(event.pair);
-      const thesis = thesisFor(snapshots, pair);
+      const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
       const outcome = String(event.outcome ?? "").toLowerCase();
       const open = openTrades.some(trade => pairName(trade.pair) === pair);
       return thesis?.status === "active" && !open &&
         ["pending", "candidate", "active", "open", "retest_held_waiting_continuation", "entry_probe_waiting_retest"].includes(outcome);
     }).slice(0, 8);
-  }, [data.events, snapshots, openTrades]);
+  }, [data.events, data.weekly_theses, snapshots, openTrades]);
   const recentEvents = data.events.slice(0, 40);
   const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
   const headerDate = new Date().toLocaleString("en-GB", {
