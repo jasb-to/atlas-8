@@ -12,6 +12,7 @@ from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMarketDataTests(unittest.TestCase):
+    @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
         supportive = {
             "status": "ok",
