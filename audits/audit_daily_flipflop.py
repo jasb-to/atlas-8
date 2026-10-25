@@ -8,7 +8,7 @@ from research.weekly_thesis import calculate_stoch_rsi
 
 START = "2020-01-01"
 END = "2026-10-26"
-REPLAY_START = pd.Timestamp("2024-10-25T00:00:00Z")
+REPLAY_START = pd.Timestamp("2024-10-24T00:00:00Z")
 REPLAY_END = pd.Timestamp("2026-10-25T00:00:00Z")
 
 
