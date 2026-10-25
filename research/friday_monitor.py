@@ -100,6 +100,25 @@ def _is_live_lifecycle_event(pair: str, event: dict, tracking_start: str | None 
     return _utc(signal_time) >= cutoff
 
 
+def _scan_4h_if_active(thesis: dict, scanner, **kwargs):
+    """Invoke the injected 4H scanner only when the weekly thesis is active."""
+    if not _should_scan_4h(thesis):
+        return None
+    return scanner(**kwargs)
+
+
+def _trade_plan_metrics(direction: str, entry: float, stop: float, target: float) -> tuple[bool, float]:
+    """Validate directional stop/target geometry and return (valid, reward/risk)."""
+    direction = str(direction).strip().lower()
+    risk = abs(float(entry) - float(stop))
+    reward = float(target) - float(entry) if direction == "long" else float(entry) - float(target)
+    rr = reward / risk if risk > 0 else 0.0
+    geometry_ok = (float(stop) < float(entry) < float(target)) if direction == "long" else (
+        float(target) < float(entry) < float(stop)
+    ) if direction == "short" else False
+    return bool(geometry_ok and rr >= 1.5), rr
+
+
 def _should_scan_4h(thesis: dict) -> bool:
     """The 4H scanner runs only for an active higher-timeframe thesis."""
     return str(thesis.get("status", "unavailable")).strip().lower() == "active"
@@ -209,7 +228,7 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                 )
                 continue
 
-            result = build_preview(pair=pair, interval=240, output_dir=str(pair_dir))
+            result = _scan_4h_if_active(weekly_thesis, build_preview, pair=pair, interval=240, output_dir=str(pair_dir))
             print(
                 f"[FRIDAY MARKET {index}/{len(pairs)}] DATA_OK pair={display_pair} "
                 f"close={result.get('last_close', 'n/a')} "
