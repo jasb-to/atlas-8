@@ -167,10 +167,10 @@ def causal_replay(raw):
             "close":round(close,6),
             "last_closed_candle":prefix.iloc[-1].timestamp.isoformat()}
         candidates=[line for line in candidates
-            if len(prefix)-1-line.end.confirmed_at <= MAX_LINE_AGE
+            if len(prefix)-1-line.confirmed_at <= MAX_LINE_AGE
             and abs(line.value_at(len(prefix)-1)-close)/close <= MAX_DISTANCE]
         candidates.sort(key=lambda line:(abs(line.value_at(len(prefix)-1)-close)/close,
-            -len(line.touch_indices),-line.end.confirmed_at))
+            -len(line.touch_indices),-line.confirmed_at))
         # Dashboard state uses nearest line, but break detection scans all valid lines.
         wedge = structure_snapshot(prefix, candidates)
         break_recorded_this_candle = False
