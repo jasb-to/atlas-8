@@ -67,6 +67,8 @@ def _download_pair(data_dir: Path, pair: str, start: pd.Timestamp, end: pd.Times
             last_error = exc
             break
 
+    source_name = "binance_spot"
+    market_name = symbol
     if rows:
         frame = pd.DataFrame(rows, columns=[
             "open_time", "open", "high", "low", "close", "volume", "close_time",
@@ -77,7 +79,9 @@ def _download_pair(data_dir: Path, pair: str, start: pd.Timestamp, end: pd.Times
             frame[column] = pd.to_numeric(frame[column], errors="raise")
         frame = frame[["timestamp", "open", "high", "low", "close", "volume"]]
     elif pair == "HYPEUSDT":
-        # Hyperliquid is the fallback for HYPE if Binance spot history is unavailable.
+        # Hyperliquid perpetual candles are a different market/source from spot.
+        source_name = "hyperliquid_perpetual"
+        market_name = "HYPE"
         response = requests.post(
             "https://api.hyperliquid.xyz/info",
             json={"type": "candleSnapshot", "req": {"coin": "HYPE", "interval": "4h", "startTime": start_ms, "endTime": end_ms}},
@@ -101,6 +105,11 @@ def _download_pair(data_dir: Path, pair: str, start: pd.Timestamp, end: pd.Times
         raise RuntimeError(f"Downloaded no closed 4H candles for {pair}")
     path = data_dir / f"{pair}_4h.parquet"
     frame.to_parquet(path, index=False)
+    path.with_suffix(".metadata.json").write_text(json.dumps({
+        "pair": pair, "source": source_name, "market": market_name,
+        "interval": "4h", "start_utc": frame.timestamp.iloc[0].isoformat(),
+        "end_utc": frame.timestamp.iloc[-1].isoformat(), "rows": len(frame),
+    }, indent=2))
     print(f"[baseline-data] {pair}: {len(frame)} candles from {frame.timestamp.iloc[0]} to {frame.timestamp.iloc[-1]}", flush=True)
     return path
 
@@ -201,6 +210,17 @@ def _safe_decision(frame: pd.DataFrame) -> dict[str, Any]:
         return {"state": "ERROR", "reason": f"{type(exc).__name__}: {exc}"}
 
 
+def _data_source(data_dir: Path, pair: str) -> str:
+    for alias in (pair, pair.replace("XBT", "BTC")):
+        metadata = data_dir / f"{alias}_4h.metadata.json"
+        if metadata.exists():
+            try:
+                return str(json.loads(metadata.read_text()).get("source", "unknown"))
+            except (OSError, ValueError, TypeError):
+                return "metadata_unreadable"
+    return "user_supplied_csv_or_parquet"
+
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
@@ -280,6 +300,7 @@ def run_baseline(
         pair_reversal_trades = [row for row in all_reversal_trades if row["pair"] == pair and row.get("eligible")]
         pair_summaries.append({
             "pair": pair,
+            "data_source": _data_source(data_dir, pair),
             "candles": len(enriched),
             "first_candle": enriched.iloc[0]["timestamp"].isoformat(),
             "last_candle": enriched.iloc[-1]["timestamp"].isoformat(),
@@ -313,6 +334,7 @@ def run_baseline(
         "window_start_utc": start.isoformat(),
         "window_end_utc": end.isoformat(),
         "requested_pairs": pairs,
+        "data_sources": {pair: _data_source(data_dir, pair) for pair in [row["pair"] for row in pair_summaries]},
         "pairs_completed": [row["pair"] for row in pair_summaries],
         "pairs_missing_full_window_coverage": missing_coverage,
         "break_events": len(all_events),
