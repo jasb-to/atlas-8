@@ -1,0 +1,161 @@
+name: FRIDAY Full Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  full-audit:
+    name: Full audit (no AI, no Telegram, no deploy)
+    runs-on: ubuntu-latest
+    env:
+      FRIDAY_AI_REVIEW_ENABLED: "false"
+      FRIDAY_TELEGRAM_ENABLED: "false"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt pytest
+
+      - name: Run complete pytest suite
+        id: pytest
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pytest tests/ -v 2>&1 | tee pytest.log
+
+      - name: Run monitor-gate tests separately
+        id: monitor_gate
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pytest tests/test_monitor_gate.py -v 2>&1 | tee monitor-gate.log
+
+      - name: Check source for forbidden AI provider references
+        id: no_hf
+        continue-on-error: true
+        shell: bash
+        run: |
+          python - <<'PY' 2>&1 | tee no-hf-references.log
+          from pathlib import Path
+          import re
+          patterns = [
+              re.compile("huggingface", re.I),
+              re.compile(r"HF_"),
+              re.compile(r"vercel.*ai-review", re.I),
+          ]
+          roots = [Path("research"), Path("dashboard"), Path("tests")]
+          extensions = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json"}
+          matches = []
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob("*"):
+                  if not path.is_file() or path.suffix.lower() not in extensions:
+                      continue
+                  if any(part.lower() in {"docs", "documentation", "node_modules", ".next"} for part in path.parts):
+                      continue
+                  for line_no, line in enumerate(path.read_text(errors="replace").splitlines(), 1):
+                      if any(pattern.search(line) for pattern in patterns):
+                          matches.append(f"{path}:{line_no}:{line.strip()}")
+          if matches:
+              print("\n".join(matches))
+              raise SystemExit("FAIL: forbidden provider reference(s) found outside documentation")
+          print("PASS: no forbidden provider references in source")
+          PY
+
+      - name: Check alert math
+        id: alert_math
+        continue-on-error: true
+        run: |
+          python - <<'PY' 2>&1 | tee alert-math.log
+          entry, stop, target, direction = 8.822, 9.046, 7.833, "short"
+          risk = abs(entry - stop)
+          tp1 = entry - 1.5 * risk if direction == "short" else entry + 1.5 * risk
+          rr = abs(target - entry) / risk
+          print(f"Entry={entry:.3f} Stop={stop:.3f} Target={target:.3f}")
+          print(f"TP1={tp1:.3f} (expected 8.486); RR={rr:.3f}R (expected approximately 4.40R)")
+          assert round(tp1, 3) == 8.486, f"TP1 mismatch: {tp1}"
+          assert abs(rr - 4.40) < 0.05, f"RR outside expected tolerance: {rr}"
+          print("PASS: alert math")
+          PY
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Build dashboard
+        id: dashboard_build
+        continue-on-error: true
+        working-directory: dashboard
+        run: |
+          npm ci 2>&1 | tee ../dashboard-build.log
+          npm run build 2>&1 | tee -a ../dashboard-build.log
+
+      - name: Read-only BTC monitor smoke test
+        id: dry_run
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m research.friday_monitor --pairs XBTUSDT --dry-run 2>&1 | tee dry-run-smoke.log
+
+      - name: Upload audit logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: friday-full-audit-logs
+          if-no-files-found: warn
+          path: |
+            pytest.log
+            monitor-gate.log
+            no-hf-references.log
+            alert-math.log
+            dashboard-build.log
+            dry-run-smoke.log
+
+      - name: Write audit summary
+        if: always()
+        env:
+          PYTEST_OUTCOME: ${{ steps.pytest.outcome }}
+          NO_HF_OUTCOME: ${{ steps.no_hf.outcome }}
+          ALERT_MATH_OUTCOME: ${{ steps.alert_math.outcome }}
+          DASHBOARD_OUTCOME: ${{ steps.dashboard_build.outcome }}
+          MONITOR_GATE_OUTCOME: ${{ steps.monitor_gate.outcome }}
+          DRY_RUN_OUTCOME: ${{ steps.dry_run.outcome }}
+        run: |
+          result() {
+            if [ "$1" = "success" ]; then echo "PASS"; else echo "FAIL ($1)"; fi
+          }
+          {
+            echo "## FRIDAY Full Audit"
+            echo
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| pytest | $(result "$PYTEST_OUTCOME") |"
+            echo "| no-HF-references | $(result "$NO_HF_OUTCOME") |"
+            echo "| alert-math | $(result "$ALERT_MATH_OUTCOME") |"
+            echo "| dashboard-build | $(result "$DASHBOARD_OUTCOME") |"
+            echo "| monitor-gate-tests | $(result "$MONITOR_GATE_OUTCOME") |"
+            echo "| dry-run-smoke (BTC) | $(result "$DRY_RUN_OUTCOME") |"
+            echo
+            echo "AI review and Telegram are disabled for the entire job. No deploy step exists."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$PYTEST_OUTCOME" != "success" ] || [ "$NO_HF_OUTCOME" != "success" ] || [ "$ALERT_MATH_OUTCOME" != "success" ] || [ "$DASHBOARD_OUTCOME" != "success" ] || [ "$MONITOR_GATE_OUTCOME" != "success" ] || [ "$DRY_RUN_OUTCOME" != "success" ]; then
+            exit 1
+          fi
