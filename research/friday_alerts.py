@@ -133,6 +133,10 @@ def send_telegram_alert(message: str, *, environ: Mapping[str, str] | None = Non
                         timeout_seconds: int = 8) -> dict[str, Any]:
     """Send a Telegram notification if credentials are configured; never logs secrets."""
     env = os.environ if environ is None else environ
+    # The audit/test kill switch overrides credentials and fails closed.
+    telegram_enabled = str(env.get("FRIDAY_TELEGRAM_ENABLED", "true")).strip().lower()
+    if telegram_enabled in {"0", "false", "no", "off"}:
+        return {"sent": False, "status": "disabled", "reason": "Telegram delivery disabled by FRIDAY_TELEGRAM_ENABLED"}
     # Fail closed: never send validation failures or a trade with an absent stop.
     if message.startswith("Invalid trade geometry:") or "🛑 Stop Loss: n/a" in message:
         return {"sent": False, "status": "invalid_trade_geometry",
