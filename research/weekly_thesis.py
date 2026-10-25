@@ -98,16 +98,39 @@ def _number(value: Any) -> float | None:
     return result if np.isfinite(result) else None
 
 
-def _inactive(status: str, reason: str, *, pair: str, weekly: pd.DataFrame,
-              daily: pd.DataFrame) -> dict[str, Any]:
+def _flat_result(
+    pair: str,
+    *,
+    status: str,
+    direction: str | None,
+    reason: str,
+    weekly_close: float | None = None,
+    weekly_sma: float | None = None,
+    weekly_stoch_k: float | None = None,
+    weekly_stoch_d: float | None = None,
+    daily_close: float | None = None,
+    daily_sma: float | None = None,
+    daily_stoch_k: float | None = None,
+    daily_stoch_d: float | None = None,
+    weekly_stoch_cross: bool = False,
+    weekly_stoch_aligned: bool = False,
+) -> dict[str, Any]:
+    """Return the same flat schema on every evaluator path."""
     return {
-        "schema_version": "sheldon-weekly-daily-v1",
         "pair": pair.upper(),
         "status": status,
-        "direction": "neutral",
+        "direction": direction,
+        "weekly_close": weekly_close,
+        "weekly_sma": weekly_sma,
+        "weekly_stoch_k": weekly_stoch_k,
+        "weekly_stoch_d": weekly_stoch_d,
+        "daily_close": daily_close,
+        "daily_sma": daily_sma,
+        "daily_stoch_k": daily_stoch_k,
+        "daily_stoch_d": daily_stoch_d,
+        "weekly_stoch_cross": bool(weekly_stoch_cross),
+        "weekly_stoch_aligned": bool(weekly_stoch_aligned),
         "reason": reason,
-        "weekly_last_closed_candle_utc": weekly.iloc[-1]["timestamp"].isoformat() if not weekly.empty else None,
-        "daily_last_closed_candle_utc": daily.iloc[-1]["timestamp"].isoformat() if not daily.empty else None,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -120,12 +143,10 @@ def evaluate_sheldon_thesis(
     fetcher: Callable[..., pd.DataFrame] = fetch_ohlc,
     as_of: datetime | pd.Timestamp | None = None,
 ) -> dict[str, Any]:
-    """Evaluate a weekly 200-SMA/Stoch RSI regime plus daily alignment/veto.
+    """Evaluate completed weekly regime and completed-daily alignment.
 
-    Rule set is provisional and parameterized by module constants. The weekly
-    Stoch RSI accepts either a fresh extreme-zone cross or already-aligned K/D,
-    matching the requested initial specification. The daily accepts K/D
-    alignment or a cross within the last three completed daily candles.
+    Weekly cross (a fresh cross in the extreme zone) and weekly aligned state
+    are deliberately reported separately. Every return has the same flat schema.
     """
     now = pd.Timestamp(as_of or datetime.now(timezone.utc))
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
@@ -135,11 +156,14 @@ def evaluate_sheldon_thesis(
     weekly = _completed_candles(weekly_raw, interval_minutes=10080, as_of=now)
     daily = _completed_candles(daily_raw, interval_minutes=1440, as_of=now)
 
-    if len(weekly) < SMA_LENGTH or len(daily) < SMA_LENGTH:
-        return _inactive(
-            "data_insufficient",
-            f"Need at least {SMA_LENGTH} completed weekly and daily candles for the 200-SMA filter.",
-            pair=pair, weekly=weekly, daily=daily,
+    wc = _number(weekly["close"].iloc[-1]) if not weekly.empty else None
+    dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
+    if len(weekly) < 201 or len(daily) < 201:
+        return _flat_result(
+            pair, status="insufficient_data", direction=None,
+            reason=(f"Need at least 201 completed weekly and daily candles; "
+                    f"available weekly={len(weekly)}, daily={len(daily)}."),
+            weekly_close=wc, daily_close=dc,
         )
 
     weekly_close = weekly["close"].astype(float)
@@ -154,93 +178,59 @@ def evaluate_sheldon_thesis(
     w_k, w_d = _number(weekly_k.iloc[-1]), _number(weekly_d.iloc[-1])
     d_k, d_d = _number(daily_k.iloc[-1]), _number(daily_d.iloc[-1])
 
-    if None in (w_sma, d_sma, w_k, w_d, d_k, d_d):
-        return _inactive(
-            "data_insufficient", "The 200-SMA or Stoch RSI values are not yet valid.",
-            pair=pair, weekly=weekly, daily=daily,
+    def result(status: str, direction: str | None, reason: str,
+               cross: bool = False, aligned: bool = False) -> dict[str, Any]:
+        return _flat_result(
+            pair, status=status, direction=direction, reason=reason,
+            weekly_close=w_close, weekly_sma=w_sma,
+            weekly_stoch_k=w_k, weekly_stoch_d=w_d,
+            daily_close=d_close, daily_sma=d_sma,
+            daily_stoch_k=d_k, daily_stoch_d=d_d,
+            weekly_stoch_cross=cross, weekly_stoch_aligned=aligned,
         )
 
+    if None in (w_sma, d_sma, w_k, w_d, d_k, d_d):
+        return result("insufficient_data", None, "The 200-SMA or Stoch RSI values are not yet valid.")
+
     w_k_prev, w_d_prev = _number(weekly_k.iloc[-2]), _number(weekly_d.iloc[-2])
-    weekly_bull_cross = (
+    bull_cross = (
         w_k_prev is not None and w_d_prev is not None
         and w_k_prev <= w_d_prev and w_k > w_d and w_k < 20
     )
-    weekly_bear_cross = (
+    bear_cross = (
         w_k_prev is not None and w_d_prev is not None
         and w_k_prev >= w_d_prev and w_k < w_d and w_k > 80
     )
-    weekly_bullish = w_close > w_sma
-    weekly_bearish = w_close < w_sma
+    bull_aligned = w_k > w_d
+    bear_aligned = w_k < w_d
+    weekly_bullish, weekly_bearish = w_close > w_sma, w_close < w_sma
 
-    if weekly_bullish and (weekly_bull_cross or w_k > w_d):
-        direction = "long"
-    elif weekly_bearish and (weekly_bear_cross or w_k < w_d):
-        direction = "short"
+    if weekly_bullish and (bull_cross or bull_aligned):
+        direction, cross, aligned = "long", bool(bull_cross), bool(bull_aligned)
+    elif weekly_bearish and (bear_cross or bear_aligned):
+        direction, cross, aligned = "short", bool(bear_cross), bool(bear_aligned)
     else:
-        return {
-            **_inactive(
-                "inactive", "Weekly 200-SMA trend and Stoch RSI direction are not aligned.",
-                pair=pair, weekly=weekly, daily=daily,
-            ),
-            "weekly": {
-                "close": w_close, "sma200": w_sma, "stoch_k": w_k, "stoch_d": w_d,
-                "trend": "bullish" if weekly_bullish else "bearish" if weekly_bearish else "neutral",
-                "stoch_extreme_cross": bool(weekly_bull_cross or weekly_bear_cross),
-            },
-        }
+        return result(
+            "inactive", None,
+            "Weekly 200-SMA trend and Stoch RSI direction are not aligned.",
+            bool(bull_cross or bear_cross), bool(bull_aligned or bear_aligned),
+        )
 
-    daily_bullish = d_close > d_sma and (d_k > d_d or _cross_recently_up(daily_k, daily_d, DAILY_RECENT_CROSS_BARS))
-    daily_bearish = d_close < d_sma and (d_k < d_d or _cross_recently_down(daily_k, daily_d, DAILY_RECENT_CROSS_BARS))
-    aligned = daily_bullish if direction == "long" else daily_bearish
-    if not aligned:
-        return {
-            "schema_version": "sheldon-weekly-daily-v1",
-            "pair": pair.upper(),
-            "status": "veto",
-            "direction": direction,
-            "reason": f"Weekly {direction} regime, but daily 200-SMA/Stoch RSI alignment failed.",
-            "weekly_last_closed_candle_utc": weekly.iloc[-1]["timestamp"].isoformat(),
-            "daily_last_closed_candle_utc": daily.iloc[-1]["timestamp"].isoformat(),
-            "weekly": {"close": w_close, "sma200": w_sma, "stoch_k": w_k, "stoch_d": w_d},
-            "daily": {"close": d_close, "sma200": d_sma, "stoch_k": d_k, "stoch_d": d_d},
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        }
-
-    # Stable ID remains unchanged while price stays on the same side of its weekly
-    # 200-SMA regime boundary; it does not churn every week.
-    side = np.sign(weekly_close.to_numpy() - weekly_sma.to_numpy())
-    valid_indices = np.flatnonzero(np.isfinite(weekly_sma.to_numpy()))
-    regime_start = int(valid_indices[0])
-    for idx in valid_indices[1:]:
-        if side[idx] != side[idx - 1]:
-            regime_start = int(idx)
-    regime_timestamp = weekly.iloc[regime_start]["timestamp"].isoformat()
-    stable_seed = f"{pair.upper()}|{direction}|{regime_timestamp}|sheldon-weekly-daily-v1"
-    thesis_id = hashlib.sha256(stable_seed.encode()).hexdigest()[:20]
-
-    return {
-        "schema_version": "sheldon-weekly-daily-v1",
-        "thesis_id": thesis_id,
-        "pair": pair.upper(),
-        "status": "active",
-        "direction": direction,
-        "reason": f"Weekly close {'above' if direction == 'long' else 'below'} 200-SMA with Stoch RSI aligned; daily 200-SMA and Stoch RSI aligned.",
-        "weekly_last_closed_candle_utc": weekly.iloc[-1]["timestamp"].isoformat(),
-        "daily_last_closed_candle_utc": daily.iloc[-1]["timestamp"].isoformat(),
-        "regime_start_utc": regime_timestamp,
-        "invalidation_level": w_sma,
-        "weekly": {
-            "close": w_close, "sma200": w_sma, "stoch_k": w_k, "stoch_d": w_d,
-            "trend": "bullish" if direction == "long" else "bearish",
-            "extreme_cross": bool(weekly_bull_cross if direction == "long" else weekly_bear_cross),
-        },
-        "daily": {
-            "close": d_close, "sma200": d_sma, "stoch_k": d_k, "stoch_d": d_d,
-            "trend": "bullish" if direction == "long" else "bearish",
-            "recent_cross": bool(
-                _cross_recently_up(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
-                if direction == "long" else _cross_recently_down(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
-            ),
-        },
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-    }
+    daily_bullish = d_close > d_sma and (
+        d_k > d_d or _cross_recently_up(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
+    )
+    daily_bearish = d_close < d_sma and (
+        d_k < d_d or _cross_recently_down(daily_k, daily_d, DAILY_RECENT_CROSS_BARS)
+    )
+    daily_aligned = daily_bullish if direction == "long" else daily_bearish
+    if not daily_aligned:
+        return result(
+            "veto", direction,
+            f"Weekly {direction} regime, but completed daily 200-SMA/Stoch RSI alignment failed.",
+            cross, aligned,
+        )
+    return result(
+        "active", direction,
+        f"Weekly {direction} regime aligned with completed daily 200-SMA and Stoch RSI.",
+        cross, aligned,
+    )
