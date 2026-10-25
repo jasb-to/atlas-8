@@ -100,7 +100,34 @@ def _is_live_lifecycle_event(pair: str, event: dict, tracking_start: str | None 
     return _utc(signal_time) >= cutoff
 
 
-def run_monitor(pairs: list[str], output_dir: str) -> dict:
+def _should_scan_4h(thesis: dict) -> bool:
+    """The 4H scanner runs only for an active higher-timeframe thesis."""
+    return str(thesis.get("status", "unavailable")).strip().lower() == "active"
+
+
+def _run_dry_run(pairs: list[str]) -> dict:
+    """Read-only smoke path: evaluate weekly/daily thesis and print only."""
+    results = []
+    for index, pair in enumerate(pairs, start=1):
+        print(f"[FRIDAY DRY-RUN {index}/{len(pairs)}] START pair={_display_pair(pair)}", flush=True)
+        thesis = evaluate_sheldon_thesis(pair, as_of=pd.Timestamp.now(tz="UTC"))
+        row = {
+            "pair": pair, "status": thesis.get("status", "unavailable"),
+            "direction": thesis.get("direction"), "macro_regime": thesis.get("macro_regime"),
+            "wave_state": thesis.get("wave_state"), "reason": thesis.get("reason"),
+            "dry_run": True, "side_effects": "disabled",
+        }
+        results.append(row)
+        print(json.dumps(row, allow_nan=False), flush=True)
+    summary = {"status": "success", "dry_run": True, "markets": len(results), "results": results}
+    print("[FRIDAY DRY-RUN FINISHED]", flush=True)
+    print(json.dumps(summary, indent=2, allow_nan=False), flush=True)
+    return summary
+
+
+def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> dict:
+    if dry_run:
+        return _run_dry_run(pairs)
     run_id = os.getenv("FRIDAY_SCAN_RUN_ID", "").strip() or f"friday-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     started_at = utc_now()
     store = create_friday_store()
@@ -142,7 +169,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     "generated_at_utc": utc_now(),
                 }
             thesis_status = str(weekly_thesis.get("status", "unavailable")).lower()
-            if thesis_status != "active":
+            if not _should_scan_4h(weekly_thesis):
                 thesis_reason = str(weekly_thesis.get("reason") or f"Weekly thesis status is {thesis_status}.")
                 row = {
                     "run_id": run_id, "pair": pair, "status": "weekly_inactive",
@@ -344,8 +371,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             for event in monitor_events:
                 event_time = _utc(event["signal_time"]) if event.get("signal_time") else None
                 add_time = _utc(event["continuation_add_time"]) if event.get("continuation_add_time") else None
-                is_fresh_entry = (event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and event_time == latest) or (
-                    event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_time == latest
+                is_fresh_entry = (event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and event_time is not None and event_time >= latest - pd.Timedelta(hours=4)) or (
+                    event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_time is not None and add_time >= latest - pd.Timedelta(hours=4)
                 )
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
@@ -398,8 +425,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 else:
                     historical_rows_ignored += 1
 
-                fresh_entry1 = event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and signal_ts == latest and signal_ts is not None and signal_ts >= tracking_cutoff
-                fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest and add_ts is not None and add_ts >= tracking_cutoff
+                fresh_entry1 = event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and signal_ts is not None and signal_ts >= latest - pd.Timedelta(hours=4) and signal_ts >= tracking_cutoff
+                fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts is not None and add_ts >= latest - pd.Timedelta(hours=4) and add_ts >= tracking_cutoff
                 # Make the lifecycle/notification distinction explicit. A break found
                 # on an older candle must not be sent later as if it were a fresh entry.
                 latest_setup = result.get("latest_setup_state", {}) or {}
@@ -535,7 +562,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 and pair.upper().endswith("USDT")
             )
             ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1", reversal.get("direction"))
-            if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and ai_pass and store.configured and hasattr(store, "paper_trades"):
+            if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and store.configured and hasattr(store, "paper_trades"):
                 register_paper_trade(
                     store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
                     signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
@@ -783,12 +810,13 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT")
     parser.add_argument("--output-dir", default="results/friday-monitor")
+    parser.add_argument("--dry-run", action="store_true", help="Read-only smoke check: no DB writes, files, paper trades or Telegram sends")
     args = parser.parse_args()
     try:
         pairs = validate_friday_pairs(args.pairs.split(","))
     except ValueError as exc:
         parser.error(str(exc))
-    result = run_monitor(pairs, args.output_dir)
+    result = run_monitor(pairs, args.output_dir, dry_run=args.dry_run)
     return _monitor_exit_code(result["status"])
 
 
