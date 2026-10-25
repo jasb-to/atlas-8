@@ -359,8 +359,16 @@ class RepoFolderFridayStore:
                 return False
 
         snapshots = []
+        weekly_theses = []
         for record in self._read("archive.json"):
-            if record.get("record_type") != "decision_snapshot":
+            record_type = record.get("record_type")
+            if record_type == "weekly_thesis_snapshot":
+                if str(record.get("pair", "")).upper().endswith("USDT") and post_launch(record.get("signal_time")):
+                    weekly_theses.append(record)
+                    if len(weekly_theses) == 25:
+                        continue
+                continue
+            if record_type != "decision_snapshot":
                 continue
             if not str(record.get("pair", "")).upper().endswith("USDT"):
                 continue
@@ -406,7 +414,7 @@ class RepoFolderFridayStore:
             "connected": True, "status": "connected",
             "message": "Connected to FRIDAY's temporary Git repository research store; only post-launch USDT research is shown.",
             "storage_backend": "github_repository_folder",
-            "snapshots": snapshots, "events": events, "runs": runs,
+            "snapshots": snapshots, "weekly_theses": weekly_theses, "events": events, "runs": runs,
             "alerts": alerts, "paper_trades": paper_trades,
             "fetched_at": utc_now(),
         }
