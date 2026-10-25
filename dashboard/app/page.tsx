@@ -184,9 +184,6 @@ export default function Home() {
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
   );
   const recentEvents = data.events.slice(0, 40);
-  const headerDate = new Date().toLocaleString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short"
-  }).toUpperCase();
 
   return <main className="shell">
     <header className="topbar">
