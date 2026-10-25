@@ -94,7 +94,7 @@ class FridayMonitorTests(unittest.TestCase):
     def test_four_hour_momentum_and_exhaustion_do_not_block_aligned_entry(self):
         from research.friday_monitor import _entry_filters_pass
         passed, blockers = _entry_filters_pass(
-            {"direction": "short", "momentum_context": {}},
+            {"direction": "short", "daily_bias": "bearish", "momentum_context": {}},
             {"short_reversal_score": 0, "long_reversal_score": 5},
             weekly_direction="short",
         )
