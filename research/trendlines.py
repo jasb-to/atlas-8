@@ -9,13 +9,13 @@ subsequent candles have closed; callers must not act on it before then.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Literal
 
 import numpy as np
 import pandas as pd
 
-Side = Literal["support", "resistance"]
+Side = Literal["support", "resistance"]\nMIN_TOUCH_SPACING = 3\nDEFAULT_RETEST_LOOKBACK = 8
 
 
 @dataclass(frozen=True)
@@ -110,8 +110,8 @@ def fit_touch_trendlines(
             values = start.price + slope * (idx - start.index)
             relevant_wick = wick[start.index : end.index + 1]
             distance = relevant_wick - values
-            tol = np.maximum(np.abs(values) * tolerance_pct, 1e-12)
-            penetration = np.maximum(np.abs(values) * max_penetration_pct, 1e-12)
+            tol = np.maximum(np.abs(values) * tolerance_pct, min_price_eps)
+            penetration = np.maximum(np.abs(values) * max_penetration_pct, min_price_eps)
 
             if kind == "support":
                 touch_mask = (distance >= -penetration) & (distance <= tol)
@@ -131,8 +131,8 @@ def fit_touch_trendlines(
             pivot_wicks = wick[pivot_indices] if len(pivot_indices) else np.array([])
             pivot_line_values = start.price + slope * (pivot_indices - start.index)
             pivot_distances = pivot_wicks - pivot_line_values
-            pivot_tolerances = np.maximum(np.abs(pivot_line_values) * tolerance_pct, 1e-12)
-            pivot_penetrations = np.maximum(np.abs(pivot_line_values) * max_penetration_pct, 1e-12)
+            pivot_tolerances = np.maximum(np.abs(pivot_line_values) * tolerance_pct, min_price_eps)
+            pivot_penetrations = np.maximum(np.abs(pivot_line_values) * max_penetration_pct, min_price_eps)
             if kind == "resistance":
                 pivot_distances = -pivot_distances
             pivot_touch_mask = (pivot_distances >= -pivot_penetrations) & (pivot_distances <= pivot_tolerances)
@@ -164,7 +164,7 @@ def fit_touch_trendlines(
         ),
         reverse=True,
     )
-    return lines[:max_lines]
+    deduped: list[Trendline] = []\n    for candidate in lines:\n        candidate_touches = set(candidate.touch_indices)\n        if any(\n            existing.kind == candidate.kind\n            and len(candidate_touches.intersection(existing.touch_indices)) >= max(2, min_touches - 1)\n            and abs(existing.slope_per_bar - candidate.slope_per_bar) <= max(abs(candidate.slope_per_bar), 1.0) * 1e-6\n            and abs(existing.start.price - candidate.start.price) <= max(abs(candidate.start.price), min_price_eps) * tolerance_pct\n            for existing in deduped\n        ):\n            continue\n        deduped.append(candidate)\n        if len(deduped) >= max_lines:\n            break\n    return deduped
 
 
 def classify_line_state(
@@ -173,7 +173,7 @@ def classify_line_state(
     *,
     index: int | None = None,
     tolerance_pct: float = 0.0015,
-    retest_lookahead_bars: int = 8,
+    retest_lookback_bars: int = DEFAULT_RETEST_LOOKBACK,
 ) -> dict:
     """Describe approach/break/retest/hold on closed candles; no orders are generated."""
     _validate_ohlc(candles)
@@ -182,7 +182,7 @@ def classify_line_state(
         raise IndexError("index must reference an existing candle after the first")
     row = candles.iloc[i]
     prev = candles.iloc[i - 1]
-    line_now = line.value_at(i)
+    if retest_lookback_bars < 1:\n        raise ValueError("retest_lookback_bars must be >= 1")\n    line_now = line.value_at(i)
     line_prev = line.value_at(i - 1)
     tol = abs(line_now) * tolerance_pct
 
@@ -205,7 +205,7 @@ def classify_line_state(
     # ordinary pre-break touch can be mislabeled as a retest.
     retest = False
     retest_index = None
-    scan_start = max(line.end.index + 1, i - retest_lookahead_bars)
+    scan_start = max(line.last_touch_index + 1, i - retest_lookback_bars)
     prior_breaks = []
     for k in range(scan_start, i):
         current = candles.iloc[k]
@@ -243,7 +243,7 @@ def classify_line_state(
                 break
 
     return {
-        "index": i,
+        "index": i,\n        "as_of_index": i,\n        "is_latest": i == len(candles) - 1,
         "line_kind": line.kind,
         "line_value": float(line_now),
         "close": float(row["close"]),
