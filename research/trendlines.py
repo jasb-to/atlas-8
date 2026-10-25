@@ -191,13 +191,13 @@ def classify_line_state(
         # single candle that first crossed it.
         broken = float(row["close"]) > line_now + tol
         near = abs(float(row["high"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
-        state = "breakout" if broken else ("approaching" if float(row["close"]) < line_now and line_now - float(row["close"]) <= tol * 3 else "watch")
+        state = "breakout" if broken else ("approaching" if float(row["close"]) < line_now and (near or line_now - float(row["close"]) <= tol * 3) else "watch")
         retest_side = "support"
     else:
         # Keep a broken line marked as broken until price closes back across it.
         broken = float(row["close"]) < line_now - tol
         near = abs(float(row["low"]) - line_now) <= tol or abs(float(row["close"]) - line_now) <= tol
-        state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and float(row["close"]) - line_now <= tol * 3 else "watch")
+        state = "breakdown" if broken else ("approaching" if float(row["close"]) > line_now and (near or float(row["close"]) - line_now <= tol * 3) else "watch")
         retest_side = "resistance"
 
     # A retest is only valid after a confirmed close through the line. Find the
