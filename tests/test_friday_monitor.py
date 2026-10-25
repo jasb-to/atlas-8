@@ -58,7 +58,8 @@ class FridayMonitorTests(unittest.TestCase):
             "break_events": [],
         }
         with TemporaryDirectory() as tmp:
-            with patch("research.friday_monitor.build_preview", return_value=preview):
+            with patch("research.friday_monitor.evaluate_sheldon_thesis", return_value={"status": "active", "direction": "short", "reason": "weekly and daily aligned", "generated_at_utc": "2026-10-21T12:00:00+00:00"}):
+                with patch("research.friday_monitor.build_preview", return_value=preview):
                 with patch("research.friday_monitor.analyse_pair", return_value={"state": "WATCH_NEUTRAL", "thesis_direction": "neutral", "generated_at_utc": "2026-10-21T12:00:00Z", "four_hour_execution": {"last_closed_candle_utc": "2026-10-21T12:00:00Z"}}):
                     with patch("research.friday_monitor.create_friday_store") as store_factory:
                         store_factory.return_value.configured = False
@@ -74,12 +75,38 @@ class FridayMonitorTests(unittest.TestCase):
             self.assertEqual(result["pair_results"][0]["run_id"], result["run_id"])
             self.assertTrue(Path(tmp, "cron_run.json").exists())
 
+    def test_inactive_weekly_thesis_skips_the_four_hour_engine(self):
+        with TemporaryDirectory() as tmp:
+            with patch("research.friday_monitor.evaluate_sheldon_thesis", return_value={
+                "status": "inactive", "direction": None, "reason": "Weekly EMA/Stoch RSI not aligned",
+                "generated_at_utc": "2026-10-21T12:00:00+00:00",
+            }):
+                with patch("research.friday_monitor.build_preview") as preview:
+                    with patch("research.friday_monitor.create_friday_store") as store_factory:
+                        store_factory.return_value.configured = False
+                        result = run_monitor(["XBTUSDT"], tmp)
+            preview.assert_not_called()
+            row = result["pair_results"][0]
+            self.assertEqual(row["status"], "weekly_inactive")
+            self.assertEqual(row["latest_setup_state"], "SKIPPED_WEEKLY_INACTIVE")
+            self.assertIn("4H scan skipped", row["scan_diagnostic"])
+
+    def test_four_hour_momentum_and_exhaustion_do_not_block_aligned_entry(self):
+        from research.friday_monitor import _entry_filters_pass
+        passed, blockers = _entry_filters_pass(
+            {"direction": "short", "momentum_context": {}},
+            {"short_reversal_score": 0, "long_reversal_score": 5},
+        )
+        self.assertTrue(passed)
+        self.assertEqual(blockers, [])
+
     def test_failed_market_writes_a_per_market_summary(self):
         with TemporaryDirectory() as tmp:
-            with patch("research.friday_monitor.build_preview", side_effect=RuntimeError("fixture failure")):
-                with patch("research.friday_monitor.create_friday_store") as store_factory:
-                    store_factory.return_value.configured = False
-                    result = run_monitor(["XBTUSDT"], tmp)
+            with patch("research.friday_monitor.evaluate_sheldon_thesis", return_value={"status": "active", "direction": "short", "reason": "weekly and daily aligned", "generated_at_utc": "2026-10-21T12:00:00+00:00"}):
+                with patch("research.friday_monitor.build_preview", side_effect=RuntimeError("fixture failure")):
+                    with patch("research.friday_monitor.create_friday_store") as store_factory:
+                        store_factory.return_value.configured = False
+                        result = run_monitor(["XBTUSDT"], tmp)
             summary_path = Path(tmp, "xbtusdt", "monitor_summary.json")
             self.assertTrue(summary_path.exists())
             import json
