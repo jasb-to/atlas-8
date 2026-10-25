@@ -106,7 +106,7 @@ def fit_touch_trendlines(
     _validate_ohlc(candles)
     if not candles.index.equals(pd.RangeIndex(len(candles))):
         raise ValueError("fit_touch_trendlines requires a zero-based positional RangeIndex; reset_index(drop=True) first")
-    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0 or min_touch_spacing < 1 or min_price_eps <= 0:
+    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0 or min_touch_spacing < 1 or min_price_eps <= 0 or max_lines < 1:
         raise ValueError("Invalid touch, spacing, price floor, or tolerance parameters")
     pivots = pivots if pivots is not None else find_wick_pivots(candles)
     points = sorted(
@@ -171,7 +171,7 @@ def fit_touch_trendlines(
                     start=start,
                     end=end,
                     slope_per_bar=float(slope),
-                    tolerance=float(max(np.abs(values).max() * tolerance_pct, 1e-12)),
+                    tolerance=float(max(np.abs(values).max() * tolerance_pct, min_price_eps)),
                     touch_indices=touch_indices,
                     violations=violations,
                     last_touch_confirmed_at=max(p.confirmed_at for p in points if p.index in touch_indices),
