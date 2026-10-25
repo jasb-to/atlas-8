@@ -63,5 +63,27 @@ class WeeklyThesisTests(unittest.TestCase):
             self.assertEqual(result_with_open[key], result_without_open[key], key)
 
 
+    def test_200_candles_fail_and_201_candles_clear_history_boundary(self):
+        as_of = pd.Timestamp("2026-10-25T12:00:00Z")
+        daily_times = pd.date_range(end="2026-10-24", periods=201, freq="D", tz="UTC")
+        weekly_times = pd.date_range(end="2026-10-18", periods=201, freq="7D", tz="UTC")
+        def frame(times):
+            x = np.arange(len(times), dtype=float)
+            return pd.DataFrame({
+                "timestamp": times,
+                "close": 100 + 0.1 * x + 3 * np.sin(x / 3),
+            })
+        daily, weekly = frame(daily_times), frame(weekly_times)
+        boundary = evaluate_sheldon_thesis(
+            "XBTUSDT", weekly_candles=weekly.iloc[:-1], daily_candles=daily, as_of=as_of
+        )
+        self.assertEqual(boundary["status"], "insufficient_data")
+        self.assertIn("weekly=200", boundary["reason"])
+        enough = evaluate_sheldon_thesis(
+            "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
+        )
+        self.assertNotEqual(enough["status"], "insufficient_data", enough["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()
