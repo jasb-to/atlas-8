@@ -95,6 +95,9 @@ PY
 echo
 echo ">>> AUDIT 5: DASHBOARD BUILD"
 cd dashboard
+if [[ ! -f package-lock.json ]]; then
+  npm install --package-lock-only --ignore-scripts
+fi
 npm ci
 npm run build
 cd "$ROOT"
