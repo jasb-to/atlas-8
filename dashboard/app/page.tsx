@@ -60,21 +60,22 @@ export default function Home() {
   const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
   const closedTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "CLOSED").slice(0, 6);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
-  const aiQuotaError = pairScans.some(scan => /402|payment required|quota exceeded/i.test(String(scan.ai_review_error ?? "")));
-  const aiReviewActive = pairScans.some(scan => scan.ai_review_status && !["disabled", "not_configured"].includes(String(scan.ai_review_status).toLowerCase()));
+  const successfulAiReview = pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
+  const aiReviewActive = Boolean(successfulAiReview);
+  const aiProvider = String(successfulAiReview?.ai_provider ?? "GROQ").toUpperCase();
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
     const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction ??
-      (thesis?.weekly_close != null && thesis?.weekly_sma != null
-        ? Number(thesis.weekly_close) > Number(thesis.weekly_sma) ? "bullish" : "bearish"
+      (thesis?.weekly_ema8 != null && thesis?.weekly_ema21 != null
+        ? Number(thesis.weekly_ema8) > Number(thesis.weekly_ema21) ? "bullish" : "bearish"
         : undefined);
     const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction ??
-      (thesis?.daily_close != null && thesis?.daily_sma != null &&
+      (thesis?.daily_ema8 != null && thesis?.daily_ema21 != null &&
        thesis?.daily_stoch_k != null && thesis?.daily_stoch_d != null
-        ? Number(thesis.daily_close) > Number(thesis.daily_sma) && Number(thesis.daily_stoch_k) > Number(thesis.daily_stoch_d)
+        ? Number(thesis.daily_ema8) > Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) > Number(thesis.daily_stoch_d)
           ? "bullish"
-          : Number(thesis.daily_close) < Number(thesis.daily_sma) && Number(thesis.daily_stoch_k) < Number(thesis.daily_stoch_d)
+          : Number(thesis.daily_ema8) < Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) < Number(thesis.daily_stoch_d)
             ? "bearish"
             : "misaligned"
         : undefined);
@@ -109,7 +110,7 @@ export default function Home() {
       <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH INTELLIGENCE</span></span></a>
       <div className="top-actions">
         <span className="mode-chip"><i /> RESEARCH ONLY · NO LIVE ORDERS</span>
-        <span className={aiQuotaError ? "ai-status ai-error" : "ai-status"}><i /> {aiQuotaError ? "AI OFFLINE · QUOTA ERROR" : aiReviewActive ? "AI REVIEW ACTIVE" : "AI REVIEW OFF · RULES FIRST"}</span>
+        <span className="ai-status"><i /> {aiReviewActive ? `AI: ${aiProvider} ONLINE` : "AI OFFLINE"}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
