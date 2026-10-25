@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
+from unittest.mock import patch
 
 from research.weekly_thesis import calculate_stoch_rsi, evaluate_sheldon_thesis
 
@@ -83,6 +84,30 @@ class WeeklyThesisTests(unittest.TestCase):
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
         )
         self.assertNotEqual(enough["status"], "insufficient_data", enough["reason"])
+
+
+    def test_weekly_alignment_does_not_require_stoch_extreme_zone(self):
+        as_of = pd.Timestamp("2026-10-25T12:00:00Z")
+        daily_times = pd.date_range(end="2026-10-24", periods=230, freq="D", tz="UTC")
+        weekly_times = pd.date_range(end="2026-10-18", periods=230, freq="7D", tz="UTC")
+        def frame(times):
+            x = np.arange(len(times), dtype=float)
+            return pd.DataFrame({"timestamp": times, "close": 100 + x})
+        def aligned_stoch(close, **kwargs):
+            return (
+                pd.Series(np.full(len(close), 60.0), index=close.index),
+                pd.Series(np.full(len(close), 50.0), index=close.index),
+            )
+        with patch("research.weekly_thesis.calculate_stoch_rsi", side_effect=aligned_stoch):
+            result = evaluate_sheldon_thesis(
+                "AVAXUSDT", weekly_candles=frame(weekly_times),
+                daily_candles=frame(daily_times), as_of=as_of,
+            )
+        self.assertEqual(result["status"], "active")
+        self.assertEqual(result["direction"], "long")
+        self.assertEqual(result["weekly_stoch_k"], 60.0)
+        self.assertEqual(result["weekly_stoch_d"], 50.0)
+
 
 
 if __name__ == "__main__":
