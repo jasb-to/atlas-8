@@ -10,7 +10,6 @@ const ISSUER = "https://token.actions.githubusercontent.com";
 const AUDIENCE = "friday-huggingface-review";
 const REPOSITORY = "jasb-to/atlas-8";
 const WORKFLOW = "jasb-to/atlas-8/.github/workflows/friday-monitor.yml@refs/heads/main";
-const DEFAULT_MODEL = "openai/gpt-oss-120b:cheapest";
 let jwksCache: { expiresAt: number; keys: any[] } | undefined;
 
 function json(body: unknown, status = 200) {
