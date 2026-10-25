@@ -1,6 +1,6 @@
 [
   {
-    "record_key": "9945f0745fb7bd04d13182516d9e7a22cc58a6a6c39c1a58504a52e1c9ae0e94",
+    "record_key": "5f6bae596d6093004809b20ebe9ae0e8f16877b0532e8c61ec6daa403db87911",
     "record_type": "multitimeframe_thesis",
     "pair": "LITUSDT",
     "timeframe": "1D+4H",
@@ -9,7 +9,7 @@
     "payload": {
       "pair": "LITUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:04:11.748581+00:00",
+      "generated_at_utc": "2026-10-25T08:13:53.007659+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -370,26 +370,25 @@
         "provider": "gemini",
         "model_id": "gemini-3.5-flash-lite",
         "response": {
-          "assessment": "mixed",
+          "assessment": "caution",
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "low",
           "supporting_evidence": [
-            "structural_trade_plans.long is marked eligible with no blockers",
-            "structural_trade_plans.long offers a reward_risk of 1.941 which satisfies the minimum 1.5 threshold",
-            "exhaustion_context notes lower wick rejection and mixed early reversal evidence"
+            "structural_trade_plans.long is marked eligible with a reward-to-risk ratio of 1.941 which clears the 1.5 minimum threshold",
+            "exhaustion_context notes lower_wick_rejection as bullish early reversal evidence"
           ],
           "counter_evidence": [
-            "rule_decision indicates a bearish directional bias and NO_TRADE state due to lack of a confirmed pullback zone touch",
-            "ema_aligned is false, showing price below the 21 EMA",
-            "structural_trade_plans.short is blocked due to reward_risk below minimum"
+            "daily_bias is bearish",
+            "rule_decision indicates a short rule bias and explicitly flags no confirmed pullback zone touched for the short setup",
+            "structural_trade_plans.short is blocked due to reward_risk_below_minimum"
           ],
           "missing_evidence": [
-            "confirmed 0.382/0.5/0.618 pullback zone touch",
-            "higher timeframe bullish confirmation"
+            "confirmed multi-touch support validation for the long plan entry",
+            "bullish momentum expansion across MACD and stochastic indicators"
           ],
-          "rationale": "Although structural_trade_plans.long is deterministically eligible with an acceptable risk-reward profile, the overall market context displays mixed signals, bearish daily bias, and lacks the necessary pullback zone confirmation required by the rule decision."
+          "rationale": "Although structural_trade_plans.long technically passes deterministic eligibility and meets the minimum reward-to-risk gate, the broader daily bias is bearish and momentum context remains mixed without bullish expansions. The setup requires extreme caution given the conflict between the short rule bias and the long candidate eligibility."
         },
-        "latency_ms": 1543,
+        "latency_ms": 1455,
         "error": null
       },
       "momentum_reversal": {
@@ -413,7 +412,7 @@
       "multitimeframe_scan": {
         "pair": "LITUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:04:11.748581+00:00",
+        "generated_at_utc": "2026-10-25T08:13:53.007659+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -480,7 +479,7 @@
     }
   },
   {
-    "record_key": "85b0ef475714582bd5b0d7cc31f3e346f0a86a845b34e701c30d5bf2429b1af9",
+    "record_key": "de60a54c496d6f28edba555d983aad7a3a07b8e6bff7e57705b290e145866689",
     "record_type": "multitimeframe_thesis",
     "pair": "SUIUSDT",
     "timeframe": "1D+4H",
@@ -489,7 +488,7 @@
     "payload": {
       "pair": "SUIUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:04:02.108205+00:00",
+      "generated_at_utc": "2026-10-25T08:13:43.336117+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -855,21 +854,22 @@
           "confidence": "medium",
           "supporting_evidence": [
             "structural_trade_plans.long is marked eligible with zero blockers",
-            "structural_trade_plans.long reward_risk ratio is 8.25, well above the 1.5 minimum gate",
-            "Daily bias is bearish, but structural long provides a defined swing-based reward potential to confirmed swing high 1.0033"
+            "reward_risk ratio of 8.24 exceeds the minimum 1.5 threshold",
+            "rsi14 at 29.16 indicates oversold conditions supporting potential mean reversion",
+            "confirmed swing low at 0.9117 provides a clear structural invalidation/stop level"
           ],
           "counter_evidence": [
-            "Daily bias is bearish and EMAs show price below short-term trend guides",
-            "Exhaustion context indicates possible bearish turn with RSI fading at 29.17",
-            "Rule decision notes current state is NO_TRADE due to lack of confirmed pullback zone touch"
+            "daily bias is bearish",
+            "exhaustion context notes possible bearish turn with price closed below previous candle low",
+            "ema8 is below ema21 indicating short-term bearish alignment"
           ],
           "missing_evidence": [
-            "Confirmed touch of a pullback zone or structural rejection/reclaim candle",
-            "Stoch RSI bullish cross confirmation for momentum reversal"
+            "higher timeframe bullish reversal confirmation",
+            "higher touch-count support confluence closer to current price action"
           ],
-          "rationale": "The candidate universe lists structural_trade_plans.long as eligible with a strong reward-to-risk ratio of 8.25, and no active blockers. However, the broader technical context and rule decision reflect a mixed picture with bearish daily bias, exhaustion signals, and no immediate pullback zone touch. Therefore, the assessment is mixed, leaning cautiously on the eligible long structural plan while awaiting further confirmation."
+          "rationale": "The long structural trade plan meets all deterministic eligibility gates and offers an exceptionally high reward-to-risk ratio. However, short-term momentum and daily bias remain bearish, warranting a mixed assessment despite clean structural parameters."
         },
-        "latency_ms": 1925,
+        "latency_ms": 1613,
         "error": null
       },
       "momentum_reversal": {
@@ -893,7 +893,7 @@
       "multitimeframe_scan": {
         "pair": "SUIUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:04:02.108205+00:00",
+        "generated_at_utc": "2026-10-25T08:13:43.336117+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -960,7 +960,7 @@
     }
   },
   {
-    "record_key": "9cfaab1ad6a438d708d39d174384ebe6167326d55ae4689e6963cc521a2d0698",
+    "record_key": "2f9a70bc552ba85b3ea7d4d2e2173b8a1ce9bc5781177b0e8031e00e55987b8d",
     "record_type": "multitimeframe_thesis",
     "pair": "NEARUSDT",
     "timeframe": "1D+4H",
@@ -969,7 +969,7 @@
     "payload": {
       "pair": "NEARUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:03:52.067619+00:00",
+      "generated_at_utc": "2026-10-25T08:13:33.371003+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -1329,22 +1329,21 @@
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "low",
           "supporting_evidence": [
-            "structural_trade_plans.long meets the minimum reward-to-risk threshold with an RR of 1.71",
-            "structural_trade_plans.long is marked eligible with no current blockers listed in the universe",
-            "RSI indicates near-oversold conditions at 31.84"
+            "structural_trade_plans.long meets the minimum reward-to-risk ratio requirement of 1.5 with a value of 1.71",
+            "structural_trade_plans.long is marked eligible in the candidate universe with no explicit blockers"
           ],
           "counter_evidence": [
-            "Daily bias is bearish",
-            "Price is trading below both EMA 8 and EMA 21",
-            "Exhaustion context indicates bearish evidence including closing below previous candle low"
+            "Daily bias is reported as bearish",
+            "EMA 8 (4.5281) is below EMA 21 (4.6988) indicating short-term bearish alignment",
+            "Exhaustion context notes bearish evidence including closing below the previous candle low"
           ],
           "missing_evidence": [
-            "Confirmed bullish structural reversal pattern on the 4h timeframe",
-            "Stoch RSI bullish cross confirmation"
+            "Confirmed bullish structural reversal pattern",
+            "Stoch RSI bullish cross or expansion confirming momentum shift for a long entry"
           ],
-          "rationale": "Although structural_trade_plans.long satisfies deterministic eligibility and >=1.5R constraints, the broader context displays strong bearish alignment across daily bias, EMAs, and exhaustion indicators. Proceeding with caution is required, and priority is given to the eligible long plan despite unfavorable trend context due to hard gate rules."
+          "rationale": "Although structural_trade_plans.long is technically eligible with an R:R above 1.5, the broader trend, daily bias, and moving average alignment remain bearish. Proceeding with a long trade under these conditions carries high false-break risk without supporting momentum confirmation."
         },
-        "latency_ms": 1399,
+        "latency_ms": 1614,
         "error": null
       },
       "momentum_reversal": {
@@ -1368,7 +1367,7 @@
       "multitimeframe_scan": {
         "pair": "NEARUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:03:52.067619+00:00",
+        "generated_at_utc": "2026-10-25T08:13:33.371003+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -1435,7 +1434,7 @@
     }
   },
   {
-    "record_key": "3d1fcda97328e636def3202f7cba1a145f4844e073076373412a485e616436a9",
+    "record_key": "11942966113d210954955d8008630a2c1a8a76c00e29187339aed6305a0e47bb",
     "record_type": "multitimeframe_thesis",
     "pair": "ZECUSDT",
     "timeframe": "1D+4H",
@@ -1444,7 +1443,7 @@
     "payload": {
       "pair": "ZECUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:03:42.435748+00:00",
+      "generated_at_utc": "2026-10-25T08:13:23.324820+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -1808,23 +1807,22 @@
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.short is fully eligible with zero blockers",
-            "reward_risk ratio of 1.65 exceeds the minimum 1.5 requirement",
-            "daily_bias is bearish across multiple indicators",
-            "exhaustion_context shows mixed early reversal evidence favoring shorts with a closed below previous candle low"
+            "Both long and short structural trade plans meet deterministic eligibility with reward-to-risk ratios exceeding the 1.5R threshold.",
+            "The short structural trade plan aligns with the daily bearish bias and EMA alignment (EMA8 below EMA21).",
+            "Exhaustion context indicates a short reversal score with evidence of a close below the previous candle low."
           ],
           "counter_evidence": [
-            "structural_trade_plans.long is also marked eligible despite opposing daily bias, representing conflicting structural interpretations",
-            "rule_decision indicates a no trade state with incomplete reaction/confluence checks",
-            "momentum_reversal_candidate is blocked by no_fresh_extreme_zone_stoch_rsi_cross"
+            "Rule decision indicates a NO_TRADE status due to incomplete reaction/confluence or risk checks.",
+            "Momentum context shows no active Stoch or MACD directional expansion crosses.",
+            "Stoch RSI K is at 82.93, indicating elevated near-term oscillators for a short continuation."
           ],
           "missing_evidence": [
-            "confirmed structural break or retest confirmation as required by exhaustion use policy",
-            "clean historical probability calibration for the fib retracement levels"
+            "Confirmed candle-based structural break or retest confirmation matching use policy requirements.",
+            "Clear volume expansion supporting directional continuation."
           ],
-          "rationale": "The candidate universe presents two eligible structural trade plans, but the short plan aligns better with the prevailing bearish daily bias and exhaustion context. However, conflicting signals from the rule decision's incomplete confluence checks and the presence of an eligible long plan despite bearish context warrant a mixed assessment with medium confidence."
+          "rationale": "The candidate universe explicitly lists structural trade plans for both long and short directions as eligible with acceptable risk-reward profiles. However, the short plan is favored due to alignment with the broader daily bearish bias and structural context, despite rule-level caution and mixed indicator signals requiring strict adherence to confirmation rules."
         },
-        "latency_ms": 1768,
+        "latency_ms": 1920,
         "error": null
       },
       "momentum_reversal": {
@@ -1848,7 +1846,7 @@
       "multitimeframe_scan": {
         "pair": "ZECUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:03:42.435748+00:00",
+        "generated_at_utc": "2026-10-25T08:13:23.324820+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -1915,7 +1913,7 @@
     }
   },
   {
-    "record_key": "478017210731e3e726183a205c5393f14a40af138906d07e6b5bbf34f068a341",
+    "record_key": "8045455d8a45fca2995cce697cd597f5bfdba5269d1090907d01671b8079876e",
     "record_type": "multitimeframe_thesis",
     "pair": "LINKUSDT",
     "timeframe": "1D+4H",
@@ -1924,7 +1922,7 @@
     "payload": {
       "pair": "LINKUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:03:32.075594+00:00",
+      "generated_at_utc": "2026-10-25T08:13:12.924871+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -2473,24 +2471,24 @@
         "response": {
           "assessment": "mixed",
           "priority_candidate": "structural_trade_plans.long",
-          "confidence": "medium",
+          "confidence": "low",
           "supporting_evidence": [
-            "structural_trade_plans.long is explicitly marked eligible in candidate_universe with no active blockers",
-            "reward_risk ratio of 2.1651 exceeds the minimum 1.5 threshold",
-            "active support line exists at 11.20645 with multiple touches"
+            "structural_trade_plans.long meets minimum reward-to-risk ratio of 1.5 (2.1651 R:R)",
+            "structural_trade_plans.long is marked eligible in the deterministic candidate universe with no blockers",
+            "Active support level present at 11.20645 with 3 touch count"
           ],
           "counter_evidence": [
-            "daily bias is bearish and MACD bearish expansion is present",
-            "setup_lifecycle for the long context was previously marked invalid due to a failed break",
-            "closed_below_previous_candle_low indicates short-term bearish pressure"
+            "Daily bias is bearish",
+            "MACD shows bearish expansion with negative histogram",
+            "Exhaustion context indicates a bearish signal of closing below previous candle low"
           ],
           "missing_evidence": [
-            "confirmed 0.382/0.5/0.618 pullback touch in the rule decision framework",
-            "fresh extreme zone stoch RSI cross for momentum reversal candidate"
+            "Stoch RSI bullish cross confirming momentum reversal",
+            "Confirmed bounce or touch of the specific pullback zone for the short setup"
           ],
-          "rationale": "While the structural long trade plan is marked eligible with a compliant reward-to-risk ratio, the broader daily bias is bearish and momentum indicators show bearish expansion. The rule decision notes no confirmed pullback zone touch, creating a mixed technical picture requiring caution."
+          "rationale": "The deterministic candidate universe marks the structural long trade plan as eligible with a valid reward-to-risk profile above the 1.5 threshold. However, counter-evidence including bearish daily bias, bearish MACD expansion, and bearish exhaustion signals create conflicting conditions. The assessment is mixed due to eligible structured geometry clashing with bearish momentum context."
         },
-        "latency_ms": 1535,
+        "latency_ms": 1581,
         "error": null
       },
       "momentum_reversal": {
@@ -2514,7 +2512,7 @@
       "multitimeframe_scan": {
         "pair": "LINKUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:03:32.075594+00:00",
+        "generated_at_utc": "2026-10-25T08:13:12.924871+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -2637,7 +2635,7 @@
     }
   },
   {
-    "record_key": "9fdef0ced0cfd983d7ff3cb903194460a9ce07218ae4d6f2b4000ed6f5b6b18b",
+    "record_key": "bacc1559855d549522bf589a9d36ac69b7f5b8c84caedc6f6ea4380b986822d8",
     "record_type": "multitimeframe_thesis",
     "pair": "DOGEUSDT",
     "timeframe": "1D+4H",
@@ -2646,7 +2644,7 @@
     "payload": {
       "pair": "DOGEUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:03:19.516423+00:00",
+      "generated_at_utc": "2026-10-25T08:12:59.970329+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -3068,25 +3066,25 @@
         "model_id": "gemini-3.5-flash-lite",
         "response": {
           "assessment": "mixed",
-          "priority_candidate": "structural_trade_plans.long",
-          "confidence": "low",
+          "priority_candidate": "structural_trade_plans.short",
+          "confidence": "medium",
           "supporting_evidence": [
-            "Both structural_trade_plans.long and structural_trade_plans.short meet the minimum risk-reward threshold of >=1.5R (1.5672R and 1.5097R respectively).",
-            "Candidate universe marks both long and short structural trade plans as eligible with zero blockers.",
-            "0.500 Fibonacci retracement level aligns with a confluent resistance/support zone holding 7 prior touches."
+            "Rule decision explicitly directs a short bias based on the confirmed short impulse between 0.08065 and 0.07483.",
+            "Structural short plan meets the >=1.5R requirement with a reward-to-risk ratio of 1.5097.",
+            "The 0.500 Fibonacci retracement level at 0.07774 shows confluence score 4, touch validation, and a rejection/reclaim candle structure.",
+            "Structural short candidate universe lists no active blockers."
           ],
           "counter_evidence": [
-            "Daily bias is explicitly bearish, which runs counter to the structural_trade_plans.long direction.",
-            "EMA alignment is bearish (EMA 8 below EMA 21).",
-            "Exhaustion context indicates mixed early reversal evidence with a bearish closed_below_previous_candle_low condition."
+            "Daily bias is noted as bearish while the structural long plan is simultaneously marked eligible, creating internal directional conflict in alternative plans.",
+            "Momentum indicators show mixed signals with Stoch RSI K at 60.4 and MACD histogram slightly negative (-0.0002)."
           ],
           "missing_evidence": [
-            "Clean trendline break, retest, and continuation confirmation specific to the active timeframes.",
-            "Unambiguous momentum expansion supporting a directional shift."
+            "A clean completed-candle trendline break and retest lifecycle confirmation specifically for the short continuation trade.",
+            "Uncalibrated historical walk-forward replay data for confirmation of edge."
           ],
-          "rationale": "Although both long and short structural trade plans satisfy deterministic eligibility gates and minimum risk-reward parameters, the daily bias is bearish while EMAs remain misaligned for longs. The short plan aligns with the prevailing daily bias, but both plans present conflicting indicator contexts, warranting a mixed assessment with low confidence."
+          "rationale": "The deterministic rule decision and structural short candidate are eligible with valid risk-reward geometry (>1.5R) and a confirmed impulse high/low range. However, mixed momentum context and conflicting daily bias indicators warrant a mixed assessment and careful adherence to research-only constraints without live execution."
         },
-        "latency_ms": 1852,
+        "latency_ms": 1815,
         "error": null
       },
       "momentum_reversal": {
@@ -3110,7 +3108,7 @@
       "multitimeframe_scan": {
         "pair": "DOGEUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:03:19.516423+00:00",
+        "generated_at_utc": "2026-10-25T08:12:59.970329+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -3200,7 +3198,7 @@
     }
   },
   {
-    "record_key": "cf748f9ae152d5db39279afd4c4fe5dbb3f58ae7ef35adc54d47e92beced309a",
+    "record_key": "238afe6fa30b2f47df1d9faccb760eea9d5807981c5b422e149c98c682326d19",
     "record_type": "multitimeframe_thesis",
     "pair": "HYPEUSDT",
     "timeframe": "1D+4H",
@@ -3209,7 +3207,7 @@
     "payload": {
       "pair": "HYPEUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:03:06.141009+00:00",
+      "generated_at_utc": "2026-10-25T08:12:46.506670+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -3673,22 +3671,22 @@
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.long is explicitly marked eligible with a reward-to-risk ratio of 2.2663, exceeding the 1.5 minimum threshold.",
-            "The 0.618 fib retracement aligns closely with entry parameters.",
-            "MACD histogram shows signs of contraction or shifting dynamics, and RSI is at 39.55 supporting a potential mean-reversion setup."
+            "structural_trade_plans.long is marked eligible in the candidate universe with a reward-to-risk ratio of 2.27, which exceeds the minimum 1.5 threshold.",
+            "The long plan defines clear structural invalidation below confirmed swing low at 74.465 and target at 80.412.",
+            "Fibonacci retracement levels 0.382, 0.5, and 0.618 show verified touch and reaction reactions within the rule engine."
           ],
           "counter_evidence": [
-            "Daily bias is currently bearish.",
-            "EMA 8 is below EMA 21, indicating intermediate trend resistance.",
-            "Exhaustion context indicates a mixed early reversal profile with a bearish recent candle close below the previous candle low."
+            "The daily bias is explicitly bearish across multiple indicators.",
+            "structural_trade_plans.short is blocked due to reward-to-risk ratio falling below the minimum 1.5 requirement.",
+            "Exhaustion context indicates a mixed early reversal profile with a recent close below the previous candle low."
           ],
           "missing_evidence": [
-            "A confirmed higher timeframe structural break and retest validating long continuation.",
-            "Stochastic RSI bullish cross confirmation."
+            "Confirmed trendline break and retest lifecycle confirmation for the long side in accordance with rule engine stipulations.",
+            "Fresh extreme-zone Stoch RSI cross for momentum reversal validation."
           ],
-          "rationale": "Although structural_trade_plans.long meets all deterministic criteria and reward-to-risk minimums, the overarching daily bearish bias and mixed exhaustion signals dictate a cautious approach. The short candidate is blocked due to an inadequate reward-to-risk profile, making the long candidate the only eligible priority choice despite conflicting momentum indicators."
+          "rationale": "The candidate universe flags structural_trade_plans.long as the sole eligible candidate passing the minimum 1.5 reward-to-risk gate (2.2663). However, caution is warranted due to a prevailing bearish daily bias, mixed exhaustion signals, and the lack of an immediate structural trendline break confirmation matching the current snapshot. Short execution plans are blocked due to unfavorable reward-to-risk metrics."
         },
-        "latency_ms": 1795,
+        "latency_ms": 2054,
         "error": null
       },
       "momentum_reversal": {
@@ -3712,7 +3710,7 @@
       "multitimeframe_scan": {
         "pair": "HYPEUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:03:06.141009+00:00",
+        "generated_at_utc": "2026-10-25T08:12:46.506670+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -3813,7 +3811,7 @@
     }
   },
   {
-    "record_key": "dada5bdf2eef910faaa1c51a9edc4341400d23d28b9eeba9fc58268af775b8f8",
+    "record_key": "3959530514f0308818b6b7d95c4db3a7b6d3f0dfa7bbda1d7d9a4f9c5c6b2d90",
     "record_type": "multitimeframe_thesis",
     "pair": "VIRTUALUSDT",
     "timeframe": "1D+4H",
@@ -3822,7 +3820,7 @@
     "payload": {
       "pair": "VIRTUALUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:02:56.160468+00:00",
+      "generated_at_utc": "2026-10-25T08:12:36.247703+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -4186,26 +4184,24 @@
         "provider": "gemini",
         "model_id": "gemini-3.5-flash-lite",
         "response": {
-          "assessment": "mixed",
+          "assessment": "caution",
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.long is explicitly marked eligible in candidate_universe",
-            "structural_trade_plans.long meets the minimum reward-to-risk requirement with an R:R of 2.184 (>=1.5R)",
-            "exhaustion_context shows bullish evidence with rsi_recovering"
+            "structural_trade_plans.long is marked eligible with a reward-to-risk ratio of 2.184, which exceeds the minimum required 1.5 threshold",
+            "rsi14 indicates slight recovery at 37.39 and exhaustion_context shows a bullish recovery marker"
           ],
           "counter_evidence": [
-            "rule_decision indicates a bearish short bias and current close is 0.6215 with bearish daily bias",
-            "structural_trade_plans.short is blocked due to reward_risk_below_minimum",
-            "momentum_reversal_candidate is in state NO_SETUP with blocker no_fresh_extreme_zone_stoch_rsi_cross"
+            "rule_decision indicates a bearish short bias and current price action is below EMA8 and EMA21",
+            "structural_trade_plans.short is blocked due to inadequate reward-to-risk ratio (0.0537)"
           ],
           "missing_evidence": [
-            "confirmed structural breakout and retest confirmation for the long candidate",
-            "stoch rsi cross confirmation for reversal validation"
+            "lack of confirmed structural continuation or clean bullish stoch-rsi cross confirmation",
+            "untested higher fib retracement zones for the broader short impulse setup"
           ],
-          "rationale": "Although the deterministic rule decision indicates a short direction and no trade execution, structural_trade_plans.long is explicitly marked eligible within the candidate universe and satisfies the minimum reward-to-risk ratio. However, because daily bias is bearish and multiple filters remain unconfirmed, the overall assessment is mixed with medium confidence, prioritizing the eligible long structural trade plan."
+          "rationale": "While structural_trade_plans.long meets all deterministic eligibility requirements and exceeds the 1.5 reward-risk minimum, conflicting bearish context from the rule_decision and EMAs warrants a cautious stance."
         },
-        "latency_ms": 1601,
+        "latency_ms": 1573,
         "error": null
       },
       "momentum_reversal": {
@@ -4229,7 +4225,7 @@
       "multitimeframe_scan": {
         "pair": "VIRTUALUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:02:56.160468+00:00",
+        "generated_at_utc": "2026-10-25T08:12:36.247703+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -4296,7 +4292,7 @@
     }
   },
   {
-    "record_key": "af7ce225261dfdd42dd41d77701fa2fbf31715824f192957a9eb8d64480d83e5",
+    "record_key": "8d281fb7d02ffe8e1a00842dbf7586d0cf1ac0ca1a1bbfd36d4b571c925208cb",
     "record_type": "multitimeframe_thesis",
     "pair": "BNBUSDT",
     "timeframe": "1D+4H",
@@ -4305,7 +4301,7 @@
     "payload": {
       "pair": "BNBUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:02:45.951713+00:00",
+      "generated_at_utc": "2026-10-25T08:12:25.854036+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -4874,26 +4870,26 @@
         "provider": "gemini",
         "model_id": "gemini-3.5-flash-lite",
         "response": {
-          "assessment": "mixed",
+          "assessment": "caution",
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.short meets the minimum reward-to-risk gate of 1.5R with an R:R of 1.83",
-            "structural_trade_plans.long meets the minimum reward-to-risk gate of 1.5R with an R:R of 1.52",
-            "Active resistance lines are present near current price structure"
+            "Daily bias is bearish.",
+            "Price is testing active resistance lines around 746.53.",
+            "Structural short plan meets the >=1.5R minimum requirement at 1.83R."
           ],
           "counter_evidence": [
-            "Rule decision indicates a NO_TRADE state due to lack of a confirmed pullback zone touch",
-            "Daily bias is currently bearish while structural_trade_plans.long goes against this bias",
-            "Stoch RSI and MACD expansion show mixed momentum signals rather than clean directional agreement"
+            "EMA 8 and EMA 21 are aligned bullishly.",
+            "MACD histogram shows expansion in a bullish direction.",
+            "Stoch RSI K at 71.69 is elevated without a bearish crossover."
           ],
           "missing_evidence": [
-            "Confirmed pullback to 0.382/0.5/0.618 Fibonacci retracement levels prior to execution",
-            "Clean rejection or reclaim candle patterns confirming structural entry"
+            "Confirmed bearish reversal candlestick pattern at resistance.",
+            "Stoch RSI bearish cross supporting short exhaustion."
           ],
-          "rationale": "Both structural trade candidates are marked eligible in the deterministic universe and clear the 1.5R gate. However, rule-based execution indicates a NO_TRADE due to the lack of a confirmed pullback to the Fibonacci retracement levels. The short plan offers slightly better R:R and aligns closer with the stated bearish daily bias, but requires waiting for proper price action confirmation rather than immediate entry."
+          "rationale": "Although structural candidates are technically eligible and meet risk-reward thresholds, conflicting momentum indicators (bullish MACD expansion, rising EMAs) introduce false-break risks at resistance. Short side is prioritized due to daily bearish bias and active overhead resistance, but caution is warranted until momentum confirms reversal."
         },
-        "latency_ms": 1787,
+        "latency_ms": 1845,
         "error": null
       },
       "momentum_reversal": {
@@ -4917,7 +4913,7 @@
       "multitimeframe_scan": {
         "pair": "BNBUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:02:45.951713+00:00",
+        "generated_at_utc": "2026-10-25T08:12:25.854036+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -5137,7 +5133,7 @@
     }
   },
   {
-    "record_key": "7f47910b0e9233e0100c14f634c1fdfaf6c9c744bdf21554236f390e0afc65cf",
+    "record_key": "3fe1f4b7e9b6a198fc9ba223f9251b3cd4a7e045e176f5cd4eef406148bda094",
     "record_type": "multitimeframe_thesis",
     "pair": "AVAXUSDT",
     "timeframe": "1D+4H",
@@ -5146,7 +5142,7 @@
     "payload": {
       "pair": "AVAXUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:02:32.093214+00:00",
+      "generated_at_utc": "2026-10-25T08:12:11.514281+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -5546,21 +5542,22 @@
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.short meets the reward-to-risk threshold of >=1.5R with 1.9777R",
-            "daily_bias is bearish and EMA8 is below EMA21, aligning with short direction",
-            "MACD bearish expansion is active with negative histogram"
+            "structural_trade_plans.short meets minimum reward-to-risk requirement with 1.98R against a 1.5R minimum gate",
+            "Daily bias is bearish and EMA alignment favors downside continuation",
+            "MACD histogram shows bearish expansion supporting short momentum"
           ],
           "counter_evidence": [
-            "Stoch RSI K is at 74.67 and D is at 66.02, indicating momentum is rising rather than oversold/exhausted for a short",
+            "Rule decision indicates NO_TRADE for immediate structural execution due to wait state requirements",
+            "Stoch RSI K is at 74.67 which is approaching higher bands rather than extreme oversold/overbought reversal zones for the short setup",
             "Exhaustion context indicates mixed early reversal evidence"
           ],
           "missing_evidence": [
-            "Calibrated historical probabilities for bounce rankings",
-            "Definitive closed-candle continuation through confirmation triggers"
+            "Uncalibrated historical probability status for bounce level rankings requiring walk-forward replay",
+            "Confirmed closed-candle continuation through the retest reaction extreme for Entry 2 add"
           ],
-          "rationale": "The structural short plan is eligible and satisfies reward-risk requirements, backed by bearish daily bias and EMA/MACD alignment. However, conflicting Stoch RSI levels and mixed exhaustion context require caution, making the assessment mixed."
+          "rationale": "While the structural short trade plan is eligible and satisfies the hard gates including the 1.5R requirement, the rule decision and setup lifecycle remain in a waiting state for continuation. The evidence is mixed because directional bias and MACD support downside execution, but momentum indicators show conflicting mid-range values and lack immediate confirmation, necessitating caution before engagement."
         },
-        "latency_ms": 1390,
+        "latency_ms": 1750,
         "error": null
       },
       "momentum_reversal": {
@@ -5584,7 +5581,7 @@
       "multitimeframe_scan": {
         "pair": "AVAXUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:02:32.093214+00:00",
+        "generated_at_utc": "2026-10-25T08:12:11.514281+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -5651,7 +5648,7 @@
     }
   },
   {
-    "record_key": "260212a9816d08fe4f115baf685bdc6bde56584f7023b4cec003e3af3f3fdf52",
+    "record_key": "09414704100ca823c87e70bbd94427d9a2183d0632ee318feb5c588e60406345",
     "record_type": "multitimeframe_thesis",
     "pair": "ADAUSDT",
     "timeframe": "1D+4H",
@@ -5660,7 +5657,7 @@
     "payload": {
       "pair": "ADAUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:02:19.035264+00:00",
+      "generated_at_utc": "2026-10-25T08:11:57.787121+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -6081,21 +6078,23 @@
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.long is explicitly marked as eligible with zero blockers.",
-            "reward_risk ratio for structural_trade_plans.long is 1.7321, meeting the minimum threshold of 1.5.",
-            "structural_trade_plans.short is also eligible with a reward_risk ratio of 1.54, meeting the minimum threshold."
+            "structural_trade_plans.long is marked eligible with no blockers",
+            "reward_risk ratio for structural_trade_plans.long is 1.7321, meeting the >=1.5R minimum gate",
+            "structural_trade_plans.short is also eligible with reward_risk of 1.54",
+            "daily bias is bearish but price is near confirmed swing low offering a mean-reversion setup for long"
           ],
           "counter_evidence": [
-            "Daily bias is bearish, which acts as a headwind for the long structural candidate.",
-            "Exhaustion context indicates a bearish score with the price closing below the previous candle low."
+            "daily_bias is bearish and EMA alignment points to downward pressure",
+            "exhaustion_context shows mixed early reversal evidence with a bearish score note",
+            "rule_decision direction is short while structural long candidate is prioritized due to eligibility and better R:R margin"
           ],
           "missing_evidence": [
-            "Confirmation of a trendline break-retest-continuation cycle for the chosen structural plan.",
-            "Fresh extreme-zone stoch-rsi cross for momentum reversal strategy."
+            "fresh extreme-zone stoch-rsi cross for momentum reversal strategy",
+            "confirmed breakout and retest confirmation for structural line breaks"
           ],
-          "rationale": "Both structural trade plans meet the mathematical eligibility criteria and minimum reward-to-risk ratio. The long plan is selected as the priority candidate based on its slightly higher reward-to-risk profile (1.7321 vs 1.54), but the assessment remains mixed due to conflicting daily bearish bias and exhaustion signals."
+          "rationale": "The candidate universe supplies two eligible structural trade plans: long and short. Both satisfy the >=1.5R gate and have zero blockers. The structural long plan offers a slightly healthier reward-to-risk ratio of 1.7321 compared to the short plan's 1.54, making structural_trade_plans.long the preferred priority candidate among the eligible choices, despite mixed macro/exhaustion context and bearish daily bias."
         },
-        "latency_ms": 1498,
+        "latency_ms": 1714,
         "error": null
       },
       "momentum_reversal": {
@@ -6119,7 +6118,7 @@
       "multitimeframe_scan": {
         "pair": "ADAUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:02:19.035264+00:00",
+        "generated_at_utc": "2026-10-25T08:11:57.787121+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -6210,7 +6209,7 @@
     }
   },
   {
-    "record_key": "47f053b153d292342962edcfffcff19652863db964dfa7438f72b269349d49ee",
+    "record_key": "17018d3e99e0a4f6435aa92590eb0c2976dccd7c9fb7087a10f6dfab7f20f2f5",
     "record_type": "multitimeframe_thesis",
     "pair": "XRPUSDT",
     "timeframe": "1D+4H",
@@ -6219,7 +6218,7 @@
     "payload": {
       "pair": "XRPUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:02:06.678423+00:00",
+      "generated_at_utc": "2026-10-25T08:11:44.674354+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -6628,23 +6627,21 @@
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "The structural short trade plan is explicitly marked eligible in candidate_universe with no current blockers.",
-            "The reward-to-risk ratio is 1.65, satisfying the minimum 1.5R gate requirement.",
-            "Daily bias is bearish and MACD histogram expansion supports downside continuation context.",
-            "The 0.618 Fibonacci retracement level aligns closely with resistance touches and shows early reaction evidence."
+            "The 0.618 fibonacci retracement level at 1.30169698 shows confluence with 11 prior touches and rejection/reclaim candle behavior.",
+            "structural_trade_plans.short is marked eligible with no blockers and satisfies the >=1.5R gate at 1.6525R.",
+            "Daily bias is bearish and MACD histogram exhibits bearish expansion context."
           ],
           "counter_evidence": [
-            "The setup lifecycle for the separate trendline break shows a failed break/invalidated state.",
-            "Stochastic RSI values are elevated (K at 89.85), indicating potential short-term overbought conditions contrary to a clean immediate short entry.",
-            "Exhaustion context registers mixed early reversal evidence with an RSI recovery reading."
+            "Stochastic RSI values are high (K: 89.85, D: 73.66) presenting potential near-term momentum friction for a short entry.",
+            "Exhaustion context indicates mixed early reversal evidence with rsi_recovering as a bullish factor."
           ],
           "missing_evidence": [
-            "Confirmation of a closed-candle structural break and subsequent retest lifecycle to fully validate the entry.",
-            "Fresh extreme zone stochastic RSI cross for momentum reversal strategies."
+            "Independent confirmation from a closed-candle structural break and retest lifecycle.",
+            "Decisive volume expansion confirming the continuation move."
           ],
-          "rationale": "The candidate universe marks structural_trade_plans.short as eligible with an acceptable reward-to-risk profile above 1.5R and supportive daily bearish context. However, mixed exhaustion evidence and a previously invalidated trendline break lifecycle introduce caution, requiring strict adherence to deterministic confirmation gates rather than unconfirmed projections."
+          "rationale": "The candidate universe presents an eligible short structural trade plan meeting the risk-reward gate with strong resistance touch confluence at the 0.618 fib level. However, mixed exhaustion indicators and elevated Stochastic RSI values introduce counter-pressure, resulting in a mixed assessment requiring careful monitoring of the structural break and retest lifecycle."
         },
-        "latency_ms": 1862,
+        "latency_ms": 2354,
         "error": null
       },
       "momentum_reversal": {
@@ -6668,7 +6665,7 @@
       "multitimeframe_scan": {
         "pair": "XRPUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:02:06.678423+00:00",
+        "generated_at_utc": "2026-10-25T08:11:44.674354+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -6747,7 +6744,7 @@
     }
   },
   {
-    "record_key": "ad66c94f08851e84a7866582d4227a8ee7d231e1ec249c348f9416cc0f467d7a",
+    "record_key": "11d83e3b317728b23a68e77119a86067ec09e3b3726664c9bff8c9c3afbc5333",
     "record_type": "multitimeframe_thesis",
     "pair": "SOLUSDT",
     "timeframe": "1D+4H",
@@ -6756,7 +6753,7 @@
     "payload": {
       "pair": "SOLUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:01:53.755806+00:00",
+      "generated_at_utc": "2026-10-25T08:11:30.796122+00:00",
       "state": "WATCH_STRUCTURE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -7159,22 +7156,23 @@
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "Rule decision confirms a short impulse with a 0.500 retracement touched and rejected/reclaimed.",
-            "Structural short plan has an eligible status, meets the minimum reward-to-risk ratio of >=1.5 (1.5189), and has no active blockers.",
-            "Daily bias is bearish and price is trading below the 4h EMA21 (103.09)."
+            "Rule decision indicates a confirmed short impulse with a 0.500 retracement touched and reclaimed/rejected with structured evidence.",
+            "Structural short plan meets eligibility requirements with zero blockers and an R:R of 1.5189, which clears the >=1.5R threshold.",
+            "Daily bias is bearish, aligning with the structural short direction.",
+            "Exhaustion context indicates mixed early reversal evidence with bearish signs such as closing below the previous candle low."
           ],
           "counter_evidence": [
-            "Exhaustion context indicates mixed early reversal evidence with RSI recovering at 40.53.",
-            "Structural long trade plan is also marked eligible in the candidate universe despite the overarching bearish bias.",
-            "Stochastic RSI values show K at 73.77 and D at 60.63, reflecting upward momentum retracement rather than definitive downward continuation."
+            "Structural long plan is also marked eligible in candidate_universe despite a bearish daily bias and shorter-term resistance reactions.",
+            "Momentum reversal candidate is in NO_SETUP state with blockers.",
+            "Stoch RSI K/D values (73.77 and 60.63) show intermediate momentum rather than a clear oversold/overbought exhaustion extreme at the exact entry reference."
           ],
           "missing_evidence": [
-            "Confirmed trendline break and retest lifecycle confirmation for the short direction.",
-            "Clean expansion of MACD bearish histogram."
+            "Completed confirmation of a trendline break-retest-continuation lifecycle separate from the initial contextual fib reaction.",
+            "Calibrated historical probability data for the specific bounce ranking."
           ],
-          "rationale": "The candidate universe presents both long and short structural trade plans as eligible, but the rule decision and daily bias lean strictly bearish following a confirmed short impulse. The short structural trade plan clears the minimum risk-to-reward hurdle (1.5189) with explicit stop and target levels. However, mixed exhaustion evidence and recovering RSI require caution, making this a mixed setup awaiting definitive structural confirmation."
+          "rationale": "The candidate universe presents both structural long and short plans as technically eligible and clearing the 1.5R gate. However, the rule decision and daily bias lean bearish, making the structural_trade_plans.short the more consistent candidate aligned with the confirmed short impulse and broader trend context. The assessment is mixed due to conflicting multi-directional eligibility in the raw candidates and the requirement for further confirmed structural execution lifecycle."
         },
-        "latency_ms": 2027,
+        "latency_ms": 1871,
         "error": null
       },
       "momentum_reversal": {
@@ -7198,7 +7196,7 @@
       "multitimeframe_scan": {
         "pair": "SOLUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:01:53.755806+00:00",
+        "generated_at_utc": "2026-10-25T08:11:30.796122+00:00",
         "state": "WATCH_STRUCTURE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -7384,7 +7382,7 @@
     }
   },
   {
-    "record_key": "8d4f5b7b4301e33e9944675d088ca7fdd6c02186fd4c6203491e6383b5077962",
+    "record_key": "fcf2e982b76579edead587dbaa44e74bac6bf8097ab449e414cb74504af1d38a",
     "record_type": "multitimeframe_thesis",
     "pair": "ETHUSDT",
     "timeframe": "1D+4H",
@@ -7393,7 +7391,7 @@
     "payload": {
       "pair": "ETHUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:01:40.472666+00:00",
+      "generated_at_utc": "2026-10-25T08:11:17.306893+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -7905,22 +7903,22 @@
           "priority_candidate": "structural_trade_plans.long",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.long meets minimum reward-to-risk ratio requirement with 1.86R",
-            "structural_trade_plans.long is explicitly marked as eligible with no active blockers",
-            "structural_trade_plans.short is also eligible with a 2.38R profile"
+            "structural_trade_plans.long meets minimum reward-to-risk requirement with a ratio of 1.8601",
+            "structural_trade_plans.long is marked eligible with no current blockers",
+            "structural_trade_plans.short meets minimum reward-to-risk requirement with a ratio of 2.3809"
           ],
           "counter_evidence": [
-            "Daily bias is currently stated as bearish",
-            "MACD histogram remains negative",
-            "Price is trading below EMA8 and EMA21"
+            "Daily bias is bearish against the long candidate plan",
+            "Exhaustion context indicates mixed early reversal evidence with a closed-below-previous-candle-low bearish sign",
+            "MACD histogram remains negative (-3.808)"
           ],
           "missing_evidence": [
-            "Clean confirmation of a structural reversal or sweep-and-reclaim at key swing lows",
-            "Stronger bullish momentum expansion indicators"
+            "Lack of stoch bullish cross or confirmation for momentum reversal candidate setup",
+            "Unconfirmed real-time bounce at exact Fib retracement levels for structural short continuation"
           ],
-          "rationale": "Both structural trade plans meet quantitative eligibility and minimum R:R hurdles in the candidate universe, but conflicting indicator context (bearish daily bias, price beneath key EMAs) makes the setup mixed. structural_trade_plans.long is highlighted as the top candidate based on direct eligibility, but caution is warranted due to the broader bearish momentum."
+          "rationale": "Both structural trade plans are technically eligible with acceptable risk-reward ratios above 1.5, but conflicting daily bearish bias and mixed exhaustion cues prevent a high-conviction directional stance, justifying a mixed assessment favoring structural review of the long side per eligibility."
         },
-        "latency_ms": 1739,
+        "latency_ms": 1562,
         "error": null
       },
       "momentum_reversal": {
@@ -7944,7 +7942,7 @@
       "multitimeframe_scan": {
         "pair": "ETHUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:01:40.472666+00:00",
+        "generated_at_utc": "2026-10-25T08:11:17.306893+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -8229,7 +8227,7 @@
     }
   },
   {
-    "record_key": "dbb757e4d5f3ab952b1410b0c86e5d7e8036cb3be9a58376f39726b689d9e08f",
+    "record_key": "0408436734573c805acf66c995faca79241ed4faf57f9ee955f83d60d049fb0b",
     "record_type": "multitimeframe_thesis",
     "pair": "XBTUSDT",
     "timeframe": "1D+4H",
@@ -8238,7 +8236,7 @@
     "payload": {
       "pair": "XBTUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-25T08:01:24.828293+00:00",
+      "generated_at_utc": "2026-10-25T08:11:01.516050+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
@@ -9019,22 +9017,23 @@
           "priority_candidate": "structural_trade_plans.short",
           "confidence": "medium",
           "supporting_evidence": [
-            "structural_trade_plans.short meets the hard gate with a reward-to-risk ratio of 1.9162 which exceeds the 1.5 minimum threshold",
-            "Daily bias is explicitly bearish with EMA alignment and negative MACD expansion in the setup lifecycle",
-            "FIB retracement level of 0.618 touched and showed rejection/reclaim candle evidence in the frozen decision context"
+            "Confirmed short impulse from swing high 82043.4 to swing low 79241.1",
+            "structural_trade_plans.short meets the hard gate with a reward-to-risk ratio of 1.9162 (exceeding the >=1.5R minimum)",
+            "Daily bias is explicitly bearish",
+            "MACD histogram shows bearish expansion context alongside EMA alignment (EMA8 below EMA21)"
           ],
           "counter_evidence": [
-            "The breakout failed its close-based invalidation rule in the setup lifecycle, state is marked INVALIDATED",
-            "Momentum reversal candidate is blocked due to no_fresh_extreme_zone_stoch_rsi_cross",
-            "Exhaustion context indicates mixed early reversal evidence with price closing below the previous candle low"
+            "The breakout setup lifecycle state is marked as INVALIDATED due to failing its close-based invalidation rule",
+            "Stochastic RSI K is at 81.3866, indicating overbought short-term conditions which increase false-break risks for a short continuation",
+            "RSI 14 sits at 41.13, showing some weakness but not heavily trending"
           ],
           "missing_evidence": [
-            "Confirmed trendline break-retest-continuation lifecycle confirmation for an actionable short entry",
-            "Calibrated historical probabilities for the bounce ranking levels"
+            "Absence of clean follow-through confirmation on the trendline break-retest lifecycle",
+            "Lack of fresh extreme-zone stochastic RSI cross for the momentum reversal alternative"
           ],
-          "rationale": "The candidate universe marks structural_trade_plans.short as eligible with valid reward-to-risk geometry and bearish daily bias alignment, but the setup lifecycle reports a failed breakout and invalidation. Therefore, the assessment is mixed, favoring the short structural plan conditionally based on explicit candidate eligibility while acknowledging conflicting setup lifecycle and exhaustion context signals."
+          "rationale": "The structural short plan is eligible in the deterministic universe with an acceptable reward-to-risk ratio, aligning with the broader bearish daily bias and EMA structure. However, conflicting signals such as an invalidated setup lifecycle state, overbought Stoch RSI levels, and mixed exhaustion evidence introduce notable false-break risks, warranting a mixed assessment."
         },
-        "latency_ms": 1774,
+        "latency_ms": 1734,
         "error": null
       },
       "momentum_reversal": {
@@ -9058,7 +9057,7 @@
       "multitimeframe_scan": {
         "pair": "XBTUSDT",
         "strategy": "daily-thesis-4h-execution-v1",
-        "generated_at_utc": "2026-10-25T08:01:24.828293+00:00",
+        "generated_at_utc": "2026-10-25T08:11:01.516050+00:00",
         "state": "WATCH_MAJOR_MOVE",
         "thesis_direction": "bearish",
         "daily_thesis": {
@@ -9211,6 +9210,1515 @@
           "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
         ]
       }
+    }
+  },
+  {
+    "record_key": "9945f0745fb7bd04d13182516d9e7a22cc58a6a6c39c1a58504a52e1c9ae0e94",
+    "record_type": "multitimeframe_thesis",
+    "pair": "LITUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "LITUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:04:11.748581+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 3.2318,
+        "ema5": 3.287979793587516,
+        "ema13": 3.352216727939971,
+        "ema8": 3.3017812984163406,
+        "ema21": 3.471123230221453,
+        "ema_5_13_spread_pct": -1.9163,
+        "ema_8_21_spread_pct": -4.8786,
+        "stoch_k": 52.438813,
+        "stoch_d": 68.223337,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.196756,
+        "macd_signal": -0.222106,
+        "macd_hist": 0.02535,
+        "macd_hist_change": "deteriorating",
+        "volume": 2108248.99,
+        "volume_vs_20_candle_average": 0.631808,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 3.2461,
+        "ema5": 3.220255021568839,
+        "ema13": 3.251333648052358,
+        "ema8": 3.2222834444807047,
+        "ema21": 3.284539307371039,
+        "ema_5_13_spread_pct": -0.9559,
+        "ema_8_21_spread_pct": -1.8954,
+        "stoch_k": 59.068481,
+        "stoch_d": 45.33979,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.048074,
+        "macd_signal": -0.030829,
+        "macd_hist": -0.017245,
+        "macd_hist_change": "improving",
+        "volume": 228977.997,
+        "volume_vs_20_candle_average": 0.392283,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "85b0ef475714582bd5b0d7cc31f3e346f0a86a845b34e701c30d5bf2429b1af9",
+    "record_type": "multitimeframe_thesis",
+    "pair": "SUIUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "SUIUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:04:02.108205+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 0.9388,
+        "ema5": 0.9726381102905742,
+        "ema13": 1.0077367848473482,
+        "ema8": 0.987828185520967,
+        "ema21": 1.0217188489986746,
+        "ema_5_13_spread_pct": -3.4829,
+        "ema_8_21_spread_pct": -3.317,
+        "stoch_k": 0.0,
+        "stoch_d": 14.075891,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.016575,
+        "macd_signal": 0.002015,
+        "macd_hist": -0.01859,
+        "macd_hist_change": "deteriorating",
+        "volume": 10140621.0182,
+        "volume_vs_20_candle_average": 0.672261,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 0.9187,
+        "ema5": 0.9332670100342586,
+        "ema13": 0.9513565517603801,
+        "ema8": 0.9405579904190337,
+        "ema21": 0.9639060302801816,
+        "ema_5_13_spread_pct": -1.9014,
+        "ema_8_21_spread_pct": -2.4222,
+        "stoch_k": 24.540357,
+        "stoch_d": 25.138713,
+        "stoch_cross_up": false,
+        "stoch_cross_down": true,
+        "macd": -0.02027,
+        "macd_signal": -0.01555,
+        "macd_hist": -0.004721,
+        "macd_hist_change": "deteriorating",
+        "volume": 1297545.8359,
+        "volume_vs_20_candle_average": 0.713396,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "9cfaab1ad6a438d708d39d174384ebe6167326d55ae4689e6963cc521a2d0698",
+    "record_type": "multitimeframe_thesis",
+    "pair": "NEARUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "NEARUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:03:52.067619+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 4.5,
+        "ema5": 4.7665000256707515,
+        "ema13": 4.900816508240922,
+        "ema8": 4.845926044416699,
+        "ema21": 4.858997644697796,
+        "ema_5_13_spread_pct": -2.7407,
+        "ema_8_21_spread_pct": -0.269,
+        "stoch_k": 0.0,
+        "stoch_d": 7.717337,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": 0.114558,
+        "macd_signal": 0.239841,
+        "macd_hist": -0.125283,
+        "macd_hist_change": "deteriorating",
+        "volume": 5839199.44254082,
+        "volume_vs_20_candle_average": 0.88896,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 4.439,
+        "ema5": 4.483074241662965,
+        "ema13": 4.606353853421005,
+        "ema8": 4.5281091862067,
+        "ema21": 4.698776226027737,
+        "ema_5_13_spread_pct": -2.6763,
+        "ema_8_21_spread_pct": -3.6322,
+        "stoch_k": 27.855804,
+        "stoch_d": 24.013161,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.147547,
+        "macd_signal": -0.113098,
+        "macd_hist": -0.034449,
+        "macd_hist_change": "improving",
+        "volume": 253429.46232329,
+        "volume_vs_20_candle_average": 0.333274,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "3d1fcda97328e636def3202f7cba1a145f4844e073076373412a485e616436a9",
+    "record_type": "multitimeframe_thesis",
+    "pair": "ZECUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "ZECUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:03:42.435748+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 1207.74,
+        "ema5": 1210.6218502617696,
+        "ema13": 1216.7378085946787,
+        "ema8": 1209.720641179869,
+        "ema21": 1233.6307443508667,
+        "ema_5_13_spread_pct": -0.5027,
+        "ema_8_21_spread_pct": -1.9382,
+        "stoch_k": 44.700087,
+        "stoch_d": 63.510365,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -23.267701,
+        "macd_signal": -24.605373,
+        "macd_hist": 1.337672,
+        "macd_hist_change": "improving",
+        "volume": 25327.00564,
+        "volume_vs_20_candle_average": 0.533325,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 1197.33,
+        "ema5": 1195.6779119056569,
+        "ema13": 1199.374821997285,
+        "ema8": 1194.798700046224,
+        "ema21": 1204.8435047124328,
+        "ema_5_13_spread_pct": -0.3082,
+        "ema_8_21_spread_pct": -0.8337,
+        "stoch_k": 82.929623,
+        "stoch_d": 70.964903,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -7.580314,
+        "macd_signal": -4.765604,
+        "macd_hist": -2.81471,
+        "macd_hist_change": "improving",
+        "volume": 13716.50793,
+        "volume_vs_20_candle_average": 1.994089,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "478017210731e3e726183a205c5393f14a40af138906d07e6b5bbf34f068a341",
+    "record_type": "multitimeframe_thesis",
+    "pair": "LINKUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "LINKUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:03:32.075594+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 11.62675,
+        "ema5": 11.928648484960767,
+        "ema13": 12.272794057719521,
+        "ema8": 12.065580345906245,
+        "ema21": 12.490983714703969,
+        "ema_5_13_spread_pct": -2.8041,
+        "ema_8_21_spread_pct": -3.4057,
+        "stoch_k": 4.020561,
+        "stoch_d": 21.521847,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.313949,
+        "macd_signal": -0.186927,
+        "macd_hist": -0.127023,
+        "macd_hist_change": "deteriorating",
+        "volume": 25837.68690565,
+        "volume_vs_20_candle_average": 0.90838,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 11.39634,
+        "ema5": 11.538554282324515,
+        "ema13": 11.710134409654566,
+        "ema8": 11.606918243667748,
+        "ema21": 11.827243359798876,
+        "ema_5_13_spread_pct": -1.4652,
+        "ema_8_21_spread_pct": -1.8629,
+        "stoch_k": 34.533244,
+        "stoch_d": 32.283469,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.188757,
+        "macd_signal": -0.14112,
+        "macd_hist": -0.047637,
+        "macd_hist_change": "deteriorating",
+        "volume": 1108.99905395,
+        "volume_vs_20_candle_average": 0.284306,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 8.111194,
+            "distance_pct": 40.501,
+            "touches": 3,
+            "start_time": "2026-07-10T16:00:00+00:00",
+            "end_time": "2026-07-19T20:00:00+00:00",
+            "start_price": 12.10355,
+            "end_price": 11.75992,
+            "slope_per_candle": -0.0062478181818182
+          },
+          {
+            "kind": "support",
+            "price": 6.313201,
+            "distance_pct": 80.516,
+            "touches": 3,
+            "start_time": "2026-07-10T16:00:00+00:00",
+            "end_time": "2026-07-26T12:00:00+00:00",
+            "start_price": 12.10355,
+            "end_price": 11.2427,
+            "slope_per_candle": -0.009061578947368431
+          },
+          {
+            "kind": "resistance",
+            "price": -4.484779,
+            "distance_pct": 354.112,
+            "touches": 4,
+            "start_time": "2026-07-01T00:00:00+00:00",
+            "end_time": "2026-07-18T08:00:00+00:00",
+            "start_price": 15.76535,
+            "end_price": 12.74381,
+            "slope_per_candle": -0.02905326923076923
+          },
+          {
+            "kind": "resistance",
+            "price": -4.30658,
+            "distance_pct": 364.626,
+            "touches": 3,
+            "start_time": "2026-07-01T00:00:00+00:00",
+            "end_time": "2026-07-21T04:00:00+00:00",
+            "start_price": 15.76535,
+            "end_price": 12.28084,
+            "slope_per_candle": -0.028797603305785124
+          },
+          {
+            "kind": "resistance",
+            "price": -3.568495,
+            "distance_pct": 419.36,
+            "touches": 3,
+            "start_time": "2026-07-16T08:00:00+00:00",
+            "end_time": "2026-07-21T04:00:00+00:00",
+            "start_price": 13.07881,
+            "end_price": 12.28084,
+            "slope_per_candle": -0.027516206896551765
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "9fdef0ced0cfd983d7ff3cb903194460a9ce07218ae4d6f2b4000ed6f5b6b18b",
+    "record_type": "multitimeframe_thesis",
+    "pair": "DOGEUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "DOGEUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:03:19.516423+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 0.07771,
+        "ema5": 0.07911787055566902,
+        "ema13": 0.08123194869841882,
+        "ema8": 0.0798724859482112,
+        "ema21": 0.08308351591871997,
+        "ema_5_13_spread_pct": -2.6025,
+        "ema_8_21_spread_pct": -3.8648,
+        "stoch_k": 9.4358,
+        "stoch_d": 31.848568,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.002899,
+        "macd_signal": -0.002458,
+        "macd_hist": -0.000441,
+        "macd_hist_change": "improving",
+        "volume": 7036581.87677336,
+        "volume_vs_20_candle_average": 1.421578,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 0.12595,
+            "distance_pct": -38.301,
+            "touches": 3,
+            "start_time": "2025-02-07T00:00:00+00:00",
+            "end_time": "2025-02-22T00:00:00+00:00",
+            "start_price": 0.06771,
+            "end_price": 0.06911,
+            "slope_per_candle": 9.333333333333323e-05
+          },
+          {
+            "kind": "support",
+            "price": 0.136917,
+            "distance_pct": -43.243,
+            "touches": 3,
+            "start_time": "2025-02-07T00:00:00+00:00",
+            "end_time": "2025-02-18T00:00:00+00:00",
+            "start_price": 0.06771,
+            "end_price": 0.06893,
+            "slope_per_candle": 0.00011090909090909081
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 0.07698,
+        "ema5": 0.07739088067467367,
+        "ema13": 0.07806512250916876,
+        "ema8": 0.07763100664815939,
+        "ema21": 0.0785985425923096,
+        "ema_5_13_spread_pct": -0.8637,
+        "ema_8_21_spread_pct": -1.231,
+        "stoch_k": 60.435981,
+        "stoch_d": 52.540867,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.000867,
+        "macd_signal": -0.000699,
+        "macd_hist": -0.000169,
+        "macd_hist_change": "improving",
+        "volume": 161257.51738297,
+        "volume_vs_20_candle_average": 0.1909,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "cf748f9ae152d5db39279afd4c4fe5dbb3f58ae7ef35adc54d47e92beced309a",
+    "record_type": "multitimeframe_thesis",
+    "pair": "HYPEUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "HYPEUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:03:06.141009+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 76.679,
+        "ema5": 77.94448407087302,
+        "ema13": 80.04420645187822,
+        "ema8": 78.73985826488847,
+        "ema21": 81.66136444278867,
+        "ema_5_13_spread_pct": -2.6232,
+        "ema_8_21_spread_pct": -3.5776,
+        "stoch_k": 1.883602,
+        "stoch_d": 17.985007,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -2.462139,
+        "macd_signal": -1.892241,
+        "macd_hist": -0.569898,
+        "macd_hist_change": "improving",
+        "volume": 208166.745,
+        "volume_vs_20_candle_average": 0.865189,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 76.146,
+        "ema5": 76.3204531498663,
+        "ema13": 76.83526309999753,
+        "ema8": 76.47069660268784,
+        "ema21": 77.36994971338247,
+        "ema_5_13_spread_pct": -0.67,
+        "ema_8_21_spread_pct": -1.1623,
+        "stoch_k": 70.156824,
+        "stoch_d": 60.783293,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.884456,
+        "macd_signal": -0.813598,
+        "macd_hist": -0.070857,
+        "macd_hist_change": "improving",
+        "volume": 15124.3902,
+        "volume_vs_20_candle_average": 0.470152,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 73.430849,
+            "distance_pct": 3.698,
+            "touches": 3,
+            "start_time": "2026-09-10T00:00:00+00:00",
+            "end_time": "2026-09-18T20:00:00+00:00",
+            "start_price": 84.91,
+            "end_price": 82.665,
+            "slope_per_candle": -0.042358490566037556
+          },
+          {
+            "kind": "support",
+            "price": 66.259025,
+            "distance_pct": 14.922,
+            "touches": 3,
+            "start_time": "2026-09-10T00:00:00+00:00",
+            "end_time": "2026-09-23T04:00:00+00:00",
+            "start_price": 84.91,
+            "end_price": 79.473,
+            "slope_per_candle": -0.06882278481012655
+          },
+          {
+            "kind": "resistance",
+            "price": 51.685312,
+            "distance_pct": 47.326,
+            "touches": 3,
+            "start_time": "2026-09-16T00:00:00+00:00",
+            "end_time": "2026-09-29T08:00:00+00:00",
+            "start_price": 95.269,
+            "end_price": 80.432,
+            "slope_per_candle": -0.18546250000000003
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "dada5bdf2eef910faaa1c51a9edc4341400d23d28b9eeba9fc58268af775b8f8",
+    "record_type": "multitimeframe_thesis",
+    "pair": "VIRTUALUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "VIRTUALUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:02:56.160468+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 0.6291,
+        "ema5": 0.6491496886260117,
+        "ema13": 0.6733947750972715,
+        "ema8": 0.6586750964771655,
+        "ema21": 0.6897754517359694,
+        "ema_5_13_spread_pct": -3.6004,
+        "ema_8_21_spread_pct": -4.5088,
+        "stoch_k": 3.316435,
+        "stoch_d": 24.463394,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.02466,
+        "macd_signal": -0.01674,
+        "macd_hist": -0.00792,
+        "macd_hist_change": "deteriorating",
+        "volume": 36057.5208,
+        "volume_vs_20_candle_average": 0.745357,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 0.6215,
+        "ema5": 0.6255269078408294,
+        "ema13": 0.6358272076961098,
+        "ema8": 0.6292741609181303,
+        "ema21": 0.6436219699546859,
+        "ema_5_13_spread_pct": -1.62,
+        "ema_8_21_spread_pct": -2.2292,
+        "stoch_k": 48.520758,
+        "stoch_d": 33.915425,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.012553,
+        "macd_signal": -0.009762,
+        "macd_hist": -0.002791,
+        "macd_hist_change": "improving",
+        "volume": 87.05153,
+        "volume_vs_20_candle_average": 0.014048,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "af7ce225261dfdd42dd41d77701fa2fbf31715824f192957a9eb8d64480d83e5",
+    "record_type": "multitimeframe_thesis",
+    "pair": "BNBUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "BNBUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:02:45.951713+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 739.18,
+        "ema5": 737.4752726240883,
+        "ema13": 738.3791097279191,
+        "ema8": 736.8256825012813,
+        "ema21": 741.6420808815669,
+        "ema_5_13_spread_pct": -0.1224,
+        "ema_8_21_spread_pct": -0.6494,
+        "stoch_k": 71.977699,
+        "stoch_d": 75.043491,
+        "stoch_cross_up": false,
+        "stoch_cross_down": true,
+        "macd": -4.460051,
+        "macd_signal": -4.386582,
+        "macd_hist": -0.073469,
+        "macd_hist_change": "improving",
+        "volume": 97.98498,
+        "volume_vs_20_candle_average": 1.177849,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 1351.6204,
+            "distance_pct": -45.312,
+            "touches": 3,
+            "start_time": "2025-07-19T00:00:00+00:00",
+            "end_time": "2025-08-13T00:00:00+00:00",
+            "start_price": 557.35,
+            "end_price": 600.33,
+            "slope_per_candle": 1.7192000000000007
+          },
+          {
+            "kind": "support",
+            "price": 1357.899302,
+            "distance_pct": -45.564,
+            "touches": 4,
+            "start_time": "2025-07-19T00:00:00+00:00",
+            "end_time": "2025-10-13T00:00:00+00:00",
+            "start_price": 557.35,
+            "end_price": 706.37,
+            "slope_per_candle": 1.7327906976744183
+          },
+          {
+            "kind": "support",
+            "price": 1362.169024,
+            "distance_pct": -45.735,
+            "touches": 3,
+            "start_time": "2025-07-23T00:00:00+00:00",
+            "end_time": "2025-10-13T00:00:00+00:00",
+            "start_price": 563.35,
+            "end_price": 706.37,
+            "slope_per_candle": 1.7441463414634144
+          },
+          {
+            "kind": "resistance",
+            "price": 1435.945455,
+            "distance_pct": -48.523,
+            "touches": 3,
+            "start_time": "2025-07-16T00:00:00+00:00",
+            "end_time": "2025-08-07T00:00:00+00:00",
+            "start_price": 579.5,
+            "end_price": 620.02,
+            "slope_per_candle": 1.841818181818181
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bullish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 744.47,
+        "ema5": 739.6977745506681,
+        "ema13": 738.0403503663205,
+        "ema8": 738.4929832120504,
+        "ema21": 737.5681776121835,
+        "ema_5_13_spread_pct": 0.2246,
+        "ema_8_21_spread_pct": 0.1254,
+        "stoch_k": 71.69174,
+        "stoch_d": 52.252933,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": 0.911767,
+        "macd_signal": 0.808734,
+        "macd_hist": 0.103034,
+        "macd_hist_change": "improving",
+        "volume": 187.63132,
+        "volume_vs_20_candle_average": 10.561866,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 691.221429,
+            "distance_pct": 7.704,
+            "touches": 3,
+            "start_time": "2026-07-03T04:00:00+00:00",
+            "end_time": "2026-07-09T00:00:00+00:00",
+            "start_price": 763.53,
+            "end_price": 759.83,
+            "slope_per_candle": -0.10571428571428376
+          },
+          {
+            "kind": "resistance",
+            "price": 682.354,
+            "distance_pct": 9.103,
+            "touches": 3,
+            "start_time": "2026-07-17T16:00:00+00:00",
+            "end_time": "2026-07-21T20:00:00+00:00",
+            "start_price": 734.89,
+            "end_price": 732.69,
+            "slope_per_candle": -0.08799999999999727
+          },
+          {
+            "kind": "resistance",
+            "price": 679.507647,
+            "distance_pct": 9.56,
+            "touches": 3,
+            "start_time": "2026-07-14T04:00:00+00:00",
+            "end_time": "2026-07-25T12:00:00+00:00",
+            "start_price": 758.03,
+            "end_price": 749.39,
+            "slope_per_candle": -0.12705882352941156
+          },
+          {
+            "kind": "resistance",
+            "price": 591.900753,
+            "distance_pct": 25.776,
+            "touches": 3,
+            "start_time": "2026-07-10T00:00:00+00:00",
+            "end_time": "2026-07-25T12:00:00+00:00",
+            "start_price": 776.02,
+            "end_price": 749.39,
+            "slope_per_candle": -0.28634408602150535
+          },
+          {
+            "kind": "resistance",
+            "price": 1012.163333,
+            "distance_pct": -26.448,
+            "touches": 3,
+            "start_time": "2026-07-17T16:00:00+00:00",
+            "end_time": "2026-07-23T16:00:00+00:00",
+            "start_price": 734.89,
+            "end_price": 751.61,
+            "slope_per_candle": 0.4644444444444452
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "7f47910b0e9233e0100c14f634c1fdfaf6c9c744bdf21554236f390e0afc65cf",
+    "record_type": "multitimeframe_thesis",
+    "pair": "AVAXUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "AVAXUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:02:32.093214+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 8.989,
+        "ema5": 9.249755300980256,
+        "ema13": 9.653374060771169,
+        "ema8": 9.426629343762063,
+        "ema21": 9.826262978055635,
+        "ema_5_13_spread_pct": -4.1811,
+        "ema_8_21_spread_pct": -4.067,
+        "stoch_k": 0.0,
+        "stoch_d": 2.087661,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.223747,
+        "macd_signal": -0.029593,
+        "macd_hist": -0.194154,
+        "macd_hist_change": "improving",
+        "volume": 26177.07081882,
+        "volume_vs_20_candle_average": 0.97687,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 8.856,
+        "ema5": 8.922396569704393,
+        "ema13": 9.01556210274628,
+        "ema8": 8.951967092338617,
+        "ema21": 9.120570964479393,
+        "ema_5_13_spread_pct": -1.0334,
+        "ema_8_21_spread_pct": -1.8486,
+        "stoch_k": 74.670615,
+        "stoch_d": 66.024927,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.178913,
+        "macd_signal": -0.178622,
+        "macd_hist": -0.000291,
+        "macd_hist_change": "deteriorating",
+        "volume": 372.25958416,
+        "volume_vs_20_candle_average": 0.117829,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "260212a9816d08fe4f115baf685bdc6bde56584f7023b4cec003e3af3f3fdf52",
+    "record_type": "multitimeframe_thesis",
+    "pair": "ADAUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "ADAUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:02:19.035264+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 0.208184,
+        "ema5": 0.21400498262317655,
+        "ema13": 0.22258091158751994,
+        "ema8": 0.2175949600288815,
+        "ema21": 0.22727232574607784,
+        "ema_5_13_spread_pct": -3.8529,
+        "ema_8_21_spread_pct": -4.258,
+        "stoch_k": 0.0,
+        "stoch_d": 9.153529,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.006801,
+        "macd_signal": -0.003409,
+        "macd_hist": -0.003392,
+        "macd_hist_change": "improving",
+        "volume": 3056526.93776651,
+        "volume_vs_20_candle_average": 0.957725,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 0.568026,
+            "distance_pct": -63.35,
+            "touches": 3,
+            "start_time": "2025-02-24T00:00:00+00:00",
+            "end_time": "2025-04-26T00:00:00+00:00",
+            "start_price": 0.171337,
+            "end_price": 0.211202,
+            "slope_per_candle": 0.0006535245901639346
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 0.205768,
+        "ema5": 0.20709472132327186,
+        "ema13": 0.20973864435308068,
+        "ema8": 0.20803103676366141,
+        "ema21": 0.2120336293437999,
+        "ema_5_13_spread_pct": -1.2606,
+        "ema_8_21_spread_pct": -1.8877,
+        "stoch_k": 57.238151,
+        "stoch_d": 49.388874,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.00381,
+        "macd_signal": -0.003337,
+        "macd_hist": -0.000473,
+        "macd_hist_change": "improving",
+        "volume": 424360.19864049,
+        "volume_vs_20_candle_average": 0.940553,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 0.063992,
+            "distance_pct": 221.55,
+            "touches": 3,
+            "start_time": "2026-07-01T00:00:00+00:00",
+            "end_time": "2026-07-26T12:00:00+00:00",
+            "start_price": 0.239067,
+            "end_price": 0.200636,
+            "slope_per_candle": -0.00025118300653594766
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "47f053b153d292342962edcfffcff19652863db964dfa7438f72b269349d49ee",
+    "record_type": "multitimeframe_thesis",
+    "pair": "XRPUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "XRPUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:02:06.678423+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 1.29995,
+        "ema5": 1.3110132089214344,
+        "ema13": 1.3342732688950871,
+        "ema8": 1.3186489389412275,
+        "ema21": 1.356340157168878,
+        "ema_5_13_spread_pct": -1.7433,
+        "ema_8_21_spread_pct": -2.7789,
+        "stoch_k": 38.834294,
+        "stoch_d": 56.740948,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.034032,
+        "macd_signal": -0.02922,
+        "macd_hist": -0.004812,
+        "macd_hist_change": "improving",
+        "volume": 1678080.4930625,
+        "volume_vs_20_candle_average": 1.442863,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 2.7326,
+            "distance_pct": -52.428,
+            "touches": 3,
+            "start_time": "2025-01-02T00:00:00+00:00",
+            "end_time": "2025-01-19T00:00:00+00:00",
+            "start_price": 1.01,
+            "end_price": 1.05437,
+            "slope_per_candle": 0.002610000000000001
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 1.30158,
+        "ema5": 1.2986370963149287,
+        "ema13": 1.3009047888955845,
+        "ema8": 1.2979471118971964,
+        "ema21": 1.306019462008697,
+        "ema_5_13_spread_pct": -0.1743,
+        "ema_8_21_spread_pct": -0.6181,
+        "stoch_k": 89.852643,
+        "stoch_d": 73.665795,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.008236,
+        "macd_signal": -0.008016,
+        "macd_hist": -0.00022,
+        "macd_hist_change": "improving",
+        "volume": 22210.33698579,
+        "volume_vs_20_candle_average": 0.131508,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "ad66c94f08851e84a7866582d4227a8ee7d231e1ec249c348f9416cc0f467d7a",
+    "record_type": "multitimeframe_thesis",
+    "pair": "SOLUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "SOLUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:01:53.755806+00:00",
+      "state": "WATCH_STRUCTURE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 102.39,
+        "ema5": 103.73445587887242,
+        "ema13": 105.71773420762666,
+        "ema8": 104.437193418945,
+        "ema21": 107.29511484779266,
+        "ema_5_13_spread_pct": -1.876,
+        "ema_8_21_spread_pct": -2.6636,
+        "stoch_k": 13.025702,
+        "stoch_d": 34.65419,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -2.294424,
+        "macd_signal": -1.668136,
+        "macd_hist": -0.626288,
+        "macd_hist_change": "improving",
+        "volume": 16926.49002023,
+        "volume_vs_20_candle_average": 0.804163,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 101.63,
+        "ema5": 101.85955938244523,
+        "ema13": 102.49130917588863,
+        "ema8": 102.04328725965338,
+        "ema21": 103.09025580977625,
+        "ema_5_13_spread_pct": -0.6164,
+        "ema_8_21_spread_pct": -1.0156,
+        "stoch_k": 73.773707,
+        "stoch_d": 60.632061,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -0.965605,
+        "macd_signal": -0.82049,
+        "macd_hist": -0.145115,
+        "macd_hist_change": "improving",
+        "volume": 476.92794668,
+        "volume_vs_20_candle_average": 0.205275,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "8d4f5b7b4301e33e9944675d088ca7fdd6c02186fd4c6203491e6383b5077962",
+    "record_type": "multitimeframe_thesis",
+    "pair": "ETHUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "ETHUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:01:40.472666+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 2359.2,
+        "ema5": 2395.3155597776113,
+        "ema13": 2436.1445192260835,
+        "ema8": 2410.566085201397,
+        "ema21": 2469.596571557153,
+        "ema_5_13_spread_pct": -1.676,
+        "ema_8_21_spread_pct": -2.3903,
+        "stoch_k": 10.698354,
+        "stoch_d": 39.353017,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -50.719158,
+        "macd_signal": -40.665073,
+        "macd_hist": -10.054085,
+        "macd_hist_change": "deteriorating",
+        "volume": 1765.72174087,
+        "volume_vs_20_candle_average": 0.987814,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 2347.86,
+        "ema5": 2353.313649788716,
+        "ema13": 2368.9761802433186,
+        "ema8": 2358.5943506838344,
+        "ema21": 2382.140338065448,
+        "ema_5_13_spread_pct": -0.6612,
+        "ema_8_21_spread_pct": -0.9884,
+        "stoch_k": 75.629605,
+        "stoch_d": 63.201154,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -21.276692,
+        "macd_signal": -17.468661,
+        "macd_hist": -3.808031,
+        "macd_hist_change": "improving",
+        "volume": 55.97502238,
+        "volume_vs_20_candle_average": 0.26319,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 2706.621887,
+            "distance_pct": -13.255,
+            "touches": 3,
+            "start_time": "2026-07-17T00:00:00+00:00",
+            "end_time": "2026-07-25T20:00:00+00:00",
+            "start_price": 2318.58,
+            "end_price": 2352.8,
+            "slope_per_candle": 0.6456603773584954
+          },
+          {
+            "kind": "support",
+            "price": 1834.582609,
+            "distance_pct": 27.978,
+            "touches": 3,
+            "start_time": "2026-07-22T00:00:00+00:00",
+            "end_time": "2026-07-25T20:00:00+00:00",
+            "start_price": 2374.55,
+            "end_price": 2352.8,
+            "slope_per_candle": -0.9456521739130435
+          },
+          {
+            "kind": "resistance",
+            "price": 846.42,
+            "distance_pct": 177.387,
+            "touches": 3,
+            "start_time": "2026-07-16T08:00:00+00:00",
+            "end_time": "2026-07-21T08:00:00+00:00",
+            "start_price": 2529.53,
+            "end_price": 2446.07,
+            "slope_per_candle": -2.7820000000000014
+          },
+          {
+            "kind": "resistance",
+            "price": 783.626,
+            "distance_pct": 199.615,
+            "touches": 3,
+            "start_time": "2026-07-01T12:00:00+00:00",
+            "end_time": "2026-07-03T04:00:00+00:00",
+            "start_price": 2748.34,
+            "end_price": 2720.03,
+            "slope_per_candle": -2.8309999999999946
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
+    }
+  },
+  {
+    "record_key": "dbb757e4d5f3ab952b1410b0c86e5d7e8036cb3be9a58376f39726b689d9e08f",
+    "record_type": "multitimeframe_thesis",
+    "pair": "XBTUSDT",
+    "timeframe": "1D+4H",
+    "strategy_version": "friday-price-action-v2",
+    "signal_time": "2026-10-25T04:00:00+00:00",
+    "payload": {
+      "pair": "XBTUSDT",
+      "strategy": "daily-thesis-4h-execution-v1",
+      "generated_at_utc": "2026-10-25T08:01:24.828293+00:00",
+      "state": "WATCH_MAJOR_MOVE",
+      "thesis_direction": "bearish",
+      "daily_thesis": {
+        "timeframe": "1D",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-24T00:00:00+00:00",
+        "close": 80879.8,
+        "ema5": 81627.6363542157,
+        "ema13": 82156.16934754388,
+        "ema8": 81877.85208791927,
+        "ema21": 82337.59790153212,
+        "ema_5_13_spread_pct": -0.6433,
+        "ema_8_21_spread_pct": -0.5584,
+        "stoch_k": 0.0,
+        "stoch_d": 30.92511,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -165.488799,
+        "macd_signal": 123.254323,
+        "macd_hist": -288.743122,
+        "macd_hist_change": "deteriorating",
+        "volume": 102.62522721,
+        "volume_vs_20_candle_average": 0.757938,
+        "nearby_trendlines": [],
+        "confirmed_breaks": []
+      },
+      "four_hour_execution": {
+        "timeframe": "4H",
+        "state": "bearish",
+        "last_closed_candle_utc": "2026-10-25T04:00:00+00:00",
+        "close": 80676.6,
+        "ema5": 80707.92489203795,
+        "ema13": 80988.19550784318,
+        "ema8": 80781.46357292308,
+        "ema21": 81281.8465392932,
+        "ema_5_13_spread_pct": -0.3461,
+        "ema_8_21_spread_pct": -0.6156,
+        "stoch_k": 81.386575,
+        "stoch_d": 68.382894,
+        "stoch_cross_up": false,
+        "stoch_cross_down": false,
+        "macd": -469.945301,
+        "macd_signal": -413.743513,
+        "macd_hist": -56.201788,
+        "macd_hist_change": "improving",
+        "volume": 1.886565,
+        "volume_vs_20_candle_average": 0.067077,
+        "nearby_trendlines": [
+          {
+            "kind": "support",
+            "price": 82391.610345,
+            "distance_pct": -2.082,
+            "touches": 3,
+            "start_time": "2026-07-19T20:00:00+00:00",
+            "end_time": "2026-07-24T16:00:00+00:00",
+            "start_price": 80857.1,
+            "end_price": 80933.3,
+            "slope_per_candle": 2.6275862068964515
+          },
+          {
+            "kind": "support",
+            "price": 82875.8,
+            "distance_pct": -2.654,
+            "touches": 4,
+            "start_time": "2026-07-18T16:00:00+00:00",
+            "end_time": "2026-07-24T16:00:00+00:00",
+            "start_price": 80807.3,
+            "end_price": 80933.3,
+            "slope_per_candle": 3.5
+          },
+          {
+            "kind": "support",
+            "price": 75733.792308,
+            "distance_pct": 6.527,
+            "touches": 3,
+            "start_time": "2026-07-18T16:00:00+00:00",
+            "end_time": "2026-07-20T20:00:00+00:00",
+            "start_price": 80807.3,
+            "end_price": 80695.7,
+            "slope_per_candle": -8.584615384615832
+          },
+          {
+            "kind": "resistance",
+            "price": 73740.344186,
+            "distance_pct": 9.406,
+            "touches": 3,
+            "start_time": "2026-07-15T08:00:00+00:00",
+            "end_time": "2026-07-22T12:00:00+00:00",
+            "start_price": 84151.5,
+            "end_price": 83418.8,
+            "slope_per_candle": -17.03953488372086
+          },
+          {
+            "kind": "resistance",
+            "price": 73552.315385,
+            "distance_pct": 9.686,
+            "touches": 3,
+            "start_time": "2026-07-14T04:00:00+00:00",
+            "end_time": "2026-07-16T08:00:00+00:00",
+            "start_price": 84348.3,
+            "end_price": 84121.2,
+            "slope_per_candle": -17.469230769231217
+          },
+          {
+            "kind": "resistance",
+            "price": 72859.68,
+            "distance_pct": 10.729,
+            "touches": 4,
+            "start_time": "2026-07-14T04:00:00+00:00",
+            "end_time": "2026-07-22T12:00:00+00:00",
+            "start_price": 84348.3,
+            "end_price": 83418.8,
+            "slope_per_candle": -18.59
+          },
+          {
+            "kind": "support",
+            "price": 72604.872632,
+            "distance_pct": 11.117,
+            "touches": 3,
+            "start_time": "2026-07-10T16:00:00+00:00",
+            "end_time": "2026-07-26T12:00:00+00:00",
+            "start_price": 80400.0,
+            "end_price": 79241.1,
+            "slope_per_candle": -12.198947368420992
+          },
+          {
+            "kind": "resistance",
+            "price": 66914.814286,
+            "distance_pct": 20.566,
+            "touches": 4,
+            "start_time": "2026-07-14T04:00:00+00:00",
+            "end_time": "2026-07-21T04:00:00+00:00",
+            "start_price": 84348.3,
+            "end_price": 83163.5,
+            "slope_per_candle": -28.20952380952388
+          }
+        ],
+        "confirmed_breaks": []
+      },
+      "daily_directional_breaks": [],
+      "aligned_4h_breaks": [],
+      "entry1_alert_eligible": false,
+      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+      "limitations": [
+        "Research signal only; it never executes trades.",
+        "Indicator confluence is evidence, not a calibrated probability.",
+        "Trendlines are algorithmic candidates and need walk-forward validation.",
+        "Daily context uses only the latest completed daily candle.",
+        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+      ]
     }
   },
   {
@@ -122394,1492 +123902,6 @@
       "pair": "XRPUSDT",
       "strategy": "daily-thesis-4h-execution-v1",
       "generated_at_utc": "2026-10-24T22:21:10.478850+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 1.29515,
-        "ema5": 1.3165448133821516,
-        "ema13": 1.3399938137109348,
-        "ema8": 1.3239914929244354,
-        "ema21": 1.3619791728857658,
-        "ema_5_13_spread_pct": -1.7499,
-        "ema_8_21_spread_pct": -2.7892,
-        "stoch_k": 59.13409,
-        "stoch_d": 63.93866,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.033588,
-        "macd_signal": -0.028017,
-        "macd_hist": -0.005572,
-        "macd_hist_change": "deteriorating",
-        "volume": 756771.88308522,
-        "volume_vs_20_candle_average": 0.688877,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 2.72999,
-            "distance_pct": -52.558,
-            "touches": 3,
-            "start_time": "2025-01-02T00:00:00+00:00",
-            "end_time": "2025-01-19T00:00:00+00:00",
-            "start_price": 1.01,
-            "end_price": 1.05437,
-            "slope_per_candle": 0.002610000000000001
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 1.28861,
-        "ema5": 1.2853902000628836,
-        "ema13": 1.298945845329562,
-        "ema8": 1.2908604214957908,
-        "ema21": 1.3066146239335756,
-        "ema_5_13_spread_pct": -1.0436,
-        "ema_8_21_spread_pct": -1.2057,
-        "stoch_k": 19.686334,
-        "stoch_d": 6.562111,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.011965,
-        "macd_signal": -0.006893,
-        "macd_hist": -0.005072,
-        "macd_hist_change": "improving",
-        "volume": 58839.06835979,
-        "volume_vs_20_candle_average": 0.253485,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "a068955e11fbcb917620220bc66ebc4d12df394c4c04349ce1efc5af43ef2e16",
-    "record_type": "multitimeframe_thesis",
-    "pair": "SOLUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "SOLUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:21:02.836136+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 102.85,
-        "ema5": 104.40668381830862,
-        "ema13": 106.27235657556443,
-        "ema8": 105.02210582435787,
-        "ema21": 107.78562633257192,
-        "ema_5_13_spread_pct": -1.7556,
-        "ema_8_21_spread_pct": -2.5639,
-        "stoch_k": 40.270701,
-        "stoch_d": 45.980559,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -2.165131,
-        "macd_signal": -1.511564,
-        "macd_hist": -0.653567,
-        "macd_hist_change": "improving",
-        "volume": 11779.46983996,
-        "volume_vs_20_candle_average": 0.562962,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 101.15,
-        "ema5": 101.43226291575259,
-        "ema13": 102.71744929319348,
-        "ema8": 102.00103910287851,
-        "ema21": 103.4107004828122,
-        "ema_5_13_spread_pct": -1.2512,
-        "ema_8_21_spread_pct": -1.3632,
-        "stoch_k": 14.560823,
-        "stoch_d": 4.853608,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -1.0936,
-        "macd_signal": -0.666739,
-        "macd_hist": -0.42686,
-        "macd_hist_change": "improving",
-        "volume": 2837.49649677,
-        "volume_vs_20_candle_average": 1.07718,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "6e32cde2183b4a598f7f424863687846da38bc39624a2c1e93df1da97323fff5",
-    "record_type": "multitimeframe_thesis",
-    "pair": "ETHUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "ETHUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:20:51.982667+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 2387.39,
-        "ema5": 2413.3733396664165,
-        "ema13": 2448.968605763764,
-        "ema8": 2425.2421095446534,
-        "ema21": 2480.636228712868,
-        "ema_5_13_spread_pct": -1.4535,
-        "ema_8_21_spread_pct": -2.2331,
-        "stoch_k": 44.031687,
-        "stoch_d": 55.377001,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -47.459395,
-        "macd_signal": -38.151552,
-        "macd_hist": -9.307843,
-        "macd_hist_change": "improving",
-        "volume": 886.35302776,
-        "volume_vs_20_candle_average": 0.508314,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 2340.06,
-        "ema5": 2349.991068036914,
-        "ema13": 2376.7522677011957,
-        "ema8": 2362.2401214242427,
-        "ema21": 2390.7977299651116,
-        "ema_5_13_spread_pct": -1.126,
-        "ema_8_21_spread_pct": -1.1945,
-        "stoch_k": 17.465627,
-        "stoch_d": 5.821876,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -22.302024,
-        "macd_signal": -13.770714,
-        "macd_hist": -8.53131,
-        "macd_hist_change": "improving",
-        "volume": 140.64360494,
-        "volume_vs_20_candle_average": 0.608076,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 2704.684906,
-            "distance_pct": -13.481,
-            "touches": 3,
-            "start_time": "2026-07-17T00:00:00+00:00",
-            "end_time": "2026-07-25T20:00:00+00:00",
-            "start_price": 2318.58,
-            "end_price": 2352.8,
-            "slope_per_candle": 0.6456603773584954
-          },
-          {
-            "kind": "support",
-            "price": 1837.419565,
-            "distance_pct": 27.356,
-            "touches": 3,
-            "start_time": "2026-07-22T00:00:00+00:00",
-            "end_time": "2026-07-25T20:00:00+00:00",
-            "start_price": 2374.55,
-            "end_price": 2352.8,
-            "slope_per_candle": -0.9456521739130435
-          },
-          {
-            "kind": "resistance",
-            "price": 854.766,
-            "distance_pct": 173.766,
-            "touches": 3,
-            "start_time": "2026-07-16T08:00:00+00:00",
-            "end_time": "2026-07-21T08:00:00+00:00",
-            "start_price": 2529.53,
-            "end_price": 2446.07,
-            "slope_per_candle": -2.7820000000000014
-          },
-          {
-            "kind": "resistance",
-            "price": 792.119,
-            "distance_pct": 195.418,
-            "touches": 3,
-            "start_time": "2026-07-01T12:00:00+00:00",
-            "end_time": "2026-07-03T04:00:00+00:00",
-            "start_price": 2748.34,
-            "end_price": 2720.03,
-            "slope_per_candle": -2.8309999999999946
-          },
-          {
-            "kind": "resistance",
-            "price": 35.969149,
-            "distance_pct": 6405.742,
-            "touches": 3,
-            "start_time": "2026-07-08T12:00:00+00:00",
-            "end_time": "2026-07-16T08:00:00+00:00",
-            "start_price": 2724.21,
-            "end_price": 2529.53,
-            "slope_per_candle": -4.142127659574465
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "53c8655a5dd4c404fce12d8a4b6959abf950eb9169a6d19c38062549bd1b133b",
-    "record_type": "multitimeframe_thesis",
-    "pair": "XBTUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "XBTUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:20:42.947427+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 81172.2,
-        "ema5": 82001.55453132353,
-        "ema13": 82368.89757213452,
-        "ema8": 82163.00982732477,
-        "ema21": 82483.37769168534,
-        "ema_5_13_spread_pct": -0.446,
-        "ema_8_21_spread_pct": -0.3884,
-        "stoch_k": 33.333333,
-        "stoch_d": 51.996373,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -53.53356,
-        "macd_signal": 195.440104,
-        "macd_hist": -248.973664,
-        "macd_hist_change": "deteriorating",
-        "volume": 173.35664496,
-        "volume_vs_20_candle_average": 1.308637,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 80505.6,
-        "ema5": 80543.39651062807,
-        "ema13": 81101.93268143616,
-        "ema8": 80774.1549407024,
-        "ema21": 81441.72214379926,
-        "ema_5_13_spread_pct": -0.6887,
-        "ema_8_21_spread_pct": -0.8197,
-        "stoch_k": 19.239514,
-        "stoch_d": 6.413171,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -531.144245,
-        "macd_signal": -348.241901,
-        "macd_hist": -182.902344,
-        "macd_hist_change": "improving",
-        "volume": 37.35738576,
-        "volume_vs_20_candle_average": 1.097411,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 82383.727586,
-            "distance_pct": -2.28,
-            "touches": 3,
-            "start_time": "2026-07-19T20:00:00+00:00",
-            "end_time": "2026-07-24T16:00:00+00:00",
-            "start_price": 80857.1,
-            "end_price": 80933.3,
-            "slope_per_candle": 2.6275862068964515
-          },
-          {
-            "kind": "support",
-            "price": 82865.3,
-            "distance_pct": -2.848,
-            "touches": 4,
-            "start_time": "2026-07-18T16:00:00+00:00",
-            "end_time": "2026-07-24T16:00:00+00:00",
-            "start_price": 80807.3,
-            "end_price": 80933.3,
-            "slope_per_candle": 3.5
-          },
-          {
-            "kind": "support",
-            "price": 75759.546154,
-            "distance_pct": 6.265,
-            "touches": 3,
-            "start_time": "2026-07-18T16:00:00+00:00",
-            "end_time": "2026-07-20T20:00:00+00:00",
-            "start_price": 80807.3,
-            "end_price": 80695.7,
-            "slope_per_candle": -8.584615384615832
-          },
-          {
-            "kind": "resistance",
-            "price": 73791.462791,
-            "distance_pct": 9.099,
-            "touches": 3,
-            "start_time": "2026-07-15T08:00:00+00:00",
-            "end_time": "2026-07-22T12:00:00+00:00",
-            "start_price": 84151.5,
-            "end_price": 83418.8,
-            "slope_per_candle": -17.03953488372086
-          },
-          {
-            "kind": "resistance",
-            "price": 73604.723077,
-            "distance_pct": 9.376,
-            "touches": 3,
-            "start_time": "2026-07-14T04:00:00+00:00",
-            "end_time": "2026-07-16T08:00:00+00:00",
-            "start_price": 84348.3,
-            "end_price": 84121.2,
-            "slope_per_candle": -17.469230769231217
-          },
-          {
-            "kind": "resistance",
-            "price": 72915.45,
-            "distance_pct": 10.41,
-            "touches": 4,
-            "start_time": "2026-07-14T04:00:00+00:00",
-            "end_time": "2026-07-22T12:00:00+00:00",
-            "start_price": 84348.3,
-            "end_price": 83418.8,
-            "slope_per_candle": -18.59
-          },
-          {
-            "kind": "resistance",
-            "price": 66999.442857,
-            "distance_pct": 20.159,
-            "touches": 4,
-            "start_time": "2026-07-14T04:00:00+00:00",
-            "end_time": "2026-07-21T04:00:00+00:00",
-            "start_price": 84348.3,
-            "end_price": 83163.5,
-            "slope_per_candle": -28.20952380952388
-          },
-          {
-            "kind": "resistance",
-            "price": 66988.528571,
-            "distance_pct": 20.178,
-            "touches": 3,
-            "start_time": "2026-07-15T08:00:00+00:00",
-            "end_time": "2026-07-21T04:00:00+00:00",
-            "start_price": 84151.5,
-            "end_price": 83163.5,
-            "slope_per_candle": -28.228571428571428
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "f1e81a5f1bf9c3152d095e505c7514fd986d62fb719da55e1d9f4d47113068d6",
-    "record_type": "multitimeframe_thesis",
-    "pair": "LITUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "LITUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:13:03.028174+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 3.1514,
-        "ema5": 3.3160696903812736,
-        "ema13": 3.3722861825966324,
-        "ema8": 3.3217759551067236,
-        "ema21": 3.4950555532435983,
-        "ema_5_13_spread_pct": -1.667,
-        "ema_8_21_spread_pct": -4.9578,
-        "stoch_k": 68.506925,
-        "stoch_d": 74.430806,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.201552,
-        "macd_signal": -0.228443,
-        "macd_hist": 0.026891,
-        "macd_hist_change": "deteriorating",
-        "volume": 3769063.82,
-        "volume_vs_20_candle_average": 1.110835,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 3.2087,
-        "ema5": 3.158148197794829,
-        "ema13": 3.2547525059349938,
-        "ema8": 3.1957097114473294,
-        "ema21": 3.2975377181108714,
-        "ema_5_13_spread_pct": -2.9681,
-        "ema_8_21_spread_pct": -3.088,
-        "stoch_k": 12.155004,
-        "stoch_d": 4.051668,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.060774,
-        "macd_signal": -0.010851,
-        "macd_hist": -0.049923,
-        "macd_hist_change": "improving",
-        "volume": 516337.029,
-        "volume_vs_20_candle_average": 0.640336,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "7aa35222fac9acb16c4becd45e8d6a255ea0549bf42f803b4f399d19211fb36c",
-    "record_type": "multitimeframe_thesis",
-    "pair": "SUIUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "SUIUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:54.978285+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 0.9607,
-        "ema5": 0.9895571654358613,
-        "ema13": 1.0192262489885728,
-        "ema8": 1.0018362385269575,
-        "ema21": 1.0300107338985451,
-        "ema_5_13_spread_pct": -2.9109,
-        "ema_8_21_spread_pct": -2.7354,
-        "stoch_k": 14.303847,
-        "stoch_d": 24.766765,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.011225,
-        "macd_signal": 0.006662,
-        "macd_hist": -0.017887,
-        "macd_hist_change": "deteriorating",
-        "volume": 12705716.4118,
-        "volume_vs_20_candle_average": 0.814401,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 0.9357,
-        "ema5": 0.9440136588656225,
-        "ema13": 0.9636296169157885,
-        "ema8": 0.9526541545640685,
-        "ema21": 0.9748352263029065,
-        "ema_5_13_spread_pct": -2.0356,
-        "ema_8_21_spread_pct": -2.2754,
-        "stoch_k": 8.674953,
-        "stoch_d": 3.478107,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.01795,
-        "macd_signal": -0.011975,
-        "macd_hist": -0.005975,
-        "macd_hist_change": "improving",
-        "volume": 1062096.2419,
-        "volume_vs_20_candle_average": 0.526346,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "e73718c211bbbe54fabf81991bcf743d670f4f11a19820c842450831eb6bed4f",
-    "record_type": "multitimeframe_thesis",
-    "pair": "NEARUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "NEARUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:46.905027+00:00",
-      "state": "WATCH_NEUTRAL",
-      "thesis_direction": "neutral",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "mixed",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 4.688,
-        "ema5": 4.899750038506127,
-        "ema13": 4.967619259614409,
-        "ema8": 4.944762057107185,
-        "ema21": 4.894897409167579,
-        "ema_5_13_spread_pct": -1.3662,
-        "ema_8_21_spread_pct": 1.0187,
-        "stoch_k": 10.916105,
-        "stoch_d": 11.970541,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": 0.164018,
-        "macd_signal": 0.271162,
-        "macd_hist": -0.107144,
-        "macd_hist_change": "deteriorating",
-        "volume": 4147516.72585411,
-        "volume_vs_20_candle_average": 0.636801,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 4.461,
-        "ema5": 4.522000565612505,
-        "ema13": 4.685446165386132,
-        "ema8": 4.593695617331441,
-        "ema21": 4.773492156842947,
-        "ema_5_13_spread_pct": -3.4884,
-        "ema_8_21_spread_pct": -3.7666,
-        "stoch_k": 6.286429,
-        "stoch_d": 2.095476,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.138404,
-        "macd_signal": -0.082895,
-        "macd_hist": -0.055509,
-        "macd_hist_change": "improving",
-        "volume": 941503.9540115,
-        "volume_vs_20_candle_average": 1.032973,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "96b01983aeb404ce0445e2bcec31912e590219f8bbe9e6f5926bebdc86f4cad3",
-    "record_type": "multitimeframe_thesis",
-    "pair": "ZECUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "ZECUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:38.709884+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 1182.52,
-        "ema5": 1212.0627753926542,
-        "ema13": 1218.2374433604584,
-        "ema8": 1210.2865386598316,
-        "ema21": 1236.2198187859585,
-        "ema_5_13_spread_pct": -0.5069,
-        "ema_8_21_spread_pct": -2.0978,
-        "stoch_k": 62.01161,
-        "stoch_d": 72.891995,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -24.428057,
-        "macd_signal": -24.939791,
-        "macd_hist": 0.511734,
-        "macd_hist_change": "deteriorating",
-        "volume": 45193.04905,
-        "volume_vs_20_candle_average": 0.951722,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 1190.19,
-        "ema5": 1174.864202681592,
-        "ema13": 1195.8126571530956,
-        "ema8": 1183.2525140924117,
-        "ema21": 1204.5756747722517,
-        "ema_5_13_spread_pct": -1.7518,
-        "ema_8_21_spread_pct": -1.7702,
-        "stoch_k": 21.298071,
-        "stoch_d": 7.099357,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -12.212016,
-        "macd_signal": -1.272545,
-        "macd_hist": -10.939471,
-        "macd_hist_change": "improving",
-        "volume": 3534.62921,
-        "volume_vs_20_candle_average": 0.479498,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "646942732910a0f2376b0a8486eec46f9642ea2c3da0ede9e41839aef7118551",
-    "record_type": "multitimeframe_thesis",
-    "pair": "LINKUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "LINKUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:30.581645+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 11.83151,
-        "ema5": 12.079597727441149,
-        "ema13": 12.38046806733944,
-        "ema8": 12.1909604447366,
-        "ema21": 12.577407086174366,
-        "ema_5_13_spread_pct": -2.4302,
-        "ema_8_21_spread_pct": -3.0725,
-        "stoch_k": 23.366195,
-        "stoch_d": 31.925821,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.277195,
-        "macd_signal": -0.155171,
-        "macd_hist": -0.122024,
-        "macd_hist_change": "improving",
-        "volume": 26174.65633994,
-        "volume_vs_20_candle_average": 0.91605,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 11.5453,
-        "ema5": 11.614970702845236,
-        "ema13": 11.81834473384961,
-        "ema8": 11.706486529544572,
-        "ema21": 11.925397871892303,
-        "ema_5_13_spread_pct": -1.7208,
-        "ema_8_21_spread_pct": -1.8357,
-        "stoch_k": 9.671458,
-        "stoch_d": 3.518662,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.170931,
-        "macd_signal": -0.10456,
-        "macd_hist": -0.066371,
-        "macd_hist_change": "improving",
-        "volume": 3972.75653751,
-        "volume_vs_20_candle_average": 0.915938,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 8.129938,
-            "distance_pct": 42.01,
-            "touches": 3,
-            "start_time": "2026-07-10T16:00:00+00:00",
-            "end_time": "2026-07-19T20:00:00+00:00",
-            "start_price": 12.10355,
-            "end_price": 11.75992,
-            "slope_per_candle": -0.0062478181818182
-          },
-          {
-            "kind": "resistance",
-            "price": -4.397619,
-            "distance_pct": 362.535,
-            "touches": 4,
-            "start_time": "2026-07-01T00:00:00+00:00",
-            "end_time": "2026-07-18T08:00:00+00:00",
-            "start_price": 15.76535,
-            "end_price": 12.74381,
-            "slope_per_candle": -0.02905326923076923
-          },
-          {
-            "kind": "resistance",
-            "price": -4.220187,
-            "distance_pct": 373.573,
-            "touches": 3,
-            "start_time": "2026-07-01T00:00:00+00:00",
-            "end_time": "2026-07-21T04:00:00+00:00",
-            "start_price": 15.76535,
-            "end_price": 12.28084,
-            "slope_per_candle": -0.028797603305785124
-          },
-          {
-            "kind": "resistance",
-            "price": -3.485947,
-            "distance_pct": 431.196,
-            "touches": 3,
-            "start_time": "2026-07-16T08:00:00+00:00",
-            "end_time": "2026-07-21T04:00:00+00:00",
-            "start_price": 13.07881,
-            "end_price": 12.28084,
-            "slope_per_candle": -0.027516206896551765
-          },
-          {
-            "kind": "resistance",
-            "price": 0.9082,
-            "distance_pct": 1171.229,
-            "touches": 3,
-            "start_time": "2026-07-04T04:00:00+00:00",
-            "end_time": "2026-07-08T12:00:00+00:00",
-            "start_price": 14.65094,
-            "end_price": 14.12159,
-            "slope_per_candle": -0.020359615384615417
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "a0f99835f64cd20014d5b241a2d3de8edadc20d541e6e0527fcb17736d0f4fea",
-    "record_type": "multitimeframe_thesis",
-    "pair": "DOGEUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "DOGEUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:20.992418+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 0.07861,
-        "ema5": 0.07982180583350353,
-        "ema13": 0.08181894014815529,
-        "ema8": 0.08049033907627154,
-        "ema21": 0.08362086751059197,
-        "ema_5_13_spread_pct": -2.4409,
-        "ema_8_21_spread_pct": -3.7437,
-        "stoch_k": 34.839527,
-        "stoch_d": 44.716529,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.0028,
-        "macd_signal": -0.002348,
-        "macd_hist": -0.000453,
-        "macd_hist_change": "improving",
-        "volume": 4581668.27908424,
-        "volume_vs_20_candle_average": 0.933108,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 0.136806,
-            "distance_pct": -42.539,
-            "touches": 3,
-            "start_time": "2025-02-07T00:00:00+00:00",
-            "end_time": "2025-02-18T00:00:00+00:00",
-            "start_price": 0.06771,
-            "end_price": 0.06893,
-            "slope_per_candle": 0.00011090909090909081
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 0.07716,
-        "ema5": 0.0773642222770236,
-        "ema13": 0.07841618991039298,
-        "ema8": 0.07784281004812885,
-        "ema21": 0.07896778019036407,
-        "ema_5_13_spread_pct": -1.3415,
-        "ema_8_21_spread_pct": -1.4246,
-        "stoch_k": 15.934737,
-        "stoch_d": 6.702772,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.000884,
-        "macd_signal": -0.000548,
-        "macd_hist": -0.000336,
-        "macd_hist_change": "improving",
-        "volume": 4923602.72872678,
-        "volume_vs_20_candle_average": 5.653185,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "863a28f66020def92a04b149865775330de070100922f22aecbde585309bbe65",
-    "record_type": "multitimeframe_thesis",
-    "pair": "HYPEUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "HYPEUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:11.015137+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 77.145,
-        "ema5": 78.57722610630952,
-        "ema13": 80.60507419385792,
-        "ema8": 79.32867491199946,
-        "ema21": 82.15960088706748,
-        "ema_5_13_spread_pct": -2.5158,
-        "ema_8_21_spread_pct": -3.4456,
-        "stoch_k": 19.316754,
-        "stoch_d": 29.320641,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -2.342115,
-        "macd_signal": -1.749766,
-        "macd_hist": -0.592349,
-        "macd_hist_change": "improving",
-        "volume": 189587.163,
-        "volume_vs_20_candle_average": 0.799217,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 76.176,
-        "ema5": 76.15402938079872,
-        "ema13": 77.07021871897756,
-        "ema8": 76.52989452874469,
-        "ema21": 77.67568706851131,
-        "ema_5_13_spread_pct": -1.1888,
-        "ema_8_21_spread_pct": -1.4751,
-        "stoch_k": 17.857505,
-        "stoch_d": 7.050481,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.982049,
-        "macd_signal": -0.73142,
-        "macd_hist": -0.250629,
-        "macd_hist_change": "improving",
-        "volume": 26678.9258,
-        "volume_vs_20_candle_average": 0.713105,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 73.557925,
-            "distance_pct": 3.559,
-            "touches": 3,
-            "start_time": "2026-09-10T00:00:00+00:00",
-            "end_time": "2026-09-18T20:00:00+00:00",
-            "start_price": 84.91,
-            "end_price": 82.665,
-            "slope_per_candle": -0.042358490566037556
-          },
-          {
-            "kind": "support",
-            "price": 66.465494,
-            "distance_pct": 14.61,
-            "touches": 3,
-            "start_time": "2026-09-10T00:00:00+00:00",
-            "end_time": "2026-09-23T04:00:00+00:00",
-            "start_price": 84.91,
-            "end_price": 79.473,
-            "slope_per_candle": -0.06882278481012655
-          },
-          {
-            "kind": "resistance",
-            "price": 52.2417,
-            "distance_pct": 45.815,
-            "touches": 3,
-            "start_time": "2026-09-16T00:00:00+00:00",
-            "end_time": "2026-09-29T08:00:00+00:00",
-            "start_price": 95.269,
-            "end_price": 80.432,
-            "slope_per_candle": -0.18546250000000003
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "a64564fa64778592b0963d9339cc65c985291c5e7e1b109e20f4a6e064e0cfd9",
-    "record_type": "multitimeframe_thesis",
-    "pair": "VIRTUALUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "VIRTUALUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:12:02.965498+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 0.6413,
-        "ema5": 0.6591745329390176,
-        "ema13": 0.6807772376134833,
-        "ema8": 0.6671251240420699,
-        "ema21": 0.6958429969095664,
-        "ema_5_13_spread_pct": -3.1732,
-        "ema_8_21_spread_pct": -4.1271,
-        "stoch_k": 28.100563,
-        "stoch_d": 38.154037,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.022403,
-        "macd_signal": -0.01476,
-        "macd_hist": -0.007643,
-        "macd_hist_change": "deteriorating",
-        "volume": 35372.89835,
-        "volume_vs_20_candle_average": 0.739083,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 0.6121,
-        "ema5": 0.6252158139627986,
-        "ema13": 0.6414094085174334,
-        "ema8": 0.6328759863245395,
-        "ema21": 0.6492933420096869,
-        "ema_5_13_spread_pct": -2.5247,
-        "ema_8_21_spread_pct": -2.5285,
-        "stoch_k": 0.0,
-        "stoch_d": 1.768265,
-        "stoch_cross_up": false,
-        "stoch_cross_down": false,
-        "macd": -0.012505,
-        "macd_signal": -0.007232,
-        "macd_hist": -0.005274,
-        "macd_hist_change": "deteriorating",
-        "volume": 0.0,
-        "volume_vs_20_candle_average": 0.0,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "8e5a7a04db4736987fce7b7b199062b4a588ac7c36b7e16aabcd539801c85976",
-    "record_type": "multitimeframe_thesis",
-    "pair": "BNBUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "BNBUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:11:55.150127+00:00",
-      "state": "WATCH_STRUCTURE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 739.59,
-        "ema5": 736.6229089361325,
-        "ema13": 738.2456280159056,
-        "ema8": 736.1530203587904,
-        "ema21": 741.8882889697236,
-        "ema_5_13_spread_pct": -0.2198,
-        "ema_8_21_spread_pct": -0.7731,
-        "stoch_k": 78.684471,
-        "stoch_d": 73.640216,
-        "stoch_cross_up": false,
-        "stoch_cross_down": false,
-        "macd": -4.944109,
-        "macd_signal": -4.368215,
-        "macd_hist": -0.575894,
-        "macd_hist_change": "improving",
-        "volume": 33.7789,
-        "volume_vs_20_candle_average": 0.372597,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 1348.182,
-            "distance_pct": -45.142,
-            "touches": 3,
-            "start_time": "2025-07-20T00:00:00+00:00",
-            "end_time": "2025-08-14T00:00:00+00:00",
-            "start_price": 557.35,
-            "end_price": 600.33,
-            "slope_per_candle": 1.7192000000000007
-          },
-          {
-            "kind": "support",
-            "price": 1354.433721,
-            "distance_pct": -45.395,
-            "touches": 4,
-            "start_time": "2025-07-20T00:00:00+00:00",
-            "end_time": "2025-10-14T00:00:00+00:00",
-            "start_price": 557.35,
-            "end_price": 706.37,
-            "slope_per_candle": 1.7327906976744183
-          },
-          {
-            "kind": "support",
-            "price": 1358.680732,
-            "distance_pct": -45.566,
-            "touches": 3,
-            "start_time": "2025-07-24T00:00:00+00:00",
-            "end_time": "2025-10-14T00:00:00+00:00",
-            "start_price": 563.35,
-            "end_price": 706.37,
-            "slope_per_candle": 1.7441463414634144
-          },
-          {
-            "kind": "resistance",
-            "price": 1432.261818,
-            "distance_pct": -48.362,
-            "touches": 3,
-            "start_time": "2025-07-17T00:00:00+00:00",
-            "end_time": "2025-08-08T00:00:00+00:00",
-            "start_price": 579.5,
-            "end_price": 620.02,
-            "slope_per_candle": 1.841818181818181
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 727.81,
-        "ema5": 730.5812391085045,
-        "ema13": 735.0307878502216,
-        "ema8": 733.0687019288183,
-        "ema21": 735.7499744018163,
-        "ema_5_13_spread_pct": -0.6054,
-        "ema_8_21_spread_pct": -0.3644,
-        "stoch_k": 8.862106,
-        "stoch_d": 14.828039,
-        "stoch_cross_up": false,
-        "stoch_cross_down": false,
-        "macd": -0.880222,
-        "macd_signal": 1.234648,
-        "macd_hist": -2.11487,
-        "macd_hist_change": "deteriorating",
-        "volume": 2.21189,
-        "volume_vs_20_candle_average": 0.241506,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 691.538571,
-            "distance_pct": 5.245,
-            "touches": 3,
-            "start_time": "2026-07-03T04:00:00+00:00",
-            "end_time": "2026-07-09T00:00:00+00:00",
-            "start_price": 763.53,
-            "end_price": 759.83,
-            "slope_per_candle": -0.10571428571428376
-          },
-          {
-            "kind": "resistance",
-            "price": 682.618,
-            "distance_pct": 6.62,
-            "touches": 3,
-            "start_time": "2026-07-17T16:00:00+00:00",
-            "end_time": "2026-07-21T20:00:00+00:00",
-            "start_price": 734.89,
-            "end_price": 732.69,
-            "slope_per_candle": -0.08799999999999727
-          },
-          {
-            "kind": "resistance",
-            "price": 679.888824,
-            "distance_pct": 7.048,
-            "touches": 3,
-            "start_time": "2026-07-14T04:00:00+00:00",
-            "end_time": "2026-07-25T12:00:00+00:00",
-            "start_price": 758.03,
-            "end_price": 749.39,
-            "slope_per_candle": -0.12705882352941156
-          },
-          {
-            "kind": "resistance",
-            "price": 592.759785,
-            "distance_pct": 22.783,
-            "touches": 3,
-            "start_time": "2026-07-10T00:00:00+00:00",
-            "end_time": "2026-07-25T12:00:00+00:00",
-            "start_price": 776.02,
-            "end_price": 749.39,
-            "slope_per_candle": -0.28634408602150535
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "7a05d6ca58ecc9992ee5e1ff0313cec1a37503fcf220bd1e36c8be3edb63fd03",
-    "record_type": "multitimeframe_thesis",
-    "pair": "AVAXUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "AVAXUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:11:44.881291+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 9.062,
-        "ema5": 9.380132951470383,
-        "ema13": 9.764103070899695,
-        "ema8": 9.551666299122651,
-        "ema21": 9.909989275861198,
-        "ema_5_13_spread_pct": -3.9325,
-        "ema_8_21_spread_pct": -3.6158,
-        "stoch_k": 1.367495,
-        "stoch_d": 3.719491,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.177876,
-        "macd_signal": 0.018946,
-        "macd_hist": -0.196822,
-        "macd_hist_change": "deteriorating",
-        "volume": 22298.7200705,
-        "volume_vs_20_candle_average": 0.86031,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 8.914,
-        "ema5": 8.927338422752323,
-        "ema13": 9.064850931675801,
-        "ema8": 8.979720146690527,
-        "ema21": 9.182193953722074,
-        "ema_5_13_spread_pct": -1.517,
-        "ema_8_21_spread_pct": -2.2051,
-        "stoch_k": 18.845112,
-        "stoch_d": 8.046256,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.196541,
-        "macd_signal": -0.17657,
-        "macd_hist": -0.019971,
-        "macd_hist_change": "improving",
-        "volume": 2248.38946058,
-        "volume_vs_20_candle_average": 0.630111,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "f97894fa8310919394afc1efa731f93da939d0dd77774204355eb41e1a9b539f",
-    "record_type": "multitimeframe_thesis",
-    "pair": "ADAUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "ADAUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:11:34.827168+00:00",
-      "state": "WATCH_MAJOR_MOVE",
-      "thesis_direction": "bearish",
-      "daily_thesis": {
-        "timeframe": "1D",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-23T00:00:00+00:00",
-        "close": 0.210499,
-        "ema5": 0.21691547393476482,
-        "ema13": 0.22498039685210658,
-        "ema8": 0.22028380575141907,
-        "ema21": 0.2291811583206856,
-        "ema_5_13_spread_pct": -3.5847,
-        "ema_8_21_spread_pct": -3.8822,
-        "stoch_k": 10.224027,
-        "stoch_d": 14.899049,
-        "stoch_cross_up": false,
-        "stoch_cross_down": true,
-        "macd": -0.005968,
-        "macd_signal": -0.002561,
-        "macd_hist": -0.003407,
-        "macd_hist_change": "deteriorating",
-        "volume": 2129793.26119953,
-        "volume_vs_20_candle_average": 0.639444,
-        "nearby_trendlines": [
-          {
-            "kind": "support",
-            "price": 0.567373,
-            "distance_pct": -62.899,
-            "touches": 3,
-            "start_time": "2025-02-24T00:00:00+00:00",
-            "end_time": "2025-04-26T00:00:00+00:00",
-            "start_price": 0.171337,
-            "end_price": 0.211202,
-            "slope_per_candle": 0.0006535245901639346
-          }
-        ],
-        "confirmed_breaks": []
-      },
-      "four_hour_execution": {
-        "timeframe": "4H",
-        "state": "bearish",
-        "last_closed_candle_utc": "2026-10-24T16:00:00+00:00",
-        "close": 0.206374,
-        "ema5": 0.20753993446604235,
-        "ema13": 0.2112822639495679,
-        "ema8": 0.20915390029361275,
-        "ema21": 0.21364628265659774,
-        "ema_5_13_spread_pct": -1.7712,
-        "ema_8_21_spread_pct": -2.1027,
-        "stoch_k": 13.562004,
-        "stoch_d": 6.056805,
-        "stoch_cross_up": true,
-        "stoch_cross_down": false,
-        "macd": -0.003879,
-        "macd_signal": -0.002906,
-        "macd_hist": -0.000973,
-        "macd_hist_change": "improving",
-        "volume": 594376.44578714,
-        "volume_vs_20_candle_average": 1.56777,
-        "nearby_trendlines": [],
-        "confirmed_breaks": []
-      },
-      "daily_directional_breaks": [],
-      "aligned_4h_breaks": [],
-      "entry1_alert_eligible": false,
-      "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
-      "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
-      "limitations": [
-        "Research signal only; it never executes trades.",
-        "Indicator confluence is evidence, not a calibrated probability.",
-        "Trendlines are algorithmic candidates and need walk-forward validation.",
-        "Daily context uses only the latest completed daily candle.",
-        "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
-      ]
-    }
-  },
-  {
-    "record_key": "77a04d0f3ecc00723cc4bccc6da924680471f288ba372d43e179fed6bed2de47",
-    "record_type": "multitimeframe_thesis",
-    "pair": "XRPUSDT",
-    "timeframe": "1D+4H",
-    "strategy_version": "friday-price-action-v2",
-    "signal_time": "2026-10-24T16:00:00+00:00",
-    "payload": {
-      "pair": "XRPUSDT",
-      "strategy": "daily-thesis-4h-execution-v1",
-      "generated_at_utc": "2026-10-24T22:11:25.272262+00:00",
       "state": "WATCH_MAJOR_MOVE",
       "thesis_direction": "bearish",
       "daily_thesis": {
