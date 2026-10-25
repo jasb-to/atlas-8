@@ -304,22 +304,22 @@
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "low",
             "supporting_evidence": [
-              "structural_trade_plans.long meets deterministic eligibility and satisfies the >=1.5R minimum requirement with 1.941 reward_risk.",
-              "exhaustion_context notes lower_wick_rejection as bullish evidence.",
-              "Daily bias is bearish, but structural_trade_plans.long is explicitly marked eligible within the candidate universe."
+              "structural_trade_plans.long is marked eligible with a reward_risk of 1.941, meeting the minimum 1.5R threshold",
+              "exhaustion_context shows lower_wick_rejection as mixed early reversal evidence",
+              "EMA8 (3.2223) is close to current close (3.2461), showing short-term stabilization"
             ],
             "counter_evidence": [
-              "Rule decision notes no confirmed 0.382/0.5/0.618 pullback zone touched yet.",
-              "EMA 8 (3.2223) and EMA 21 (3.2845) show a mixed or bearish short-term trend alignment with close at 3.2461.",
-              "Short-term rule decision explicitly outlines a NO_TRADE state due to lack of a confirmed pullback level."
+              "daily_bias is explicitly bearish across multiple modules",
+              "EMA8 is below EMA21, maintaining a bearish moving average alignment on the 4h timeframe",
+              "rule_decision evaluated a short setup and noted no confirmed pullback zone was touched"
             ],
             "missing_evidence": [
-              "Confirmed candle-close retest of required Fibonacci retracement support areas.",
-              "Fresh Stoch-RSI extreme zone crossover for the momentum reversal candidate."
+              "absence of a confirmed bullish structural break or continuation pattern",
+              "lack of stoch_bullish_cross to confirm momentum reversal"
             ],
-            "rationale": "While structural_trade_plans.long meets eligibility and the required >=1.5R threshold, the overarching rule decision indicates a NO_TRADE state due to lack of a confirmed pullback level. Therefore, caution is warranted as the setup awaits proper structural validation."
+            "rationale": "While structural_trade_plans.long meets the mechanical eligibility and 1.5R gate, the broader context remains bearish with negative EMA alignment and conflicting rule-decision framework leaning short. Therefore, assessment is caution with low confidence."
           },
-          "latency_ms": 1665,
+          "latency_ms": 1773,
           "error": null
         },
         "momentum_reversal": {
@@ -343,7 +343,7 @@
         "multitimeframe_scan": {
           "pair": "LITUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:57.261854+00:00",
+          "generated_at_utc": "2026-10-25T09:04:00.138632+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -705,26 +705,26 @@
           "provider": "gemini",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
+            "assessment": "caution",
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "low",
             "supporting_evidence": [
-              "structural_trade_plans.long is marked eligible with no blockers",
-              "reward_risk ratio is 8.2468, well above the 1.5 minimum threshold",
-              "daily bias is bearish but price is near the swing low providing a clear structural reference point"
+              "structural_trade_plans.long is marked eligible with zero blockers",
+              "structural_trade_plans.long reward_risk of 8.25 exceeds the minimum 1.5 threshold",
+              "daily_bias is bearish but structural_trade_plans.long offers a counter-trend reversal setup at confirmed swing low 0.9117 with entry at 0.9187"
             ],
             "counter_evidence": [
-              "rule_decision indicates a NO_TRADE state due to lack of a confirmed pullback zone touch",
-              "daily bias is bearish and price is trading below both ema8_4h and ema21_4h",
-              "exhaustion_context indicates possible bearish turn with RSI fading and closing below previous candle low"
+              "rule_decision indicates NO_TRADE due to un-touched pullback zones and rolling low concerns",
+              "daily_bias is bearish and EMA8 is below EMA21, presenting trend headwinds for any long trade",
+              "exhaustion context points to possible bearish turn with RSI fading and closing below previous candle low"
             ],
             "missing_evidence": [
-              "confirmed pullback to a 0.382/0.5/0.618 Fib zone to validate entry execution",
-              "bullish momentum confirmation on higher timeframes"
+              "touched and confirmed Fibonacci retracement pullback zone prior to entry",
+              "clear bullish reversal candle pattern at support"
             ],
-            "rationale": "Although structural_trade_plans.long is mathematically eligible with an attractive reward-to-risk ratio, the broader market context shows a bearish daily bias, declining EMAs, and a NO_TRADE execution state due to the absence of a verified pullback entry. Therefore, caution and a mixed assessment are warranted."
+            "rationale": "While structural_trade_plans.long meets deterministic eligibility and high reward-to-risk criteria, the broader context shows a bearish daily bias, bearish momentum expansion, and lack of a touched pullback zone as highlighted by the rule decision. Therefore, caution is warranted."
           },
-          "latency_ms": 1679,
+          "latency_ms": 4039,
           "error": null
         },
         "momentum_reversal": {
@@ -748,7 +748,7 @@
         "multitimeframe_scan": {
           "pair": "SUIUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:48.427476+00:00",
+          "generated_at_utc": "2026-10-25T09:03:50.785191+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1101,31 +1101,13 @@
           "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
         },
         "model_review": {
-          "status": "ok",
-          "provider": "gemini",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "caution",
-            "priority_candidate": "structural_trade_plans.long",
-            "confidence": "low",
-            "supporting_evidence": [
-              "structural_trade_plans.long meets the minimum reward-to-risk ratio requirement of 1.5 with a value of 1.71",
-              "structural_trade_plans.long is marked eligible in the candidate universe with no blockers",
-              "RSI14 is at 31.84, suggesting approaching oversold conditions"
-            ],
-            "counter_evidence": [
-              "Daily bias is explicitly bearish",
-              "Price is below both the 4h 8 EMA and 21 EMA",
-              "Exhaustion context indicates mixed early reversal evidence with a recent close below the previous candle low"
-            ],
-            "missing_evidence": [
-              "Confirmed bullish structural break or reversal confirmation candle",
-              "Stoch RSI bullish crossover for momentum validation"
-            ],
-            "rationale": "Although structural_trade_plans.long meets eligibility and risk-reward gates, the overall trend context is strongly bearish with price trading below short-term EMAs. Advancing a long trade carries high false-break risk without concrete bullish confirmation."
-          },
-          "latency_ms": 1512,
-          "error": null
+          "status": "error",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": 5114,
+          "error_category": "quota_or_billing",
+          "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
         "momentum_reversal": {
           "strategy": "stoch-rsi-structural-reversal-v1",
@@ -1148,7 +1130,7 @@
         "multitimeframe_scan": {
           "pair": "NEARUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:39.446577+00:00",
+          "generated_at_utc": "2026-10-25T09:03:39.151071+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1511,25 +1493,24 @@
           "response": {
             "assessment": "mixed",
             "priority_candidate": "structural_trade_plans.short",
-            "confidence": "medium",
+            "confidence": "low",
             "supporting_evidence": [
-              "Daily bias is explicitly noted as bearish.",
-              "structural_trade_plans.short is fully eligible with no active blockers.",
-              "Reward-to-risk ratio for the short plan is 1.65, which satisfies the minimum 1.5R gate.",
-              "Price is currently trading below the 21 EMA (1204.84) at 1197.33."
+              "Both structural long and short plans meet deterministic eligibility and exceed the minimum 1.5R requirement.",
+              "The 0.618 retracement level exhibits a rejection or reclaim candle and high confluence score.",
+              "Short candidate has a favorable risk-to-reward ratio of 1.65 with structured targets based on confirmed structure."
             ],
             "counter_evidence": [
-              "The deterministic rule_decision currently evaluates execution as 'no trade; no order submitted' under 'WAIT_FOR_CONFLUENCE' status.",
-              "Exhaustion context indicates mixed early reversal evidence with a low short reversal score of 1.",
-              "Stochastic RSI values show %K at 82.93 and %D at 71.0, reflecting elevated momentum that conflicts with a direct short entry."
+              "Daily bias is reported as bearish, complicating the thesis for the structural long plan.",
+              "Exhaustion context indicates a mixed early reversal state with only limited bearish score evidence.",
+              "Rule decision notes that execution is currently 'no trade; no order submitted' due to incomplete reaction/confluence or risk checks."
             ],
             "missing_evidence": [
-              "Confirmed bearish continuation close below key structural swing lows.",
-              "Definitive rejection or retest confirmation at the 0.618 or 0.5 Fibonacci retracement levels."
+              "Fully calibrated historical probability models for the specific Fibonacci bounce levels.",
+              "Confirmed multi-candle structural break and retest confirmation matching use policy requirements."
             ],
-            "rationale": "Although structural_trade_plans.short meets all deterministic eligibility requirements and exceeds the 1.5R threshold under a bearish daily bias, mixed exhaustion signals and conflicting momentum indicators warrant a mixed assessment with caution regarding execution timing."
+            "rationale": "The candidate universe lists both structural long and short trade plans as technically eligible with valid risk-reward ratios above 1.5R. However, the overall daily bias is bearish, and the rule decision remains in a watching state with incomplete reaction confirmations. Between the eligible options, structural_trade_plans.short aligns better with the stated bearish daily bias and higher confluence reaction zones, though overall evidence is mixed and confidence remains low pending further confirmation."
           },
-          "latency_ms": 2143,
+          "latency_ms": 2501,
           "error": null
         },
         "momentum_reversal": {
@@ -1553,7 +1534,7 @@
         "multitimeframe_scan": {
           "pair": "ZECUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:30.612187+00:00",
+          "generated_at_utc": "2026-10-25T09:03:26.323095+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2049,23 +2030,22 @@
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.long is marked eligible with no blockers",
-              "reward-risk ratio of 2.1651 exceeds the minimum 1.5 threshold",
-              "active support line present at 11.2065 with distance 1.69 percent",
-              "RSI(14) is at 32.95 indicating near-oversold conditions"
+              "structural_trade_plans.long is explicitly marked eligible in candidate_universe with zero blockers",
+              "reward_risk ratio is 2.1651, successfully clearing the >=1.5R hard gate",
+              "active support line exists at 11.20645 with touch count 3"
             ],
             "counter_evidence": [
               "daily bias is bearish",
-              "MACD histogram shows bearish expansion",
-              "exhaustion context notes bearish price action via closing below previous candle low"
+              "exhaustion context shows a bearish closed_below_previous_candle_low signal",
+              "MACD bearish expansion is present with negative histogram"
             ],
             "missing_evidence": [
-              "uncalibrated historical probability status for fib bounce levels",
-              "lack of fresh extreme zone stoch RSI cross for reversal candidate"
+              "uncalibrated historical probability status requiring walk-forward replay",
+              "confirmed 0.382/0.5/0.618 pullback zone touch in rule_decision"
             ],
-            "rationale": "The long structural trade plan satisfies all deterministic eligibility gates and minimum risk-reward criteria, but the broader technical context leans bearish with active MACD bearish expansion and bearish daily bias, leading to a mixed assessment where caution is warranted."
+            "rationale": "The structural_trade_plans.long candidate meets all deterministic eligibility gates including reward-to-risk thresholds. However, the broader context exhibits mixed signals due to a bearish daily bias, bearish MACD expansion, and an uncalibrated historical probability warning, prompting a mixed assessment with medium confidence."
           },
-          "latency_ms": 1477,
+          "latency_ms": 1526,
           "error": null
         },
         "momentum_reversal": {
@@ -2089,7 +2069,7 @@
         "multitimeframe_scan": {
           "pair": "LINKUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:21.159839+00:00",
+          "generated_at_utc": "2026-10-25T09:03:16.035818+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2544,26 +2524,26 @@
           "provider": "gemini",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
+            "assessment": "caution",
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "low",
             "supporting_evidence": [
-              "structural_trade_plans.long meets minimum reward-to-risk requirement with a ratio of 1.5672",
-              "structural_trade_plans.long has no blockers listed in the candidate universe",
-              "rule_decision indicates a confirmed short impulse with 0.500 retracement touched and reclaimed/rejected"
+              "structural_trade_plans.long is marked eligible with zero blockers",
+              "reward_risk ratio of 1.5672 satisfies the minimum threshold of 1.5",
+              "rule_decision identifies a valid impulse range and 0.500 retracement reaction context"
             ],
             "counter_evidence": [
-              "daily bias is bearish while structural_trade_plans.long requires a long direction",
-              "exhaustion context shows mixed early reversal evidence with a bearish closed_below_previous_candle_low factor",
-              "momentum context shows negative macd histogram values"
+              "Daily bias is explicitly bearish while evaluating a long trade plan",
+              "MACD histogram is negative and EMAs (ema8_4h at 0.0776, ema21_4h at 0.0786) reflect a bearish alignment",
+              "Exhaustion context indicates mixed early reversal evidence with a bearish closed_below_previous_candle_low condition"
             ],
             "missing_evidence": [
-              "uncalibrated historical probabilities for bounce rankings",
-              "clean alignment between daily bearish bias and long trade direction"
+              "Confirmed bullish trendline break and retest lifecycle matching the long direction",
+              "Confluence of higher timeframe bullish momentum expansion"
             ],
-            "rationale": "The candidate universe lists both long and short structural trade plans as eligible with adequate reward-to-risk ratios >=1.5. However, the daily bias is bearish and indicator alignment conflicts directly with a long thesis, while the rule decision context highlights a short impulse setup. Consequently, the assessment is mixed with low confidence, designating structural_trade_plans.long as the primary candidate based purely on deterministic eligibility while noting substantial counter-evidence from trend bias."
+            "rationale": "While structural_trade_plans.long passes deterministic eligibility and meets the >=1.5R risk-reward gate, the broader context exhibits significant counter-evidence including a bearish daily bias, bearish EMA alignment, negative MACD histogram, and mixed exhaustion context. Consequently, caution is warranted, and the assessment leans cautious rather than supportive."
           },
-          "latency_ms": 1722,
+          "latency_ms": 1636,
           "error": null
         },
         "momentum_reversal": {
@@ -2587,7 +2567,7 @@
         "multitimeframe_scan": {
           "pair": "DOGEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:12.383427+00:00",
+          "generated_at_utc": "2026-10-25T09:03:05.779504+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3037,25 +3017,26 @@
           "provider": "gemini",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "mixed",
+            "assessment": "caution",
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.long is explicitly marked eligible with zero blockers.",
-              "Reward-to-risk ratio of 2.2663 exceeds the minimum threshold of 1.5.",
-              "Rule decision features a confirmed short impulse with fib retracement levels touched and respected."
+              "structural_trade_plans.long is marked eligible with a reward-to-risk ratio of 2.2663, satisfying the minimum 1.5R threshold",
+              "Rule decision features a confirmed short impulse with validated 0.382 retracement and structural rejection",
+              "MACD histogram shows previous expansion characteristics and stoch RSI shows active positioning"
             ],
             "counter_evidence": [
-              "Daily bias is listed as bearish, presenting a headwind to long continuation.",
-              "Rule decision suggests a short direction for the fib retracement context while the eligible priority candidate is long."
+              "Daily bias is explicitly noted as bearish",
+              "EMA 8 is below EMA 21 (76.4707 vs 77.3699), indicating medium-term trend headwinds for a long candidate",
+              "Exhaustion context indicates mixed early reversal evidence with a recent close below the previous candle low"
             ],
             "missing_evidence": [
-              "Clean confirmation of a trendline break and retest lifecycle matching the long candidate's direction.",
-              "Bullish Stoch RSI cross confirmation."
+              "Confirmed multi-touch trendline break and retest lifecycle specifically aligned for the long structural target in current window",
+              "Fresh extreme-zone Stoch RSI cross for the momentum reversal setup"
             ],
-            "rationale": "The candidate universe explicitly marks structural_trade_plans.long as eligible with a favorable reward-to-risk ratio above 1.5 and no blockers. However, mixed signals exist due to a bearish daily bias and conflicting short-side fib reaction context within the rule decision, warranting a mixed assessment."
+            "rationale": "While structural_trade_plans.long is mathematically eligible with a reward-risk ratio exceeding the minimum threshold, conflicting bearish daily bias, bearish EMA alignment, and mixed exhaustion indicators advise caution against aggressive execution. The short trade candidate is blocked due to insufficient reward-risk profile."
           },
-          "latency_ms": 1306,
+          "latency_ms": 1815,
           "error": null
         },
         "momentum_reversal": {
@@ -3079,7 +3060,7 @@
         "multitimeframe_scan": {
           "pair": "HYPEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:52:03.118332+00:00",
+          "generated_at_utc": "2026-10-25T09:02:55.206455+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3478,24 +3459,26 @@
           "provider": "gemini",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "caution",
+            "assessment": "mixed",
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.long is marked eligible with a reward-to-risk ratio of 2.184, which exceeds the minimum threshold of 1.5.",
-              "Exhaustion context notes rsi_recovering as bullish evidence supporting the long candidate."
+              "structural_trade_plans.long is marked eligible with no blockers",
+              "structural_trade_plans.long reward_risk ratio of 2.184 meets the >=1.5R minimum gate",
+              "exhaustion_context shows rsi_recovering as bullish evidence"
             ],
             "counter_evidence": [
-              "Rule decision and daily bias indicate a bearish trend with price closing below previous candle lows.",
-              "EMA 8 and EMA 21 are aligned downward on the 4h timeframe, showing trend headwinds for any long continuation."
+              "rule_decision indicates a bearish daily bias and short impulse origin",
+              "EMA8 is below EMA21 reflecting ongoing downward trend pressure on the 4h timeframe",
+              "structural_trade_plans.short is blocked due to inadequate reward_risk ratio"
             ],
             "missing_evidence": [
-              "Confirmed multi-candle structural reversal or base formation to support the long entry.",
-              "Stoch RSI bullish cross confirmation."
+              "confirmed bullish structural break and retest pattern",
+              "stoch_bullish_cross on momentum indicators"
             ],
-            "rationale": "Although structural_trade_plans.long satisfies deterministic eligibility and minimum reward-to-risk criteria, the broader context remains mixed to bearish with negative EMA alignments and ongoing downside momentum. Caution is warranted and execution must respect strict confirmation rules."
+            "rationale": "The only eligible candidate meeting all hard gates is structural_trade_plans.long with a reward-to-risk ratio of 2.184. However, the broader trend context shows a bearish daily bias and lower EMA alignment, creating mixed signals that warrant caution."
           },
-          "latency_ms": 1585,
+          "latency_ms": 1815,
           "error": null
         },
         "momentum_reversal": {
@@ -3519,7 +3502,7 @@
         "multitimeframe_scan": {
           "pair": "VIRTUALUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:54.665768+00:00",
+          "generated_at_utc": "2026-10-25T09:02:45.878353+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3992,22 +3975,22 @@
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.short is explicitly marked eligible with zero blockers.",
-              "reward_risk ratio for the short plan is 1.8305, exceeding the minimum 1.5 threshold.",
-              "active resistance line is closely overhead at approximately 746.53 (distance -0.28%)."
+              "Both structural long and short candidate plans meet the deterministic eligibility and >=1.5R risk-reward gate.",
+              "Structural short candidate offers a 1.8305 reward-to-risk ratio with well-defined entry, stop, and target geometry.",
+              "Active resistance lines are present nearby (e.g., line price 746.52) offering structural backing for a short bias."
             ],
             "counter_evidence": [
-              "rule_decision indicates a NO_TRADE state due to lack of a confirmed pullback touch into the 0.382/0.5/0.618 fib zone.",
-              "EMA8 and EMA21 are upward aligned, and MACD histogram shows bullish expansion.",
-              "Daily bias is marked as bearish, creating some cross-timeframe divergence with recent momentum."
+              "Daily bias is currently bearish while structural trade plans include a long direction option, creating conflicting directional signals.",
+              "Momentum indicators show MACD bullish expansion and stoch RSI K at 71.69, conflicting with a clean short continuation thesis.",
+              "Rule decision indicates no trade execution due to lack of a confirmed pullback zone touch."
             ],
             "missing_evidence": [
-              "Confirmed price touch and reaction at the designated Fibonacci retracement entry levels.",
-              "Stoch RSI bearish cross to support momentum reversal."
+              "Confirmation of a 0.382/0.5/0.618 Fibonacci pullback zone touch.",
+              "Clear rejection or reclaim candle patterns at the key resistance levels."
             ],
-            "rationale": "Although structural trade plans are marked eligible with valid reward-to-risk ratios exceeding 1.5, the deterministic rule decision remains in a NO_TRADE state because the price has not touched the required Fibonacci retracement levels for the short setup. Momentum indicators display mixed signals with bullish MACD expansion against a broader bearish daily bias. Therefore, a mixed assessment is warranted with the short structural plan prioritized conditionally upon retest confirmation."
+            "rationale": "While both structural trade plans are marked eligible and satisfy the minimum risk-reward gates, the overall market context displays mixed signals with conflicting daily bias and momentum indicators. The structural short candidate presents a slightly better-aligned setup near active resistance lines, but the absence of a confirmed pullback touch warrants a cautious, mixed assessment without immediate execution."
           },
-          "latency_ms": 1888,
+          "latency_ms": 1763,
           "error": null
         },
         "momentum_reversal": {
@@ -4031,7 +4014,7 @@
         "multitimeframe_scan": {
           "pair": "BNBUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:47.048514+00:00",
+          "generated_at_utc": "2026-10-25T09:02:37.044525+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -4533,23 +4516,23 @@
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.short meets the minimum 1.5R requirement with a reward_risk of 1.9777",
-              "Daily bias is bearish with EMA alignment supporting downward movement",
-              "MACD bearish expansion is active with negative histogram",
-              "Breakout retest held and confirmed with structural confluence near the 0.382 retracement area"
+              "structural_trade_plans.short meets minimum reward-to-risk threshold with 1.9777 R",
+              "daily bias is bearish with EMA alignment supporting downward continuation",
+              "MACD bearish expansion confirmed with negative histogram",
+              "breakout retest held successfully as noted in setup_lifecycle"
             ],
             "counter_evidence": [
-              "Stochastic RSI K line at 74.67 is elevated, indicating potential near-term upward momentum before continuation",
-              "Exhaustion context indicates mixed early reversal evidence with only a single bearish score note",
-              "Rule decision suggests a NO_TRADE or wait state depending on strict lifecycle execution filters"
+              "stoch_rsi_k at 74.67 and d at 66.02 indicate rising momentum away from oversold conditions",
+              "exhaustion context shows mixed early reversal evidence with a bearish closed below previous candle low score of only 1",
+              "rule_decision indicates a NO_TRADE or waiting state for active confirmation"
             ],
             "missing_evidence": [
-              "Closed-candle continuation through the retest reaction extreme for the secondary add entry",
-              "Calibrated historical probability data for the specific fibonacci bounce ranking"
+              "closed-candle structural continuation through retest reaction extreme",
+              "calibrated historical probability metrics for bounce levels"
             ],
-            "rationale": "The short structural trade plan is mathematically eligible and clears hard gates including the 1.5R threshold and structural risk limits. However, mixed exhaustion indicators, elevated stochastic RSI, and rule-level wait states require a cautious assessment. The short candidate is prioritized over the long candidate due to overarching daily bearish bias and MACD expansion, but requires strict adherence to closed-candle continuation triggers before any execution."
+            "rationale": "The short structural trade plan is mathematically eligible and clears the 1.5 R threshold, supported by a bearish daily bias and MACD expansion. However, mixed exhaustion signals and rising Stoch RSI create counter-evidence and false-break risks, warranting a mixed assessment and caution until a closed-candle continuation confirms the setup."
           },
-          "latency_ms": 1849,
+          "latency_ms": 1698,
           "error": null
         },
         "momentum_reversal": {
@@ -4573,7 +4556,7 @@
         "multitimeframe_scan": {
           "pair": "AVAXUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:37.334317+00:00",
+          "generated_at_utc": "2026-10-25T09:02:25.777428+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -4972,21 +4955,21 @@
             "confidence": "low",
             "supporting_evidence": [
               "structural_trade_plans.long is marked eligible with no blockers",
-              "structural_trade_plans.long reward_risk ratio is 1.7321, meeting the >=1.5 minimum threshold",
-              "RSI14 is at 34.94, suggesting a potentially oversold or low-end consolidation area"
+              "structural_trade_plans.long reward_risk ratio of 1.7321 meets the >=1.5R minimum gate",
+              "RSI14 is at 34.94, showing oversold/low conditions supporting a potential long bounce setup"
             ],
             "counter_evidence": [
-              "Daily bias is bearish",
-              "EMA8 is below EMA21, indicating a prevailing short-term downtrend",
-              "Exhaustion context indicates a bearish evidence note with a closed price below the previous candle low"
+              "Daily bias is stated as bearish across multiple contexts",
+              "Exhaustion context notes a bearish evidence item closed_below_previous_candle_low",
+              "MACD histogram remains negative (-0.0005)"
             ],
             "missing_evidence": [
-              "Confirmed bullish volume expansion",
-              "Clean trendline break and retest lifecycle confirmation for the long candidate"
+              "Fresh extreme-zone stoch-rsi cross for the reversal candidate",
+              "Clean structural trendline break and retest confirmation on the 240m timeframe"
             ],
-            "rationale": "Although structural_trade_plans.long meets eligibility and reward-to-risk rules within the deterministic candidate universe, the broader indicator context (bearish daily bias, EMA alignment, and bearish exhaustion evidence) introduces significant friction and false-break risks, making the setup mixed and requiring extreme caution."
+            "rationale": "While structural_trade_plans.long satisfies the deterministic eligibility and reward-to-risk threshold (>1.5R) without active blockers, the broader context exhibits bearish daily bias, negative MACD histogram, and mixed exhaustion signs. Therefore, the assessment is mixed with low confidence, highlighting the need for closed-candle confirmation before any execution."
           },
-          "latency_ms": 1524,
+          "latency_ms": 1557,
           "error": null
         },
         "momentum_reversal": {
@@ -5010,7 +4993,7 @@
         "multitimeframe_scan": {
           "pair": "ADAUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:27.716678+00:00",
+          "generated_at_utc": "2026-10-25T09:02:14.528490+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -5428,26 +5411,27 @@
           "provider": "gemini",
           "model_id": "gemini-3.5-flash-lite",
           "response": {
-            "assessment": "supportive",
+            "assessment": "mixed",
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.short is explicitly marked eligible in candidate_universe with no blockers",
-              "reward_risk ratio is 1.65, satisfying the >= 1.5R hard gate",
-              "rule_decision aligns with a short bias and confirms 0.618 fib retracement reaction",
-              "daily bias is bearish and MACD histogram shows bearish expansion context"
+              "structural_trade_plans.short is explicitly marked eligible with no blockers",
+              "reward-to-risk ratio is 1.6525, which clears the >=1.5R hard gate",
+              "daily bias is bearish and MACD histogram shows bearish expansion context",
+              "price is testing the 0.618 fibonacci retracement level with confluence score 4.5"
             ],
             "counter_evidence": [
-              "exhaustion_context notes mixed early reversal evidence with rsi recovering",
-              "stoch rsi levels are relatively high at ~89.8"
+              "setup_lifecycle state is INVALIDATED for the broader trendline break structure",
+              "exhaustion context notes mixed early reversal evidence with RSI recovering to 47.16",
+              "stoch rsi K is at 89.85 showing high momentum conditions counter to a pure short bias"
             ],
             "missing_evidence": [
-              "walk-forward calibrated probability for the specific retracement bounce",
-              "definitive trendline break and retest lifecycle confirmation"
+              "confirmed subsequent candle rejection or sweep confirmation on the lower timeframe execution sequence",
+              "fresh extreme zone stoch rsi cross for the momentum reversal candidate"
             ],
-            "rationale": "The structural short trade plan is fully eligible within the deterministic candidate universe, fulfills the required >=1.5 reward-to-risk ratio, and aligns with the prevailing bearish daily bias and impulse retracement level at 0.618. Although minor mixed exhaustion cues exist, the evidence sufficiently supports the designated short candidate under strict adherence to the provided context."
+            "rationale": "The short structural trade plan satisfies all deterministic eligibility and reward-to-risk gates, aligning with the overall daily bearish bias and Fibonacci retracement interaction. However, mixed exhaustion signals and an invalidated trendline lifecycle template introduce counter-evidence, warranting a mixed assessment and careful shadow research tracking."
           },
-          "latency_ms": 2482,
+          "latency_ms": 1725,
           "error": null
         },
         "momentum_reversal": {
@@ -5471,7 +5455,7 @@
         "multitimeframe_scan": {
           "pair": "XRPUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:18.854976+00:00",
+          "generated_at_utc": "2026-10-25T09:02:04.333664+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -5887,23 +5871,22 @@
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "low",
             "supporting_evidence": [
-              "Confirmed short impulse range from swing high 105.24 to swing low 98.64",
-              "Rule decision establishes a bearish short bias with Fibonacci reaction at the 0.5 level",
-              "structural_trade_plans.short meets the minimum reward-to-risk ratio threshold of 1.5R with 1.5189R",
-              "Both structural long and short plans are marked as eligible in the candidate universe with no explicit blockers"
+              "Confirmed short impulse observed from structural swing high 105.24 to swing low 98.64",
+              "Both structural_trade_plans.long and structural_trade_plans.short are marked eligible in the candidate universe with risk-reward ratios above the 1.5R threshold",
+              "Rule decision notes daily bias is bearish and 0.500/0.618 fib retracements show rejection or reclaim candles with confluence"
             ],
             "counter_evidence": [
-              "Daily bias is bearish while structural_trade_plans.long goes against the prevailing bias",
-              "Exhaustion context is mixed with early reversal evidence and RSI at 40.53 indicating lack of strong directional momentum",
-              "Rule decision states that is_actionable is false and requires separate trendline break-retest-continuation confirmation"
+              "Rule decision specifies a short impulse direction while structural_trade_plans.long exhibits a higher reward-to-risk ratio (1.7679 vs 1.5189)",
+              "Exhaustion context is mixed with early reversal evidence and RSI at 40.53",
+              "Setup lifecycle indicates expired previous long trendline break setup"
             ],
             "missing_evidence": [
-              "Completed candle structural break and retest lifecycle confirmation",
-              "Clear expansion in MACD histogram and definitive momentum alignment"
+              "Confirmed trendline break -> retest -> continuation lifecycle for the chosen candidate",
+              "Calibrated historical probabilities for the bounce levels"
             ],
-            "rationale": "The candidate universe lists both long and short structural trade plans as eligible with acceptable risk-reward ratios above 1.5R. However, the rule decision and indicators reflect a bearish daily bias and mixed exhaustion context where the setup is explicitly marked as non-actionable awaiting confirmation. structural_trade_plans.short aligns with the prevailing bearish daily bias, but confidence remains low due to the lack of actionable structural confirmation and mixed momentum indicators."
+            "rationale": "The candidate universe lists both long and short structural trade plans as eligible with sufficient reward-to-risk ratios (>1.5R). However, the rule decision and impulse context favor a short bias in alignment with the bearish daily bias, making structural_trade_plans.short the most consistent candidate despite mixed exhaustion context and lack of a confirmed execution lifecycle."
           },
-          "latency_ms": 1989,
+          "latency_ms": 1820,
           "error": null
         },
         "momentum_reversal": {
@@ -5927,7 +5910,7 @@
         "multitimeframe_scan": {
           "pair": "SOLUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:51:08.978678+00:00",
+          "generated_at_utc": "2026-10-25T09:01:53.589388+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -6395,22 +6378,21 @@
             "priority_candidate": "structural_trade_plans.long",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.long is marked eligible with no blockers",
-              "structural_trade_plans.long reward_risk ratio is 1.86, meeting the >=1.5R gate",
-              "structural_trade_plans.short is also marked eligible with no blockers and a reward_risk ratio of 2.38"
+              "structural_trade_plans.long meets deterministic eligibility and passes the >=1.5R hard gate with a 1.86 reward-to-risk ratio.",
+              "structural_trade_plans.short also passes the >=1.5R gate with 2.38 reward-to-risk ratio.",
+              "Daily bias is marked bearish, creating a multi-timeframe contextual conflict with long setup ideas while aligning with the short trade plan."
             ],
             "counter_evidence": [
-              "Daily bias is bearish",
-              "MACD histogram shows persistent negative values",
-              "Recent support breakout failed its close-based invalidation rule"
+              "Daily bias is bearish, running counter to the structural_trade_plans.long candidate direction.",
+              "Exhaustion context indicates a mixed early reversal evidence state with a closed_below_previous_candle_low bearish note."
             ],
             "missing_evidence": [
-              "Fresh confirmed extreme zone stoch RSI cross for momentum reversal candidate",
-              "Clear confirmation of sustained price acceptance above key moving averages"
+              "Fresh extreme-zone Stoch RSI cross for momentum reversal candidate setup confirmation.",
+              "Confirmed touch and reaction at specified Fibonacci retracement or support confluence zones."
             ],
-            "rationale": "Both structural trade plans meet quantitative eligibility criteria and risk-reward minimums. However, the prevailing bearish daily bias, mixed exhaustion context, and recent failed breakout structure advise caution, resulting in a mixed assessment where structural long parameters qualify under deterministic rules despite conflicting contextual indicators."
+            "rationale": "Both structural trade plans are marked eligible and clear the 1.5R hard gate, but structural_trade_plans.long offers a viable setup counter to the bearish daily bias, while structural_trade_plans.short aligns with the daily bias. The momentum reversal candidate is blocked due to lack of a fresh extreme-zone Stoch RSI cross. Assessment is mixed due to cross-currents between the structural long eligibility and the overarching bearish daily bias and exhaustion context."
           },
-          "latency_ms": 1709,
+          "latency_ms": 4521,
           "error": null
         },
         "momentum_reversal": {
@@ -6434,7 +6416,7 @@
         "multitimeframe_scan": {
           "pair": "ETHUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:50:59.677319+00:00",
+          "generated_at_utc": "2026-10-25T09:01:42.841289+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -7172,22 +7154,22 @@
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.short has no explicit blockers and satisfies the reward-to-risk gate (1.92R >= 1.5R).",
-              "Daily bias is explicitly marked as bearish.",
-              "MACD histogram expansion and price sitting below EMA8 and EMA21 reinforce bearish structural context."
+              "Confirmed short impulse from swing high 82043.4 to low 79241.1",
+              "structural_trade_plans.short meets the hard gate with a 1.9162 reward-to-risk ratio exceeding the 1.5 minimum",
+              "Daily bias is bearish with EMA8 below EMA21, aligning with short direction",
+              "Retracement levels show reaction and rejection at the 0.618 fib resistance area with multiple touch confluence"
             ],
             "counter_evidence": [
-              "The setup lifecycle for the short breakout experiment failed its close-based invalidation rule.",
-              "RSI14 is at 41.13 and Stoch RSI K is relatively high at 81.39, creating mixed reversal cues.",
-              "Active support lines are present below current price which could act as immediate downside barriers."
+              "Setup lifecycle indicates a failed breakout and invalidation state on the support line break",
+              "Momentum context does not show active MACD bearish expansion at the latest snapshot (histogram -56.2018 versus previous -80.4833)"
             ],
             "missing_evidence": [
-              "A clean, confirmed trendline break with a successful retest-continuation sequence for the short direction.",
-              "Fresh extreme zone Stoch RSI cross for the momentum reversal candidate."
+              "Fresh active trendline retest and continuation confirmation for the short lifecycle",
+              "Decisive confirmation of Stochastic RSI bearish cross in extreme zones"
             ],
-            "rationale": "While structural_trade_plans.short is eligible and meets minimum reward-to-risk parameters, the broader context contains mixed signals including a failed close-based breakdown and conflicting short-term momentum readings. Therefore, the assessment is mixed with a medium confidence level favoring the short plan due to daily bearish alignment."
+            "rationale": "The candidate universe presents a structurally eligible short trade plan that satisfies the >=1.5R reward-risk gate and aligns with the broader bearish daily bias and confirmed impulse swing. However, mixed signals such as a failed breakdown lifecycle state and conflicting short-term momentum indicators warrant a mixed assessment and moderate confidence, requiring strict adherence to the closed-candle structural break/retest validation."
           },
-          "latency_ms": 1744,
+          "latency_ms": 1733,
           "error": null
         },
         "momentum_reversal": {
@@ -7211,7 +7193,7 @@
         "multitimeframe_scan": {
           "pair": "XBTUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T08:50:49.161437+00:00",
+          "generated_at_utc": "2026-10-25T09:01:27.366417+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -12021,7 +12003,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -12083,7 +12065,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -12152,7 +12134,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-24T20:00:00+00:00",
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -12222,7 +12204,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-24T20:00:00+00:00",
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -12279,7 +12261,7 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "failure_time": null,
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -12352,7 +12334,7 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "failure_time": null,
-      "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -12702,6 +12684,487 @@
     }
   ],
   "runs": [
+    {
+      "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+      "started_at": "2026-10-25T09:01:16.310001+00:00",
+      "finished_at": "2026-10-25T09:04:00.718346+00:00",
+      "status": "scan_complete_ai_unavailable",
+      "pairs_checked": 15,
+      "pair_results": [
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "XBTUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:01:16.310277+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 80676.6,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1733,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 64,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:01:28.784097+00:00",
+          "duration_seconds": 12.474,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "ETHUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:01:28.784409+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 2347.86,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 4521,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 54,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:01:44.001449+00:00",
+          "duration_seconds": 15.217,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "SOLUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:01:44.001800+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 101.63,
+          "latest_setup_state": "EXPIRED",
+          "latest_setup_message": "No qualifying retest held within 72 hours.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1820,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 44,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:01:54.064104+00:00",
+          "duration_seconds": 10.062,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "XRPUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:01:54.064431+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 1.30158,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1725,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 51,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:02:04.795731+00:00",
+          "duration_seconds": 10.731,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "ADAUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:04.795970+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 0.205768,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1557,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 29,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:02:14.998714+00:00",
+          "duration_seconds": 10.203,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "AVAXUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:14.998983+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 8.856,
+          "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+          "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1698,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 35,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "ENTRY_1",
+              "sent": false,
+              "status": "not_sent_break_no_longer_fresh",
+              "signal_time": "2026-10-24T04:00:00+00:00",
+              "reason": "Break candle 2026-10-24T04:00:00+00:00 is older than the latest completed candle 2026-10-25T04:00:00+00:00; FRIDAY only sends Entry 1 alerts on the break candle, so it will not send a delayed entry. Retest is held and continuation is still pending."
+            }
+          ],
+          "market_finished_at": "2026-10-25T09:02:26.557255+00:00",
+          "duration_seconds": 11.558,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "BNBUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:26.557512+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 744.47,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1763,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 84,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:02:37.514095+00:00",
+          "duration_seconds": 10.957,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "VIRTUALUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:37.514360+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 0.6215,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1815,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 11,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:02:46.380985+00:00",
+          "duration_seconds": 8.867,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "HYPEUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:46.381268+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 76.146,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1815,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 6,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:02:55.676541+00:00",
+          "duration_seconds": 9.295,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "DOGEUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:02:55.676851+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 0.07698,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1636,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 33,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:03:06.244989+00:00",
+          "duration_seconds": 10.568,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "LINKUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:03:06.245265+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 11.39634,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1526,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 52,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:03:16.503895+00:00",
+          "duration_seconds": 10.259,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "ZECUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:03:16.504169+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 1197.33,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 2501,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 4,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:03:26.867222+00:00",
+          "duration_seconds": 10.363,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "NEARUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:03:26.867485+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 4.439,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 5114,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:03:39.628151+00:00",
+          "duration_seconds": 12.761,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "SUIUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:03:39.628438+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 0.9187,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 4039,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 6,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:03:51.301161+00:00",
+          "duration_seconds": 11.673,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        },
+        {
+          "run_id": "a658e421-4810-4dee-b5fb-e5b6a73f96aa",
+          "pair": "LITUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T09:03:51.301444+00:00",
+          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
+          "last_close": 3.2461,
+          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+          "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1773,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "caution",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": [],
+          "market_finished_at": "2026-10-25T09:04:00.718014+00:00",
+          "duration_seconds": 9.417,
+          "alert_outcomes_total": 0,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 0
+        }
+      ],
+      "trade_events_seen": 6,
+      "live_events_persisted": 6,
+      "historical_replay_events_ignored": 481,
+      "error": null,
+      "persistence_configured": true,
+      "markets_requested": 15,
+      "markets_succeeded": 15,
+      "markets_failed": 0,
+      "alert_outcomes_total": 1,
+      "alert_outcomes_sent": 0,
+      "alert_outcomes_blocked": 1,
+      "ai_reviews_ok": 14,
+      "ai_reviews_failed": 1,
+      "run_ledger_persisted": true
+    },
     {
       "run_id": "986dde63-a320-4f65-b549-f0a5e66593b1",
       "started_at": "2026-10-25T08:50:39.645347+00:00",
@@ -17006,479 +17469,6 @@
       "ai_reviews_ok": 15,
       "ai_reviews_failed": 0,
       "run_ledger_persisted": true
-    },
-    {
-      "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-      "started_at": "2026-10-25T07:20:39.076184+00:00",
-      "finished_at": "2026-10-25T07:23:07.909139+00:00",
-      "status": "success",
-      "pairs_checked": 15,
-      "pair_results": [
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "XBTUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:20:39.076470+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 80859.7,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 2133,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 64,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:20:51.268702+00:00",
-          "duration_seconds": 12.192,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "ETHUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:20:51.268962+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 2362.0,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1796,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 54,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:03.211287+00:00",
-          "duration_seconds": 11.942,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "SOLUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:03.211521+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 102.42,
-          "latest_setup_state": "EXPIRED",
-          "latest_setup_message": "No qualifying retest held within 72 hours.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1577,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 44,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:12.491649+00:00",
-          "duration_seconds": 9.28,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "XRPUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:12.491850+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 1.31101,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1405,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 51,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:22.418469+00:00",
-          "duration_seconds": 9.927,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "ADAUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:22.418692+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 0.207765,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1532,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 29,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:32.437647+00:00",
-          "duration_seconds": 10.019,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "AVAXUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:32.437885+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 8.971,
-          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
-          "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1822,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 35,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:43.287212+00:00",
-          "duration_seconds": 10.849,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "BNBUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:43.287437+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 745.04,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1807,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 84,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:21:53.840069+00:00",
-          "duration_seconds": 10.553,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "VIRTUALUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:21:53.840275+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 0.6296,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1521,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "supportive",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 11,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:02.009418+00:00",
-          "duration_seconds": 8.169,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "HYPEUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:02.009652+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 76.565,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 2151,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 6,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:11.680593+00:00",
-          "duration_seconds": 9.671,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "DOGEUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:11.680791+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 0.07783,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1704,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 33,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:21.637440+00:00",
-          "duration_seconds": 9.957,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "LINKUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:21.637669+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 11.59119,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1666,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 52,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:31.682028+00:00",
-          "duration_seconds": 10.044,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "ZECUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:31.682234+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 1212.91,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1643,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 4,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:40.918595+00:00",
-          "duration_seconds": 9.236,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "NEARUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:40.918805+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 4.486,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1457,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:49.842768+00:00",
-          "duration_seconds": 8.924,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "SUIUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:49.842976+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 0.9371,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1663,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 6,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:22:58.906183+00:00",
-          "duration_seconds": 9.063,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        },
-        {
-          "run_id": "7c74b130-131f-4dc7-a24d-78dfc7b7fb86",
-          "pair": "LITUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T07:22:58.906391+00:00",
-          "last_completed_candle_utc": "2026-10-25T00:00:00+00:00",
-          "last_close": 3.2566,
-          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
-          "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1625,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bullish_turn",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": [],
-          "market_finished_at": "2026-10-25T07:23:07.908878+00:00",
-          "duration_seconds": 9.002,
-          "alert_outcomes_total": 0,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 0
-        }
-      ],
-      "trade_events_seen": 6,
-      "live_events_persisted": 6,
-      "historical_replay_events_ignored": 481,
-      "error": null,
-      "persistence_configured": true,
-      "markets_requested": 15,
-      "markets_succeeded": 15,
-      "markets_failed": 0,
-      "alert_outcomes_total": 0,
-      "alert_outcomes_sent": 0,
-      "alert_outcomes_blocked": 0,
-      "ai_reviews_ok": 15,
-      "ai_reviews_failed": 0,
-      "run_ledger_persisted": true
     }
   ],
   "alerts": [
@@ -17585,5 +17575,5 @@
       "research_only": true
     }
   ],
-  "fetched_at": "2026-10-25T08:52:57.717524+00:00"
+  "fetched_at": "2026-10-25T09:04:00.852124+00:00"
 }
