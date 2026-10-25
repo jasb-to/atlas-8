@@ -86,6 +86,8 @@ class FridayPersistenceTests(unittest.TestCase):
             self.assertEqual(dashboard["storage_backend"], "github_repository_folder")
             self.assertEqual(len(dashboard["events"]), 1)
             self.assertEqual(len(dashboard["snapshots"]), 1)
+            self.assertEqual(len(dashboard["weekly_theses"]), 1)
+            self.assertEqual(dashboard["weekly_theses"][0]["payload"]["status"], "active")
             self.assertEqual(dashboard["runs"][0]["run_id"], "run-1")
 
     def test_repo_paper_trade_is_in_dashboard_and_alert_history_is_bounded_separately(self):
