@@ -101,7 +101,7 @@ def build_signal_alert(
         f"🎯 Entry: {_fmt_price(entry_value)}",
         f"🛑 Stop Loss: {_fmt_price(stop_value)}",
         f"💰 TP1: {_fmt_price(tp1)} (1.5R)",
-        f"💰 TP2: {_fmt_price(target_value)} ({tp2_rr:.2f}R)",
+        f"💰 TP2: {_fmt_price(target_value)} ({tp2_rr:.1f}R)",
         "",
         f"🧠 Why: {why}",
         "",
