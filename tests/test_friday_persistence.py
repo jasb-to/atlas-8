@@ -73,6 +73,10 @@ class FridayPersistenceTests(unittest.TestCase):
                 record_key="snapshot-1", record_type="decision_snapshot", pair="XBTUSDT",
                 timeframe="4H", signal_time="2026-10-24T12:00:00Z", payload={"state":"WATCH"},
             ))
+            store.record_archive(make_archive_record(
+                record_key="weekly-1", record_type="weekly_thesis_snapshot", pair="XBTUSDT",
+                timeframe="1W+1D", signal_time="2026-10-24T12:00:00Z", payload={"status":"active","direction":"long"},
+            ))
             store.record_cron_run(make_cron_run(
                 run_id="run-1", status="success", pair_results=[{"pair":"XBTUSDT","status":"ok"}],
                 started_at="2026-10-24T12:00:00Z",
