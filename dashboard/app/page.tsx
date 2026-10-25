@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 type Row = Record<string, any>;
 type Payload = {
   connected: boolean; status: string; message: string;
-  snapshots: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; paper_trades: Row[];
+  snapshots: Row[]; weekly_theses: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; paper_trades: Row[];
   fetched_at?: string;
 };
-const empty: Payload = { connected: false, status: "loading", message: "Loading FRIDAY data…", snapshots: [], events: [], runs: [], alerts: [], paper_trades: [] };
+const empty: Payload = { connected: false, status: "loading", message: "Loading FRIDAY data…", snapshots: [], weekly_theses: [], events: [], runs: [], alerts: [], paper_trades: [] };
 const WATCH_PAIRS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "AVAXUSDT", "LINKUSDT"];
 const fmtTime = (value?: string) => value ? new Date(value).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }) : "—";
 const fmtPrice = (value: unknown) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) ? Number(value).toLocaleString("en-GB", { maximumFractionDigits: 6 }) : "—";
@@ -27,7 +27,7 @@ const thesisFor = (snapshots: Row[], pair: string) => {
   for (const snap of snapshots) {
     if (pairName(snap.pair) !== pair) continue;
     const p = payloadOf(snap);
-    const thesis = p.weekly_thesis ?? p.sheldon_weekly_thesis ?? p.weeklyThesis ?? p.multitimeframe_scan?.weekly_thesis;
+    const thesis = snap.record_type === "weekly_thesis_snapshot" ? p : (p.weekly_thesis ?? p.sheldon_weekly_thesis ?? p.weeklyThesis ?? p.multitimeframe_scan?.weekly_thesis);
     if (thesis && typeof thesis === "object") return thesis as Row;
   }
   return null;
@@ -63,7 +63,7 @@ export default function Home() {
   const aiQuotaError = pairScans.some(scan => /402|payment required|quota exceeded/i.test(String(scan.ai_review_error ?? "")));
   const aiReviewActive = pairScans.some(scan => scan.ai_review_status && !["disabled", "not_configured"].includes(String(scan.ai_review_status).toLowerCase()));
   const weeklyCards = WATCH_PAIRS.map(pair => {
-    const thesis = thesisFor(snapshots, pair);
+    const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
     const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction;
     const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction;
