@@ -17,7 +17,7 @@ class FridayAlertTests(unittest.TestCase):
         self.assertIn("🎯 Entry: 100", message)
         self.assertIn("🛑 Stop Loss: 98", message)
         self.assertIn("💰 TP1: 103 (1.5R)", message)
-        self.assertIn("💰 TP2: 106 (3.00R)", message)
+        self.assertIn("💰 TP2: 106 (3.0R)", message)
         self.assertIn("Weekly filter not applied", message)
         self.assertIn("(Mode: Research / Paper Only)", message)
 
@@ -35,7 +35,7 @@ class FridayAlertTests(unittest.TestCase):
         self.assertIn("🎯 Entry: 8.822", message)
         self.assertIn("🛑 Stop Loss: 9.0467", message)
         self.assertIn("💰 TP1: 8.48495 (1.5R)", message)
-        self.assertIn("💰 TP2: 7.833 (4.40R)", message)
+        self.assertIn("💰 TP2: 7.833 (4.4R)", message)
         self.assertNotIn("999", message)
         self.assertIn("Weekly bearish. Daily bearish.", message)
         self.assertIn("retest held; continuation confirmed", message)
