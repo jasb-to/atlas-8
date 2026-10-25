@@ -67,7 +67,7 @@ class WeeklyThesisTests(unittest.TestCase):
     def test_20_candles_fail_and_21_candles_clear_ema_history_boundary(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=40, freq="D", tz="UTC")
-        weekly_times = pd.date_range(end="2026-10-18", periods=21, freq="7D", tz="UTC")
+        weekly_times = pd.date_range(end="2026-10-18", periods=34, freq="7D", tz="UTC")
         def frame(times):
             x = np.arange(len(times), dtype=float)
             return pd.DataFrame({
@@ -79,7 +79,7 @@ class WeeklyThesisTests(unittest.TestCase):
             "XBTUSDT", weekly_candles=weekly.iloc[:-1], daily_candles=daily, as_of=as_of
         )
         self.assertEqual(boundary["status"], "insufficient_data")
-        self.assertIn("weekly=20", boundary["reason"])
+        self.assertIn("weekly=33", boundary["reason"])
         enough = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
         )
