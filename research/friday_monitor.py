@@ -75,6 +75,8 @@ def _ai_candidate_pass(
     necessarily the internal strategy ID. "Mixed" is allowed only when it explicitly
     selects the expected direction; caution/rejection/insufficient evidence remain blocked.
     """
+    if os.getenv("FRIDAY_AI_REVIEW_ENABLED", "false").strip().lower() not in {"1", "true", "yes", "on"}:
+        return True, "ai_review_disabled_advisory_only"
     if not isinstance(review, dict) or review.get("status") != "ok":
         return False, "ai_review_not_completed"
     response = review.get("response") or {}
