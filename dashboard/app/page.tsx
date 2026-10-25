@@ -61,7 +61,8 @@ export default function Home() {
   const closedTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "CLOSED").slice(0, 6);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiQuotaError = pairScans.some(scan => /402|payment required|quota exceeded/i.test(String(scan.ai_review_error ?? "")));
-  const aiReviewActive = pairScans.some(scan => scan.ai_review_status && !["disabled", "not_configured"].includes(String(scan.ai_review_status).toLowerCase()));
+  const aiReviewActive = pairScans.some(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
+  const aiProvider = pairScans.find(scan => scan.ai_review_status === "ok" && (scan.ai_review_provider || scan.ai_provider))?.ai_review_provider ?? pairScans.find(scan => scan.ai_review_status === "ok" && scan.ai_provider)?.ai_provider;
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
     const scan = scanByPair.get(pair);
@@ -109,7 +110,7 @@ export default function Home() {
       <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH INTELLIGENCE</span></span></a>
       <div className="top-actions">
         <span className="mode-chip"><i /> RESEARCH ONLY · NO LIVE ORDERS</span>
-        <span className={aiQuotaError ? "ai-status ai-error" : "ai-status"}><i /> {aiQuotaError ? "AI OFFLINE · QUOTA ERROR" : aiReviewActive ? "AI REVIEW ACTIVE" : "AI REVIEW OFF · RULES FIRST"}</span>
+        <span className={aiQuotaError ? "ai-status ai-error" : "ai-status"}><i /> {aiQuotaError ? "AI OFFLINE" : aiReviewActive ? `AI: ${String(aiProvider ?? "ONLINE").toUpperCase()}` : "AI: OFF · RULES FIRST"}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
