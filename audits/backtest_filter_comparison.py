@@ -3,9 +3,9 @@
 Run from the repository root. Uses the same causal 4H event detector and trade
 replay for both scenarios. The only scenario difference is whether a setup is
 retained when the completed-candle weekly/daily thesis is active at signal time.
-The evaluation window starts in 2025 because AVAX and SOL do not have 200 weeks
-of listing history during most of 2023; earlier signals cannot be evaluated by
-the specified 200-week SMA rule and must not be counted as filtered losers.
+The weekly filter uses EMA 8/21 plus Stoch RSI alignment. The evaluation window
+starts in 2025 for a consistent, mature sample across AVAX, SOL and BTC; every
+signal is evaluated using completed weekly and daily candles available at that time.
 """
 from __future__ import annotations
 
