@@ -294,31 +294,13 @@
           "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
         },
         "model_review": {
-          "status": "ok",
-          "provider": "gemini",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "caution",
-            "priority_candidate": "structural_trade_plans.long",
-            "confidence": "medium",
-            "supporting_evidence": [
-              "structural_trade_plans.long is marked eligible with zero blockers",
-              "reward_risk ratio is 2.3683, exceeding the minimum 1.5 threshold",
-              "stop and target geometry are defined from confirmed structure swings"
-            ],
-            "counter_evidence": [
-              "daily bias is bearish and price is below both EMA8 and EMA21",
-              "rule_decision indicates a short setup direction and explicit no-trade execution state",
-              "exhaustion context notes the close lost EMA8 while EMAs were flat or rising"
-            ],
-            "missing_evidence": [
-              "bullish momentum confirmation such as a stoch RSI bullish cross",
-              "sustained reclaim of key resistance levels"
-            ],
-            "rationale": "Although structural_trade_plans.long passes deterministic eligibility and meets the minimum reward-to-risk ratio, the broader context shows a bearish daily bias, negative EMA alignment, and conflict with the rule_decision short execution plan. Therefore, a cautious stance is warranted despite meeting mathematical thresholds."
-          },
-          "latency_ms": 1639,
-          "error": null
+          "status": "error",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": 228,
+          "error_category": "quota_or_billing",
+          "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
         "momentum_reversal": {
           "strategy": "stoch-rsi-structural-reversal-v1",
@@ -341,7 +323,7 @@
         "multitimeframe_scan": {
           "pair": "LITUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:55.762083+00:00",
+          "generated_at_utc": "2026-10-25T12:33:52.433937+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -704,7 +686,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 267,
+          "latency_ms": 277,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -729,7 +711,7 @@
         "multitimeframe_scan": {
           "pair": "SUIUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:46.644425+00:00",
+          "generated_at_utc": "2026-10-25T12:33:44.224907+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1086,7 +1068,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 278,
+          "latency_ms": 259,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -1111,7 +1093,7 @@
         "multitimeframe_scan": {
           "pair": "NEARUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:38.903535+00:00",
+          "generated_at_utc": "2026-10-25T12:33:35.779659+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1470,7 +1452,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 232,
+          "latency_ms": 233,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -1495,7 +1477,7 @@
         "multitimeframe_scan": {
           "pair": "ZECUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:31.039354+00:00",
+          "generated_at_utc": "2026-10-25T12:33:27.255404+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -1991,7 +1973,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 239,
+          "latency_ms": 508,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -2016,7 +1998,7 @@
         "multitimeframe_scan": {
           "pair": "LINKUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:23.074053+00:00",
+          "generated_at_utc": "2026-10-25T12:33:18.569911+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2438,31 +2420,13 @@
           "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
         },
         "model_review": {
-          "status": "ok",
-          "provider": "gemini",
-          "model_id": "gemini-3.5-flash-lite",
-          "response": {
-            "assessment": "mixed",
-            "priority_candidate": "structural_trade_plans.short",
-            "confidence": "medium",
-            "supporting_evidence": [
-              "structural_trade_plans.short is explicitly marked eligible with zero blockers and a reward-to-risk ratio of 1.6953, satisfying the >=1.5R gate.",
-              "Daily bias is reported as bearish, aligning with the short trade plan direction.",
-              "MACD histogram is negative (-0.0002) and stoch_bearish_cross is true, supporting bearish momentum context."
-            ],
-            "counter_evidence": [
-              "The frozen rule_decision for short retracement levels indicates 'WAIT_FOR_CONFLUENCE' with no immediate retest reaction or liquidity sweep confirmed at the 0.382, 0.5, or 0.618 fib levels.",
-              "Exhaustion context indicates mixed early reversal evidence with a low score (short_reversal_score: 1) and rsi14 at 37.94.",
-              "structural_trade_plans.long is also marked eligible under candidate_universe despite the bearish daily bias, presenting conflicting candidate eligibility."
-            ],
-            "missing_evidence": [
-              "Confirmed candle-close reaction or liquidity sweep and reclaim at specific Fibonacci retracement levels for the short setup.",
-              "Clearer validation of exhaustion parameters to eliminate false-break risks."
-            ],
-            "rationale": "Although structural_trade_plans.short passes the mechanical eligibility and >=1.5R risk-reward gates with bearish daily bias alignment, the underlying retracement execution state is currently 'WAIT_FOR_CONFLUENCE' with unconfirmed reactions at key fib levels. Conversely, long candidates clash with the bearish regime. Therefore, the overall assessment is mixed, favoring the short plan due to trend alignment while noting incomplete execution triggers."
-          },
-          "latency_ms": 2153,
-          "error": null
+          "status": "error",
+          "provider": "huggingface",
+          "model_id": "openai/gpt-oss-120b:cheapest",
+          "response": null,
+          "latency_ms": 5096,
+          "error_category": "quota_or_billing",
+          "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
         "momentum_reversal": {
           "strategy": "stoch-rsi-structural-reversal-v1",
@@ -2485,7 +2449,7 @@
         "multitimeframe_scan": {
           "pair": "DOGEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:14.312105+00:00",
+          "generated_at_utc": "2026-10-25T12:33:07.002313+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -2905,7 +2869,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 227,
+          "latency_ms": 5117,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -2930,7 +2894,7 @@
         "multitimeframe_scan": {
           "pair": "HYPEUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:22:03.637435+00:00",
+          "generated_at_utc": "2026-10-25T12:32:50.836322+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3313,7 +3277,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 288,
+          "latency_ms": 267,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -3338,7 +3302,7 @@
         "multitimeframe_scan": {
           "pair": "VIRTUALUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:55.742585+00:00",
+          "generated_at_utc": "2026-10-25T12:32:37.570063+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -3807,7 +3771,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 241,
+          "latency_ms": 219,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -3832,7 +3796,7 @@
         "multitimeframe_scan": {
           "pair": "BNBUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:48.581555+00:00",
+          "generated_at_utc": "2026-10-25T12:32:28.778115+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -4339,7 +4303,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 245,
+          "latency_ms": 271,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -4364,7 +4328,7 @@
         "multitimeframe_scan": {
           "pair": "AVAXUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:39.246038+00:00",
+          "generated_at_utc": "2026-10-25T12:32:16.018729+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -4729,7 +4693,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 238,
+          "latency_ms": 249,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -4754,7 +4718,7 @@
         "multitimeframe_scan": {
           "pair": "ADAUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:30.118255+00:00",
+          "generated_at_utc": "2026-10-25T12:32:04.267881+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -5141,7 +5105,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 295,
+          "latency_ms": 275,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -5166,7 +5130,7 @@
         "multitimeframe_scan": {
           "pair": "XRPUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:21.529410+00:00",
+          "generated_at_utc": "2026-10-25T12:31:53.116156+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -5544,32 +5508,29 @@
         },
         "model_review": {
           "status": "ok",
-          "provider": "groq",
-          "model_id": "openai/gpt-oss-120b",
+          "provider": "gemini",
+          "model_id": "gemini-3.5-flash-lite",
           "response": {
             "assessment": "mixed",
             "priority_candidate": "structural_trade_plans.short",
             "confidence": "medium",
             "supporting_evidence": [
-              "structural_trade_plans.short.eligible=true",
-              "structural_trade_plans.short.reward_risk=1.5211>=1.5",
-              "directional momentum aligns: momentum_context.stoch_bearish_cross=true",
-              "risk_pct=0.4465 within acceptable range (risk_ok=true)",
-              "stop/target geometry respects ATR and reward/risk thresholds"
+              "Daily bias is bearish with EMA8 and EMA21 aligned downwards.",
+              "Rule decision points toward short direction following the confirmed impulse range.",
+              "Structural short candidate meets the minimum reward-to-risk gate of >= 1.5R with 1.52R.",
+              "Short candidate has zero explicit blockers in the candidate universe."
             ],
             "counter_evidence": [
-              "no confirmed retest or confluence at fib retracement levels (all entries status=\"WAIT_FOR_CONFLUENCE\")",
-              "exhaustion_context.status=\"ok\" but reversal scores mixed (short_reversal_score=1) indicating limited reversal confidence",
-              "research_only flag true \u2013 not a live execution plan"
+              "Rule decision execution notes no order submitted due to incomplete confluence/reaction checks.",
+              "Exhaustion context is mixed with early reversal evidence on both sides."
             ],
             "missing_evidence": [
-              "explicit confirmation of price reaction at a fib level (e.g., bounce or rejection)",
-              "calibrated probability or walk\u2011forward validation for bounce rankings",
-              "finalized entry trigger beyond current \"watching\" state"
+              "Confirmed candle-close confirmation on local retest levels.",
+              "Decisive reaction or sweep-and-reclaim at the designated Fib levels."
             ],
-            "rationale": "The short structural trade plan satisfies all hard gates: it is marked eligible, offers a reward\u2011to\u2011risk ratio above the 1.5 threshold, and aligns with the prevailing bearish momentum (stoch\u2011bearish cross). Risk metrics are within acceptable limits. However, the trade lacks the required confluence and a confirmed retest at the identified fib levels, and the exhaustion context provides only mixed reversal evidence. Consequently, while the short candidate is the most viable, the missing confirmation introduces uncertainty, leading to a mixed assessment with medium confidence."
+            "rationale": "While the structural short trade plan is technically eligible and satisfies hard risk-reward gates under deterministic rules, the rule decision indicates that execution is currently watching due to incomplete confluence or reaction checks. Thus, the assessment is mixed, favoring the short candidate due to overall bearish daily bias and alignment with the rule decision's directional framework."
           },
-          "latency_ms": 3475,
+          "latency_ms": 1868,
           "error": null
         },
         "momentum_reversal": {
@@ -5593,7 +5554,7 @@
         "multitimeframe_scan": {
           "pair": "SOLUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:12.707681+00:00",
+          "generated_at_utc": "2026-10-25T12:31:41.750871+00:00",
           "state": "WATCH_STRUCTURE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -6061,23 +6022,24 @@
           "response": {
             "assessment": "mixed",
             "priority_candidate": "structural_trade_plans.long",
-            "confidence": "medium",
+            "confidence": "low",
             "supporting_evidence": [
-              "structural_trade_plans.long is explicitly marked eligible with zero blockers.",
-              "reward_risk ratio is 1.6409, meeting the >=1.5R gate threshold.",
-              "exhaustion_context indicates lower wick rejection present as mixed early reversal evidence."
+              "structural_trade_plans.long meets minimum reward-to-risk ratio of 1.6409 which exceeds the 1.5 threshold",
+              "structural_trade_plans.short meets minimum reward-to-risk ratio of 2.2385 which exceeds the 1.5 threshold",
+              "Both structural trade plans are explicitly marked eligible in candidate_universe"
             ],
             "counter_evidence": [
-              "daily_bias is bearish with EMAs aligned downwards on the 4h timeframe.",
-              "momentum_reversal_candidate is blocked due to momentum_structure_not_confirmed."
+              "Daily bias is bearish and EMAs are aligned downward against long continuation trades",
+              "Exhaustion context indicates mixed early reversal evidence with rsi_fading",
+              "Momentum reversal candidate is currently blocked due to momentum_structure_not_confirmed"
             ],
             "missing_evidence": [
-              "Confirmed higher timeframe trend continuation for the long side.",
-              "Clean unconflicting volume profile confirmation."
+              "Confirmed bullish structural reversal pattern on higher timeframes",
+              "Clean test and hold of the corresponding Fibonacci retracement levels"
             ],
-            "rationale": "While structural_trade_plans.long passes deterministic eligibility and the >=1.5R reward-to-risk threshold, the overall context features conflicting bearish daily bias and lower timeframe momentum pressures, resulting in a mixed assessment where the long structural candidate remains the primary eligible plan despite mixed headwinds."
+            "rationale": "Although both structural trade plans meet eligibility criteria and the minimum risk-reward gates, the broader daily bias is bearish and momentum indicators show conflicting pressures, resulting in a mixed assessment with low confidence."
           },
-          "latency_ms": 2157,
+          "latency_ms": 1570,
           "error": null
         },
         "momentum_reversal": {
@@ -6108,7 +6070,7 @@
         "multitimeframe_scan": {
           "pair": "ETHUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:21:00.790584+00:00",
+          "generated_at_utc": "2026-10-25T12:31:28.662519+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -6811,7 +6773,7 @@
           "provider": "huggingface",
           "model_id": "openai/gpt-oss-120b:cheapest",
           "response": null,
-          "latency_ms": 318,
+          "latency_ms": 305,
           "error_category": "quota_or_billing",
           "error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402"
         },
@@ -6843,7 +6805,7 @@
         "multitimeframe_scan": {
           "pair": "XBTUSDT",
           "strategy": "daily-thesis-4h-execution-v1",
-          "generated_at_utc": "2026-10-25T12:20:48.273290+00:00",
+          "generated_at_utc": "2026-10-25T12:31:13.159476+00:00",
           "state": "WATCH_MAJOR_MOVE",
           "thesis_direction": "bearish",
           "daily_thesis": {
@@ -11653,7 +11615,7 @@
       "continuation_add_time": "2026-10-25T08:00:00+00:00",
       "continuation_add_close": 8.822,
       "failure_time": null,
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -11711,7 +11673,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": null,
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -11772,7 +11734,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-24T20:00:00+00:00",
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -11835,7 +11797,7 @@
       "continuation_add_time": null,
       "continuation_add_close": null,
       "failure_time": "2026-10-24T20:00:00+00:00",
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T12:00:00+00:00",
@@ -11885,7 +11847,7 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "failure_time": null,
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -11950,7 +11912,7 @@
       "continuation_add_time": "2026-10-24T12:00:00+00:00",
       "continuation_add_close": 79834.9,
       "failure_time": null,
-      "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
       "evidence": {
         "event": "BREAK_CLOSE_PROBE",
         "signal_time": "2026-10-24T04:00:00+00:00",
@@ -12292,6 +12254,590 @@
     }
   ],
   "runs": [
+    {
+      "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+      "started_at": "2026-10-25T12:31:01.013789+00:00",
+      "finished_at": "2026-10-25T12:33:53.018030+00:00",
+      "status": "scan_complete_ai_unavailable",
+      "pairs_checked": 15,
+      "pair_results": [
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "XBTUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:31:01.014122+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 80594.4,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 305,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 64,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:31:14.937956+00:00",
+          "duration_seconds": 13.924,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "ETHUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:31:14.938226+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 2339.8,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1570,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 54,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:31:30.023925+00:00",
+          "duration_seconds": 15.086,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "SOLUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:31:30.024204+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 101.33,
+          "latest_setup_state": "EXPIRED",
+          "latest_setup_message": "No qualifying retest held within 72 hours.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "ok",
+          "ai_review_latency_ms": 1868,
+          "ai_review_error": null,
+          "ai_review_error_category": null,
+          "ai_model_id": "gemini-3.5-flash-lite",
+          "ai_review_assessment": "mixed",
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 44,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=EXPIRED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:31:42.367899+00:00",
+          "duration_seconds": 12.344,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "XRPUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:31:42.368144+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 1.30094,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 275,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 51,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:31:53.734209+00:00",
+          "duration_seconds": 11.366,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "ADAUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:31:53.734456+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 0.205055,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 249,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 29,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:32:04.863904+00:00",
+          "duration_seconds": 11.129,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "AVAXUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:32:04.864152+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 8.822,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "FIB_REACTION_CANDIDATE",
+          "friday_decision_reason": "Confirmed long impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "scan_diagnostic": "Confirmed long impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 271,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 34,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "PAPER_ENTRY",
+              "sent": false,
+              "status": "ai_review_blocked",
+              "reason": "ai_review_not_completed"
+            },
+            {
+              "type": "ENTRY_2",
+              "sent": false,
+              "status": "ai_review_blocked",
+              "reason": "ai_review_not_completed"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:32:17.012607+00:00",
+          "duration_seconds": 12.148,
+          "alert_outcomes_total": 2,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 2
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "BNBUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:32:17.012888+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 743.57,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 219,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 84,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:32:29.397316+00:00",
+          "duration_seconds": 12.384,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "VIRTUALUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:32:29.397564+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 0.6102,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 267,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bearish_turn",
+          "break_event_count": 11,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:32:38.158688+00:00",
+          "duration_seconds": 8.761,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "HYPEUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:32:38.158972+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 76.55,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 5117,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "possible_bullish_turn",
+          "break_event_count": 6,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:32:51.419031+00:00",
+          "duration_seconds": 13.26,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "DOGEUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:32:51.419287+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 0.07678,
+          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 5096,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 32,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:07.605601+00:00",
+          "duration_seconds": 16.186,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "LINKUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:33:07.605900+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 11.40886,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 508,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 52,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:19.184481+00:00",
+          "duration_seconds": 11.579,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "ZECUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:33:19.184730+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 1218.8,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "WATCHING",
+          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+          "multitimeframe_state": "WATCH_STRUCTURE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 233,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 4,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:27.870914+00:00",
+          "duration_seconds": 8.686,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "NEARUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:33:27.871220+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 4.482,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 259,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:36.356571+00:00",
+          "duration_seconds": 8.485,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "SUIUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:33:36.356833+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 0.9198,
+          "latest_setup_state": "INVALIDATED",
+          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 277,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 6,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:44.823794+00:00",
+          "duration_seconds": 8.467,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        },
+        {
+          "run_id": "31197798-fbf8-4533-a8ab-fb58f5b45345",
+          "pair": "LITUSDT",
+          "status": "ok",
+          "market_started_at": "2026-10-25T12:33:44.824052+00:00",
+          "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+          "last_close": 3.2161,
+          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+          "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
+          "friday_decision": "NO_TRADE",
+          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+          "multitimeframe_state": "WATCH_MAJOR_MOVE",
+          "multitimeframe_direction": "bearish",
+          "ai_review_status": "error",
+          "ai_review_latency_ms": 228,
+          "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+          "ai_review_error_category": "quota_or_billing",
+          "ai_model_id": "openai/gpt-oss-120b:cheapest",
+          "ai_review_assessment": null,
+          "reversal_context": "mixed_early_reversal_evidence",
+          "break_event_count": 7,
+          "persistence": "configured",
+          "alert_results": [
+            {
+              "type": "SCAN",
+              "sent": false,
+              "status": "no_actionable_signal",
+              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=ENTRY_PROBE_WAITING_RETEST; execution_blockers=no_fresh_closed_4h_stoch_cross"
+            }
+          ],
+          "market_finished_at": "2026-10-25T12:33:53.017742+00:00",
+          "duration_seconds": 8.194,
+          "alert_outcomes_total": 1,
+          "alert_outcomes_sent": 0,
+          "alert_outcomes_blocked": 1
+        }
+      ],
+      "trade_events_seen": 6,
+      "live_events_persisted": 6,
+      "historical_replay_events_ignored": 479,
+      "error": null,
+      "persistence_configured": true,
+      "markets_requested": 15,
+      "markets_succeeded": 15,
+      "markets_failed": 0,
+      "alert_outcomes_total": 16,
+      "alert_outcomes_sent": 0,
+      "alert_outcomes_blocked": 16,
+      "ai_reviews_ok": 2,
+      "ai_reviews_failed": 13,
+      "run_ledger_persisted": true
+    },
     {
       "run_id": "56ca28d8-c151-4d08-a804-5a93ddede464",
       "started_at": "2026-10-25T12:20:39.008894+00:00",
@@ -17488,585 +18034,6 @@
       "ai_reviews_ok": 15,
       "ai_reviews_failed": 0,
       "run_ledger_persisted": true
-    },
-    {
-      "run_id": "friday-gha-40187166655-1",
-      "started_at": "2026-10-25T11:04:00.969309+00:00",
-      "finished_at": "2026-10-25T11:06:35.551914+00:00",
-      "status": "success",
-      "pairs_checked": 15,
-      "pair_results": [
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "XBTUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:00.969579+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 80676.6,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1766,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 64,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:04:12.576351+00:00",
-          "duration_seconds": 11.607,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "ETHUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:12.576607+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 2347.86,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1619,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 54,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:04:24.916157+00:00",
-          "duration_seconds": 12.34,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "SOLUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:24.916455+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 101.63,
-          "latest_setup_state": "EXPIRED",
-          "latest_setup_message": "No qualifying retest held within 72 hours.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1714,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 44,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=EXPIRED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:04:34.873409+00:00",
-          "duration_seconds": 9.957,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "XRPUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:34.873660+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 1.30158,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.618 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1675,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 51,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:04:45.359520+00:00",
-          "duration_seconds": 10.486,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "ADAUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:45.359781+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 0.205768,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1685,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 29,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:04:55.663156+00:00",
-          "duration_seconds": 10.303,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "AVAXUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:04:55.663408+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 8.856,
-          "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
-          "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1616,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 35,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "ENTRY_1",
-              "sent": false,
-              "status": "not_sent_break_no_longer_fresh",
-              "signal_time": "2026-10-24T04:00:00+00:00",
-              "reason": "Break candle 2026-10-24T04:00:00+00:00 is older than the latest completed candle 2026-10-25T04:00:00+00:00; FRIDAY only sends Entry 1 alerts on the break candle, so it will not send a delayed entry. Retest is held and continuation is still pending."
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:06.842064+00:00",
-          "duration_seconds": 11.179,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "BNBUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:06.842348+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 744.47,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 2095,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 84,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:18.050290+00:00",
-          "duration_seconds": 11.208,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "VIRTUALUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:18.050544+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 0.6215,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1727,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 11,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:26.992880+00:00",
-          "duration_seconds": 8.942,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "HYPEUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:26.993154+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 76.146,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1691,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 6,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:36.020528+00:00",
-          "duration_seconds": 9.027,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "DOGEUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:36.020759+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 0.07698,
-          "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
-          "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
-          "friday_decision": "FIB_REACTION_CANDIDATE",
-          "friday_decision_reason": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "scan_diagnostic": "Confirmed short impulse; 0.500 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1862,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 33,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=CONTINUATION_ADD_CONFIRMED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:46.949657+00:00",
-          "duration_seconds": 10.929,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "LINKUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:46.949912+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 11.39634,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1468,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 52,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:05:57.151169+00:00",
-          "duration_seconds": 10.201,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "ZECUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:05:57.151434+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 1197.33,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "WATCHING",
-          "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
-          "multitimeframe_state": "WATCH_STRUCTURE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 2114,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 4,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:06:06.968101+00:00",
-          "duration_seconds": 9.817,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "NEARUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:06:06.968337+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 4.439,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1942,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:06:16.698832+00:00",
-          "duration_seconds": 9.73,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "SUIUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:06:16.699057+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 0.9187,
-          "latest_setup_state": "INVALIDATED",
-          "latest_setup_message": "The breakout failed its close-based invalidation rule.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1695,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "mixed",
-          "reversal_context": "possible_bearish_turn",
-          "break_event_count": 6,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:06:26.154850+00:00",
-          "duration_seconds": 9.456,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        },
-        {
-          "run_id": "friday-gha-40187166655-1",
-          "pair": "LITUSDT",
-          "status": "ok",
-          "market_started_at": "2026-10-25T11:06:26.155074+00:00",
-          "last_completed_candle_utc": "2026-10-25T04:00:00+00:00",
-          "last_close": 3.2461,
-          "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
-          "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
-          "friday_decision": "NO_TRADE",
-          "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
-          "multitimeframe_state": "WATCH_MAJOR_MOVE",
-          "multitimeframe_direction": "bearish",
-          "ai_review_status": "ok",
-          "ai_review_latency_ms": 1832,
-          "ai_review_error": null,
-          "ai_review_error_category": null,
-          "ai_model_id": "gemini-3.5-flash-lite",
-          "ai_review_assessment": "caution",
-          "reversal_context": "mixed_early_reversal_evidence",
-          "break_event_count": 7,
-          "persistence": "configured",
-          "alert_results": [
-            {
-              "type": "SCAN",
-              "sent": false,
-              "status": "no_actionable_signal",
-              "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=ENTRY_PROBE_WAITING_RETEST; execution_blockers=no_fresh_closed_4h_stoch_cross"
-            }
-          ],
-          "market_finished_at": "2026-10-25T11:06:35.551656+00:00",
-          "duration_seconds": 9.397,
-          "alert_outcomes_total": 1,
-          "alert_outcomes_sent": 0,
-          "alert_outcomes_blocked": 1
-        }
-      ],
-      "trade_events_seen": 6,
-      "live_events_persisted": 6,
-      "historical_replay_events_ignored": 481,
-      "error": null,
-      "persistence_configured": true,
-      "markets_requested": 15,
-      "markets_succeeded": 15,
-      "markets_failed": 0,
-      "alert_outcomes_total": 15,
-      "alert_outcomes_sent": 0,
-      "alert_outcomes_blocked": 15,
-      "ai_reviews_ok": 15,
-      "ai_reviews_failed": 0,
-      "run_ledger_persisted": true
     }
   ],
   "alerts": [
@@ -18210,5 +18177,5 @@
       "invalidation_reason": "originating trendline thesis failed on a completed candle"
     }
   ],
-  "fetched_at": "2026-10-25T12:22:56.393446+00:00"
+  "fetched_at": "2026-10-25T12:33:53.200956+00:00"
 }
