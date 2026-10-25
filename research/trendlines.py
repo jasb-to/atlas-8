@@ -37,6 +37,19 @@ class Trendline:
     tolerance: float
     touch_indices: tuple[int, ...]
     violations: tuple[int, ...]
+    last_touch_confirmed_at: int | None = None
+
+    @property
+    def last_touch_index(self) -> int:
+        """Position of the latest qualifying confirmed pivot contact."""
+        return self.touch_indices[-1] if self.touch_indices else self.end.index
+
+    @property
+    def confirmed_at(self) -> int:
+        """Candle by which every touch used to qualify the line was confirmed."""
+        if self.last_touch_confirmed_at is not None:
+            return self.last_touch_confirmed_at
+        return max(self.start.confirmed_at, self.end.confirmed_at)
 
     def value_at(self, index: int) -> float:
         return self.start.price + self.slope_per_bar * (index - self.start.index)
@@ -80,6 +93,8 @@ def fit_touch_trendlines(
     tolerance_pct: float = 0.0015,
     max_penetration_pct: float = 0.003,
     max_lines: int = 20,
+    min_touch_spacing: int = MIN_TOUCH_SPACING,
+    min_price_eps: float = 1e-8,
 ) -> list[Trendline]:
     """Build candidate lines through same-kind wick pivots and score real wick contacts.
 
@@ -89,8 +104,10 @@ def fit_touch_trendlines(
     observable and must not erase a historically valid line from the research output.
     """
     _validate_ohlc(candles)
-    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0:
-        raise ValueError("Invalid touch or tolerance parameters")
+    if not candles.index.equals(pd.RangeIndex(len(candles))):
+        raise ValueError("fit_touch_trendlines requires a zero-based positional RangeIndex; reset_index(drop=True) first")
+    if min_touches < 2 or tolerance_pct < 0 or max_penetration_pct < 0 or min_touch_spacing < 1 or min_price_eps <= 0:
+        raise ValueError("Invalid touch, spacing, price floor, or tolerance parameters")
     pivots = pivots if pivots is not None else find_wick_pivots(candles)
     points = sorted(
         (p for p in pivots if p.kind == kind),
@@ -144,6 +161,10 @@ def fit_touch_trendlines(
             # same-side swing pivots, while every intervening candle is checked for penetration.
             if len(touch_indices) < min_touches or violations:
                 continue
+            # Keep distinct contacts structurally separate; nearby ragged pivots
+            # should not satisfy the minimum-touch rule on their own.
+            if any((b - a) < min_touch_spacing for a, b in zip(touch_indices, touch_indices[1:])):
+                continue
             lines.append(
                 Trendline(
                     kind=kind,
@@ -153,6 +174,7 @@ def fit_touch_trendlines(
                     tolerance=float(max(np.abs(values).max() * tolerance_pct, 1e-12)),
                     touch_indices=touch_indices,
                     violations=violations,
+                    last_touch_confirmed_at=max(p.confirmed_at for p in points if p.index in touch_indices),
                 )
             )
 
