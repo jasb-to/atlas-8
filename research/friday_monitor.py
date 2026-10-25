@@ -41,17 +41,32 @@ def _entry_filters_pass(
     reversal: dict,
     weekly_direction: str | None = None,
 ) -> tuple[bool, list[str]]:
-    """Use the active weekly thesis as direction gate; ignore 4H momentum/exhaustion.
-
-    Four-hour Stoch RSI, MACD and reversal/exhaustion scores are advisory only and
-    must not veto a confirmed trendline break after the weekly thesis gate passes.
-    """
+    """Require daily bias to agree with the entry and reject strong opposing exhaustion."""
     direction = str(event.get("direction", "")).strip().lower()
     if direction not in {"long", "short"}:
         return False, ["direction_missing"]
+
     thesis_direction = str(weekly_direction or "").strip().lower()
     if thesis_direction in {"long", "short"} and direction != thesis_direction:
         return False, ["direction_conflicts_with_weekly_thesis"]
+
+    daily_bias = str(event.get("daily_bias", "")).strip().lower()
+    if daily_bias not in {"bullish", "bearish"}:
+        return False, ["daily_bias_unavailable"]
+    expected_bias = "bullish" if direction == "long" else "bearish"
+    if daily_bias != expected_bias:
+        return False, ["direction_conflicts_with_daily_bias"]
+
+    long_score = reversal.get("long_reversal_score", 0) if isinstance(reversal, dict) else 0
+    short_score = reversal.get("short_reversal_score", 0) if isinstance(reversal, dict) else 0
+    try:
+        long_score, short_score = float(long_score or 0), float(short_score or 0)
+    except (TypeError, ValueError):
+        return False, ["invalid_reversal_scores"]
+    opposing_score = short_score if direction == "long" else long_score
+    aligned_score = long_score if direction == "long" else short_score
+    if opposing_score >= 3 and opposing_score > aligned_score:
+        return False, ["opposing_exhaustion_filter_blocked_entry"]
     return True, []
 
 
