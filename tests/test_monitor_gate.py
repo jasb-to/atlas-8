@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
+from research.friday_alerts import send_telegram_alert
 from research.friday_monitor import (
     _entry_filters_pass,
     _scan_4h_if_active,
@@ -47,6 +48,20 @@ class MonitorGateTests(unittest.TestCase):
         self.assertTrue(valid_plan)
         self.assertGreaterEqual(rr, 1.5)
         send_alert.assert_called_once_with("paper alert")
+
+    @patch("research.friday_alerts.requests.post")
+    def test_telegram_kill_switch_blocks_delivery_even_with_credentials(self, post):
+        result = send_telegram_alert(
+            "test message",
+            environ={
+                "FRIDAY_TELEGRAM_ENABLED": "false",
+                "TELEGRAM_BOT_TOKEN": "test-token",
+                "TELEGRAM_CHAT_ID": "test-chat",
+            },
+        )
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["status"], "disabled")
+        post.assert_not_called()
 
     def test_invalid_or_low_rr_plan_does_not_fire_alert(self):
         valid_plan, rr = _trade_plan_metrics("short", entry=8.822, stop=9.046, target=8.700)
