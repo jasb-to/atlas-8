@@ -96,9 +96,15 @@ class FridayMonitorTests(unittest.TestCase):
         passed, blockers = _entry_filters_pass(
             {"direction": "short", "momentum_context": {}},
             {"short_reversal_score": 0, "long_reversal_score": 5},
+            weekly_direction="short",
         )
         self.assertTrue(passed)
         self.assertEqual(blockers, [])
+        opposite_passed, opposite_blockers = _entry_filters_pass(
+            {"direction": "long", "momentum_context": {}}, {}, weekly_direction="short"
+        )
+        self.assertFalse(opposite_passed)
+        self.assertEqual(opposite_blockers, ["direction_conflicts_with_weekly_thesis"])
 
     def test_failed_market_writes_a_per_market_summary(self):
         with TemporaryDirectory() as tmp:
