@@ -13,7 +13,9 @@ from research.friday_trade_plan import build_trade_plan
 from research.friday_reversal import reversal_context
 
 
-def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dict:
+def scan_momentum_reversal(
+    frame: pd.DataFrame, *, pair: str = "UNKNOWN", thesis_direction: str | None = None
+) -> dict:
     """Evaluate the latest completed candle without looking into the future."""
     result = {
         "strategy": "stoch-rsi-structural-reversal-v1",
@@ -59,15 +61,36 @@ def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dic
         return result
 
     direction = "short" if cross_down else "long"
+    normalized_thesis = str(thesis_direction or "").strip().lower()
+    expected_thesis = {"bearish": "short", "short": "short", "bullish": "long", "long": "long"}.get(normalized_thesis)
+    if expected_thesis is not None and direction != expected_thesis:
+        result.update({
+            "direction": direction,
+            "signal_time": pd.Timestamp(data.timestamp.iloc[-1]).isoformat(),
+            "blockers": ["countertrend_reversal_blocked_by_daily_thesis"],
+            "daily_thesis_direction": normalized_thesis,
+        })
+        return result
+
+    ema5 = close.ewm(span=5, adjust=False).mean()
     ema8 = close.ewm(span=8, adjust=False).mean()
+    ema13 = close.ewm(span=13, adjust=False).mean()
     ema21 = close.ewm(span=21, adjust=False).mean()
+    close_now = float(close.iloc[-1])
+    ema_aligned = (
+        close_now < min(float(ema5.iloc[-1]), float(ema8.iloc[-1]), float(ema13.iloc[-1]), float(ema21.iloc[-1]))
+        if direction == "short"
+        else close_now > max(float(ema5.iloc[-1]), float(ema8.iloc[-1]), float(ema13.iloc[-1]), float(ema21.iloc[-1]))
+    )
     macd = close.ewm(span=12, adjust=False).mean() - close.ewm(span=26, adjust=False).mean()
     macd_signal = macd.ewm(span=9, adjust=False).mean()
     hist = macd - macd_signal
     # Reversal context is a confluence gate, not a standalone oscillator trade.
     context_ok = (
-        (direction == "short" and (ema8.iloc[-1] < ema21.iloc[-1] or hist.iloc[-1] < hist.iloc[-2]))
-        or (direction == "long" and (ema8.iloc[-1] > ema21.iloc[-1] or hist.iloc[-1] > hist.iloc[-2]))
+        ema_aligned and (
+            (direction == "short" and hist.iloc[-1] < hist.iloc[-2])
+            or (direction == "long" and hist.iloc[-1] > hist.iloc[-2])
+        )
     )
     result.update({
         "direction": direction,
@@ -75,8 +98,12 @@ def scan_momentum_reversal(frame: pd.DataFrame, *, pair: str = "UNKNOWN") -> dic
         "entry": round(float(close.iloc[-1]), 10),
         "stoch_rsi_k": round(float(k.iloc[-1]), 4),
         "stoch_rsi_d": round(float(d.iloc[-1]), 4),
+        "ema5": round(float(ema5.iloc[-1]), 10),
         "ema8": round(float(ema8.iloc[-1]), 10),
+        "ema13": round(float(ema13.iloc[-1]), 10),
         "ema21": round(float(ema21.iloc[-1]), 10),
+        "price_aligned_with_all_emas": bool(ema_aligned),
+        "daily_thesis_direction": normalized_thesis or None,
         "macd_hist": round(float(hist.iloc[-1]), 10),
     })
     if not context_ok:

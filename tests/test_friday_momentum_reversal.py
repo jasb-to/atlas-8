@@ -31,6 +31,24 @@ class FridayMomentumReversalTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("opposing_exhaustion_filter_blocked_entry", blockers)
 
+    def test_long_is_blocked_by_bearish_daily_bias(self):
+        ok, blockers = _entry_filters_pass(
+            {"direction": "long", "daily_bias": "bearish",
+             "momentum_context": {"macd_bullish_expansion": True}},
+            {"long_reversal_score": 1, "short_reversal_score": 0},
+        )
+        self.assertFalse(ok)
+        self.assertIn("direction_conflicts_with_daily_bias", blockers)
+
+    def test_short_is_blocked_by_bullish_daily_bias(self):
+        ok, blockers = _entry_filters_pass(
+            {"direction": "short", "daily_bias": "bullish",
+             "momentum_context": {"stoch_bearish_cross": True}},
+            {"long_reversal_score": 0, "short_reversal_score": 1},
+        )
+        self.assertFalse(ok)
+        self.assertIn("direction_conflicts_with_daily_bias", blockers)
+
     def test_missing_direction_is_blocked(self):
         ok, blockers = _entry_filters_pass({"momentum_context": {}}, {})
         self.assertFalse(ok)

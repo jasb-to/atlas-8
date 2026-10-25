@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from research.friday_paper_trades import register_paper_trade, update_paper_trades
+from research.friday_paper_trades import register_paper_trade, update_paper_trades, invalidate_paper_trade
 
 
 class FakeStore:
@@ -53,6 +53,20 @@ class PaperTradeLifecycleTests(unittest.TestCase):
         self.assertEqual(rows[0]["status"], "CLOSED")
         self.assertEqual(rows[0]["exit_reason"], "TAKE_PROFIT")
         self.assertEqual(rows[0]["realized_r_multiple"], 2.0)
+
+    def test_failed_break_closes_matching_paper_trade_before_wide_stop(self):
+        store = FakeStore()
+        register_paper_trade(store, pair="ETHUSDT", strategy="friday-price-action-v2",
+            signal_time="2026-10-24T13:00:00Z", direction="short",
+            entry=2306.21, stop=2530.88, target=1912.52, reward_risk=1.75)
+        closed = invalidate_paper_trade(
+            store, pair="ETHUSDT", signal_time="2026-10-24T13:00:00+00:00",
+            exit_time="2026-10-25T04:00:00Z", exit_price=2363.0,
+        )
+        self.assertIsNotNone(closed)
+        self.assertEqual(closed["status"], "CLOSED")
+        self.assertEqual(closed["exit_reason"], "THESIS_INVALIDATED")
+        self.assertLess(closed["realized_r_multiple"], 0)
 
     def test_same_candle_stop_and_target_uses_conservative_stop(self):
         store = FakeStore()

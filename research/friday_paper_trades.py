@@ -106,3 +106,39 @@ def update_paper_trades(store, *, pair: str, candles: pd.DataFrame) -> list[dict
         store.upsert_paper_trade(trade)
         updated.append(trade)
     return updated
+
+
+def invalidate_paper_trade(store, *, pair: str, signal_time: str | None,
+                           exit_time: str, exit_price: float,
+                           reason: str = "THESIS_INVALIDATED") -> dict[str, Any] | None:
+    """Close the matching open paper position when its originating structure fails."""
+    if not signal_time:
+        return None
+    target_time = pd.to_datetime(signal_time, utc=True)
+    for trade in store.paper_trades():
+        if (
+            str(trade.get("pair", "")).upper() != pair.upper()
+            or str(trade.get("strategy", "")) != "friday-price-action-v2"
+            or str(trade.get("status", "")).upper() != "OPEN"
+        ):
+            continue
+        if pd.to_datetime(trade.get("signal_time"), utc=True) != target_time:
+            continue
+        entry = float(trade["entry"])
+        stop = float(trade["stop_loss"])
+        price = float(exit_price)
+        direction = str(trade["direction"]).lower()
+        risk = abs(entry - stop)
+        pnl_distance = price - entry if direction == "long" else entry - price
+        trade.update({
+            "status": "CLOSED",
+            "exit_time": pd.to_datetime(exit_time, utc=True).isoformat(),
+            "exit_price": price,
+            "exit_reason": reason,
+            "realized_r_multiple": round(pnl_distance / risk, 4) if risk else None,
+            "invalidation_reason": "originating trendline thesis failed on a completed candle",
+            "last_checked_at": utc_now(),
+        })
+        store.upsert_paper_trade(trade)
+        return trade
+    return None

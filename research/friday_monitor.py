@@ -50,6 +50,11 @@ def _entry_filters_pass(event: dict, reversal: dict) -> tuple[bool, list[str]]:
     else:
         return False, ["direction_missing"]
     blockers = []
+    daily_bias = str(event.get("daily_bias", "")).strip().lower()
+    if direction == "long" and daily_bias == "bearish":
+        blockers.append("direction_conflicts_with_daily_bias")
+    elif direction == "short" and daily_bias == "bullish":
+        blockers.append("direction_conflicts_with_daily_bias")
     if not momentum_ok:
         blockers.append("directional_momentum_filter_failed")
     if opposing >= 2 and opposing > aligned:
@@ -153,7 +158,62 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             (pair_dir / "multitimeframe_scan.json").write_text(json.dumps(mtf, indent=2, allow_nan=False))
             latest = _utc(result["last_completed_candle_utc"])
             candles = pd.DataFrame(result.get("closed_candles", []))
+            # Apply thesis invalidation before scanning later candles for stop/target,
+            # so a failed structure cannot be retroactively treated as a live trade.
+            # Close a paper thesis immediately when the original structural break
+            # is confirmed failed, even if its wider stop has not been touched.
+            if store.configured and hasattr(store, "paper_trades"):
+                from research.friday_paper_trades import invalidate_paper_trade
+                for failed_event in result.get("break_events", []):
+                    if failed_event.get("outcome") == "failed_break":
+                        invalidate_paper_trade(
+                            store, pair=pair, signal_time=failed_event.get("signal_time"),
+                            exit_time=failed_event.get("failure_time") or latest.isoformat(),
+                            exit_price=float(failed_event.get("failure_close") or result["last_close"]),
+                            reason="THESIS_INVALIDATED",
+                        )
             paper_updates = update_paper_trades(store, pair=pair, candles=candles) if store.configured and hasattr(store, "paper_trades") else []
+            # A retained thesis may become executable on a later closed 4H candle.
+            # Keep the original break identity, but emit a distinct execution event
+            # when a fresh stochastic cross aligns with the daily bias and all EMAs.
+            monitor_events = list(result.get("break_events", []))
+            execution = result.get("execution_trigger", {}) or {}
+            latest_setup_for_execution = result.get("latest_setup_state", {}) or {}
+            source_break = next((
+                event for event in result.get("break_events", [])
+                if event.get("signal_time") == latest_setup_for_execution.get("signal_time")
+            ), None)
+            if (
+                execution.get("eligible")
+                and str(latest_setup_for_execution.get("state", "")).upper() == "RETEST_HELD_WAITING_CONTINUATION"
+                and source_break
+                and source_break.get("outcome") == "retest_held_waiting_continuation"
+                and str(source_break.get("direction", "")).lower() == str(execution.get("direction", "")).lower()
+            ):
+                monitor_events.append({
+                    "event": "EXECUTION_TRIGGER_ENTRY_1",
+                    "signal_time": execution.get("signal_time"),
+                    "direction": execution.get("direction"),
+                    "line_kind": source_break.get("line_kind"),
+                    "line_price_at_break": source_break.get("line_price_at_break"),
+                    "close_at_break": execution.get("close"),
+                    "touch_count": source_break.get("touch_count"),
+                    "daily_bias": execution.get("daily_bias"),
+                    "ema_aligned": True,
+                    "momentum_context": {
+                        "stoch_bullish_cross": bool(execution.get("stoch_bullish_cross")),
+                        "stoch_bearish_cross": bool(execution.get("stoch_bearish_cross")),
+                        "macd_bullish_expansion": False,
+                        "macd_bearish_expansion": False,
+                    },
+                    "anchor_start_time": source_break.get("anchor_start_time"),
+                    "anchor_end_time": source_break.get("anchor_end_time"),
+                    "original_break_signal_time": source_break.get("signal_time"),
+                    "execution_trigger": execution,
+                    "outcome": "execution_trigger_confirmed",
+                    "retest_confirmed": True,
+                    "research_only": True,
+                })
             row = {
                 "run_id": run_id,
                 "pair": pair, "status": "ok",
@@ -209,10 +269,10 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
             # Register fresh price-action entries only when directional momentum
             # and exhaustion gates pass and a structural plan clears at least 1.5R.
             reversal_context_now = result.get("reversal_context", {})
-            for event in result.get("break_events", []):
+            for event in monitor_events:
                 event_time = _utc(event["signal_time"]) if event.get("signal_time") else None
                 add_time = _utc(event["continuation_add_time"]) if event.get("continuation_add_time") else None
-                is_fresh_entry = (event.get("event") == "BREAK_CLOSE_PROBE" and event_time == latest) or (
+                is_fresh_entry = (event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and event_time == latest) or (
                     event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_time == latest
                 )
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
@@ -248,7 +308,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 )
             # Persist the lifecycle ledger idempotently. Only alert events that
             # first become actionable on the latest closed candle.
-            for event in result.get("break_events", []):
+            for event in monitor_events:
                 normalized = dict(event)
                 signal_ts = _utc(event["signal_time"]) if event.get("signal_time") else None
                 add_ts = _utc(event["continuation_add_time"]) if event.get("continuation_add_time") else None
@@ -269,7 +329,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 else:
                     historical_rows_ignored += 1
 
-                fresh_entry1 = event.get("event") == "BREAK_CLOSE_PROBE" and signal_ts == latest and signal_ts is not None and signal_ts >= tracking_cutoff
+                fresh_entry1 = event.get("event") in {"BREAK_CLOSE_PROBE", "EXECUTION_TRIGGER_ENTRY_1"} and signal_ts == latest and signal_ts is not None and signal_ts >= tracking_cutoff
                 fresh_entry2 = event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" and add_ts == latest and add_ts is not None and add_ts >= tracking_cutoff
                 # Make the lifecycle/notification distinction explicit. A break found
                 # on an older candle must not be sent later as if it were a fresh entry.
@@ -494,6 +554,15 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                             "No delayed Entry 1 alert is sent; wait for a fresh continuation signal."
                         ),
                     })
+            if not row["alert_results"]:
+                row["alert_results"].append({
+                    "type": "SCAN", "sent": False, "status": "no_actionable_signal",
+                    "reason": (
+                        "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. "
+                        f"setup={latest_setup_state or 'unknown'}; "
+                        f"execution_blockers={', '.join(execution.get('blockers', [])) or 'none'}"
+                    ),
+                })
             row["market_finished_at"] = utc_now()
             row["duration_seconds"] = round((pd.Timestamp(row["market_finished_at"]) - pd.Timestamp(pair_started)).total_seconds(), 3)
             row["alert_outcomes_total"] = len(row["alert_results"])
