@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Row = Record<string, any>;
 type Payload = {
@@ -36,7 +36,6 @@ const thesisFor = (snapshots: Row[], pair: string) => {
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
   const [busy, setBusy] = useState(false);
-  const [view, setView] = useState<"overview" | "debug">("overview");
 
   async function refresh() {
     setBusy(true);
@@ -92,7 +91,99 @@ export default function Home() {
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
   );
   const recentEvents = data.events.slice(0, 40);
-  const lastScan = latestRun?.finished_at ?? latestRun?.started_at;
+ client";
+
+import { useEffect, useState } from "react";
+
+type Row = Record<string, any>;
+type Payload = {
+  connected: boolean; status: string; message: string;
+  snapshots: Row[]; weekly_theses: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; paper_trades: Row[];
+  fetched_at?: string;
+};
+const empty: Payload = { connected: false, status: "loading", message: "Loading FRIDAY data…", snapshots: [], weekly_theses: [], events: [], runs: [], alerts: [], paper_trades: [] };
+const WATCH_PAIRS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "AVAXUSDT", "LINKUSDT"];
+const fmtTime = (value?: string) => value ? new Date(value).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }) : "—";
+const fmtPrice = (value: unknown) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) ? Number(value).toLocaleString("en-GB", { maximumFractionDigits: 6 }) : "—";
+const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object" ? row.payload : {};
+const clean = (value: unknown) => String(value ?? "—").replaceAll("_", " ");
+const pairName = (value: unknown) => {
+  const pair = String(value ?? "").toUpperCase();
+  if (["XBTUSDT", "XBTUSD", "BTCUSD"].includes(pair)) return "BTCUSDT";
+  return pair.endsWith("USD") && !pair.endsWith("USDT") ? pair.slice(0, -3) + "USDT" : pair;
+};
+const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
+const direction = (value: unknown) => String(value ?? "").toLowerCase();
+const isBull = (value: unknown) => ["long", "bullish", "active_long"].includes(direction(value));
+const isBear = (value: unknown) => ["short", "bearish", "active_short"].includes(direction(value));
+const thesisFor = (snapshots: Row[], pair: string) => {
+  for (const snap of snapshots) {
+    if (pairName(snap.pair) !== pair) continue;
+    const p = payloadOf(snap);
+    const thesis = snap.record_type === "weekly_thesis_snapshot" ? p : (p.weekly_thesis ?? p.sheldon_weekly_thesis ?? p.weeklyThesis ?? p.multitimeframe_scan?.weekly_thesis);
+    if (thesis && typeof thesis === "object") return thesis as Row;
+  }
+  return null;
+};
+
+export default function Home() {
+  const [data, setData] = useState<Payload>(empty);
+  const [busy, setBusy] = useState(false);
+
+  async function refresh() {
+    setBusy(true);
+    try {
+      const response = await fetch("/api/friday", { cache: "no-store" });
+      const body = await response.json();
+      setData({ ...empty, ...body });
+    } catch {
+      setData({ ...empty, status: "unreachable", message: "Dashboard API could not be reached." });
+    } finally { setBusy(false); }
+  }
+  useEffect(() => {
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const latestRun = data.runs[0];
+  const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
+  const snapshots = data.snapshots ?? [];
+  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
+  const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
+  const successfulAiReview = pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
+  const aiReviewActive = Boolean(successfulAiReview);
+  const aiProvider = String(successfulAiReview?.ai_provider ?? "GROQ").toUpperCase();
+  const weeklyCards = WATCH_PAIRS.map(pair => {
+    const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
+    const scan = scanByPair.get(pair);
+    const weeklyTrend = thesis?.weekly_trend ?? thesis?.weekly_status ?? thesis?.weekly_direction ??
+      (thesis?.weekly_ema8 != null && thesis?.weekly_ema21 != null
+        ? Number(thesis.weekly_ema8) > Number(thesis.weekly_ema21) ? "bullish" : "bearish"
+        : undefined);
+    const dailyTrend = thesis?.daily_alignment ?? thesis?.daily_status ?? thesis?.daily_direction ??
+      (thesis?.daily_ema8 != null && thesis?.daily_ema21 != null &&
+       thesis?.daily_stoch_k != null && thesis?.daily_stoch_d != null
+        ? Number(thesis.daily_ema8) > Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) > Number(thesis.daily_stoch_d)
+          ? "bullish"
+          : Number(thesis.daily_ema8) < Number(thesis.daily_ema21) && Number(thesis.daily_stoch_k) < Number(thesis.daily_stoch_d)
+            ? "bearish"
+            : "misaligned"
+        : undefined);
+    const weeklyMomentum = thesis?.weekly_stoch_aligned === true
+      ? "K > D"
+      : thesis?.weekly_stoch_aligned === false
+        ? "K < D"
+        : thesis?.weekly_stoch_k != null && thesis?.weekly_stoch_d != null
+          ? Number(thesis.weekly_stoch_k) > Number(thesis.weekly_stoch_d) ? "K > D" : "K < D"
+          : "Not available";
+    const active = String(thesis?.status ?? "").toLowerCase() === "active";
+    return { pair, thesis, scan, weeklyTrend, dailyTrend, weeklyMomentum, active };
+  });
+  const watchlist = weeklyCards.filter(card =>
+    card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
+  );
+  const recentEvents = data.events.slice(0, 40);
   const headerDate = new Date().toLocaleString("en-GB", {
     day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short"
   }).toUpperCase();
@@ -112,7 +203,7 @@ export default function Home() {
       <div className="thesis-grid">
         {weeklyCards.map(card => {
           const trend = card.weeklyTrend ?? "Unavailable";
-          const dailyPass = card.active && (isBull(card.dailyTrend) || isBear(card.dailyTrend));
+          const dailyPass = (isBull(trend) && isBull(card.dailyTrend)) || (isBear(trend) && isBear(card.dailyTrend));
           const status = card.active ? "READY" : "SKIPPED";
           return <article className="thesis-card" key={card.pair}>
             <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : "pill neutral"}>{status}</span></div>
