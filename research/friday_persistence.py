@@ -363,10 +363,12 @@ class RepoFolderFridayStore:
         for record in self._read("archive.json"):
             record_type = record.get("record_type")
             if record_type == "weekly_thesis_snapshot":
-                if str(record.get("pair", "")).upper().endswith("USDT") and post_launch(record.get("signal_time")):
+                if (
+                    len(weekly_theses) < 25
+                    and str(record.get("pair", "")).upper().endswith("USDT")
+                    and post_launch(record.get("signal_time"))
+                ):
                     weekly_theses.append(record)
-                    if len(weekly_theses) == 25:
-                        continue
                 continue
             if record_type != "decision_snapshot":
                 continue
