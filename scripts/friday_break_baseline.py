@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import requests
+import time
 
 from research.friday_decision import evaluate_friday_decision
 from research.friday_momentum_reversal import scan_momentum_reversal
@@ -28,6 +30,79 @@ DEFAULT_PAIRS = (
     "VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT"
 )
 HORIZONS = (3, 6, 12, 18)
+
+
+def _download_pair(data_dir: Path, pair: str, start: pd.Timestamp, end: pd.Timestamp) -> Path:
+    """Download closed 4H candles from public Binance spot; HYPE may fall back to Hyperliquid."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    start_ms, end_ms = int(start.timestamp() * 1000), int(end.timestamp() * 1000)
+    symbol = pair.replace("XBT", "BTC")
+    step_ms = 4 * 60 * 60 * 1000
+    rows: list[list[Any]] = []
+    cursor = start_ms
+    last_error: Exception | None = None
+    while cursor < end_ms:
+        try:
+            response = requests.get(
+                "https://data-api.binance.vision/api/v3/klines",
+                params={"symbol": symbol, "interval": "4h", "startTime": cursor, "endTime": end_ms, "limit": 1000},
+                timeout=30,
+                headers={"User-Agent": "atlas-8-friday-baseline/1.0"},
+            )
+            response.raise_for_status()
+            batch = response.json()
+            if not isinstance(batch, list):
+                raise RuntimeError(f"Unexpected Binance response for {symbol}: {batch}")
+            if not batch:
+                break
+            rows.extend(batch)
+            next_cursor = int(batch[-1][0]) + step_ms
+            if next_cursor <= cursor:
+                break
+            cursor = next_cursor
+            time.sleep(0.15)
+            if len(batch) < 1000:
+                break
+        except (requests.RequestException, ValueError, RuntimeError) as exc:
+            last_error = exc
+            break
+
+    if rows:
+        frame = pd.DataFrame(rows, columns=[
+            "open_time", "open", "high", "low", "close", "volume", "close_time",
+            "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore",
+        ])
+        frame["timestamp"] = pd.to_datetime(pd.to_numeric(frame["open_time"]), unit="ms", utc=True)
+        for column in ("open", "high", "low", "close", "volume"):
+            frame[column] = pd.to_numeric(frame[column], errors="raise")
+        frame = frame[["timestamp", "open", "high", "low", "close", "volume"]]
+    elif pair == "HYPEUSDT":
+        # Hyperliquid is the fallback for HYPE if Binance spot history is unavailable.
+        response = requests.post(
+            "https://api.hyperliquid.xyz/info",
+            json={"type": "candleSnapshot", "req": {"coin": "HYPE", "interval": "4h", "startTime": start_ms, "endTime": end_ms}},
+            timeout=30,
+            headers={"User-Agent": "atlas-8-friday-baseline/1.0"},
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if not payload:
+            raise RuntimeError(f"No 4H history for {pair}; Binance error was {last_error}")
+        frame = pd.DataFrame(payload)
+        frame["timestamp"] = pd.to_datetime(pd.to_numeric(frame["t"]), unit="ms", utc=True)
+        for source, target in (("o", "open"), ("h", "high"), ("l", "low"), ("c", "close"), ("v", "volume")):
+            frame[target] = pd.to_numeric(frame[source], errors="raise")
+        frame = frame[["timestamp", "open", "high", "low", "close", "volume"]]
+    else:
+        raise RuntimeError(f"Could not download {pair} from Binance spot: {last_error}")
+    frame = frame.drop_duplicates("timestamp").sort_values("timestamp").reset_index(drop=True)
+    frame = frame[(frame["timestamp"] >= start) & (frame["timestamp"] + pd.Timedelta(hours=4) <= end)]
+    if frame.empty:
+        raise RuntimeError(f"Downloaded no closed 4H candles for {pair}")
+    path = data_dir / f"{pair}_4h.parquet"
+    frame.to_parquet(path, index=False)
+    print(f"[baseline-data] {pair}: {len(frame)} candles from {frame.timestamp.iloc[0]} to {frame.timestamp.iloc[-1]}", flush=True)
+    return path
 
 
 def _read_pair(data_dir: Path, pair: str) -> pd.DataFrame:
@@ -264,6 +339,7 @@ def main() -> None:
     parser.add_argument("--data-dir", type=Path, default=Path("data/friday_baseline"))
     parser.add_argument("--output-dir", type=Path, default=Path("results/friday-baseline"))
     parser.add_argument("--pairs", default=DEFAULT_PAIRS)
+    parser.add_argument("--download", action="store_true", help="Fetch the requested window from public market-data APIs before replay.")
     parser.add_argument("--start", default="2026-04-25T00:00:00Z")
     parser.add_argument("--end", default="2026-10-25T00:00:00Z")
     args = parser.parse_args()
@@ -271,9 +347,19 @@ def main() -> None:
     end = pd.Timestamp(args.end)
     if start.tzinfo is None or end.tzinfo is None or start >= end:
         parser.error("--start and --end must be timezone-aware timestamps with start < end")
+    pairs = [pair.strip().upper() for pair in args.pairs.split(",") if pair.strip()]
+    if args.download:
+        failed = []
+        for pair in pairs:
+            try:
+                _download_pair(args.data_dir, pair, start.tz_convert("UTC"), end.tz_convert("UTC"))
+            except Exception as exc:
+                failed.append(f"{pair}: {type(exc).__name__}: {exc}")
+        if failed:
+            raise RuntimeError("Historical data download incomplete:\n" + "\n".join(failed))
     report = run_baseline(
         data_dir=args.data_dir, output_dir=args.output_dir,
-        pairs=[pair.strip().upper() for pair in args.pairs.split(",") if pair.strip()],
+        pairs=pairs,
         start=start.tz_convert("UTC"), end=end.tz_convert("UTC"),
     )
     print(json.dumps(report, indent=2))
