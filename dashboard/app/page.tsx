@@ -58,7 +58,6 @@ export default function Home() {
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const snapshots = data.snapshots ?? [];
   const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
-  const closedTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "CLOSED").slice(0, 6);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const successfulAiReview = pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
   const aiReviewActive = Boolean(successfulAiReview);
@@ -178,15 +177,6 @@ export default function Home() {
         </div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No weekly-approved setups waiting</b><p>There is no persisted active weekly thesis attached to a waiting 4H setup. Candidates will appear here when both records exist.</p></div></div>}
       </section>
 
-      <section className="section-block compact">
-        <div className="section-heading"><div><span className="eyebrow">04 / RECENT RESULTS</span><h2>Recently closed trades</h2></div><span className="section-count">{closedTrades.length} SHOWN</span></div>
-        <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>DIRECTION</th><th>STATUS</th><th>RESULT</th><th>CLOSED</th></tr></thead><tbody>
-          {closedTrades.length ? closedTrades.map((trade, index) => {
-            const result = Number(trade.realized_r_multiple);
-            return <tr key={trade.trade_id ?? index}><td><b>{shortPair(trade.pair)}</b></td><td><span className={direction(trade.direction) === "long" ? "direction long" : "direction short"}>{String(trade.direction ?? "—").toUpperCase()}</span></td><td>{clean(trade.exit_reason ?? "Closed")}</td><td className={Number.isFinite(result) ? result >= 0 ? "positive-text" : "negative-text" : ""}>{Number.isFinite(result) ? (result > 0 ? "+" : "") + result.toFixed(2) + "R" : "—"}</td><td>{fmtTime(trade.exit_time)}</td></tr>;
-          }) : <tr><td colSpan={5} className="table-empty">No closed paper trades have been recorded yet.</td></tr>}
-        </tbody></table></div>
-      </section>
     </> : <>
       <section className="section-block debug-page">
         <div className="section-heading"><div><span className="eyebrow">DIAGNOSTICS / HIDDEN FROM OVERVIEW</span><h2>Debug & scan evidence</h2><p>Operational details remain available here without overwhelming the scoreboard.</p></div></div>
