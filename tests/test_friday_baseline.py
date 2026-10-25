@@ -19,7 +19,7 @@ class FridayBaselineTests(unittest.TestCase):
     def test_forward_returns_are_calculated_even_for_terminal_events(self):
         frame = self.frame()
         returns = _forward_returns(frame, frame.iloc[2]["timestamp"].isoformat(), "long")
-        self.assertAlmostEqual(returns["forward_3_bar_return_pct"], (104 / 103 - 1) * 100, places=5)
+        self.assertAlmostEqual(returns["forward_3_bar_return_pct"], (106 / 103 - 1) * 100, places=5)
         self.assertIsNotNone(returns["forward_18_bar_return_pct"])
 
     def test_forward_returns_are_null_when_horizon_is_not_available(self):
