@@ -296,6 +296,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 "multitimeframe_state": mtf.get("state"),
                 "multitimeframe_direction": mtf.get("thesis_direction"),
                 "ai_review_status": result.get("model_review", {}).get("status", "missing"),
+                "ai_provider": result.get("model_review", {}).get("provider"),
                 "ai_review_latency_ms": result.get("model_review", {}).get("latency_ms"),
                 "ai_review_error": result.get("model_review", {}).get("error"),
                 "ai_review_error_category": result.get("model_review", {}).get("error_category"),
