@@ -21,26 +21,39 @@ class FridayAlertTests(unittest.TestCase):
         self.assertIn("Weekly filter not applied", message)
         self.assertIn("(Mode: Research / Paper Only)", message)
 
-    def test_entry2_alert_only_after_continuation_event(self):
+    def test_entry2_alert_calculates_reward_risk_from_geometry(self):
         message = build_signal_alert({
             "event": "BREAK_CLOSE_PROBE", "event_add": "CONTINUATION_ADD_CONFIRMED",
             "direction": "short", "signal_time": "2026-10-21T12:00:00+00:00",
             "continuation_add_time": "2026-10-21T16:00:00+00:00",
             "continuation_add_close": 8.822, "continuation_trigger": 8.828,
             "line_price_at_break": 9.0019, "paper_stop": 9.0467,
-            "paper_target": 7.833, "paper_reward_risk": 4.4,
+            "paper_target": 7.833, "paper_reward_risk": 999,
         }, pair="AVAXUSDT", weekly_thesis={"status": "active", "direction": "short"},
            daily_context={"bias": "bearish"})
         self.assertIn("🚨 FRIDAY | ENTRY 2 CONFIRMED", message)
         self.assertIn("🎯 Entry: 8.822", message)
         self.assertIn("🛑 Stop Loss: 9.0467", message)
+        self.assertIn("💰 TP1: 8.48495 (1.5R)", message)
         self.assertIn("💰 TP2: 7.833 (4.4R)", message)
+        self.assertNotIn("999", message)
         self.assertIn("Weekly bearish. Daily bearish.", message)
         self.assertIn("retest held; continuation confirmed", message)
 
-    def test_invalid_event_rejected(self):
-        with self.assertRaises(ValueError):
-            build_signal_alert({"event": "NOT_AN_ENTRY", "direction": "short"}, pair="BTCUSDT")
+    def test_invalid_event_returns_geometry_error(self):
+        message = build_signal_alert({"event": "NOT_AN_ENTRY", "direction": "short"}, pair="BTCUSDT")
+        self.assertTrue(message.startswith("Invalid trade geometry:"))
+
+    def test_invalid_geometry_is_not_sent(self):
+        message = build_signal_alert({
+            "event": "BREAK_CLOSE_PROBE", "direction": "short",
+            "close_at_break": "8.822", "paper_stop": 0, "paper_target": "none",
+        }, pair="AVAXUSDT")
+        result = send_telegram_alert(
+            message, environ={"TELEGRAM_BOT_TOKEN": "not-used", "TELEGRAM_CHAT_ID": "not-used"}
+        )
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["status"], "invalid_trade_geometry")
 
     def test_missing_telegram_credentials_is_safe_noop(self):
         result = send_telegram_alert("test", environ={})
