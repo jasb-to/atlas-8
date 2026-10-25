@@ -7,8 +7,8 @@ from research.weekly_thesis import calculate_stoch_rsi, evaluate_sheldon_thesis
 
 
 SCHEMA = {
-    "pair", "status", "direction", "weekly_close", "weekly_sma",
-    "weekly_stoch_k", "weekly_stoch_d", "daily_close", "daily_sma",
+    "pair", "status", "direction", "weekly_close", "weekly_ema8", "weekly_ema21",
+    "weekly_stoch_k", "weekly_stoch_d", "daily_close", "daily_ema8", "daily_ema21",
     "daily_stoch_k", "daily_stoch_d", "weekly_stoch_cross",
     "weekly_stoch_aligned", "reason", "generated_at_utc",
 }
@@ -64,10 +64,10 @@ class WeeklyThesisTests(unittest.TestCase):
             self.assertEqual(result_with_open[key], result_without_open[key], key)
 
 
-    def test_200_candles_fail_and_201_candles_clear_history_boundary(self):
+    def test_20_candles_fail_and_21_candles_clear_ema_history_boundary(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
-        daily_times = pd.date_range(end="2026-10-24", periods=201, freq="D", tz="UTC")
-        weekly_times = pd.date_range(end="2026-10-18", periods=201, freq="7D", tz="UTC")
+        daily_times = pd.date_range(end="2026-10-24", periods=40, freq="D", tz="UTC")
+        weekly_times = pd.date_range(end="2026-10-18", periods=21, freq="7D", tz="UTC")
         def frame(times):
             x = np.arange(len(times), dtype=float)
             return pd.DataFrame({
@@ -79,7 +79,7 @@ class WeeklyThesisTests(unittest.TestCase):
             "XBTUSDT", weekly_candles=weekly.iloc[:-1], daily_candles=daily, as_of=as_of
         )
         self.assertEqual(boundary["status"], "insufficient_data")
-        self.assertIn("weekly=200", boundary["reason"])
+        self.assertIn("weekly=20", boundary["reason"])
         enough = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
         )
