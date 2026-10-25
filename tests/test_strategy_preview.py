@@ -83,6 +83,33 @@ class StrategyPreviewTests(unittest.TestCase):
         from research.strategy_preview import RETEST_BARS
         self.assertEqual(RETEST_BARS * 4, 72)
 
+    def test_line_retest_maps_prefix_coordinates_to_full_frame(self):
+        line = self.line("resistance")
+        frame = pd.DataFrame({
+            "high": [101.0] * 9,
+            "low": [100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 100.5, 99.9, 100.2],
+            "close": [100.6, 100.6, 100.6, 100.6, 100.6, 100.6, 100.6, 100.1, 100.4],
+        })
+        found, index, held = line_retest(frame, line, 6, 8, origin=5)
+        self.assertTrue(found)
+        self.assertEqual(index, 7)
+        self.assertTrue(held)
+
+    def test_indicators_precompute_macd_for_replay(self):
+        from research.strategy_preview import indicators
+        frame = pd.DataFrame({
+            "timestamp": pd.date_range("2026-10-01", periods=40, freq="4h", tz="UTC"),
+            "open": [100.0 + i for i in range(40)],
+            "high": [101.0 + i for i in range(40)],
+            "low": [99.0 + i for i in range(40)],
+            "close": [100.5 + i for i in range(40)],
+            "volume": [1000.0] * 40,
+        })
+        enriched = indicators(frame)
+        self.assertTrue({"macd", "macd_signal", "macd_hist"}.issubset(enriched.columns))
+        context = momentum_context(enriched, len(enriched) - 1)
+        self.assertIn("macd_histogram", context)
+
 
     def test_live_preview_does_not_retain_stale_line_when_latest_has_none(self):
         n = 100
