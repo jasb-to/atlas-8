@@ -350,10 +350,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now, weekly_thesis.get("direction"))
-                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
-                if not ai_pass:
-                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
-                    continue
+                # AI review is advisory only; it must never veto an aligned 4H breakout.
                 if not passed:
                     row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "filtered", "reason": ", ".join(filter_blockers)})
                     continue
@@ -454,10 +451,7 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     })
                 if fresh_entry1 or fresh_entry2:
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}), weekly_thesis.get("direction"))
-                    ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "friday-price-action-v2", event.get("direction"))
-                    if not ai_pass:
-                        row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
-                        continue
+                    # AI review is advisory only; the HTF thesis and trade geometry govern entry.
                     direction = str(event.get("direction", "")).lower()
                     plan = (result.get("trade_plans") or {}).get(direction, {})
                     entry_ref = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
