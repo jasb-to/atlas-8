@@ -20,18 +20,19 @@ python - <<'PY'
 from pathlib import Path
 import re
 patterns = [re.compile(r"(?i)huggingface"), re.compile(r"(?i)HF_"), re.compile(r"(?i)vercel.*ai-review")]
-roots = [Path("research"), Path("dashboard"), Path("tests")]
-extensions = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json", ".yml", ".yaml", ".sh"}
+root = Path(".")
+extensions = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json", ".yml", ".yaml", ".sh", ".toml", ".txt"}
 matches = []
-for root in roots:
-    if not root.exists():
+for path in root.rglob("*"):
+    if not path.is_file():
         continue
-    for path in root.rglob("*"):
-        if not path.is_file() or path.suffix.lower() not in extensions:
-            continue
-        if any(part.lower() in {"docs", "documentation", "node_modules", ".next"} for part in path.parts):
-            continue
-        for line_no, line in enumerate(path.read_text(errors="replace").splitlines(), 1):
+    if path.suffix.lower() not in extensions and not path.name.startswith(".env"):
+        continue
+    if path.as_posix() in {".github/workflows/friday-full-audit.yml", "run_full_audit.sh"}:
+        continue
+    if any(part.lower() in {".git", "docs", "documentation", "node_modules", ".next", "dist", "build"} for part in path.parts):
+        continue
+    for line_no, line in enumerate(path.read_text(errors="replace").splitlines(), 1):
             if any(pattern.search(line) for pattern in patterns):
                 matches.append(f"{path}:{line_no}:{line.strip()}")
 if matches:
