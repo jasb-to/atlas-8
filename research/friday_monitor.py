@@ -338,8 +338,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     timeframe="1D+4H", signal_time=mtf.get("four_hour_execution", {}).get("last_closed_candle_utc"),
                     payload=mtf,
                 ))
-            # Register fresh price-action entries only when directional momentum
-            # and exhaustion gates pass and a structural plan clears at least 1.5R.
+            # Register a fresh 4H breakout when the weekly direction agrees and
+            # valid structural stop/target geometry clears at least 1.5R.
             reversal_context_now = result.get("reversal_context", {})
             for event in monitor_events:
                 event_time = _utc(event["signal_time"]) if event.get("signal_time") else None
@@ -356,8 +356,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     continue
                 direction = str(event.get("direction", "")).lower()
                 plan = (result.get("trade_plans") or {}).get(direction, {})
-                if not plan.get("eligible"):
-                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "blocked_trade_plan", "reason": ", ".join(plan.get("blockers", []))})
+                if plan.get("stop") is None or plan.get("target") is None:
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "blocked_trade_plan", "reason": "missing structural stop or target"})
                     continue
                 signal_time = event.get("continuation_add_time") if event.get("event_add") == "CONTINUATION_ADD_CONFIRMED" else event.get("signal_time")
                 entry_price = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
@@ -457,8 +457,8 @@ def run_monitor(pairs: list[str], output_dir: str) -> dict:
                     entry_ref = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
                     stop = plan.get("stop")
                     target = plan.get("target")
-                    if not passed or not plan.get("eligible") or stop is None or target is None:
-                        reasons = filter_blockers + list(plan.get("blockers", []))
+                    if not passed or stop is None or target is None:
+                        reasons = filter_blockers + (["missing structural stop or target"] if stop is None or target is None else [])
                         row["alert_results"].append({
                             "type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
                             "status": "filtered_or_no_valid_plan",
