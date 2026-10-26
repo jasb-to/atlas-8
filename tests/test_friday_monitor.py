@@ -44,6 +44,7 @@ class FridayMonitorTests(unittest.TestCase):
         # a degraded scan, and candidate/alert gates remain closed without valid AI.
         from research.friday_monitor import _monitor_exit_code
         self.assertEqual(_monitor_exit_code("scan_complete_ai_unavailable"), 0)
+        self.assertEqual(_monitor_exit_code("scan_complete"), 0)
         self.assertEqual(_monitor_exit_code("success"), 0)
         self.assertEqual(_monitor_exit_code("partial_failure"), 1)
         self.assertEqual(_monitor_exit_code("failure"), 1)
@@ -153,6 +154,19 @@ class FridayMonitorTests(unittest.TestCase):
             store.finish_alert(args["alert_key"], status="sent", message_id=123)
             self.assertFalse(store.claim_alert(**args))
 
+
+
+    def test_intentionally_disabled_ai_is_not_reported_as_unavailable(self):
+        from research.friday_monitor import _ai_run_status
+        self.assertEqual(_ai_run_status(["disabled", "disabled", "not_run"]), "scan_complete")
+
+    def test_attempted_failed_ai_review_is_reported_as_unavailable(self):
+        from research.friday_monitor import _ai_run_status
+        self.assertEqual(_ai_run_status(["disabled", "error", "disabled"]), "scan_complete_ai_unavailable")
+
+    def test_successful_ai_review_is_not_reported_as_unavailable(self):
+        from research.friday_monitor import _ai_run_status
+        self.assertEqual(_ai_run_status(["ok", "disabled"]), "scan_complete")
 
     def test_ai_review_disabled_does_not_block_deterministic_paper_candidate(self):
         with patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "false"}, clear=False):

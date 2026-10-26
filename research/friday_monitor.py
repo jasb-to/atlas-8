@@ -743,13 +743,11 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
     if not store.configured:
         status = "persistence_not_configured" if not failures else "partial_failure"
     elif not failures:
-        ai_statuses = [row.get("ai_review_status", "missing") for row in pair_results if row.get("status") == "ok"]
-        # Market scanning, persistence, and the run ledger must continue when the
-        # optional AI reviewer is temporarily unavailable. Candidate promotion and
-        # alerts remain blocked by _ai_candidate_pass unless a valid review exists.
-        # This is a successful scan with a clearly degraded AI status, not an AI pass.
-        if ai_statuses and any(value != "ok" for value in ai_statuses):
-            status = "scan_complete_ai_unavailable"
+        ai_statuses = [
+            str(row.get("ai_review_status", "missing")).strip().lower()
+            for row in pair_results if row.get("status") == "ok"
+        ]
+        status = _ai_run_status(ai_statuses)
     run_record = make_cron_run(
         run_id=run_id, status=status, pair_results=pair_results, started_at=started_at,
         error="; ".join(failures) if failures else None,
@@ -765,8 +763,12 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
     run_record["alert_outcomes_total"] = len(all_alert_outcomes)
     run_record["alert_outcomes_sent"] = sum(1 for item in all_alert_outcomes if item.get("sent") is True)
     run_record["alert_outcomes_blocked"] = sum(1 for item in all_alert_outcomes if item.get("sent") is False)
-    run_record["ai_reviews_ok"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") == "ok")
-    run_record["ai_reviews_failed"] = sum(1 for row in pair_results if row.get("status") == "ok" and row.get("ai_review_status") != "ok")
+    run_record["ai_reviews_ok"] = sum(1 for row in pair_results if row.get("status") == "ok" and str(row.get("ai_review_status", "")).lower() == "ok")
+    run_record["ai_reviews_failed"] = sum(
+        1 for row in pair_results
+        if row.get("status") == "ok"
+        and str(row.get("ai_review_status", "missing")).strip().lower() not in {"ok", "disabled", "not_run", "missing", ""}
+    )
     (out / "cron_run.json").write_text(json.dumps(run_record, indent=2, allow_nan=False))
     # Database/repository logging failures must remain visible in the local
     # artifact and Actions log instead of aborting before RUN_FINISHED.
@@ -777,7 +779,7 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
         except Exception as persist_exc:
             run_record["run_ledger_persisted"] = False
             run_record["persistence_error"] = f"{type(persist_exc).__name__}: {persist_exc}"
-            if status in {"success", "scan_complete_ai_unavailable"}:
+            if status in {"success", "scan_complete", "scan_complete_ai_unavailable"}:
                 status = "partial_failure"
             run_record["status"] = status
             run_record["error"] = "; ".join(filter(None, [run_record.get("error"), run_record["persistence_error"]]))
@@ -829,9 +831,20 @@ def validate_friday_pairs(pairs: list[str]) -> list[str]:
     return normalized
 
 
+def _ai_run_status(statuses: list[str]) -> str:
+    """Map review outcomes to run status without treating intentional disablement as failure."""
+    normalized = [str(status or "missing").strip().lower() for status in statuses]
+    attempted = [status for status in normalized if status not in {"disabled", "not_run", "missing", ""}]
+    if attempted and any(status != "ok" for status in attempted):
+        return "scan_complete_ai_unavailable"
+    if normalized and all(status in {"disabled", "not_run", "missing", ""} for status in normalized):
+        return "scan_complete"
+    return "scan_complete"
+
+
 def _monitor_exit_code(status: str) -> int:
     """Return success when scanning/persistence completed, even if AI is degraded."""
-    return 0 if status in {"success", "scan_complete_ai_unavailable"} else 1
+    return 0 if status in {"success", "scan_complete", "scan_complete_ai_unavailable"} else 1
 
 
 def main() -> int:
