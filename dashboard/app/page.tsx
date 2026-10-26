@@ -59,9 +59,12 @@ export default function Home() {
   const snapshots = data.snapshots ?? [];
   const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
-  const successfulAiReview = pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok");
-  const aiReviewActive = Boolean(successfulAiReview);
-  const aiProvider = String(successfulAiReview?.ai_provider ?? "GROQ").toUpperCase();
+  const aiStatuses = pairScans.map(scan => String(scan.ai_review_status ?? "missing").trim().toLowerCase());
+  const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
+  const aiReviewSucceeded = aiReviewAttempted.some(status => status === "ok");
+  const aiReviewFailed = aiReviewAttempted.some(status => status !== "ok");
+  const aiStatusLabel = aiReviewSucceeded ? "ONLINE" : aiReviewFailed ? "ERROR" : "DISABLED";
+  const aiProvider = String(pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok")?.ai_provider ?? "AI").toUpperCase();
 
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
@@ -93,7 +96,7 @@ export default function Home() {
       <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH ONLY</span></span></a>
       <div className="top-actions">
         <span className={data.connected ? "pill positive" : "pill neutral"}><i /> DATA: {data.connected ? "ONLINE" : "OFFLINE"}</span>
-        <span className={aiReviewActive && aiProvider === "GROQ" ? "pill positive" : "pill neutral"}><i /> AI: GROQ {aiReviewActive && aiProvider === "GROQ" ? "ONLINE" : "OFFLINE"}</span>
+        <span className={aiStatusLabel === "ONLINE" ? "pill positive" : aiStatusLabel === "ERROR" ? "pill negative" : "pill neutral"}><i /> AI: {aiStatusLabel === "ONLINE" ? aiProvider + " ONLINE" : aiStatusLabel}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
@@ -174,7 +177,7 @@ export default function Home() {
         <summary>DEBUG · Scan trace, AI errors and invalidations</summary>
         <div className="debug-grid">
           <div><span>DATA LINK</span><b>{data.connected ? "ONLINE" : clean(data.status).toUpperCase()}</b></div>
-          <div><span>LAST RUN</span><b>{clean(latestRun?.status).toUpperCase()}</b></div>
+          <div><span>LAST RUN</span><b>{["success", "scan_complete"].includes(String(latestRun?.status ?? "").toLowerCase()) ? "SCAN COMPLETE" : String(latestRun?.status ?? "").toLowerCase() === "scan_complete_ai_unavailable" ? "SCAN COMPLETE · AI ERROR" : clean(latestRun?.status).toUpperCase()}</b></div>
           <div><span>MARKETS SCANNED</span><b>{latestRun?.pairs_checked ?? pairScans.length}</b></div>
           <div><span>AI REVIEWS OK</span><b>{pairScans.filter(scan => scan.ai_review_status === "ok").length} / {pairScans.length}</b></div>
           <div><span>LAST REFRESH</span><b>{fmtTime(data.fetched_at)}</b></div>
