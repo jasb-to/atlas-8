@@ -46,7 +46,7 @@ export default function Home() {
   const latestRun = data.runs[0];
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const snapshots = data.snapshots ?? [];
-  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
+  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN" && trade.ready !== false && trade.entry != null && trade.stop_loss != null && trade.take_profit != null);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiStatuses = pairScans.map(scan => String(scan.ai_review_status ?? "missing").trim().toLowerCase());
   const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
@@ -91,12 +91,6 @@ export default function Home() {
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
   });
 
-  const inactiveCards = weeklyCards.filter(card => !["active", "veto"].includes(card.thesisStatus));
-  const collapseInactive = weeklyCards.length > 10;
-  const visibleWeeklyCards = collapseInactive
-    ? weeklyCards.filter(card => ["active", "veto"].includes(card.thesisStatus))
-    : weeklyCards;
-
   const watchlist = weeklyCards.filter(card =>
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
   );
@@ -114,43 +108,28 @@ export default function Home() {
 
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
-      {weeklyCards.length ? <>
-        <div className="thesis-grid">
-          {visibleWeeklyCards.map(card => {
-            const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : "SKIPPED";
-            const macroBull = card.macroRegime === "BULLISH";
-            const macroBear = card.macroRegime === "BEARISH";
-            const dirBull = isBull(card.tradeDirection);
-            const dirBear = isBear(card.tradeDirection);
+      <p className="thesis-note">All scanned markets · Completed weekly and daily candles · The 4H engine only runs when the thesis is ACTIVE.</p>
+      {weeklyCards.length ? <div className="thesis-grid">
+        {weeklyCards.map(card => {
+          const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : "INACTIVE";
+          const macroBull = card.macroRegime === "BULLISH";
+          const macroBear = card.macroRegime === "BEARISH";
+          const dirBull = isBull(card.tradeDirection);
+          const dirBear = isBear(card.tradeDirection);
+          const thesis = card.thesis as Row;
 
-            return <article className="thesis-card" key={card.pair}>
-              <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
-              <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
-              <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
-              <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
-              <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
-            </article>;
-          })}
-        </div>
-        {collapseInactive && inactiveCards.length > 0 && <details className="inactive-theses">
-          <summary>{inactiveCards.length} inactive markets</summary>
-          <div className="thesis-grid">
-            {inactiveCards.map(card => {
-              const macroBull = card.macroRegime === "BULLISH";
-              const macroBear = card.macroRegime === "BEARISH";
-              const dirBull = isBull(card.tradeDirection);
-              const dirBear = isBear(card.tradeDirection);
-              return <article className="thesis-card" key={card.pair}>
-                <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className="pill neutral">SKIPPED</span></div>
-                <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
-                <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
-                <div className="thesis-row"><span>DAILY ALIGNMENT</span><b>{card.dailyAlignment}</b></div>
-                <div className="thesis-bottom"><span>THESIS STATUS</span><b>SKIPPED</b></div>
-              </article>;
-            })}
-          </div>
-        </details>}
-      </> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
+          return <article className="thesis-card" key={card.pair}>
+            <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
+            <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
+            <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
+            <div className="thesis-row"><span>WEEKLY CLOSE</span><b>{fmtPrice(thesis.weekly_close)}</b></div>
+            <div className="thesis-row"><span>DAILY CLOSE</span><b>{fmtPrice(thesis.daily_close)}</b></div>
+            <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
+            <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
+            {thesis.reason && <p className="thesis-reason">{String(thesis.reason)}</p>}
+          </article>;
+        })}
+      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
     </section>
 
     <section className="section-block">
@@ -160,9 +139,9 @@ export default function Home() {
           const dir = direction(trade.direction);
           const entry = Number(trade.entry);
           const stop = Number(trade.stop_loss);
-          const target = Number(trade.take_profit);
+          const target = Number(trade.tp2 ?? trade.take_profit);
           const risk = Math.abs(entry - stop);
-          const tp1 = dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5;
+          const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
           return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
             <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
             <div className="trade-prices">
