@@ -54,7 +54,7 @@ def _line_candidates(frame: pd.DataFrame) -> list:
     last_i = len(sample) - 1
     close = float(sample.iloc[-1].close)
     return [line for line in lines
-            if line.end.confirmed_at <= last_i
+            if line.confirmed_at <= last_i
             and abs(line.value_at(last_i) - close) / max(abs(close), 1e-9) <= MAX_LINE_DISTANCE]
 
 
