@@ -108,7 +108,7 @@ export default function Home() {
 
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
-      <p className="thesis-note">Completed weekly and daily candles · The 4H engine only runs when the thesis is ACTIVE.</p>
+      <p className="thesis-note">All scanned markets · Completed weekly and daily candles · The 4H engine only runs when the thesis is ACTIVE.</p>
       {weeklyCards.length ? <div className="thesis-grid">
         {weeklyCards.map(card => {
           const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : "INACTIVE";
