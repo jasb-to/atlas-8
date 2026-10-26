@@ -141,13 +141,13 @@ export default function Home() {
           const stop = Number(trade.stop_loss);
           const target = Number(trade.tp2 ?? trade.take_profit);
           const risk = Math.abs(entry - stop);
-          const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
+          const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk : entry - risk));
           return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
             <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
             <div className="trade-prices">
               <div><span>ENTRY</span><b>{fmtPrice(entry)}</b></div>
               <div><span>SL</span><b>{fmtPrice(stop)}</b></div>
-              <div><span>TP1 · 1.5R</span><b>{fmtPrice(tp1)}</b></div>
+              <div><span>TP1 {trade.tp1_hit ? "HIT" : "· 1R"}</span><b>{fmtPrice(tp1)}</b></div>
               <div><span>TP2</span><b>{fmtPrice(target)}</b></div>
             </div>
             <div className="trade-foot"><span>RESEARCH · PAPER ONLY</span><b>{Number.isFinite(Number(trade.reward_risk)) ? Number(trade.reward_risk).toFixed(2) + "R" : "—"}</b></div>
