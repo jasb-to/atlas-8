@@ -64,7 +64,6 @@ export default function Home() {
   const aiReviewSucceeded = aiReviewAttempted.some(status => status === "ok");
   const aiReviewFailed = aiReviewAttempted.some(status => status !== "ok");
   const aiStatusLabel = aiReviewSucceeded ? "ONLINE" : aiReviewFailed ? "ERROR" : "DISABLED";
-  const aiProvider = String(pairScans.find(scan => String(scan.ai_review_status ?? "").toLowerCase() === "ok")?.ai_provider ?? "AI").toUpperCase();
 
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
@@ -96,7 +95,7 @@ export default function Home() {
       <a className="brand" href="#"><span className="brand-mark">F</span><span>FRIDAY<span className="brand-sub">RESEARCH ONLY</span></span></a>
       <div className="top-actions">
         <span className={data.connected ? "pill positive" : "pill neutral"}><i /> DATA: {data.connected ? "ONLINE" : "OFFLINE"}</span>
-        <span className={aiStatusLabel === "ONLINE" ? "pill positive" : aiStatusLabel === "ERROR" ? "pill negative" : "pill neutral"}><i /> AI: {aiStatusLabel === "ONLINE" ? aiProvider + " ONLINE" : aiStatusLabel}</span>
+        <span className={aiStatusLabel === "ONLINE" ? "pill positive" : aiStatusLabel === "ERROR" ? "pill negative" : "pill neutral"}><i /> AI: {aiStatusLabel}</span>
         <button className="refresh" onClick={() => void refresh()} disabled={busy}>{busy ? "Refreshing…" : "↻ Refresh"}</button>
       </div>
     </header>
