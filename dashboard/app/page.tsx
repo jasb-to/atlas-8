@@ -46,7 +46,7 @@ export default function Home() {
   const latestRun = data.runs[0];
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const snapshots = data.snapshots ?? [];
-  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN");
+  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN" && trade.ready !== false && trade.entry != null && trade.stop_loss != null && trade.take_profit != null);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiStatuses = pairScans.map(scan => String(scan.ai_review_status ?? "missing").trim().toLowerCase());
   const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
@@ -139,9 +139,9 @@ export default function Home() {
           const dir = direction(trade.direction);
           const entry = Number(trade.entry);
           const stop = Number(trade.stop_loss);
-          const target = Number(trade.take_profit);
+          const target = Number(trade.tp2 ?? trade.take_profit);
           const risk = Math.abs(entry - stop);
-          const tp1 = dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5;
+          const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
           return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
             <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
             <div className="trade-prices">
