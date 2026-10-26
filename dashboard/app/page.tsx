@@ -9,7 +9,6 @@ type Payload = {
   fetched_at?: string;
 };
 const empty: Payload = { connected: false, status: "loading", message: "Loading FRIDAY data…", snapshots: [], weekly_theses: [], events: [], runs: [], alerts: [], paper_trades: [] };
-const WATCH_PAIRS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "AVAXUSDT", "LINKUSDT"];
 const fmtTime = (value?: string) => value ? new Date(value).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }) : "—";
 const fmtPrice = (value: unknown) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)) ? Number(value).toLocaleString("en-GB", { maximumFractionDigits: 6 }) : "—";
 const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object" ? row.payload : {};
@@ -23,16 +22,6 @@ const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
 const direction = (value: unknown) => String(value ?? "").toLowerCase();
 const isBull = (value: unknown) => ["long", "bullish", "active_long"].includes(direction(value));
 const isBear = (value: unknown) => ["short", "bearish", "active_short"].includes(direction(value));
-
-const thesisFor = (snapshots: Row[], pair: string) => {
-  for (const snap of snapshots) {
-    if (pairName(snap.pair) !== pair) continue;
-    const p = payloadOf(snap);
-    const thesis = snap.record_type === "weekly_thesis_snapshot" ? p : (p.weekly_thesis ?? p.sheldon_weekly_thesis ?? p.weeklyThesis ?? p.multitimeframe_scan?.weekly_thesis);
-    if (thesis && typeof thesis === "object") return thesis as Row;
-  }
-  return null;
-};
 
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
@@ -65,25 +54,48 @@ export default function Home() {
   const aiReviewFailed = aiReviewAttempted.some(status => status !== "ok");
   const aiStatusLabel = aiReviewFailed ? "ERROR" : aiReviewSucceeded ? "ONLINE" : "DISABLED";
 
-  const weeklyCards = WATCH_PAIRS.map(pair => {
-    const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
-    const scan = scanByPair.get(pair);
-    
-    // STRICT MAPPING: No EMA fallbacks. If the persisted data is missing, show UNKNOWN.
-    const macroRegime = String(thesis?.macro_regime ?? "UNKNOWN").toUpperCase();
-    const waveState = String(thesis?.wave_state ?? "UNKNOWN").toUpperCase();
-    const tradeDirection = String(thesis?.direction ?? "UNKNOWN").toUpperCase();
-    const thesisStatus = String(thesis?.status ?? "UNKNOWN").toLowerCase();
-    
-    const waveLabel = thesis?.wave_state 
-      ? `${waveState} (${tradeDirection})` 
-      : "UNKNOWN";
-      
-    const dailyAlignment = thesis?.status === "veto" ? "VETO" : (thesis?.status === "active" ? "PASS" : "UNKNOWN");
-    const active = thesisStatus === "active";
+  // Use only persisted weekly_thesis_snapshot records from the latest completed run.
+  // The records are newest-first in the payload; the run window prevents older snapshots
+  // from replacing a market that was skipped or unavailable in the current run.
+  const runStarted = Date.parse(String(latestRun?.started_at ?? ""));
+  const runFinished = Date.parse(String(latestRun?.finished_at ?? ""));
+  const thesisRecords = (data.weekly_theses ?? []).filter(record =>
+    record.record_type === "weekly_thesis_snapshot" && Boolean(record.pair)
+  );
+  const latestRunRecords = Number.isFinite(runStarted) && Number.isFinite(runFinished)
+    ? thesisRecords.filter(record => {
+        const recordedAt = Date.parse(String(record.signal_time ?? ""));
+        return Number.isFinite(recordedAt) && recordedAt >= runStarted && recordedAt <= runFinished;
+      })
+    : thesisRecords;
+  const latestThesisByPair = new Map<string, Row>();
+  for (const record of latestRunRecords) {
+    const pair = pairName(record.pair);
+    if (!latestThesisByPair.has(pair)) latestThesisByPair.set(pair, record);
+  }
 
+  const weeklyCards = Array.from(latestThesisByPair.entries()).map(([pair, record]) => {
+    const thesis = payloadOf(record);
+    const scan = scanByPair.get(pair);
+    // Strictly display the persisted thesis values; never infer macro/wave state from EMAs.
+    const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").toUpperCase();
+    const waveState = String(thesis.wave_state ?? "UNKNOWN").toUpperCase();
+    const tradeDirection = String(thesis.direction ?? "UNKNOWN").toUpperCase();
+    const thesisStatus = String(thesis.status ?? "UNKNOWN").toLowerCase();
+    const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
+    const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
+    const active = thesisStatus === "active";
     return { pair, thesis, scan, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+  }).sort((a, b) => {
+    const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
+    return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
   });
+
+  const inactiveCards = weeklyCards.filter(card => !["active", "veto"].includes(card.thesisStatus));
+  const collapseInactive = weeklyCards.length > 10;
+  const visibleWeeklyCards = collapseInactive
+    ? weeklyCards.filter(card => ["active", "veto"].includes(card.thesisStatus))
+    : weeklyCards;
 
   const watchlist = weeklyCards.filter(card =>
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
@@ -102,36 +114,43 @@ export default function Home() {
 
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
-      <div className="thesis-grid">
-        {weeklyCards.map(card => {
-          const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : "SKIPPED";
-          const macroBull = card.macroRegime === "BULLISH";
-          const macroBear = card.macroRegime === "BEARISH";
-          const dirBull = isBull(card.tradeDirection);
-          const dirBear = isBear(card.tradeDirection);
+      {weeklyCards.length ? <>
+        <div className="thesis-grid">
+          {visibleWeeklyCards.map(card => {
+            const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : "SKIPPED";
+            const macroBull = card.macroRegime === "BULLISH";
+            const macroBear = card.macroRegime === "BEARISH";
+            const dirBull = isBull(card.tradeDirection);
+            const dirBear = isBear(card.tradeDirection);
 
-          return <article className="thesis-card" key={card.pair}>
-            <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : "pill neutral"}>{statusLabel}</span></div>
-            
-            <div className="thesis-row">
-              <span>MACRO</span>
-              <b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b>
-            </div>
-            
-            <div className="thesis-row">
-              <span>WAVE</span>
-              <b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b>
-            </div>
-            
-            <div className="thesis-row">
-              <span>DAILY ALIGNMENT</span>
-              <b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b>
-            </div>
-            
-            <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
-          </article>;
-        })}
-      </div>
+            return <article className="thesis-card" key={card.pair}>
+              <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
+              <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
+              <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
+              <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
+              <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
+            </article>;
+          })}
+        </div>
+        {collapseInactive && inactiveCards.length > 0 && <details className="inactive-theses">
+          <summary>{inactiveCards.length} inactive markets</summary>
+          <div className="thesis-grid">
+            {inactiveCards.map(card => {
+              const macroBull = card.macroRegime === "BULLISH";
+              const macroBear = card.macroRegime === "BEARISH";
+              const dirBull = isBull(card.tradeDirection);
+              const dirBear = isBear(card.tradeDirection);
+              return <article className="thesis-card" key={card.pair}>
+                <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className="pill neutral">SKIPPED</span></div>
+                <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
+                <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
+                <div className="thesis-row"><span>DAILY ALIGNMENT</span><b>{card.dailyAlignment}</b></div>
+                <div className="thesis-bottom"><span>THESIS STATUS</span><b>SKIPPED</b></div>
+              </article>;
+            })}
+          </div>
+        </details>}
+      </> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
     </section>
 
     <section className="section-block">
