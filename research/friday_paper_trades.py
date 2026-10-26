@@ -41,6 +41,8 @@ def register_paper_trade(store, *, pair: str, strategy: str, signal_time: str,
         "timeframe": timeframe, "direction": direction.upper(),
         "signal_time": signal_time, "opened_at": utc_now(),
         "entry": entry, "stop_loss": stop, "take_profit": target,
+        "tp1": entry + abs(entry - stop) if direction.lower() == "long" else entry - abs(entry - stop),
+        "tp2": target, "tp1_hit": False, "tp1_hit_time": None,
         "reward_risk": float(reward_risk),
         "ai_review_status": (ai_review or {}).get("status", "not_attached"),
         "ai_assessment": ((ai_review or {}).get("response") or {}).get("assessment"),
@@ -81,26 +83,40 @@ def update_paper_trades(store, *, pair: str, candles: pd.DataFrame) -> list[dict
             store.upsert_paper_trade(trade)
             updated.append(trade)
             continue
+        entry = float(trade["entry"])
+        stop = float(trade["stop_loss"])
+        target = float(trade.get("tp2") or trade["take_profit"])
+        risk = abs(entry - stop)
+        tp1 = float(trade.get("tp1") or (entry + risk if trade["direction"].lower() == "long" else entry - risk))
         for candle in later.itertuples(index=False):
             high, low = float(candle.high), float(candle.low)
             direction = trade["direction"].lower()
-            stop_hit = low <= float(trade["stop_loss"]) if direction == "long" else high >= float(trade["stop_loss"])
-            target_hit = high >= float(trade["take_profit"]) if direction == "long" else low <= float(trade["take_profit"])
-            exit_reason = None
-            exit_price = None
-            if stop_hit:  # conservative: stop takes precedence if both hit in one OHLC candle
-                exit_reason, exit_price = "STOP_LOSS", float(trade["stop_loss"])
-            elif target_hit:
-                exit_reason, exit_price = "TAKE_PROFIT", float(trade["take_profit"])
-            trade["last_checked_candle"] = pd.Timestamp(candle.timestamp).isoformat()
+            stop_hit = low <= stop if direction == "long" else high >= stop
+            tp1_touched = high >= tp1 if direction == "long" else low <= tp1
+            tp2_hit = high >= target if direction == "long" else low <= target
+            candle_time = pd.Timestamp(candle.timestamp).isoformat()
+            trade["last_checked_candle"] = candle_time
             trade["last_checked_at"] = utc_now()
-            if exit_reason:
-                risk = abs(float(trade["entry"]) - float(trade["stop_loss"]))
-                pnl_distance = (exit_price - float(trade["entry"])) if direction == "long" else (float(trade["entry"]) - exit_price)
+            # Conservative OHLC ordering: a stop wins ties against either target.
+            if stop_hit:
+                pnl_r = -1.0
+                if trade.get("tp1_hit"):
+                    pnl_r = 0.5 * 1.0 + 0.5 * -1.0  # half closed at TP1, runner stopped
                 trade.update({
-                    "status": "CLOSED", "exit_time": pd.Timestamp(candle.timestamp).isoformat(),
-                    "exit_price": exit_price, "exit_reason": exit_reason,
-                    "realized_r_multiple": round(pnl_distance / risk, 4) if risk else None,
+                    "status": "CLOSED", "exit_time": candle_time,
+                    "exit_price": stop, "exit_reason": "STOP_LOSS",
+                    "realized_r_multiple": round(pnl_r, 4),
+                })
+                break
+            if tp1_touched and not trade.get("tp1_hit"):
+                trade.update({"tp1_hit": True, "tp1_hit_time": candle_time})
+            if tp2_hit:
+                tp2_r = ((target - entry) if direction == "long" else (entry - target)) / risk if risk else 0.0
+                pnl_r = 0.5 * 1.0 + 0.5 * tp2_r if trade.get("tp1_hit") else tp2_r
+                trade.update({
+                    "status": "CLOSED", "exit_time": candle_time,
+                    "exit_price": target, "exit_reason": "TAKE_PROFIT_2",
+                    "realized_r_multiple": round(pnl_r, 4),
                 })
                 break
         store.upsert_paper_trade(trade)
