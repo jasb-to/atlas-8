@@ -63,7 +63,7 @@ export default function Home() {
   const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
   const aiReviewSucceeded = aiReviewAttempted.some(status => status === "ok");
   const aiReviewFailed = aiReviewAttempted.some(status => status !== "ok");
-  const aiStatusLabel = aiReviewSucceeded ? "ONLINE" : aiReviewFailed ? "ERROR" : "DISABLED";
+  const aiStatusLabel = aiReviewFailed ? "ERROR" : aiReviewSucceeded ? "ONLINE" : "DISABLED";
 
   const weeklyCards = WATCH_PAIRS.map(pair => {
     const thesis = thesisFor(data.weekly_theses ?? [], pair) ?? thesisFor(snapshots, pair);
@@ -178,7 +178,7 @@ export default function Home() {
           <div><span>DATA LINK</span><b>{data.connected ? "ONLINE" : clean(data.status).toUpperCase()}</b></div>
           <div><span>LAST RUN</span><b>{["success", "scan_complete"].includes(String(latestRun?.status ?? "").toLowerCase()) ? "SCAN COMPLETE" : String(latestRun?.status ?? "").toLowerCase() === "scan_complete_ai_unavailable" ? "SCAN COMPLETE · AI ERROR" : clean(latestRun?.status).toUpperCase()}</b></div>
           <div><span>MARKETS SCANNED</span><b>{latestRun?.pairs_checked ?? pairScans.length}</b></div>
-          <div><span>AI REVIEWS OK</span><b>{pairScans.filter(scan => scan.ai_review_status === "ok").length} / {pairScans.length}</b></div>
+          <div><span>AI REVIEWS OK</span><b>{pairScans.filter(scan => scan.ai_review_status === "ok").length} / {aiReviewAttempted.length}</b></div>
           <div><span>LAST REFRESH</span><b>{fmtTime(data.fetched_at)}</b></div>
         </div>
         <h3>Scan trace and errors</h3>
