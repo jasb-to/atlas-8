@@ -6,12 +6,16 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-from research.friday_market_data import fetch_ohlc
+from research.friday_market_data import fetch_ohlc, _pair_cache, _provider_cache
 from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass, _is_live_lifecycle_event
 from research.friday_persistence import RepoFolderFridayStore
 
 
 class FridayMarketDataTests(unittest.TestCase):
+    def setUp(self):
+        _pair_cache.clear()
+        _provider_cache.clear()
+
     @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
         supportive = {
@@ -43,6 +47,7 @@ class FridayMarketDataTests(unittest.TestCase):
 
     def test_friday_cli_canonicalizes_legacy_aliases_and_only_scans_usdt_pairs(self):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
+        self.assertEqual(validate_friday_pairs(["UNIUSDT"]), ["UNIUSDT"])
         self.assertEqual(validate_friday_pairs(["XBTUSD"]), ["XBTUSDT"])
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
             validate_friday_pairs(["UNKNOWNUSD"])
@@ -51,29 +56,63 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_missing_kraken_pair_is_reported_unavailable_without_fallback(self, kraken, get):
-        kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
-        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR: HYPEUSDT"):
+    def test_no_kraken_or_binance_usdt_market_is_reported_unavailable(self, kraken, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}
+            }},
+            raise_for_status=lambda: None,
+        )
+        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR OR BINANCE USDT MARKET: HYPEUSDT"):
             fetch_ohlc("HYPEUSDT", 240)
-        get.assert_not_called()
+        kraken.assert_not_called()
+        self.assertEqual(get.call_count, 2)
 
+    @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_missing_kraken_usdt_pair_falls_back_to_okx_usdt(self, kraken, get):
-        kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
-        now = pd.Timestamp.now(tz="UTC")
-        start_ms = int((now - pd.Timedelta(hours=204)).timestamp() * 1000)
-        rows = []
-        for i in range(50):
-            open_ms = start_ms + i * 4 * 60 * 60 * 1000
-            rows.append([str(open_ms), "100", "105", "99", "103", "10", "1020", "1020", "1"])
-        get.return_value = Mock(status_code=200, json=lambda: {"code": "0", "msg": "", "data": rows}, raise_for_status=lambda: None)
+    def test_uses_binance_free_fallback_when_kraken_pair_is_missing(self, kraken, get):
+        now_ms = int((pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=8)).timestamp() * 1000)
+        catalogue = {"error": [], "result": {"XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}}}
+        candle = [now_ms, "100", "105", "99", "103", "10", now_ms + 4*60*60*1000 - 1,
+                  "1020", 12, "5", "510", "0"]
+        get.side_effect = [
+            Mock(json=lambda: catalogue, raise_for_status=lambda: None),
+            Mock(json=lambda: [candle], raise_for_status=lambda: None),
+        ]
         frame = fetch_ohlc("HYPEUSDT", 240)
-        self.assertEqual(get.call_args.kwargs["params"]["instId"], "HYPE-USDT")
-        self.assertEqual(len(frame), 50)
-        self.assertIn("vwap", frame.columns)
+        self.assertEqual(frame.attrs["source"], "Binance Spot (free fallback)")
+        self.assertEqual(frame.attrs["source_pair"], "HYPEUSDT")
+        kraken.assert_not_called()
 
+    @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_passes_usdt_pair_to_kraken(self, fetch):
+    def test_resolves_requested_symbol_from_kraken_assetpairs_catalogue(self, kraken, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "XXBTZUSDT": {"altname": "XBTUSDT", "wsname": "XBT/USDT"}
+            }},
+            raise_for_status=lambda: None,
+        )
+        timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50, "vwap": [102.0] * 50,
+            "volume": [10.0] * 50, "trades": [10] * 50,
+        })
+        kraken.return_value = frame
+        result = fetch_ohlc("BTCUSDT", 240)
+        kraken.assert_called_once_with(pair="XBTUSDT", interval=240)
+        self.assertEqual(len(result), 50)
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_passes_resolved_usdt_pair_to_kraken(self, fetch, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "XXBTZUSDT": {"altname": "XBTUSDT", "wsname": "XBT/USDT"}
+            }},
+            raise_for_status=lambda: None,
+        )
         timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
         frame = pd.DataFrame({
             "timestamp": timestamps,

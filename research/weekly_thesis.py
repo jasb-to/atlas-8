@@ -125,6 +125,8 @@ def _flat_result(
     daily_alignment: str = "unavailable",
     weekly_stoch_cross: bool = False,
     weekly_stoch_aligned: bool = False,
+    data_source_weekly: str = "unknown",
+    data_source_daily: str = "unknown",
 ) -> dict[str, Any]:
     """Return a stable, flat schema for active, vetoed and unavailable theses."""
     return {
@@ -151,6 +153,8 @@ def _flat_result(
         "daily_alignment": daily_alignment,
         "weekly_stoch_cross": bool(weekly_stoch_cross),
         "weekly_stoch_aligned": bool(weekly_stoch_aligned),
+        "data_source_weekly": data_source_weekly,
+        "data_source_daily": data_source_daily,
         "reason": reason,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
@@ -196,6 +200,8 @@ def evaluate_sheldon_thesis(
             reason=(f"Need at least 200 completed weekly and 50 completed daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
             weekly_close=wc, daily_close=dc,
+            data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
+            data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
         )
 
     weekly_close = weekly["close"].astype(float)
@@ -239,6 +245,8 @@ def evaluate_sheldon_thesis(
             daily_alignment=daily_state,
             weekly_stoch_cross=bool(bull_cross or bear_cross),
             weekly_stoch_aligned=bool(w_k is not None and w_d is not None and w_k > w_d),
+            data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
+            data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
         )
 
     if None in (w_ema200, d_ema50, w_macd_hist):
