@@ -84,80 +84,91 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
     raise RuntimeError(f"Unknown asset pair: {symbol}")
 
 
-def _fetch_binance_ohlc(symbol: str, interval: int) -> pd.DataFrame:
-    """Fetch public Binance Spot candles; caller must label the source."""
-    intervals = {1: "1m", 5: "5m", 15: "15m", 30: "30m", 60: "1h",
-                 240: "4h", 1440: "1d", 10080: "1w"}
-    if interval not in intervals:
-        raise RuntimeError(f"Unsupported Binance candle interval: {interval}m")
-    binance_symbol = _normalise_pair(symbol)
-    if binance_symbol.startswith("XBT"):
-        binance_symbol = "BTC" + binance_symbol[3:]
-    response = requests.get(
-        BINANCE_KLINES_URL,
-        params={"symbol": binance_symbol, "interval": intervals[interval], "limit": 1000},
-        timeout=20,
-        headers={"User-Agent": "atlas-8-research/1.0"},
-    )
-    response.raise_for_status()
-    rows = response.json()
-    if not isinstance(rows, list) or not rows:
-        raise RuntimeError(f"Binance returned no candles for {binance_symbol}")
-    frame = pd.DataFrame(rows, columns=[
-        "open_time", "open", "high", "low", "close", "volume", "close_time",
-        "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore",
-    ])
-    frame["timestamp"] = pd.to_datetime(frame["open_time"], unit="ms", utc=True)
-    for col in ("open", "high", "low", "close", "volume", "quote_volume"):
+# Only use 4H-to-1D aggregation for markets whose history has been a known
+# coverage problem. Other markets keep their native daily feed.
+TARGETED_RESAMPLE_PAIRS = {"BNBUSDT", "HYPEUSDT", "LITUSDT", "SUIUSDT", "VIRTUALUSDT", "ZECUSDT"}
+
+
+def aggregate_ohlc(candles: pd.DataFrame, interval_minutes: int, target_minutes: int) -> pd.DataFrame:
+    """Aggregate complete, gap-free lower-timeframe OHLCV into UTC candles."""
+    if target_minutes <= interval_minutes or target_minutes % interval_minutes:
+        raise ValueError("Target interval must be an integer multiple of source interval")
+    required = {"timestamp", "open", "high", "low", "close", "volume"}
+    missing = required.difference(candles.columns)
+    if missing:
+        raise ValueError(f"OHLC data is missing required columns: {sorted(missing)}")
+    frame = candles.copy()
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+    for col in ("open", "high", "low", "close", "volume"):
         frame[col] = pd.to_numeric(frame[col], errors="coerce")
-    frame["vwap"] = frame["quote_volume"] / frame["volume"].replace(0, float("nan"))
-    frame["trades"] = pd.to_numeric(frame["trades"], errors="coerce").fillna(0).astype(int)
-    frame = frame[["timestamp", "open", "high", "low", "close", "vwap", "volume", "trades"]]
-    frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
+    frame = frame.dropna(subset=["timestamp", "open", "high", "low", "close", "volume"])
+    frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
     now = pd.Timestamp.now(tz="UTC")
-    frame = frame.loc[frame["timestamp"] + pd.Timedelta(minutes=interval) <= now].reset_index(drop=True)
-    frame.attrs["source"] = "Binance Spot (free fallback)"
-    frame.attrs["source_pair"] = binance_symbol
+    frame = frame.loc[frame["timestamp"] + pd.Timedelta(minutes=interval_minutes) <= now]
+    if frame.empty:
+        return frame.assign(timestamp=pd.Series(dtype="datetime64[ns, UTC]"))
+
+    step = pd.Timedelta(minutes=interval_minutes)
+    target = pd.Timedelta(minutes=target_minutes)
+    frame = frame.loc[frame["timestamp"].dt.floor(target) + target <= now]
+    frame["bucket"] = frame["timestamp"].dt.floor(target)
+    expected = target_minutes // interval_minutes
+    rows = []
+    for bucket, group in frame.groupby("bucket", sort=True):
+        group = group.sort_values("timestamp")
+        expected_times = pd.date_range(bucket, periods=expected, freq=step)
+        # Reject partial days and any missing 4H bar; never invent OHLC values.
+        if len(group) != expected or list(group["timestamp"]) != list(expected_times):
+            continue
+        row = {
+            "timestamp": bucket,
+            "open": float(group.iloc[0]["open"]),
+            "high": float(group["high"].max()),
+            "low": float(group["low"].min()),
+            "close": float(group.iloc[-1]["close"]),
+            "volume": float(group["volume"].sum()),
+        }
+        if "trades" in group.columns:
+            row["trades"] = int(pd.to_numeric(group["trades"], errors="coerce").fillna(0).sum())
+        if "vwap" in group.columns:
+            volume = group["volume"].sum()
+            row["vwap"] = float((group["vwap"] * group["volume"]).sum() / volume) if volume else float("nan")
+        rows.append(row)
+    result = pd.DataFrame(rows)
+    if not result.empty:
+        result = result.sort_values("timestamp").reset_index(drop=True)
+    result.attrs["source"] = f"{candles.attrs.get('source', 'unknown')} 4H aggregated to 1D"
+    result.attrs["source_pair"] = candles.attrs.get("source_pair", "")
+    result.attrs["aggregation"] = "UTC; six complete 4H candles; gap-free"
+    return result
+
+
+def _fetch_kraken(pair: str, interval: int) -> pd.DataFrame:
+    resolved_pair = _resolve_kraken_usdt_pair(pair)
+    _throttle_public_request()
+    frame = fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
+    frame.attrs["source"] = "Kraken Spot"
+    frame.attrs["source_pair"] = resolved_pair
     return frame
 
-
 def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
-    """Fetch Kraken candles first; use Binance only when Kraken lacks a usable weekly history."""
+    """Fetch Kraken USDT OHLC; targeted markets may aggregate complete 4H bars to 1D.
+
+    Binance is intentionally not used as a fallback. Aggregation is only attempted
+    for the known coverage-problem markets and never relaxes weekly/daily minimums.
+    """
     symbol = pair.upper().strip()
     canonical = _normalise_pair(symbol)
-    with _pair_cache_lock:
-        preferred = _provider_cache.get(canonical)
-    if preferred == "binance":
-        return _fetch_binance_ohlc(symbol, interval)
-
     try:
-        resolved_pair = _resolve_kraken_usdt_pair(symbol)
-        _throttle_public_request()
-        frame = fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
-        frame.attrs["source"] = "Kraken Spot"
-        frame.attrs["source_pair"] = resolved_pair
-        if interval == 10080 and len(frame) < 200:
-            try:
-                fallback = _fetch_binance_ohlc(symbol, interval)
-                if len(fallback) > len(frame):
-                    with _pair_cache_lock:
-                        _provider_cache[canonical] = "binance"
-                    return fallback
-            except (requests.RequestException, RuntimeError, ValueError):
-                # Preserve Kraken's partial history so the evaluator can report the
-                # exact shortfall rather than hiding usable candles.
-                pass
+        frame = _fetch_kraken(symbol, interval)
+        if interval == 1440 and canonical in TARGETED_RESAMPLE_PAIRS and len(frame) < 50:
+            four_hour = _fetch_kraken(symbol, 240)
+            aggregated = aggregate_ohlc(four_hour, 240, 1440)
+            if len(aggregated) > len(frame):
+                return aggregated
         return frame
-    except RuntimeError as exc:
-        if "Unknown asset pair" not in str(exc):
-            raise
-        try:
-            fallback = _fetch_binance_ohlc(symbol, interval)
-            with _pair_cache_lock:
-                _provider_cache[canonical] = "binance"
-            return fallback
-        except (requests.RequestException, RuntimeError, ValueError) as fallback_error:
-            raise RuntimeError(
-                f"UNAVAILABLE — NO KRAKEN PAIR OR BINANCE USDT MARKET: {symbol} "
-                f"(interval={interval}m); fallback detail: {fallback_error}"
-            ) from exc
+    except (RuntimeError, requests.RequestException, ValueError) as exc:
+        raise RuntimeError(
+            f"UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: {symbol} "
+            f"(interval={interval}m); detail: {exc}"
+        ) from exc
