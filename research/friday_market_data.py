@@ -55,6 +55,9 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
     if not isinstance(pairs, dict):
         raise RuntimeError("Kraken AssetPairs response has no result catalogue")
 
+    quote = "USDT" if canonical.endswith("USDT") else "USD" if canonical.endswith("USD") else None
+    if quote is None:
+        raise RuntimeError(f"Unsupported quote asset for pair: {symbol}")
     for pair_id, details in pairs.items():
         if not isinstance(details, dict):
             continue
@@ -65,9 +68,10 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
             _normalise_pair(wsname),
             _normalise_pair(str(pair_id)),
         }
-        # Do not accidentally accept a USD/EUR market for a requested USDT pair.
+        # Match the requested quote asset exactly: USD requests stay USD and
+        # USDT requests stay USDT. Never silently substitute one for the other.
         if canonical in candidates and (
-            altname.upper().endswith("USDT") or wsname.upper().endswith("/USDT")
+            altname.upper().endswith(quote) or wsname.upper().endswith("/" + quote)
         ):
             with _pair_cache_lock:
                 _pair_cache[canonical] = altname or pair_id
