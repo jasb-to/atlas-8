@@ -190,14 +190,6 @@ def evaluate_sheldon_thesis(
 
     wc = _number(weekly["close"].iloc[-1]) if not weekly.empty else None
     dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
-    if len(weekly) < 200 or len(daily) < 50:
-        return _flat_result(
-            pair, status="insufficient_data", direction=None,
-            reason=(f"Need at least 200 completed weekly and 50 completed daily candles; "
-                    f"available weekly={len(weekly)}, daily={len(daily)}."),
-            weekly_close=wc, daily_close=dc,
-        )
-
     weekly_close = weekly["close"].astype(float)
     daily_close = daily["close"].astype(float)
     weekly_ema8 = weekly_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
@@ -241,9 +233,48 @@ def evaluate_sheldon_thesis(
             weekly_stoch_aligned=bool(w_k is not None and w_d is not None and w_k > w_d),
         )
 
-    if None in (w_ema200, d_ema50, w_macd_hist):
-        return result("insufficient_data", None,
-                      "Weekly EMA 200, Stoch RSI/MACD, or daily EMA 50 is not valid.")
+    # Surface every indicator that can be calculated even when a market is
+    # too young for the 200-week macro gate. Never promote a partial-history
+    # market to ACTIVE: this branch is diagnostics only and remains fail-closed.
+    if len(weekly) < 200 or len(daily) < 50 or None in (w_ema200, d_ema50, w_macd_hist):
+        stoch_bear = (w_k < w_d) if w_k is not None and w_d is not None else (
+            w_macd_hist is not None and w_macd_hist < 0
+        )
+        stoch_bull = (w_k > w_d) if w_k is not None and w_d is not None else (
+            w_macd_hist is not None and w_macd_hist > 0
+        )
+        macd_bear = w_macd_hist is not None and w_macd_hist < 0
+        macd_bull = w_macd_hist is not None and w_macd_hist > 0
+        if stoch_bear != stoch_bull:
+            momentum_label = "momentum_bearish" if stoch_bear else "momentum_bullish"
+        elif macd_bear != macd_bull:
+            momentum_label = "momentum_bearish" if macd_bear else "momentum_bullish"
+        else:
+            momentum_label = "momentum_unavailable"
+        macro_label = (
+            "insufficient_history" if w_ema200 is None
+            else ("bullish" if w_close > w_ema200 else "bearish" if w_close < w_ema200 else "neutral")
+        )
+        daily_label = (
+            "unavailable" if d_ema50 is None
+            else ("bullish_bias" if d_close > d_ema50 else "bearish_bias" if d_close < d_ema50 else "at_ema50")
+        )
+        missing = []
+        if len(weekly) < 200:
+            missing.append(f"200-week macro history ({len(weekly)}/200 weekly candles)")
+        if len(daily) < 50:
+            missing.append(f"daily EMA 50 history ({len(daily)}/50 daily candles)")
+        if w_macd_hist is None:
+            missing.append("weekly MACD history")
+        if d_ema50 is None:
+            missing.append("daily EMA 50")
+        return result(
+            "insufficient_data", None,
+            "Indicators shown where calculable; trading remains blocked pending " + ", ".join(missing) + ".",
+            macro=macro_label, wave=momentum_label,
+            bearish=bool(stoch_bear or macd_bear), bullish=bool(stoch_bull or macd_bull),
+            daily_state=daily_label,
+        )
 
     macro_bull = w_close > w_ema200
     macro_bear = w_close < w_ema200
