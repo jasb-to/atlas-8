@@ -808,7 +808,7 @@ def validate_friday_pairs(pairs: list[str]) -> list[str]:
         "VIRTUALUSD": "VIRTUALUSDT", "HYPEUSD": "HYPEUSDT",
         "DOGEUSD": "DOGEUSDT", "LINKUSD": "LINKUSDT",
         "ZECUSD": "ZECUSDT", "NEARUSD": "NEARUSDT",
-        "SUIUSD": "SUIUSDT", "LITUSD": "LITUSDT",
+        "SUIUSD": "SUIUSDT", "LITUSD": "LITUSDT", "UNIUSD": "UNIUSDT",
     }
     normalized = []
     for raw_pair in pairs:
@@ -819,7 +819,7 @@ def validate_friday_pairs(pairs: list[str]) -> list[str]:
         if pair not in {
             "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT",
             "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT",
-            "SUIUSDT", "LITUSDT",
+            "SUIUSDT", "LITUSDT", "UNIUSDT",
         }:
             raise ValueError(
                 "FRIDAY research scans only the approved USDT universe; rejected: " + pair
@@ -849,7 +849,7 @@ def _monitor_exit_code(status: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT")
+    parser.add_argument("--pairs", default="XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT,UNIUSDT")
     parser.add_argument("--output-dir", default="results/friday-monitor")
     parser.add_argument("--dry-run", action="store_true", help="Read-only smoke check: no DB writes, files, paper trades or Telegram sends")
     args = parser.parse_args()
