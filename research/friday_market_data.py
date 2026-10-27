@@ -1,8 +1,9 @@
-"""Kraken-only USDT spot OHLC adapter for FRIDAY.
+"""Kraken-first USDT OHLC adapter with a clearly labelled free Binance fallback.
 
-All thesis and execution market data must come from Kraken spot. If Kraken
-does not expose a requested pair, propagate the explicit unavailable error;
-never substitute candles from another exchange.
+Kraken is always attempted first. Binance Spot is used only when Kraken has no
+matching USDT pair or fewer than 200 completed weekly candles. A per-pair
+provider choice keeps weekly, daily and execution candles on the same venue
+within one scan process. The caller still enforces the thesis candle minimums.
 """
 from __future__ import annotations
 
@@ -17,6 +18,8 @@ from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 # Space request starts to stay conservative with Kraken's public API rate limits.
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
 KRAKEN_ASSET_PAIRS_URL = "https://api.kraken.com/0/public/AssetPairs"
+BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines"
+_provider_cache: dict[str, str] = {}
 _pair_cache: dict[str, str] = {}
 _pair_cache_lock = threading.Lock()
 _request_lock = threading.Lock()
@@ -81,16 +84,80 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
     raise RuntimeError(f"Unknown asset pair: {symbol}")
 
 
+def _fetch_binance_ohlc(symbol: str, interval: int) -> pd.DataFrame:
+    """Fetch public Binance Spot candles; caller must label the source."""
+    intervals = {1: "1m", 5: "5m", 15: "15m", 30: "30m", 60: "1h",
+                 240: "4h", 1440: "1d", 10080: "1w"}
+    if interval not in intervals:
+        raise RuntimeError(f"Unsupported Binance candle interval: {interval}m")
+    binance_symbol = _normalise_pair(symbol)
+    if binance_symbol.startswith("XBT"):
+        binance_symbol = "BTC" + binance_symbol[3:]
+    response = requests.get(
+        BINANCE_KLINES_URL,
+        params={"symbol": binance_symbol, "interval": intervals[interval], "limit": 1000},
+        timeout=20,
+        headers={"User-Agent": "atlas-8-research/1.0"},
+    )
+    response.raise_for_status()
+    rows = response.json()
+    if not isinstance(rows, list) or not rows:
+        raise RuntimeError(f"Binance returned no candles for {binance_symbol}")
+    frame = pd.DataFrame(rows, columns=[
+        "open_time", "open", "high", "low", "close", "volume", "close_time",
+        "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore",
+    ])
+    frame["timestamp"] = pd.to_datetime(frame["open_time"], unit="ms", utc=True)
+    for col in ("open", "high", "low", "close", "volume", "quote_volume"):
+        frame[col] = pd.to_numeric(frame[col], errors="coerce")
+    frame["vwap"] = frame["quote_volume"] / frame["volume"].replace(0, float("nan"))
+    frame["trades"] = pd.to_numeric(frame["trades"], errors="coerce").fillna(0).astype(int)
+    frame = frame[["timestamp", "open", "high", "low", "close", "vwap", "volume", "trades"]]
+    frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
+    now = pd.Timestamp.now(tz="UTC")
+    frame = frame.loc[frame["timestamp"] + pd.Timedelta(minutes=interval) <= now].reset_index(drop=True)
+    frame.attrs["source"] = "Binance Spot (free fallback)"
+    frame.attrs["source_pair"] = binance_symbol
+    return frame
+
+
 def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
-    """Fetch completed USDT OHLC candles from Kraken, resolving Kraken's pair aliases."""
+    """Fetch Kraken candles first; use Binance only when Kraken lacks a usable weekly history."""
     symbol = pair.upper().strip()
+    canonical = _normalise_pair(symbol)
+    with _pair_cache_lock:
+        preferred = _provider_cache.get(canonical)
+    if preferred == "binance":
+        return _fetch_binance_ohlc(symbol, interval)
+
     try:
         resolved_pair = _resolve_kraken_usdt_pair(symbol)
         _throttle_public_request()
-        return fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
+        frame = fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
+        frame.attrs["source"] = "Kraken Spot"
+        frame.attrs["source_pair"] = resolved_pair
+        if interval == 10080 and len(frame) < 200:
+            try:
+                fallback = _fetch_binance_ohlc(symbol, interval)
+                if len(fallback) > len(frame):
+                    with _pair_cache_lock:
+                        _provider_cache[canonical] = "binance"
+                    return fallback
+            except (requests.RequestException, RuntimeError, ValueError):
+                # Preserve Kraken's partial history so the evaluator can report the
+                # exact shortfall rather than hiding usable candles.
+                pass
+        return frame
     except RuntimeError as exc:
-        if "Unknown asset pair" in str(exc):
+        if "Unknown asset pair" not in str(exc):
+            raise
+        try:
+            fallback = _fetch_binance_ohlc(symbol, interval)
+            with _pair_cache_lock:
+                _provider_cache[canonical] = "binance"
+            return fallback
+        except (requests.RequestException, RuntimeError, ValueError) as fallback_error:
             raise RuntimeError(
-                f"UNAVAILABLE — NO KRAKEN PAIR: {symbol} (interval={interval}m)"
+                f"UNAVAILABLE — NO KRAKEN PAIR OR BINANCE USDT MARKET: {symbol} "
+                f"(interval={interval}m); fallback detail: {fallback_error}"
             ) from exc
-        raise
