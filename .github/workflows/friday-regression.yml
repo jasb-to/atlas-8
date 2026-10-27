@@ -32,6 +32,26 @@ jobs:
           python-version: "3.12"
       - name: Install research dependencies
         run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Validate embedded FRIDAY workflow shell scripts
+        run: |
+          ruby -ryaml -rtempfile <<'RUBY'
+          workflow = YAML.load_file(".github/workflows/friday-monitor.yml")
+          steps = workflow.fetch("jobs").fetch("monitor").fetch("steps")
+          checked = 0
+          steps.each_with_index do |step, index|
+            next unless step["run"]
+            Tempfile.create(["friday-workflow-step", ".sh"]) do |file|
+              file.write(step.fetch("run"))
+              file.flush
+              unless system("bash", "-n", file.path)
+                abort "Shell syntax validation failed for friday-monitor.yml step #{index + 1}: #{step['name']}"
+              end
+            end
+            checked += 1
+          end
+          abort "No embedded shell scripts were checked" if checked.zero?
+          puts "Validated bash syntax for #{checked} FRIDAY workflow steps."
+          RUBY
       - name: Run FRIDAY regression tests
         run: python -m unittest discover -s tests -p "test_friday_*.py" -v
 
