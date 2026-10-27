@@ -20,7 +20,7 @@ const pairName = (value: unknown) => {
 };
 const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
 const THESIS_UNIVERSE = [
-  "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT",
+  "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT",
   "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
 ];
 const direction = (value: unknown) => String(value ?? "").toLowerCase();
