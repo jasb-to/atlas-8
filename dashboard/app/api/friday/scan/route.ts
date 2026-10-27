@@ -67,7 +67,7 @@ async function triggerScan(request: NextRequest) {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT", scan_id: scanRunId },
+        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT,UNIUSDT", scan_id: scanRunId },
       }),
       cache: "no-store",
     });
