@@ -46,6 +46,7 @@ class FridayMarketDataTests(unittest.TestCase):
 
     def test_friday_cli_canonicalizes_legacy_aliases_and_only_scans_usdt_pairs(self):
         self.assertEqual(validate_friday_pairs([" xbtusdt ", "ETHUSDT"]), ["XBTUSDT", "ETHUSDT"])
+        self.assertEqual(validate_friday_pairs(["UNIUSDT"]), ["UNIUSDT"])
         self.assertEqual(validate_friday_pairs(["XBTUSD"]), ["XBTUSDT"])
         with self.assertRaisesRegex(ValueError, "approved USDT universe"):
             validate_friday_pairs(["UNKNOWNUSD"])
