@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-from research.friday_market_data import fetch_ohlc, _pair_cache
+from research.friday_market_data import fetch_ohlc, _pair_cache, _provider_cache
 from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass, _is_live_lifecycle_event
 from research.friday_persistence import RepoFolderFridayStore
 
@@ -14,6 +14,7 @@ from research.friday_persistence import RepoFolderFridayStore
 class FridayMarketDataTests(unittest.TestCase):
     def setUp(self):
         _pair_cache.clear()
+        _provider_cache.clear()
 
     @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
@@ -55,17 +56,33 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_missing_kraken_usdt_pair_is_unavailable_without_secondary_exchange(self, kraken, get):
+    def test_no_kraken_or_binance_usdt_market_is_reported_unavailable(self, kraken, get):
         get.return_value = Mock(
             json=lambda: {"error": [], "result": {
                 "XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}
             }},
             raise_for_status=lambda: None,
         )
-        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR: HYPEUSDT"):
+        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR OR BINANCE USDT MARKET: HYPEUSDT"):
             fetch_ohlc("HYPEUSDT", 240)
         kraken.assert_not_called()
-        get.assert_called_once()
+        self.assertEqual(get.call_count, 2)
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_uses_binance_free_fallback_when_kraken_pair_is_missing(self, kraken, get):
+        now_ms = int((pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=8)).timestamp() * 1000)
+        catalogue = {"error": [], "result": {"XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}}}
+        candle = [now_ms, "100", "105", "99", "103", "10", now_ms + 4*60*60*1000 - 1,
+                  "1020", 12, "5", "510", "0"]
+        get.side_effect = [
+            Mock(json=lambda: catalogue, raise_for_status=lambda: None),
+            Mock(json=lambda: [candle], raise_for_status=lambda: None),
+        ]
+        frame = fetch_ohlc("HYPEUSDT", 240)
+        self.assertEqual(frame.attrs["source"], "Binance Spot (free fallback)")
+        self.assertEqual(frame.attrs["source_pair"], "HYPEUSDT")
+        kraken.assert_not_called()
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
