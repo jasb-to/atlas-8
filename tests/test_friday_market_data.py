@@ -51,6 +51,13 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_missing_kraken_pair_is_reported_unavailable_without_fallback(self, kraken, get):
+        kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
+        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR: HYPEUSDT"):
+            fetch_ohlc("HYPEUSDT", 240)
+        get.assert_not_called()
+
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_missing_kraken_usdt_pair_falls_back_to_okx_usdt(self, kraken, get):
         kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
         now = pd.Timestamp.now(tz="UTC")
