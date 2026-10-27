@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-from research.friday_market_data import fetch_ohlc, _pair_cache, _provider_cache
+from research.friday_market_data import fetch_ohlc, aggregate_ohlc, _pair_cache
 from research.friday_monitor import validate_friday_pairs, _ai_candidate_pass, _is_live_lifecycle_event
 from research.friday_persistence import RepoFolderFridayStore
 
@@ -14,7 +14,6 @@ from research.friday_persistence import RepoFolderFridayStore
 class FridayMarketDataTests(unittest.TestCase):
     def setUp(self):
         _pair_cache.clear()
-        _provider_cache.clear()
 
     @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
@@ -56,33 +55,46 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_no_kraken_or_binance_usdt_market_is_reported_unavailable(self, kraken, get):
+    def test_no_kraken_usdt_market_is_reported_unavailable(self, kraken, get):
         get.return_value = Mock(
             json=lambda: {"error": [], "result": {
                 "XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}
             }},
             raise_for_status=lambda: None,
         )
-        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN PAIR OR BINANCE USDT MARKET: HYPEUSDT"):
+        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: HYPEUSDT"):
             fetch_ohlc("HYPEUSDT", 240)
         kraken.assert_not_called()
-        self.assertEqual(get.call_count, 2)
 
-    @patch("research.friday_market_data.requests.get")
-    @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_uses_binance_free_fallback_when_kraken_pair_is_missing(self, kraken, get):
-        now_ms = int((pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=8)).timestamp() * 1000)
-        catalogue = {"error": [], "result": {"XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}}}
-        candle = [now_ms, "100", "105", "99", "103", "10", now_ms + 4*60*60*1000 - 1,
-                  "1020", 12, "5", "510", "0"]
-        get.side_effect = [
-            Mock(json=lambda: catalogue, raise_for_status=lambda: None),
-            Mock(json=lambda: [candle], raise_for_status=lambda: None),
-        ]
-        frame = fetch_ohlc("HYPEUSDT", 240)
-        self.assertEqual(frame.attrs["source"], "Binance Spot (free fallback)")
-        self.assertEqual(frame.attrs["source_pair"], "HYPEUSDT")
-        kraken.assert_not_called()
+    def test_aggregate_4h_to_daily_uses_ohlcv_rules_and_complete_utc_day(self):
+        timestamps = pd.date_range("2026-10-20T00:00:00Z", periods=12, freq="4h")
+        frame = pd.DataFrame({
+            "timestamp": timestamps,
+            "open": [float(i + 1) for i in range(12)],
+            "high": [float(i + 3) for i in range(12)],
+            "low": [float(i) for i in range(12)],
+            "close": [float(i + 2) for i in range(12)],
+            "volume": [10.0] * 12,
+            "vwap": [float(i + 2) for i in range(12)],
+        })
+        frame.attrs["source"] = "Kraken Spot"
+        result = aggregate_ohlc(frame, 240, 1440)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result.iloc[0]["open"], 1.0)
+        self.assertEqual(result.iloc[0]["high"], 8.0)
+        self.assertEqual(result.iloc[0]["low"], 0.0)
+        self.assertEqual(result.iloc[0]["close"], 7.0)
+        self.assertEqual(result.iloc[0]["volume"], 60.0)
+        self.assertEqual(result.attrs["source"], "Kraken Spot 4H aggregated to 1D")
+
+    def test_aggregate_rejects_days_with_missing_4h_candles(self):
+        timestamps = pd.date_range("2026-10-20T00:00:00Z", periods=6, freq="4h").delete(2)
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": 1.0, "high": 2.0,
+            "low": 0.5, "close": 1.5, "volume": 10.0,
+        })
+        result = aggregate_ohlc(frame, 240, 1440)
+        self.assertTrue(result.empty)
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
