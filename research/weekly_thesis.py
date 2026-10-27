@@ -270,7 +270,8 @@ def evaluate_sheldon_thesis(
             missing.append("daily EMA 50")
         return result(
             "insufficient_data", None,
-            "Indicators shown where calculable; trading remains blocked pending " + ", ".join(missing) + ".",
+            f"Indicators shown where calculable; available weekly={len(weekly)}, daily={len(daily)}. "
+            "Trading remains blocked pending " + ", ".join(missing) + ".",
             macro=macro_label, wave=momentum_label,
             bearish=bool(stoch_bear or macd_bear), bullish=bool(stoch_bull or macd_bull),
             daily_state=daily_label,
