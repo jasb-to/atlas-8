@@ -191,51 +191,36 @@ jobs:
                 --output "$pair_dir/learning_report.json"
             done
           fi
-      - name: Archive research records in the testing-only repo folder
+      - name: Persist FRIDAY state on a non-production data branch
         if: always() && github.ref == 'refs/heads/main'
         env:
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          RUN_DATE="$(date -u +%F)"
-          ARCHIVE_ROOT="testing/friday/runs/$RUN_DATE/run-$RUN_ID-attempt-$RUN_ATTEMPT"
-          mkdir -p "$ARCHIVE_ROOT"
-          if [ -d results/friday-monitor ]; then
-            while IFS= read -r -d "" source; do
-              pair_dir="$(dirname "$source")"
-              pair="$(basename "$pair_dir")"
-              dest="$ARCHIVE_ROOT/$pair"
-              mkdir -p "$dest"
-              for file in strategy_preview.json decision_journal.jsonl trade_replay.jsonl structural_target_replay.jsonl entry2_trade_replay.jsonl entry2_structural_target_replay.jsonl break_events.jsonl learning_report.json multitimeframe_scan.json monitor_summary.json; do
-                if [ -f "$pair_dir/$file" ]; then cp "$pair_dir/$file" "$dest/$file"; fi
-              done
-            done < <(find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0)
-            if [ -f results/friday-monitor/cron_run.json ]; then
-              cp results/friday-monitor/cron_run.json "$ARCHIVE_ROOT/cron_run.json"
-            fi
-          fi
-          cat > "$ARCHIVE_ROOT/README.md" <<EOF
-          # Friday research run $RUN_ID
-
-          - UTC date: $RUN_DATE
-          - Workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID
-          - Purpose: research and paper-testing only
-          - Contains hypothetical research outputs, not executed trades.
-          EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add testing/friday
-          if git diff --cached --quiet; then
-            echo "No new FRIDAY data to commit."
+          if [ ! -d testing/friday/data ]; then
+            echo "[FRIDAY] No repo-backed state directory to persist."
             exit 0
           fi
-          git commit -m "test(friday): archive research run $RUN_ID"
-          # Dashboard/code deployments can advance main while this scan runs.
-          # Rebase the data-only archive commit before pushing to avoid losing it.
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
+
+          # Keep durable monitor state off main so Vercel does not build for every scan.
+          git worktree add --detach /tmp/friday-data-export HEAD
+          (
+            cd /tmp/friday-data-export
+            git checkout --orphan friday-data-export
+            git rm -rf . >/dev/null 2>&1 || true
+            mkdir -p testing/friday/data
+            cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/
+            git add -f testing/friday/data
+            if git diff --cached --quiet; then
+              echo "[FRIDAY] No persistent state changes to save."
+              exit 0
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "data(friday): persist research state run $RUN_ID attempt $RUN_ATTEMPT"
+            git push origin HEAD:refs/heads/friday-research-data --force
+          )
       - name: Upload Friday run logs and market snapshots
         if: always()
         uses: actions/upload-artifact@v4
