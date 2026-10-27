@@ -1,10 +1,4 @@
-"""Kraken-first USDT OHLC adapter with a clearly labelled free Binance fallback.
-
-Kraken is always attempted first. Binance Spot is used only when Kraken has no
-matching USDT pair or fewer than 200 completed weekly candles. A per-pair
-provider choice keeps weekly, daily and execution candles on the same venue
-within one scan process. The caller still enforces the thesis candle minimums.
-"""
+"""Kraken-first USDT OHLC adapter with targeted, gap-checked 4H-to-1D aggregation."""
 from __future__ import annotations
 
 import threading
@@ -18,8 +12,6 @@ from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 # Space request starts to stay conservative with Kraken's public API rate limits.
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
 KRAKEN_ASSET_PAIRS_URL = "https://api.kraken.com/0/public/AssetPairs"
-BINANCE_KLINES_URL = "https://data-api.binance.vision/api/v3/klines"
-_provider_cache: dict[str, str] = {}
 _pair_cache: dict[str, str] = {}
 _pair_cache_lock = threading.Lock()
 _request_lock = threading.Lock()
