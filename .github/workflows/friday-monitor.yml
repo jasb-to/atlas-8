@@ -64,7 +64,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
           FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
-          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT' }}
+          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT,UNIUSDT' }}
         run: |
           # Never interpolate workflow_dispatch input into shell source. The Python
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
@@ -251,16 +251,7 @@ jobs:
             mkdir -p testing/friday/data testing/friday/runs
             # Vercel reads this branch-level config before attempting a build.
             # Research storage is not an application deployment source.
-            cat > vercel.json <<'JSON'
-            {
-              "$schema": "https://openapi.vercel.sh/vercel.json",
-              "git": {
-                "deploymentEnabled": {
-                  "friday-research-data": false
-                }
-              }
-            }
-            JSON
+            python -c 'import json; json.dump({"$schema":"https://openapi.vercel.sh/vercel.json","git":{"deploymentEnabled":{"friday-research-data":False}}}, open("vercel.json","w"), indent=2); print()'
             if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
             if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
             git add -f testing/friday/data testing/friday/runs
