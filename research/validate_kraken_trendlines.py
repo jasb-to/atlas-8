@@ -57,8 +57,9 @@ def fetch_ohlc(pair: str = "XBTUSD", interval: int = 240) -> pd.DataFrame:
     now = pd.Timestamp.now(tz="UTC")
     candle_end = frame["timestamp"] + pd.Timedelta(minutes=interval)
     frame = frame.loc[candle_end <= now].reset_index(drop=True)
-    if len(frame) < 50:
-        raise RuntimeError(f"Only {len(frame)} completed candles available; refusing to audit.")
+    # Return partial history to callers. The Weekly Thesis evaluator owns its
+    # explicit 200-week / 50-day sufficiency gate; the chart audit checks its own
+    # minimum immediately before fitting trendlines.
     return frame
 
 
@@ -247,6 +248,8 @@ def main() -> None:
     args = parser.parse_args()
 
     frame = fetch_ohlc(args.pair, args.interval)
+    if len(frame) < 50:
+        raise RuntimeError(f"Only {len(frame)} completed candles available; refusing to audit.")
     result = audit(frame, args.min_touches, args.tolerance_pct, args.pair, args.interval)
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
