@@ -249,6 +249,18 @@ jobs:
             git checkout --orphan friday-data-export
             git rm -rf . >/dev/null 2>&1 || true
             mkdir -p testing/friday/data testing/friday/runs
+            # Vercel reads this branch-level config before attempting a build.
+            # Research storage is not an application deployment source.
+            cat > vercel.json <<'JSON'
+            {
+              "$schema": "https://openapi.vercel.sh/vercel.json",
+              "git": {
+                "deploymentEnabled": {
+                  "friday-research-data": false
+                }
+              }
+            }
+            JSON
             if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
             if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
             git add -f testing/friday/data testing/friday/runs
