@@ -18,7 +18,7 @@ from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 # Space request starts to stay conservative with Kraken's public API rate limits.
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
 KRAKEN_ASSET_PAIRS_URL = "https://api.kraken.com/0/public/AssetPairs"
-BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines"
+BINANCE_KLINES_URL = "https://data-api.binance.vision/api/v3/klines"
 _provider_cache: dict[str, str] = {}
 _pair_cache: dict[str, str] = {}
 _pair_cache_lock = threading.Lock()
