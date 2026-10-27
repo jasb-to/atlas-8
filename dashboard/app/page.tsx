@@ -129,7 +129,7 @@ export default function Home() {
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
             <div className="thesis-row"><span>WEEKLY CLOSE</span><b>{fmtPrice(thesis.weekly_close)}</b></div>
             <div className="thesis-row"><span>DAILY CLOSE</span><b>{fmtPrice(thesis.daily_close)}</b></div>
-            <div className="thesis-row"><span>DATA SOURCE</span><b>{clean(thesis.data_source_weekly ?? "UNKNOWN")}</b></div>
+            <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(thesis.data_source_weekly ?? "UNKNOWN")} / {clean(thesis.data_source_daily ?? "UNKNOWN")}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
             <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
             {<p className="thesis-reason">{String(thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</p>}
