@@ -43,6 +43,18 @@ jobs:
           cache: pip
       - name: Install research dependencies
         run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Restore temporary FRIDAY repo state from data branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin friday-research-data >/dev/null 2>&1; then
+            git fetch origin friday-research-data
+            git checkout origin/friday-research-data -- testing/friday/data testing/friday/runs
+            git reset -- testing/friday/data testing/friday/runs
+            echo "[FRIDAY] Restored persistent state and run archives from friday-research-data."
+          else
+            echo "[FRIDAY] No data branch exists yet; seeding it from the current checkout."
+          fi
       - name: Run Friday monitor
         env:
           FRIDAY_STORAGE_BACKEND: repo
