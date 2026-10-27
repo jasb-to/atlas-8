@@ -65,6 +65,22 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertEqual(len(frame), 50)
         self.assertIn("vwap", frame.columns)
 
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_okx_weekly_history_under_50_is_returned_for_diagnostics(self, kraken, get):
+        kraken.side_effect = RuntimeError("Kraken API returned errors: ['EQuery:Unknown asset pair']")
+        now = pd.Timestamp.now(tz="UTC")
+        start_ms = int((now - pd.Timedelta(weeks=42)).timestamp() * 1000)
+        rows = []
+        for i in range(41):
+            open_ms = start_ms + i * 7 * 24 * 60 * 60 * 1000
+            rows.append([str(open_ms), "100", "105", "99", "103", "10", "1020", "1020", "1"])
+        get.return_value = Mock(status_code=200, json=lambda: {"code": "0", "msg": "", "data": rows}, raise_for_status=lambda: None)
+        frame = fetch_ohlc("LITUSDT", 10080)
+        self.assertEqual(get.call_args.kwargs["params"]["instId"], "LIT-USDT")
+        self.assertEqual(len(frame), 41)
+        self.assertEqual(frame["close"].iloc[-1], 103)
+
     @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_passes_usdt_pair_to_kraken(self, fetch):
         timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
