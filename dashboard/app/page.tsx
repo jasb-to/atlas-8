@@ -26,6 +26,7 @@ const isBear = (value: unknown) => ["short", "bearish", "active_short"].includes
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
   const [busy, setBusy] = useState(false);
+  const [thesisFilter, setThesisFilter] = useState("ALL");
 
   async function refresh() {
     setBusy(true);
@@ -91,6 +92,7 @@ export default function Home() {
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
   });
 
+  const visibleWeeklyCards = weeklyCards.filter(card => thesisFilter === "ALL" || (thesisFilter === "ACTIVE" ? card.thesisStatus === "active" : thesisFilter === "VETO" ? card.thesisStatus === "veto" : thesisFilter === "WAITING" ? !["active", "veto"].includes(card.thesisStatus) : false));
   const watchlist = weeklyCards.filter(card =>
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
   );
@@ -109,8 +111,9 @@ export default function Home() {
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
       <p className="thesis-note">All scanned markets · Completed weekly and daily candles · The 4H engine only runs when the thesis is ACTIVE.</p>
-      {weeklyCards.length ? <div className="thesis-grid">
-        {weeklyCards.map(card => {
+      <div className="thesis-filter-row"><div className="thesis-filter-group">{[["ALL","ALL MARKETS"],["ACTIVE","ACTIVE"],["VETO","VETOED"],["WAITING","WAITING / OTHER"]].map(([value,label]) => <button key={value} className={thesisFilter === value ? "thesis-filter active" : "thesis-filter"} onClick={() => setThesisFilter(value)}>{label}</button>)}</div><span className="thesis-scroll-hint">SCROLL ↔</span></div>
+      {weeklyCards.length ? <div className="thesis-strip">
+        {visibleWeeklyCards.map(card => {
           const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : "INACTIVE";
           const macroBull = card.macroRegime === "BULLISH";
           const macroBear = card.macroRegime === "BEARISH";

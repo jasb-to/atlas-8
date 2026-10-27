@@ -14,3 +14,21 @@ button{font:inherit}.shell{max-width:1500px;margin:0 auto;padding:0 40px}.topbar
 @media(max-width:420px){.thesis-grid{grid-template-columns:1fr}.mode-chip,.ai-status{font-size:8px}.trade-prices{grid-template-columns:1fr 1fr}.trade-prices>div:last-child{grid-column:1/-1}.debug-grid{grid-template-columns:1fr}}
 
 .trade-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}.trade-card{padding:12px}.trade-prices{gap:6px;margin-top:12px}.trade-prices>div{padding:8px}.trade-prices span{font-size:8px;margin-bottom:4px}.trade-prices b{font-size:11px}.trade-card p{font-size:10px;line-height:1.4;margin-top:8px}.trade-foot{padding-top:8px;margin-top:8px}
+
+
+/* Weekly thesis market strip: compact, filterable and horizontally scrollable. */
+.thesis-filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 12px;}
+.thesis-filter-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.thesis-filter{appearance:none;border:1px solid var(--border, #26364a);background:var(--panel, #0d1b2c);color:var(--muted, #91a1b5);border-radius:999px;padding:7px 11px;font:600 10px/1.2 'DM Mono',monospace;letter-spacing:.04em;cursor:pointer;white-space:nowrap;}
+.thesis-filter.active{background:var(--accent-soft, #173a3b);border-color:var(--accent, #3bc6a4);color:var(--text, #e8eef7);}
+.thesis-scroll-hint{font:500 10px 'DM Mono',monospace;letter-spacing:.08em;color:var(--muted, #91a1b5);white-space:nowrap;}
+.thesis-strip{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#38506a transparent;-webkit-overflow-scrolling:touch;}
+.thesis-strip>.thesis-card{flex:0 0 clamp(238px, 26vw, 300px);width:clamp(238px, 26vw, 300px);min-width:0;scroll-snap-align:start;}
+.thesis-strip .thesis-card{padding:14px;}
+.thesis-strip .thesis-top{margin-bottom:12px;}
+.thesis-strip .thesis-row{gap:8px;padding:6px 0;font-size:11px;}
+.thesis-strip .thesis-row span,.thesis-strip .thesis-bottom span{font-size:9px;letter-spacing:.06em;}
+.thesis-strip .thesis-row b{text-align:right;overflow-wrap:anywhere;}
+.thesis-strip .thesis-bottom{margin-top:8px;padding-top:9px;}
+.thesis-strip .thesis-reason{font-size:11px;line-height:1.45;margin:9px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+@media(max-width:640px){.thesis-filter-row{align-items:flex-start}.thesis-filter-group{flex-wrap:nowrap;overflow-x:auto;max-width:calc(100vw - 105px);padding-bottom:4px}.thesis-filter{padding:7px 9px}.thesis-scroll-hint{padding-top:7px;font-size:9px}.thesis-strip>.thesis-card{flex-basis:82vw;width:82vw}}
