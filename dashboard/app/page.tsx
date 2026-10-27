@@ -19,6 +19,10 @@ const pairName = (value: unknown) => {
   return pair.endsWith("USD") && !pair.endsWith("USDT") ? pair.slice(0, -3) + "USDT" : pair;
 };
 const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
+const THESIS_UNIVERSE = [
+  "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT",
+  "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
+];
 const direction = (value: unknown) => String(value ?? "").toLowerCase();
 const isBull = (value: unknown) => ["long", "bullish", "active_long"].includes(direction(value));
 const isBear = (value: unknown) => ["short", "bearish", "active_short"].includes(direction(value));
@@ -74,14 +78,15 @@ export default function Home() {
     if (!latestThesisByPair.has(pair)) latestThesisByPair.set(pair, record);
   }
 
-  const weeklyCards = Array.from(latestThesisByPair.entries()).map(([pair, record]) => {
+  const weeklyCards = THESIS_UNIVERSE.map(pair => {
+    const record = latestThesisByPair.get(pair);
     const thesis = payloadOf(record);
     const scan = scanByPair.get(pair);
-    // Strictly display the persisted thesis values; never infer macro/wave state from EMAs.
+    // Strictly display persisted thesis values; missing snapshots remain visible as missing.
     const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").toUpperCase();
     const waveState = String(thesis.wave_state ?? "UNKNOWN").toUpperCase();
     const tradeDirection = String(thesis.direction ?? "UNKNOWN").toUpperCase();
-    const thesisStatus = String(thesis.status ?? "UNKNOWN").toLowerCase();
+    const thesisStatus = record ? String(thesis.status ?? "UNKNOWN").toLowerCase() : "missing";
     const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
     const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
     const active = thesisStatus === "active";
@@ -107,11 +112,11 @@ export default function Home() {
     </header>
 
     <section className="section-block">
-      <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>Completed weekly and daily candles. The 4H engine only runs when the thesis is active.</p></div></div>
-      <p className="thesis-note">All scanned markets · Completed weekly and daily candles · The 4H engine only runs when the thesis is ACTIVE.</p>
+      <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>16 fixed market slots · completed weekly and daily candles · missing snapshots stay visible.</p></div></div>
+      <p className="thesis-note">16 markets · completed candles only · only ACTIVE theses can pass the 4H gate.</p>
       {weeklyCards.length ? <div className="thesis-grid">
         {weeklyCards.map(card => {
-          const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : "INACTIVE";
+          const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : card.thesisStatus === "missing" ? "NO SNAPSHOT" : "INACTIVE";
           const macroBull = card.macroRegime === "BULLISH";
           const macroBear = card.macroRegime === "BEARISH";
           const dirBull = isBull(card.tradeDirection);
@@ -126,7 +131,7 @@ export default function Home() {
             <div className="thesis-row"><span>DAILY CLOSE</span><b>{fmtPrice(thesis.daily_close)}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
             <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
-            {thesis.reason && <p className="thesis-reason">{String(thesis.reason)}</p>}
+            {<p className="thesis-reason">{String(thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</p>}
           </article>;
         })}
       </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
