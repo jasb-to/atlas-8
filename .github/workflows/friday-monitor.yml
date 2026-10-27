@@ -203,15 +203,43 @@ jobs:
             exit 0
           fi
 
-          # Keep durable monitor state off main so Vercel does not build for every scan.
+          # Archive this run in the data-only branch, not in main.
+          RUN_DATE="$(date -u +%F)"
+          ARCHIVE_ROOT="testing/friday/runs/$RUN_DATE/run-$RUN_ID-attempt-$RUN_ATTEMPT"
+          mkdir -p "$ARCHIVE_ROOT"
+          if [ -d results/friday-monitor ]; then
+            while IFS= read -r -d "" source; do
+              pair_dir="$(dirname "$source")"
+              pair="$(basename "$pair_dir")"
+              dest="$ARCHIVE_ROOT/$pair"
+              mkdir -p "$dest"
+              for file in strategy_preview.json decision_journal.jsonl trade_replay.jsonl structural_target_replay.jsonl entry2_trade_replay.jsonl entry2_structural_target_replay.jsonl break_events.jsonl learning_report.json multitimeframe_scan.json monitor_summary.json; do
+                if [ -f "$pair_dir/$file" ]; then cp "$pair_dir/$file" "$dest/$file"; fi
+              done
+            done < <(find results/friday-monitor -mindepth 2 -maxdepth 2 -name strategy_preview.json -print0)
+            if [ -f results/friday-monitor/cron_run.json ]; then
+              cp results/friday-monitor/cron_run.json "$ARCHIVE_ROOT/cron_run.json"
+            fi
+          fi
+          cat > "$ARCHIVE_ROOT/README.md" <<EOF
+          # Friday research run $RUN_ID
+
+          - UTC date: $RUN_DATE
+          - Workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/$RUN_ID
+          - Purpose: research and paper-testing only
+          - Contains hypothetical research outputs, not executed trades.
+          EOF
+
+          # Keep durable monitor state and archived runs off main so Vercel does not build for every scan.
           git worktree add --detach /tmp/friday-data-export HEAD
           (
             cd /tmp/friday-data-export
             git checkout --orphan friday-data-export
             git rm -rf . >/dev/null 2>&1 || true
-            mkdir -p testing/friday/data
-            cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/
-            git add -f testing/friday/data
+            mkdir -p testing/friday/data testing/friday/runs
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
+            git add -f testing/friday/data testing/friday/runs
             if git diff --cached --quiet; then
               echo "[FRIDAY] No persistent state changes to save."
               exit 0
