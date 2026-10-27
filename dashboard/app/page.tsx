@@ -78,12 +78,16 @@ export default function Home() {
     const thesis = payloadOf(record);
     const scan = scanByPair.get(pair);
     // Strictly display the persisted thesis values; never infer macro/wave state from EMAs.
-    const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").toUpperCase();
-    const waveState = String(thesis.wave_state ?? "UNKNOWN").toUpperCase();
+    const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").replaceAll("_", " ").toUpperCase();
+    const waveState = String(thesis.wave_state ?? "UNKNOWN").replaceAll("_", " ").toUpperCase();
     const tradeDirection = String(thesis.direction ?? "UNKNOWN").toUpperCase();
     const thesisStatus = String(thesis.status ?? "UNKNOWN").toLowerCase();
-    const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
-    const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
+    const waveLabel = thesis.wave_state
+      ? (tradeDirection === "UNKNOWN" ? waveState : `${waveState} (${tradeDirection})`)
+      : "UNKNOWN";
+    const dailyAlignment = String(
+      thesis.daily_alignment ?? (thesisStatus === "veto" ? "veto" : thesisStatus === "active" ? "pass" : "unknown")
+    ).replaceAll("_", " ").toUpperCase();
     const active = thesisStatus === "active";
     return { pair, thesis, scan, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
   }).sort((a, b) => {
