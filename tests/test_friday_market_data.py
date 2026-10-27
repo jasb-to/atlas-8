@@ -86,8 +86,15 @@ class FridayMarketDataTests(unittest.TestCase):
         kraken.assert_called_once_with(pair="XBTUSDT", interval=240)
         self.assertEqual(len(result), 50)
 
+    @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_passes_usdt_pair_to_kraken(self, fetch):
+    def test_passes_resolved_usdt_pair_to_kraken(self, fetch, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "XXBTZUSDT": {"altname": "XBTUSDT", "wsname": "XBT/USDT"}
+            }},
+            raise_for_status=lambda: None,
+        )
         timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
         frame = pd.DataFrame({
             "timestamp": timestamps,
