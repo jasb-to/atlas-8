@@ -85,6 +85,34 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertNotEqual(enough["status"], "insufficient_data", enough["reason"])
 
 
+    def test_partial_weekly_history_displays_indicators_but_never_activates(self):
+        as_of = pd.Timestamp("2026-10-27T12:00:00Z")
+        weekly_times = pd.date_range(end="2026-10-18", periods=79, freq="7D", tz="UTC")
+        daily_times = pd.date_range(end="2026-10-26", periods=552, freq="D", tz="UTC")
+        def frame(times):
+            x = np.arange(len(times), dtype=float)
+            return pd.DataFrame({
+                "timestamp": times,
+                "close": 100 + 0.12 * x + 2 * np.sin(x / 4),
+            })
+        result = evaluate_sheldon_thesis(
+            "BNBUSDT", weekly_candles=frame(weekly_times),
+            daily_candles=frame(daily_times), as_of=as_of,
+        )
+        self.assertEqual(result["status"], "insufficient_data")
+        self.assertIsNone(result["direction"])
+        self.assertEqual(result["macro_regime"], "insufficient_history")
+        self.assertNotIn(result["wave_state"], (None, ""))
+        self.assertIn(result["daily_alignment"], {"bullish_bias", "bearish_bias", "at_ema50"})
+        self.assertIsNotNone(result["weekly_close"])
+        self.assertIsNotNone(result["daily_close"])
+        self.assertIsNotNone(result["weekly_ema8"])
+        self.assertIsNotNone(result["weekly_ema21"])
+        self.assertIsNotNone(result["daily_ema50"])
+        self.assertIn("available weekly=79, daily=552", result["reason"])
+        self.assertIn("trading remains blocked", result["reason"].lower())
+
+
     def test_weekly_alignment_does_not_require_stoch_extreme_zone(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=230, freq="D", tz="UTC")

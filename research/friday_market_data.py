@@ -71,8 +71,8 @@ def _fetch_okx_ohlc(pair: str, interval: int) -> pd.DataFrame:
     frame["trades"] = float("nan")
     frame = frame.loc[frame["confirm"].astype(str) == "1"].copy()
     frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
-    if len(frame) < 50:
-        raise RuntimeError(f"Only {len(frame)} completed OKX candles available for {base}-USDT; refusing to scan")
+    if frame.empty:
+        raise RuntimeError(f"No completed OKX candles available for {base}-USDT")
     return frame[["timestamp", "open", "high", "low", "close", "vwap", "volume", "trades"]]
 
 
