@@ -43,6 +43,18 @@ jobs:
           cache: pip
       - name: Install research dependencies
         run: python -m pip install --upgrade pip pandas numpy requests matplotlib
+      - name: Restore temporary FRIDAY repo state from data branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin friday-research-data >/dev/null 2>&1; then
+            git fetch origin friday-research-data
+            git checkout origin/friday-research-data -- testing/friday/data testing/friday/runs
+            git reset -- testing/friday/data testing/friday/runs
+            echo "[FRIDAY] Restored persistent state and run archives from friday-research-data."
+          else
+            echo "[FRIDAY] No data branch exists yet; seeding it from the current checkout."
+          fi
       - name: Run Friday monitor
         env:
           FRIDAY_STORAGE_BACKEND: repo
@@ -191,13 +203,19 @@ jobs:
                 --output "$pair_dir/learning_report.json"
             done
           fi
-      - name: Archive research records in the testing-only repo folder
+      - name: Persist FRIDAY state on a non-production data branch
         if: always() && github.ref == 'refs/heads/main'
         env:
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           set -euo pipefail
+          if [ ! -d testing/friday/data ]; then
+            echo "[FRIDAY] No repo-backed state directory to persist."
+            exit 0
+          fi
+
+          # Archive this run in the data-only branch, not in main.
           RUN_DATE="$(date -u +%F)"
           ARCHIVE_ROOT="testing/friday/runs/$RUN_DATE/run-$RUN_ID-attempt-$RUN_ATTEMPT"
           mkdir -p "$ARCHIVE_ROOT"
@@ -223,19 +241,26 @@ jobs:
           - Purpose: research and paper-testing only
           - Contains hypothetical research outputs, not executed trades.
           EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add testing/friday
-          if git diff --cached --quiet; then
-            echo "No new FRIDAY data to commit."
-            exit 0
-          fi
-          git commit -m "test(friday): archive research run $RUN_ID"
-          # Dashboard/code deployments can advance main while this scan runs.
-          # Rebase the data-only archive commit before pushing to avoid losing it.
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
+
+          # Keep durable monitor state and archived runs off main so Vercel does not build for every scan.
+          git worktree add --detach /tmp/friday-data-export HEAD
+          (
+            cd /tmp/friday-data-export
+            git checkout --orphan friday-data-export
+            git rm -rf . >/dev/null 2>&1 || true
+            mkdir -p testing/friday/data testing/friday/runs
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
+            git add -f testing/friday/data testing/friday/runs
+            if git diff --cached --quiet; then
+              echo "[FRIDAY] No persistent state changes to save."
+              exit 0
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "data(friday): persist research state run $RUN_ID attempt $RUN_ATTEMPT"
+            git push origin HEAD:refs/heads/friday-research-data --force
+          )
       - name: Upload Friday run logs and market snapshots
         if: always()
         uses: actions/upload-artifact@v4
