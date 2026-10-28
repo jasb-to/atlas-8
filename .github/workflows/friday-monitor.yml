@@ -254,7 +254,7 @@ jobs:
             python -c 'import json; json.dump({"$schema":"https://openapi.vercel.sh/vercel.json","git":{"deploymentEnabled":{"friday-research-data":False}}}, open("vercel.json","w"), indent=2); print()'
             if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
             if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
-            git add -f testing/friday/data testing/friday/runs
+            git add -f vercel.json testing/friday/data testing/friday/runs
             if git diff --cached --quiet; then
               echo "[FRIDAY] No persistent state changes to save."
               exit 0
