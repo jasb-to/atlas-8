@@ -92,7 +92,8 @@ export default function Home() {
     const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
     const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
     const active = thesisStatus === "active";
-    return { pair, thesis, scan, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+    const recordType = String(record?.record_type ?? "MISSING");
+    return { pair, thesis, scan, recordType, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
   }).sort((a, b) => {
     const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
@@ -116,8 +117,9 @@ export default function Home() {
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>16 fixed market slots · completed weekly and daily candles · missing snapshots stay visible.</p></div></div>
       <p className="thesis-note">16 markets · completed candles only · only ACTIVE theses can pass the 4H gate.</p>
-      {weeklyCards.length ? <div className="thesis-grid">
-        {weeklyCards.map(card => {
+      {weeklyCards.length ? <>
+      <div className="thesis-grid">
+        {weeklyCards.filter(card => card.active).map(card => {
           const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : card.thesisStatus === "missing" ? "NO SNAPSHOT" : "INACTIVE";
           const macroBull = card.macroRegime === "BULLISH";
           const macroBear = card.macroRegime === "BEARISH";
@@ -131,13 +133,26 @@ export default function Home() {
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
             <div className="thesis-row"><span>WEEKLY CLOSE</span><b>{fmtPrice(thesis.weekly_close)}</b></div>
             <div className="thesis-row"><span>DAILY CLOSE</span><b>{fmtPrice(thesis.daily_close)}</b></div>
-            <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(thesis.data_source_weekly ?? "UNKNOWN")} / {clean(thesis.data_source_daily ?? "UNKNOWN")}</b></div>
+            <div className="thesis-row"><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
             <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
             {<p className="thesis-reason">{String(thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</p>}
           </article>;
         })}
-      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
+      </div>
+      {weeklyCards.some(card => !card.active) ? <details className="debug-details inactive-theses">
+        <summary>INACTIVE MARKETS · {weeklyCards.filter(card => !card.active).length} collapsed</summary>
+        <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>STATUS</th><th>MACRO / WAVE</th><th>WEEKLY CLOSE</th><th>DAILY CLOSE</th><th>RECORD TYPE</th><th>REASON</th></tr></thead><tbody>
+          {weeklyCards.filter(card => !card.active).map(card => <tr key={card.pair}>
+            <td><b>{shortPair(card.pair)}</b></td>
+            <td>{card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : card.thesisStatus === "missing" || card.thesisStatus === "no_snapshot" ? "NO SNAPSHOT" : "INACTIVE"}</td>
+            <td>{card.macroRegime} / {card.waveLabel}</td>
+            <td>{fmtPrice(card.thesis.weekly_close)}</td><td>{fmtPrice(card.thesis.daily_close)}</td>
+            <td>{clean(card.recordType)}</td><td>{String(card.thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</td>
+          </tr>)}
+        </tbody></table></div>
+      </details> : null}
+      </> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
     </section>
 
     <section className="section-block">
@@ -190,7 +205,7 @@ export default function Home() {
         </div>
         <h3>Scan trace and errors</h3>
         <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>SCAN</th><th>DECISION</th><th>AI ERROR</th><th>DETAIL</th><th>LAST CANDLE</th></tr></thead><tbody>
-          {pairScans.length ? pairScans.map(scan => <tr key={scan.pair}><td><b>{shortPair(scan.pair)}</b></td><td>{clean(scan.status)}</td><td>{clean(scan.latest_setup_state)} / {clean(scan.friday_decision)}</td><td>{scan.ai_review_error ? String(scan.ai_review_error) : "—"}</td><td>{clean(scan.scan_diagnostic ?? scan.weekly_thesis?.reason)}</td><td>{fmtTime(scan.last_completed_candle_utc)}</td></tr>) : <tr><td colSpan={6} className="table-empty">No scan trace has been published yet.</td></tr>}
+          {pairScans.length ? pairScans.map(scan => <tr key={scan.pair}><td><b>{shortPair(scan.pair)}</b></td><td>{clean(scan.status)}</td><td>{String(scan.friday_decision ?? "").toUpperCase() === "FIB_REACTION_CANDIDATE" ? "WEEKLY THESIS ONLY" : `${clean(scan.latest_setup_state)} / ${clean(scan.friday_decision)}`}</td><td>{scan.ai_review_error ? String(scan.ai_review_error) : "—"}</td><td>{String(scan.friday_decision ?? "").toUpperCase() === "FIB_REACTION_CANDIDATE" ? "Fibonacci reaction context suppressed in trace; weekly thesis and 4H break/retest remain authoritative." : clean(scan.scan_diagnostic ?? scan.weekly_thesis?.reason)}</td><td>{fmtTime(scan.last_completed_candle_utc)}</td></tr>) : <tr><td colSpan={6} className="table-empty">No scan trace has been published yet.</td></tr>}
         </tbody></table></div>
         <h3>Invalidations and lifecycle history</h3>
         <div className="table-wrap"><table><thead><tr><th>MARKET / TIME</th><th>EVENT</th><th>DIRECTION</th><th>STATE</th><th>ENTRY REF.</th></tr></thead><tbody>
