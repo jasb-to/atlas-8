@@ -1,5 +1,4 @@
 import unittest
-import os
 
 import pandas as pd
 
@@ -83,6 +82,83 @@ class FridayMomentumReversalTests(unittest.TestCase):
         self.assertEqual(result["state"], "BLOCKED")
         self.assertFalse(result["eligible"])
         self.assertIn("insufficient_indicator_history", result["blockers"])
+
+
+    def test_disabled_momentum_reversal_is_completely_silent(self):
+        """The kill switch must prevent reversal persistence and Telegram delivery."""
+        from tempfile import TemporaryDirectory
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from unittest.mock import patch, MagicMock
+        from research.friday_monitor import run_monitor
+
+        candle_time = "2026-10-28T16:00:00+00:00"
+        preview = {
+            "last_completed_candle_utc": candle_time,
+            "last_close": 101.05,
+            "latest_setup_state": {"state": "NO_SETUP", "message": "no structural setup"},
+            "friday_decision": {"state": "NO_TRADE", "reason": "no structural entry"},
+            "event_count": 0,
+            "break_events": [],
+            "closed_candles": [],
+            "model_review": {"status": "disabled", "response": None},
+            "reversal_context": {"state": "neutral"},
+            "current_indicators": {},
+            "structure_lifecycle": {},
+            "execution_trigger": {"eligible": False, "blockers": []},
+            "trade_plans": {},
+            "momentum_reversal": {
+                "strategy": "stoch-rsi-structural-reversal-v1",
+                "state": "CANDIDATE",
+                "eligible": True,
+                "direction": "short",
+                "signal_time": candle_time,
+                "entry": 101.05,
+                "stop": 102.20,
+                "target": 98.04,
+                "reward_risk": 2.62,
+            },
+        }
+        store = MagicMock()
+        store.configured = True
+        store.paper_trades = []
+        output = StringIO()
+
+        with TemporaryDirectory() as tmp, redirect_stdout(output), patch.dict(
+            os.environ, {"FRIDAY_MOMENTUM_REVERSAL_ENABLED": "false", "FRIDAY_AI_REVIEW_ENABLED": "false"}, clear=False
+        ):
+            with patch("research.friday_monitor.create_friday_store", return_value=store):
+                with patch("research.friday_monitor.evaluate_sheldon_thesis", return_value={
+                    "status": "active", "direction": "short", "reason": "active test thesis",
+                    "generated_at_utc": candle_time,
+                }):
+                    with patch("research.friday_monitor.build_preview", return_value=preview):
+                        with patch("research.friday_monitor.analyse_pair", return_value={
+                            "state": "WATCH_NEUTRAL", "thesis_direction": "short",
+                            "generated_at_utc": candle_time,
+                            "four_hour_execution": {"last_closed_candle_utc": candle_time},
+                        }):
+                            with patch("research.friday_monitor.update_paper_trades", return_value=[]):
+                                with patch("research.friday_monitor.register_paper_trade") as register_trade:
+                                    with patch("research.friday_monitor.send_telegram_alert") as send_alert:
+                                        result = run_monitor(["SOLUSDT"], tmp)
+
+        send_alert.assert_not_called()
+        self.assertNotIn("MOMENTUM_REVERSAL", output.getvalue())
+        register_trade.assert_not_called()
+        store.record_trade_event.assert_not_called()
+        store.claim_alert.assert_not_called()
+        self.assertFalse(any(
+            item.get("type") == "MOMENTUM_REVERSAL"
+            for item in result["pair_results"][0]["alert_results"]
+        ))
+        snapshot_payloads = [
+            call.args[0].get("payload", {})
+            for call in store.record_archive.call_args_list
+            if call.args and isinstance(call.args[0], dict)
+        ]
+        self.assertTrue(snapshot_payloads)
+        self.assertTrue(all("momentum_reversal" not in payload for payload in snapshot_payloads))
 
 
 if __name__ == "__main__":
