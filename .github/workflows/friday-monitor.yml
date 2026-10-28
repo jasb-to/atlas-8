@@ -123,8 +123,15 @@ jobs:
               print("[FRIDAY] No per-market summaries were written.")
           for row in summaries:
               pair = row.get("pair", "UNKNOWN")
-              if row.get("status") != "ok":
-                  print(f"[FRIDAY SCAN] {pair} | ERROR | {row.get('error', 'No error details recorded')}")
+              row_status = row.get("status")
+              if row_status == "weekly_inactive":
+                  thesis = row.get("weekly_thesis") or {}
+                  thesis_status = row.get("weekly_thesis_status") or thesis.get("status", "inactive")
+                  reason = row.get("scan_diagnostic") or thesis.get("reason") or "Weekly thesis is not active."
+                  print(f"[FRIDAY SCAN] {pair} | WEEKLY INACTIVE | Thesis={thesis_status} | {reason}")
+                  continue
+              if row_status != "ok":
+                  print(f"[FRIDAY SCAN] {pair} | ERROR | {row.get('error') or row.get('scan_diagnostic') or 'No error details recorded'}")
                   continue
 
               setup = row.get("latest_setup_state")
