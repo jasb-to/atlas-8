@@ -14,6 +14,8 @@ from research.friday_persistence import RepoFolderFridayStore
 class FridayMarketDataTests(unittest.TestCase):
     def setUp(self):
         _pair_cache.clear()
+        import research.friday_market_data as market_data
+        market_data._asset_pairs_catalogue = None
 
     @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
@@ -163,6 +165,40 @@ class FridayMarketDataTests(unittest.TestCase):
 
 
 class FridayLedgerTrackingTests(unittest.TestCase):
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_assetpairs_catalogue_is_fetched_once_for_multiple_standard_symbols(self, kraken, get):
+        catalogue = {
+            "HYPEUSDT": {"altname": "HYPEUSDT", "wsname": "HYPE/USDT"},
+            "SUIUSDT": {"altname": "SUIUSDT", "wsname": "SUI/USDT"},
+            "ZECUSDT": {"altname": "ZECUSDT", "wsname": "ZEC/USDT"},
+            "NEARUSDT": {"altname": "NEARUSDT", "wsname": "NEAR/USDT"},
+            "UNIUSDT": {"altname": "UNIUSDT", "wsname": "UNI/USDT"},
+        }
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": catalogue},
+            raise_for_status=lambda: None,
+        )
+        timestamps = pd.date_range("2026-10-20", periods=50, freq="7D", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50, "vwap": [102.0] * 50,
+            "volume": [10.0] * 50, "trades": [10] * 50,
+        })
+        kraken.return_value = frame
+
+        for symbol in ("HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"):
+            result = fetch_ohlc(symbol, 10080)
+            self.assertEqual(len(result), 50)
+            self.assertEqual(result.attrs["source_pair"], symbol)
+
+        self.assertEqual(get.call_count, 1)
+        self.assertEqual(
+            [call.kwargs["pair"] for call in kraken.call_args_list],
+            ["HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"],
+        )
+
     def test_historical_backfill_is_not_persisted_but_new_events_are_idempotent(self):
         old_cutoff = os.environ.get("FRIDAY_TRACKING_START_UTC")
         os.environ["FRIDAY_TRACKING_START_UTC"] = "2026-10-23T17:00:00+00:00"
