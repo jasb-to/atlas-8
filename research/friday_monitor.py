@@ -583,7 +583,8 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                         raise
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
-            reversal = result.get("momentum_reversal", {})
+            # Weekly thesis remains authoritative; reversal candidates are opt-in only.
+            reversal = result.get("momentum_reversal", {}) if os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"} else {}
             reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
             reversal_is_live = (
                 reversal_ts is not None and reversal_ts >= tracking_cutoff
