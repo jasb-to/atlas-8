@@ -1,7 +1,10 @@
 # FRIDAY weekly thesis forensic audits
 
 These audits are isolated research tooling. They do not wire the weekly filter into
-friday_monitor.py, place orders, or authorize production alerts.
+friday_monitor.py, place orders, or authorize production alerts. Market data is
+Kraken-only. Historical audits fail closed when Kraken's public OHLC endpoint
+cannot supply the entire requested date range; partial history must never be
+presented as a complete backtest.
 
 ## 1. Alert geometry (local deterministic check)
 
@@ -19,7 +22,7 @@ The exact input entry=8.822, stop=9.046 yields TP1 8.486; using stop
 python -m audits.audit_midweek_freeze
 ~~~
 
-Fetches recent weekly BTC candles and compares the last completed weekly close,
+Fetches weekly BTC candles from Kraken and compares the last completed weekly close,
 200-SMA and Stoch RSI at Wednesday noon versus Friday 23:59 in each eligible week.
 It fails closed if fewer than 201 completed weekly candles are available. This
 tests the completed-candle boundary; it does not prove every possible data adapter
@@ -31,11 +34,13 @@ or time-zone path is correct.
 python -m audits.audit_daily_flipflop
 ~~~
 
-Fetches paginated OKX history for SOLUSDT and ETHUSDT, replays completed daily
-closes across two years, and reports state transitions plus returns to the prior
-state within five days. This is measurement, not an automatic hysteresis change.
-The daily decision is sampled at each completed daily close and is therefore held
-for the following 24 hours.
+Requests the configured historical window from Kraken for SOLUSDT and ETHUSDT,
+replays completed daily closes, and reports state transitions plus returns to the
+prior state within five days. Kraken's bounded public OHLC history may not cover
+the full multi-year interval; in that case the audit reports a blocked/incomplete
+history error rather than silently using another exchange or partial data. This is
+measurement, not an automatic hysteresis change. The daily decision is sampled at
+each completed daily close and is held for the following 24 hours.
 
 ## 4. Trade-by-trade regression diff
 
@@ -58,16 +63,17 @@ does not claim a pass if either artifact is missing.
 python -m audits.backtest_filter_comparison
 ~~~
 
-Uses the same causal 4H break detector and replay engine for AVAXUSDT, SOLUSDT and
-BTCUSDT from 2023-01-01 through 2024-10-01. Scenario B keeps only direction-matched
-setups with an active completed-candle weekly/daily thesis at signal time. The
-report includes trade count, win rate, net R, maximum drawdown and net equity
-return. Win-rate improvement alone is not proof of alpha; compare net R, drawdown,
-trade count, and execution-cost assumptions.
+Uses Kraken-only OHLC data for AVAXUSDT, SOLUSDT and BTCUSDT. The requested
+multi-year window must be fully available or the audit stops with an explicit
+incomplete-history error. Scenario B keeps only direction-matched setups with an
+active completed-candle weekly/daily thesis at signal time. The report includes
+trade count, win rate, net R, maximum drawdown and net equity return. Win-rate
+improvement alone is not proof of alpha; compare net R, drawdown, trade count,
+and execution-cost assumptions.
 
 ## Important limitations
 
-- These scripts fetch public market data and have not been run as part of this commit.
+- These scripts fetch public Kraken market data and have not been run as part of this commit.
 - Do not paste a PASS claim into the PR until the command was actually run and its
   output saved with the relevant code SHA and data window.
 - The main vs PR diff tests regression safety. Filter-off vs filter-on tests the
