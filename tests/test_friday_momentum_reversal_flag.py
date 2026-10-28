@@ -25,14 +25,17 @@ class MomentumReversalFlagTests(unittest.TestCase):
             ):
                 self.assertTrue(momentum_reversal_enabled())
 
-    def test_monitor_gates_candidate_persistence_and_alerts(self):
-        source = (Path(__file__).resolve().parents[1] / "research" / "friday_monitor.py").read_text()
-        self.assertIn(
-            'reversal = result.get("momentum_reversal", {}) if momentum_reversal_enabled() else {}',
-            source,
-        )
-        self.assertIn('"type": "MOMENTUM_REVERSAL"', source)
+    def test_preview_does_not_run_scanner_when_disabled(self):
+        source = (Path(__file__).resolve().parents[1] / "research" / "strategy_preview.py").read_text()
+        self.assertIn("if momentum_reversal_enabled()", source)
+        self.assertIn('"enabled": False, "eligible": False, "state": "DISABLED"', source)
 
+    def test_monitor_workflow_explicitly_disables_reversal_alerts(self):
+        source = (
+            Path(__file__).resolve().parents[1]
+            / ".github" / "workflows" / "friday-monitor.yml"
+        ).read_text()
+        self.assertIn('FRIDAY_MOMENTUM_REVERSAL_ENABLED: "false"', source)
     def test_dashboard_uses_snapshot_record_type_and_collapses_inactive_markets(self):
         source = (
             Path(__file__).resolve().parents[1]
