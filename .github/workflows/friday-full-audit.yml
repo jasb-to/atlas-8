@@ -3,7 +3,7 @@ name: FRIDAY Full Audit
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fix/kraken-symbol-mapping]
 
 permissions:
   contents: read
@@ -94,6 +94,13 @@ jobs:
           print("PASS: alert math")
           PY
 
+      - name: Verify live weekly Kraken OHLC for five requested markets
+        id: kraken_weekly
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python -m scripts.audit_kraken_weekly_pairs 2>&1 | tee kraken-weekly-pairs.log
+
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
@@ -131,6 +138,7 @@ jobs:
             alert-math.log
             dashboard-build.log
             dry-run-smoke.log
+            kraken-weekly-pairs.log
 
       - name: Write audit summary
         if: always()
@@ -141,6 +149,7 @@ jobs:
           DASHBOARD_OUTCOME: ${{ steps.dashboard_build.outcome }}
           MONITOR_GATE_OUTCOME: ${{ steps.monitor_gate.outcome }}
           DRY_RUN_OUTCOME: ${{ steps.dry_run.outcome }}
+          KRAKEN_WEEKLY_OUTCOME: ${{ steps.kraken_weekly.outcome }}
         run: |
           result() {
             if [ "$1" = "success" ]; then echo "PASS"; else echo "FAIL ($1)"; fi
@@ -156,9 +165,10 @@ jobs:
             echo "| dashboard-build | $(result "$DASHBOARD_OUTCOME") |"
             echo "| monitor-gate-tests | $(result "$MONITOR_GATE_OUTCOME") |"
             echo "| dry-run-smoke (BTC) | $(result "$DRY_RUN_OUTCOME") |"
+            echo "| live weekly Kraken pairs | $(result "$KRAKEN_WEEKLY_OUTCOME") |"
             echo
             echo "AI review and Telegram are disabled for the entire job. No deploy step exists."
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$PYTEST_OUTCOME" != "success" ] || [ "$NO_HF_OUTCOME" != "success" ] || [ "$ALERT_MATH_OUTCOME" != "success" ] || [ "$DASHBOARD_OUTCOME" != "success" ] || [ "$MONITOR_GATE_OUTCOME" != "success" ] || [ "$DRY_RUN_OUTCOME" != "success" ]; then
+          if [ "$PYTEST_OUTCOME" != "success" ] || [ "$NO_HF_OUTCOME" != "success" ] || [ "$ALERT_MATH_OUTCOME" != "success" ] || [ "$DASHBOARD_OUTCOME" != "success" ] || [ "$MONITOR_GATE_OUTCOME" != "success" ] || [ "$DRY_RUN_OUTCOME" != "success" ] || [ "$KRAKEN_WEEKLY_OUTCOME" != "success" ]; then
             exit 1
           fi
