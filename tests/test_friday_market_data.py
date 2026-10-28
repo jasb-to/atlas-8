@@ -164,8 +164,6 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertIn("vwap", result.columns)
 
 
-class FridayLedgerTrackingTests(unittest.TestCase):
-
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_assetpairs_catalogue_is_fetched_once_for_multiple_standard_symbols(self, kraken, get):
@@ -198,6 +196,9 @@ class FridayLedgerTrackingTests(unittest.TestCase):
             [call.kwargs["pair"] for call in kraken.call_args_list],
             ["HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"],
         )
+
+
+class FridayLedgerTrackingTests(unittest.TestCase):
 
     def test_historical_backfill_is_not_persisted_but_new_events_are_idempotent(self):
         old_cutoff = os.environ.get("FRIDAY_TRACKING_START_UTC")
