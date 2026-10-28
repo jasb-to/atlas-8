@@ -72,26 +72,42 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
     quote = "USDT" if canonical.endswith("USDT") else "USD" if canonical.endswith("USD") else None
     if quote is None:
         raise RuntimeError(f"Unsupported quote asset for pair: {symbol}")
-    for pair_id, details in pairs.items():
-        if not isinstance(details, dict):
-            continue
-        altname = str(details.get("altname", ""))
-        wsname = str(details.get("wsname", ""))
-        candidates = {
-            _normalise_pair(altname),
-            _normalise_pair(wsname),
-            _normalise_pair(str(pair_id)),
-        }
-        # Match the requested quote asset exactly: USD requests stay USD and
-        # USDT requests stay USDT. Never silently substitute one for the other.
-        if canonical in candidates and (
-            altname.upper().endswith(quote) or wsname.upper().endswith("/" + quote)
-        ):
-            with _pair_cache_lock:
-                _pair_cache[canonical] = altname or pair_id
-            return altname or pair_id
 
-    raise RuntimeError(f"Unknown asset pair: {symbol}")
+    def find_pair(requested_quote: str) -> str | None:
+        requested_base = canonical[:-len(quote)] if quote else canonical
+        for pair_id, details in pairs.items():
+            if not isinstance(details, dict):
+                continue
+            altname = str(details.get("altname", ""))
+            wsname = str(details.get("wsname", ""))
+            base_quote = wsname.split("/", 1) if "/" in wsname else ("", "")
+            base = base_quote[0]
+            actual_quote = base_quote[1].upper()
+            if (_normalise_pair(base) == _normalise_pair(requested_base)
+                    and actual_quote == requested_quote
+                    and (altname.upper().endswith(requested_quote)
+                         or wsname.upper().endswith("/" + requested_quote))):
+                return altname or str(pair_id)
+        return None
+
+    resolved = find_pair(quote)
+    if resolved is None and quote == "USDT":
+        base = canonical[:-4]
+        # USD is permitted only for these structural-thesis markets. It is not
+        # a general quote substitution and is never used for execution orders.
+        if base in {"HYPE", "SUI", "ZEC", "NEAR", "UNI"}:
+            resolved = find_pair("USD")
+            if resolved:
+                print(
+                    f"WARNING: No USDT market on Kraken for {base}. "
+                    f"Falling back to {base}USD for structural analysis only.",
+                    flush=True,
+                )
+    if resolved is None:
+        raise RuntimeError(f"Unknown asset pair: {symbol}")
+    with _pair_cache_lock:
+        _pair_cache[canonical] = resolved
+    return resolved
 
 
 # Only use 4H-to-1D aggregation for markets whose history has been a known
@@ -157,7 +173,9 @@ def _fetch_kraken(pair: str, interval: int) -> pd.DataFrame:
     resolved_pair = _resolve_kraken_usdt_pair(pair)
     _throttle_public_request()
     frame = fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
-    frame.attrs["source"] = "Kraken Spot"
+    quote_currency = "USD" if resolved_pair.upper().endswith("USD") and not resolved_pair.upper().endswith("USDT") else "USDT"
+    frame.attrs["quote_currency"] = quote_currency
+    frame.attrs["source"] = f"Kraken Spot ({quote_currency})" if quote_currency == "USD" else "Kraken Spot"
     frame.attrs["source_pair"] = resolved_pair
     return frame
 
