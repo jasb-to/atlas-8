@@ -170,6 +170,7 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
     all_rows = []
     historical_rows_ignored = 0
     tracking_cutoff = _utc(os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
+    momentum_reversal_enabled = os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -387,7 +388,7 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                         "current_indicators": result.get("current_indicators"),
                         "structure_lifecycle": result.get("structure_lifecycle"),
                         "model_review": result.get("model_review"),
-                        "momentum_reversal": result.get("momentum_reversal"),
+                        **({"momentum_reversal": result.get("momentum_reversal")} if momentum_reversal_enabled else {}),
                         "multitimeframe_scan": mtf,
                     },
                 ))
@@ -581,84 +582,85 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                             "reason": f"{type(alert_exc).__name__}: {alert_exc}",
                         })
                         raise
-            # Separate Stoch RSI reversal archetype: notify only when a fresh
-            # completed-candle candidate also has a valid structural risk plan.
-            reversal = result.get("momentum_reversal", {})
-            reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
-            reversal_is_live = (
-                reversal_ts is not None and reversal_ts >= tracking_cutoff
-                and pair.upper().endswith("USDT")
-            )
-            ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1", reversal.get("direction"))
-            if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and store.configured and hasattr(store, "paper_trades"):
-                register_paper_trade(
-                    store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
-                    signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
-                    direction=str(reversal["direction"]).lower(), entry=float(reversal["entry"]),
-                    stop=float(reversal["stop"]), target=float(reversal["target"]),
-                    reward_risk=float(reversal["reward_risk"]),
-                    ai_review=result.get("model_review"),
+            if momentum_reversal_enabled:
+                # Separate Stoch RSI reversal archetype: notify only when a fresh
+                # completed-candle candidate also has a valid structural risk plan.
+                reversal = result.get("momentum_reversal", {})
+                reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
+                reversal_is_live = (
+                    reversal_ts is not None and reversal_ts >= tracking_cutoff
+                    and pair.upper().endswith("USDT")
                 )
-            if reversal.get("eligible") and reversal_ts == latest and reversal_is_live:
-                if not ai_pass:
-                    row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
-                reversal_event = {
-                    "event": "MOMENTUM_REVERSAL_CANDIDATE",
-                    "signal_time": reversal.get("signal_time"),
-                    "direction": reversal.get("direction"),
-                    "line_kind": "momentum_reversal",
-                    "anchor_start_time": reversal.get("signal_time"),
-                    "anchor_end_time": reversal.get("signal_time"),
-                    "close_at_break": reversal.get("entry"),
-                    "outcome": "candidate",
-                    "retest_confirmed": False,
-                    "evidence": reversal,
-                }
-                reversal_row = make_trade_event(
-                    pair=pair, timeframe="4H", event=reversal_event, run_id=run_id,
-                    strategy_version="friday-stoch-rsi-structural-reversal-v1",
-                )
-                all_rows.append(reversal_row)
-                if store.configured:
-                    store.record_trade_event(reversal_row)
-                    store.record_archive(make_archive_record(
-                        record_key=reversal_row["event_key"] + ":plan",
-                        record_type="momentum_reversal_candidate", pair=pair,
-                        timeframe="4H", signal_time=reversal.get("signal_time"),
-                        payload=reversal,
+                ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1", reversal.get("direction"))
+                if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and store.configured and hasattr(store, "paper_trades"):
+                    register_paper_trade(
+                        store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
+                        signal_time=pd.Timestamp(reversal["signal_time"]).isoformat(),
+                        direction=str(reversal["direction"]).lower(), entry=float(reversal["entry"]),
+                        stop=float(reversal["stop"]), target=float(reversal["target"]),
+                        reward_risk=float(reversal["reward_risk"]),
+                        ai_review=result.get("model_review"),
+                    )
+                if reversal.get("eligible") and reversal_ts == latest and reversal_is_live:
+                    if not ai_pass:
+                        row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "ai_review_blocked", "reason": ai_reason})
+                    reversal_event = {
+                        "event": "MOMENTUM_REVERSAL_CANDIDATE",
+                        "signal_time": reversal.get("signal_time"),
+                        "direction": reversal.get("direction"),
+                        "line_kind": "momentum_reversal",
+                        "anchor_start_time": reversal.get("signal_time"),
+                        "anchor_end_time": reversal.get("signal_time"),
+                        "close_at_break": reversal.get("entry"),
+                        "outcome": "candidate",
+                        "retest_confirmed": False,
+                        "evidence": reversal,
+                    }
+                    reversal_row = make_trade_event(
+                        pair=pair, timeframe="4H", event=reversal_event, run_id=run_id,
                         strategy_version="friday-stoch-rsi-structural-reversal-v1",
-                    ))
-                    if ai_pass:
-                        alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
-                        claimed = store.claim_alert(
-                            alert_key=alert_key, pair=pair, alert_type="MOMENTUM_REVERSAL",
-                            signal_time=reversal.get("signal_time"),
-                        )
-                        if claimed:
-                            from research.friday_alerts import build_momentum_reversal_alert
-                            try:
-                                alert = send_telegram_alert(
-                                    build_momentum_reversal_alert(reversal, pair=_display_pair(pair), timeframe="4H")
-                                )
-                                if alert.get("sent"):
-                                    store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
-                                else:
-                                    store.finish_alert(alert_key, status="failed", error=alert.get("reason"))
-                                row["alert_results"].append({
-                                    "type": "MOMENTUM_REVERSAL", "sent": alert.get("sent", False),
-                                    "status": alert.get("status"), "reason": alert.get("reason"),
-                                })
-                            except Exception as alert_exc:
-                                store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
-                                row["alert_results"].append({
-                                    "type": "MOMENTUM_REVERSAL", "sent": False, "status": "failed",
-                                    "reason": f"{type(alert_exc).__name__}: {alert_exc}",
-                                })
-                                raise
-                        else:
-                            row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
-                else:
-                    row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
+                    )
+                    all_rows.append(reversal_row)
+                    if store.configured:
+                        store.record_trade_event(reversal_row)
+                        store.record_archive(make_archive_record(
+                            record_key=reversal_row["event_key"] + ":plan",
+                            record_type="momentum_reversal_candidate", pair=pair,
+                            timeframe="4H", signal_time=reversal.get("signal_time"),
+                            payload=reversal,
+                            strategy_version="friday-stoch-rsi-structural-reversal-v1",
+                        ))
+                        if ai_pass:
+                            alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
+                            claimed = store.claim_alert(
+                                alert_key=alert_key, pair=pair, alert_type="MOMENTUM_REVERSAL",
+                                signal_time=reversal.get("signal_time"),
+                            )
+                            if claimed:
+                                from research.friday_alerts import build_momentum_reversal_alert
+                                try:
+                                    alert = send_telegram_alert(
+                                        build_momentum_reversal_alert(reversal, pair=_display_pair(pair), timeframe="4H")
+                                    )
+                                    if alert.get("sent"):
+                                        store.finish_alert(alert_key, status="sent", message_id=alert.get("message_id"))
+                                    else:
+                                        store.finish_alert(alert_key, status="failed", error=alert.get("reason"))
+                                    row["alert_results"].append({
+                                        "type": "MOMENTUM_REVERSAL", "sent": alert.get("sent", False),
+                                        "status": alert.get("status"), "reason": alert.get("reason"),
+                                    })
+                                except Exception as alert_exc:
+                                    store.finish_alert(alert_key, status="failed", error=f"{type(alert_exc).__name__}: {alert_exc}")
+                                    row["alert_results"].append({
+                                        "type": "MOMENTUM_REVERSAL", "sent": False, "status": "failed",
+                                        "reason": f"{type(alert_exc).__name__}: {alert_exc}",
+                                    })
+                                    raise
+                            else:
+                                row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "duplicate_suppressed"})
+                    else:
+                        row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False, "status": "persistence_not_configured"})
             # Ensure the most relevant lifecycle blocker is visible even if the
             # older event loop did not emit a notification outcome for this setup.
             latest_setup = result.get("latest_setup_state", {}) or {}
