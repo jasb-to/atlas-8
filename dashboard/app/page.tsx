@@ -52,7 +52,7 @@ export default function Home() {
   const latestRun = data.runs[0];
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const snapshots = data.snapshots ?? [];
-  const openTrades = data.paper_trades.filter(trade => String(trade.status).toUpperCase() === "OPEN" && trade.ready !== false && trade.entry != null && trade.stop_loss != null && trade.take_profit != null);
+  const openTrades = data.paper_trades.filter(trade => ["OPEN", "ACTIVE"].includes(String(trade.status ?? "").trim().toUpperCase()) && trade.ready !== false && trade.entry != null && (trade.stop_loss ?? trade.stop) != null && (trade.tp2 ?? trade.take_profit ?? trade.target) != null);
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiStatuses = pairScans.map(scan => String(scan.ai_review_status ?? "missing").trim().toLowerCase());
   const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
@@ -92,7 +92,10 @@ export default function Home() {
     const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
     const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
     const active = thesisStatus === "active";
-    return { pair, thesis, scan, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+    const recordType = String(record?.record_type ?? "MISSING");
+    const sourceWeekly = String(thesis.data_source_weekly ?? "MISSING");
+    const sourceDaily = String(thesis.data_source_daily ?? "MISSING");
+    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
   }).sort((a, b) => {
     const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
@@ -131,7 +134,8 @@ export default function Home() {
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
             <div className="thesis-row"><span>WEEKLY CLOSE</span><b>{fmtPrice(thesis.weekly_close)}</b></div>
             <div className="thesis-row"><span>DAILY CLOSE</span><b>{fmtPrice(thesis.daily_close)}</b></div>
-            <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(thesis.data_source_weekly ?? "UNKNOWN")} / {clean(thesis.data_source_daily ?? "UNKNOWN")}</b></div>
+            <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div>
+            <div className="thesis-row"><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
             <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
             {<p className="thesis-reason">{String(thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</p>}
@@ -146,8 +150,8 @@ export default function Home() {
         {openTrades.map((trade, index) => {
           const dir = direction(trade.direction);
           const entry = Number(trade.entry);
-          const stop = Number(trade.stop_loss);
-          const target = Number(trade.tp2 ?? trade.take_profit);
+          const stop = Number(trade.stop_loss ?? trade.stop);
+          const target = Number(trade.tp2 ?? trade.take_profit ?? trade.target);
           const risk = Math.abs(entry - stop);
           const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
           return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
