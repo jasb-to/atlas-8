@@ -90,7 +90,7 @@ class FridayMomentumReversalTests(unittest.TestCase):
         from tempfile import TemporaryDirectory
         from contextlib import redirect_stdout
         from io import StringIO
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import patch
         from research.friday_monitor import run_monitor
 
         candle_time = "2026-10-28T16:00:00+00:00"
@@ -120,9 +120,32 @@ class FridayMomentumReversalTests(unittest.TestCase):
                 "reward_risk": 2.62,
             },
         }
-        store = MagicMock()
-        store.configured = True
-        store.paper_trades = []
+        class FakeStore:
+            configured = True
+            paper_trades = []
+
+            def __init__(self):
+                self.archives = []
+                self.trade_events = []
+                self.alert_claims = []
+
+            def record_archive(self, record):
+                self.archives.append(record)
+
+            def record_trade_event(self, record):
+                self.trade_events.append(record)
+
+            def claim_alert(self, **kwargs):
+                self.alert_claims.append(kwargs)
+                return True
+
+            def finish_alert(self, *args, **kwargs):
+                return None
+
+            def record_cron_run(self, record):
+                return None
+
+        store = FakeStore()
         output = StringIO()
 
         with TemporaryDirectory() as tmp, redirect_stdout(output), patch.dict(
@@ -147,16 +170,16 @@ class FridayMomentumReversalTests(unittest.TestCase):
         send_alert.assert_not_called()
         self.assertNotIn("MOMENTUM_REVERSAL", output.getvalue())
         register_trade.assert_not_called()
-        store.record_trade_event.assert_not_called()
-        store.claim_alert.assert_not_called()
+        self.assertEqual(store.trade_events, [])
+        self.assertEqual(store.alert_claims, [])
         self.assertFalse(any(
             item.get("type") == "MOMENTUM_REVERSAL"
             for item in result["pair_results"][0]["alert_results"]
         ))
         snapshot_payloads = [
-            call.args[0].get("payload", {})
-            for call in store.record_archive.call_args_list
-            if call.args and isinstance(call.args[0], dict)
+            record.get("payload", {})
+            for record in store.archives
+            if isinstance(record, dict)
         ]
         self.assertTrue(snapshot_payloads)
         self.assertTrue(all("momentum_reversal" not in payload for payload in snapshot_payloads))
