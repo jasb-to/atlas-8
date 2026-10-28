@@ -13,6 +13,7 @@ from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
 KRAKEN_ASSET_PAIRS_URL = "https://api.kraken.com/0/public/AssetPairs"
 _pair_cache: dict[str, str] = {}
+_asset_pairs_catalogue: dict[str, dict] | None = None
 _pair_cache_lock = threading.Lock()
 _request_lock = threading.Lock()
 _last_request_started = 0.0
@@ -42,24 +43,31 @@ def _normalise_pair(value: str) -> str:
 def _resolve_kraken_usdt_pair(symbol: str) -> str:
     """Resolve requested symbols against Kraken's live AssetPairs catalogue."""
     canonical = _normalise_pair(symbol)
+    global _asset_pairs_catalogue
     with _pair_cache_lock:
         cached = _pair_cache.get(canonical)
-    if cached:
-        return cached
+        if cached:
+            return cached
 
-    _throttle_public_request()
-    response = requests.get(
-        KRAKEN_ASSET_PAIRS_URL,
-        timeout=20,
-        headers={"User-Agent": "atlas-8-research/1.0"},
-    )
-    response.raise_for_status()
-    payload = response.json()
-    if payload.get("error"):
-        raise RuntimeError(f"Kraken AssetPairs API returned errors: {payload['error']}")
-    pairs = payload.get("result", {})
-    if not isinstance(pairs, dict):
-        raise RuntimeError("Kraken AssetPairs response has no result catalogue")
+        # Fetch AssetPairs once per process and reuse the full catalogue for every
+        # ticker. Holding this lock during the first request prevents duplicate
+        # catalogue downloads when several market scans start concurrently.
+        if _asset_pairs_catalogue is None:
+            _throttle_public_request()
+            response = requests.get(
+                KRAKEN_ASSET_PAIRS_URL,
+                timeout=20,
+                headers={"User-Agent": "atlas-8-research/1.0"},
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("error"):
+                raise RuntimeError(f"Kraken AssetPairs API returned errors: {payload['error']}")
+            pairs = payload.get("result", {})
+            if not isinstance(pairs, dict):
+                raise RuntimeError("Kraken AssetPairs response has no result catalogue")
+            _asset_pairs_catalogue = pairs
+        pairs = _asset_pairs_catalogue
 
     quote = "USDT" if canonical.endswith("USDT") else "USD" if canonical.endswith("USD") else None
     if quote is None:
