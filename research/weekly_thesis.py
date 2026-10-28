@@ -127,6 +127,7 @@ def _flat_result(
     weekly_stoch_aligned: bool = False,
     data_source_weekly: str = "unknown",
     data_source_daily: str = "unknown",
+    quote_currency: str = "USDT",
 ) -> dict[str, Any]:
     """Return a stable, flat schema for active, vetoed and unavailable theses."""
     return {
@@ -155,6 +156,7 @@ def _flat_result(
         "weekly_stoch_aligned": bool(weekly_stoch_aligned),
         "data_source_weekly": data_source_weekly,
         "data_source_daily": data_source_daily,
+        "quote_currency": quote_currency,
         "reason": reason,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
@@ -202,6 +204,7 @@ def evaluate_sheldon_thesis(
             weekly_close=wc, daily_close=dc,
             data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
             data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
+            quote_currency=str(weekly_raw.attrs.get("quote_currency", "USDT")),
         )
 
     weekly_close = weekly["close"].astype(float)
@@ -247,6 +250,7 @@ def evaluate_sheldon_thesis(
             weekly_stoch_aligned=bool(w_k is not None and w_d is not None and w_k > w_d),
             data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
             data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
+            quote_currency=str(weekly_raw.attrs.get("quote_currency", "USDT")),
         )
 
     if None in (w_ema200, d_ema50, w_macd_hist):

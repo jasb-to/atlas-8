@@ -13,6 +13,7 @@ from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
 KRAKEN_ASSET_PAIRS_URL = "https://api.kraken.com/0/public/AssetPairs"
 _pair_cache: dict[str, str] = {}
+_asset_pairs_catalogue: dict[str, dict] | None = None
 _pair_cache_lock = threading.Lock()
 _request_lock = threading.Lock()
 _last_request_started = 0.0
@@ -42,48 +43,71 @@ def _normalise_pair(value: str) -> str:
 def _resolve_kraken_usdt_pair(symbol: str) -> str:
     """Resolve requested symbols against Kraken's live AssetPairs catalogue."""
     canonical = _normalise_pair(symbol)
+    global _asset_pairs_catalogue
     with _pair_cache_lock:
         cached = _pair_cache.get(canonical)
-    if cached:
-        return cached
+        if cached:
+            return cached
 
-    _throttle_public_request()
-    response = requests.get(
-        KRAKEN_ASSET_PAIRS_URL,
-        timeout=20,
-        headers={"User-Agent": "atlas-8-research/1.0"},
-    )
-    response.raise_for_status()
-    payload = response.json()
-    if payload.get("error"):
-        raise RuntimeError(f"Kraken AssetPairs API returned errors: {payload['error']}")
-    pairs = payload.get("result", {})
-    if not isinstance(pairs, dict):
-        raise RuntimeError("Kraken AssetPairs response has no result catalogue")
+        # Fetch AssetPairs once per process and reuse the full catalogue for every
+        # ticker. Holding this lock during the first request prevents duplicate
+        # catalogue downloads when several market scans start concurrently.
+        if _asset_pairs_catalogue is None:
+            _throttle_public_request()
+            response = requests.get(
+                KRAKEN_ASSET_PAIRS_URL,
+                timeout=20,
+                headers={"User-Agent": "atlas-8-research/1.0"},
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("error"):
+                raise RuntimeError(f"Kraken AssetPairs API returned errors: {payload['error']}")
+            pairs = payload.get("result", {})
+            if not isinstance(pairs, dict):
+                raise RuntimeError("Kraken AssetPairs response has no result catalogue")
+            _asset_pairs_catalogue = pairs
+        pairs = _asset_pairs_catalogue
 
     quote = "USDT" if canonical.endswith("USDT") else "USD" if canonical.endswith("USD") else None
     if quote is None:
         raise RuntimeError(f"Unsupported quote asset for pair: {symbol}")
-    for pair_id, details in pairs.items():
-        if not isinstance(details, dict):
-            continue
-        altname = str(details.get("altname", ""))
-        wsname = str(details.get("wsname", ""))
-        candidates = {
-            _normalise_pair(altname),
-            _normalise_pair(wsname),
-            _normalise_pair(str(pair_id)),
-        }
-        # Match the requested quote asset exactly: USD requests stay USD and
-        # USDT requests stay USDT. Never silently substitute one for the other.
-        if canonical in candidates and (
-            altname.upper().endswith(quote) or wsname.upper().endswith("/" + quote)
-        ):
-            with _pair_cache_lock:
-                _pair_cache[canonical] = altname or pair_id
-            return altname or pair_id
 
-    raise RuntimeError(f"Unknown asset pair: {symbol}")
+    def find_pair(requested_quote: str) -> str | None:
+        requested_base = canonical[:-len(quote)] if quote else canonical
+        for pair_id, details in pairs.items():
+            if not isinstance(details, dict):
+                continue
+            altname = str(details.get("altname", ""))
+            wsname = str(details.get("wsname", ""))
+            base_quote = wsname.split("/", 1) if "/" in wsname else ("", "")
+            base = base_quote[0]
+            actual_quote = base_quote[1].upper()
+            if (_normalise_pair(base) == _normalise_pair(requested_base)
+                    and actual_quote == requested_quote
+                    and (altname.upper().endswith(requested_quote)
+                         or wsname.upper().endswith("/" + requested_quote))):
+                return altname or str(pair_id)
+        return None
+
+    resolved = find_pair(quote)
+    if resolved is None and quote == "USDT":
+        base = canonical[:-4]
+        # USD is permitted only for these structural-thesis markets. It is not
+        # a general quote substitution and is never used for execution orders.
+        if base in {"HYPE", "SUI", "ZEC", "NEAR", "UNI"}:
+            resolved = find_pair("USD")
+            if resolved:
+                print(
+                    f"WARNING: No USDT market on Kraken for {base}. "
+                    f"Falling back to {base}USD for structural analysis only.",
+                    flush=True,
+                )
+    if resolved is None:
+        raise RuntimeError(f"Unknown asset pair: {symbol}")
+    with _pair_cache_lock:
+        _pair_cache[canonical] = resolved
+    return resolved
 
 
 # Only use 4H-to-1D aggregation for markets whose history has been a known
@@ -141,6 +165,7 @@ def aggregate_ohlc(candles: pd.DataFrame, interval_minutes: int, target_minutes:
         result = result.sort_values("timestamp").reset_index(drop=True)
     result.attrs["source"] = f"{candles.attrs.get('source', 'unknown')} 4H aggregated to 1D"
     result.attrs["source_pair"] = candles.attrs.get("source_pair", "")
+    result.attrs["quote_currency"] = candles.attrs.get("quote_currency", "USDT")
     result.attrs["aggregation"] = "UTC; six complete 4H candles; gap-free"
     return result
 
@@ -149,7 +174,9 @@ def _fetch_kraken(pair: str, interval: int) -> pd.DataFrame:
     resolved_pair = _resolve_kraken_usdt_pair(pair)
     _throttle_public_request()
     frame = fetch_kraken_ohlc(pair=resolved_pair, interval=interval)
-    frame.attrs["source"] = "Kraken Spot"
+    quote_currency = "USD" if resolved_pair.upper().endswith("USD") and not resolved_pair.upper().endswith("USDT") else "USDT"
+    frame.attrs["quote_currency"] = quote_currency
+    frame.attrs["source"] = f"Kraken Spot ({quote_currency})" if quote_currency == "USD" else "Kraken Spot"
     frame.attrs["source_pair"] = resolved_pair
     return frame
 

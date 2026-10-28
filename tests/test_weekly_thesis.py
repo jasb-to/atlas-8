@@ -13,7 +13,7 @@ SCHEMA = {
     "weekly_macd_histogram", "daily_close", "daily_ema8", "daily_ema21",
     "daily_ema50", "daily_stoch_k", "daily_stoch_d", "daily_alignment",
     "weekly_stoch_cross", "weekly_stoch_aligned", "data_source_weekly", "data_source_daily",
-    "reason", "generated_at_utc",
+    "quote_currency", "reason", "generated_at_utc",
 }
 
 

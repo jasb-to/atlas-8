@@ -14,6 +14,8 @@ from research.friday_persistence import RepoFolderFridayStore
 class FridayMarketDataTests(unittest.TestCase):
     def setUp(self):
         _pair_cache.clear()
+        import research.friday_market_data as market_data
+        market_data._asset_pairs_catalogue = None
 
     @patch.dict(os.environ, {"FRIDAY_AI_REVIEW_ENABLED": "true"}, clear=False)
     def test_ai_review_is_a_hard_gate_for_paper_promotion(self):
@@ -55,15 +57,62 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
-    def test_no_kraken_usdt_market_is_reported_unavailable(self, kraken, get):
+    def test_hype_usdt_request_uses_scoped_usd_fallback_and_marks_thesis_currency(self, kraken, get):
+        import contextlib
+        import io
+        from research.weekly_thesis import evaluate_sheldon_thesis
+        from research.friday_persistence import make_archive_record
+
         get.return_value = Mock(
             json=lambda: {"error": [], "result": {
-                "XXBTZUSD": {"altname": "XBTUSD", "wsname": "XBT/USD"}
+                "HYPEUSD": {"altname": "HYPEUSD", "wsname": "HYPE/USD"}
             }},
             raise_for_status=lambda: None,
         )
-        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: HYPEUSDT"):
-            fetch_ohlc("HYPEUSDT", 240)
+        timestamps = pd.date_range("2026-10-01", periods=50, freq="4h", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50, "vwap": [102.0] * 50,
+            "volume": [10.0] * 50, "trades": [10] * 50,
+        })
+        kraken.return_value = frame
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            result = fetch_ohlc("HYPEUSDT", 240)
+        self.assertIn(
+            "WARNING: No USDT market on Kraken for HYPE. Falling back to HYPEUSD for structural analysis only.",
+            output.getvalue(),
+        )
+        kraken.assert_called_once_with(pair="HYPEUSD", interval=240)
+        self.assertEqual(result.attrs["source_pair"], "HYPEUSD")
+        self.assertEqual(result.attrs["quote_currency"], "USD")
+        self.assertEqual(result.attrs["source"], "Kraken Spot (USD)")
+
+        weekly = result.iloc[:10].copy()
+        weekly.attrs.update(result.attrs)
+        daily = result.iloc[:10].copy()
+        daily.attrs.update(result.attrs)
+        thesis = evaluate_sheldon_thesis("HYPEUSDT", weekly_candles=weekly, daily_candles=daily)
+        self.assertEqual(thesis["quote_currency"], "USD")
+        record = make_archive_record(
+            record_key="hype-weekly-usd", record_type="weekly_thesis_snapshot",
+            pair="HYPEUSDT", timeframe="1W", signal_time=thesis["generated_at_utc"],
+            payload=thesis,
+        )
+        self.assertEqual(record["payload"]["quote_currency"], "USD")
+        self.assertEqual(record["payload"]["data_source_weekly"], "Kraken Spot (USD)")
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_usd_fallback_is_not_used_for_unapproved_asset(self, kraken, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "FOOUSD": {"altname": "FOOUSD", "wsname": "FOO/USD"}
+            }},
+            raise_for_status=lambda: None,
+        )
+        with self.assertRaisesRegex(RuntimeError, "UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: FOOUSDT"):
+            fetch_ohlc("FOOUSDT", 240)
         kraken.assert_not_called()
 
     def test_aggregate_4h_to_daily_uses_ohlcv_rules_and_complete_utc_day(self):
@@ -162,7 +211,42 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertIn("vwap", result.columns)
 
 
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_assetpairs_catalogue_is_fetched_once_for_multiple_standard_symbols(self, kraken, get):
+        catalogue = {
+            "HYPEUSDT": {"altname": "HYPEUSDT", "wsname": "HYPE/USDT"},
+            "SUIUSDT": {"altname": "SUIUSDT", "wsname": "SUI/USDT"},
+            "ZECUSDT": {"altname": "ZECUSDT", "wsname": "ZEC/USDT"},
+            "NEARUSDT": {"altname": "NEARUSDT", "wsname": "NEAR/USDT"},
+            "UNIUSDT": {"altname": "UNIUSDT", "wsname": "UNI/USDT"},
+        }
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": catalogue},
+            raise_for_status=lambda: None,
+        )
+        timestamps = pd.date_range("2026-10-20", periods=50, freq="7D", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50, "vwap": [102.0] * 50,
+            "volume": [10.0] * 50, "trades": [10] * 50,
+        })
+        kraken.return_value = frame
+
+        for symbol in ("HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"):
+            result = fetch_ohlc(symbol, 10080)
+            self.assertEqual(len(result), 50)
+            self.assertEqual(result.attrs["source_pair"], symbol)
+
+        self.assertEqual(get.call_count, 1)
+        self.assertEqual(
+            [call.kwargs["pair"] for call in kraken.call_args_list],
+            ["HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"],
+        )
+
+
 class FridayLedgerTrackingTests(unittest.TestCase):
+
     def test_historical_backfill_is_not_persisted_but_new_events_are_idempotent(self):
         old_cutoff = os.environ.get("FRIDAY_TRACKING_START_UTC")
         os.environ["FRIDAY_TRACKING_START_UTC"] = "2026-10-23T17:00:00+00:00"
