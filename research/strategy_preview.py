@@ -25,6 +25,11 @@ LOOKBACK = 180
 MAX_LINE_AGE = 90
 MAX_DISTANCE = 0.025
 
+
+def momentum_reversal_enabled() -> bool:
+    """Return whether the standalone reversal scanner is explicitly enabled."""
+    return os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+
 def indicators(frame):
     out = frame.sort_values("timestamp").reset_index(drop=True).copy()
     close = out.close.astype(float)
@@ -399,7 +404,7 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
         "closed_candles":[{"timestamp":pd.Timestamp(r.timestamp).isoformat(),"open":float(r.open),"high":float(r.high),"low":float(r.low),"close":float(r.close)} for r in raw.tail(100).itertuples(index=False)],
         "momentum_reversal": (
             scan_momentum_reversal(raw, pair=pair, thesis_direction=str(last.daily_bias))
-            if os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+            if momentum_reversal_enabled()
             else {"enabled": False, "eligible": False, "state": "DISABLED", "blockers": ["feature_disabled"]}
         ),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
