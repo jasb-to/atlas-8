@@ -397,7 +397,11 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
         "completed_candles":len(raw),"last_completed_candle_utc":last.timestamp.isoformat(),"walk_forward_split_time":walk_forward_split_time,"last_close":float(last.close),
         "trade_plans":{"long":build_trade_plan(frame, "long"),"short":build_trade_plan(frame, "short")},
         "closed_candles":[{"timestamp":pd.Timestamp(r.timestamp).isoformat(),"open":float(r.open),"high":float(r.high),"low":float(r.low),"close":float(r.close)} for r in raw.tail(100).itertuples(index=False)],
-        "momentum_reversal":scan_momentum_reversal(raw, pair=pair, thesis_direction=str(last.daily_bias)),
+        "momentum_reversal": (
+            scan_momentum_reversal(raw, pair=pair, thesis_direction=str(last.daily_bias))
+            if os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+            else {"enabled": False, "eligible": False, "state": "DISABLED", "blockers": ["feature_disabled"]}
+        ),
         "current_indicators":{"ema8_4h":_num(last.ema8_4h),"ema21_4h":_num(last.ema21_4h),
             "daily_bias":str(last.daily_bias),"stoch_rsi_k":_num(last.stoch_k),"stoch_rsi_d":_num(last.stoch_d),"atr14":_num(last.atr14)},
         "live_preview":status,"friday_decision":friday_decision,"reversal_context":reversal_context(frame),"structure_lifecycle":structure_payload,"break_events":events,"event_count":len(events),
@@ -441,7 +445,7 @@ def build_preview(pair="XBTUSDT", interval=240, output_dir="results/strategy-pre
             "indicators": result["current_indicators"], "structure": structure_payload,
             "candidate_universe": {
                 "latest_break_event": next((dict(e, strategy="friday-price-action-v2") for e in reversed(events) if e.get("signal_time") == last.timestamp.isoformat()), None),
-                "momentum_reversal_candidate": result["momentum_reversal"],
+                **({"momentum_reversal_candidate": result["momentum_reversal"]} if result["momentum_reversal"].get("enabled", True) else {}),
                 "structural_trade_plans": result["trade_plans"],
                 "exhaustion_context": result["reversal_context"],
                 "momentum_context": result["latest_momentum_context"],
