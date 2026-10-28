@@ -7,6 +7,7 @@ type Payload = {
   connected: boolean; status: string; message: string;
   snapshots: Row[]; weekly_theses: Row[]; events: Row[]; runs: Row[]; alerts: Row[]; paper_trades: Row[];
   fetched_at?: string;
+  api_fetched_at?: string;
 };
 const empty: Payload = { connected: false, status: "loading", message: "Loading FRIDAY data…", snapshots: [], weekly_theses: [], events: [], runs: [], alerts: [], paper_trades: [] };
 const fmtTime = (value?: string) => value ? new Date(value).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }) : "—";
@@ -15,8 +16,9 @@ const payloadOf = (row?: Row) => row?.payload && typeof row.payload === "object"
 const clean = (value: unknown) => String(value ?? "—").replaceAll("_", " ");
 const pairName = (value: unknown) => {
   const pair = String(value ?? "").toUpperCase();
-  if (["XBTUSDT", "XBTUSD", "BTCUSD"].includes(pair)) return "BTCUSDT";
-  return pair.endsWith("USD") && !pair.endsWith("USDT") ? pair.slice(0, -3) + "USDT" : pair;
+  if (pair === "XBTUSDT") return "BTCUSDT";
+  if (pair === "XBTUSD" || pair === "BTCUSD") return "BTCUSD";
+  return pair;
 };
 const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
 const THESIS_UNIVERSE = [
@@ -183,7 +185,8 @@ export default function Home() {
           <div><span>LAST RUN</span><b>{["success", "scan_complete"].includes(String(latestRun?.status ?? "").toLowerCase()) ? "SCAN COMPLETE" : String(latestRun?.status ?? "").toLowerCase() === "scan_complete_ai_unavailable" ? "SCAN COMPLETE · AI ERROR" : clean(latestRun?.status).toUpperCase()}</b></div>
           <div><span>MARKETS SCANNED</span><b>{latestRun?.pairs_checked ?? pairScans.length}</b></div>
           <div><span>AI REVIEWS OK</span><b>{pairScans.filter(scan => scan.ai_review_status === "ok").length} / {aiReviewAttempted.length}</b></div>
-          <div><span>LAST REFRESH</span><b>{fmtTime(data.fetched_at)}</b></div>
+          <div><span>LAST DATA RUN</span><b>{fmtTime(latestRun?.finished_at ?? data.fetched_at)}</b></div>
+          <div><span>API READ</span><b>{fmtTime(data.api_fetched_at)}</b></div>
         </div>
         <h3>Scan trace and errors</h3>
         <div className="table-wrap"><table><thead><tr><th>MARKET</th><th>SCAN</th><th>DECISION</th><th>AI ERROR</th><th>DETAIL</th><th>LAST CANDLE</th></tr></thead><tbody>
