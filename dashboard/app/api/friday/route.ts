@@ -53,7 +53,7 @@ export async function GET() {
       status: "connected",
       storage_backend: "github_repository_folder",
       data_branch: branch,
-      fetched_at: new Date().toISOString(),
+      api_fetched_at: new Date().toISOString(),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
