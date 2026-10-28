@@ -8,6 +8,13 @@ export const runtime = "nodejs";
 const GITHUB_DISPATCH_URL =
   "https://api.github.com/repos/jasb-to/atlas-8/actions/workflows/friday-monitor.yml/dispatches";
 
+// Keep the dispatched universe, logged universe, and API response identical.
+const FRIDAY_SCAN_PAIRS = [
+  "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT",
+  "BNBUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT",
+  "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
+] as const;
+
 function safeEqual(left: string, right: string): boolean {
   const a = Buffer.from(left, "utf8");
   const b = Buffer.from(right, "utf8");
@@ -67,7 +74,7 @@ async function triggerScan(request: NextRequest) {
       },
       body: JSON.stringify({
         ref: "main",
-        inputs: { pairs: "XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT", scan_id: scanRunId },
+        inputs: { pairs: FRIDAY_SCAN_PAIRS.join(","), scan_id: scanRunId },
       }),
       cache: "no-store",
     });
@@ -77,7 +84,7 @@ async function triggerScan(request: NextRequest) {
       ref: "main",
       scan_run_id: scanRunId,
       requested_at: requestStartedAt,
-      pairs: ["BTC", "ETH", "SOL", "XRP", "ADA", "AVAX", "BNB", "VIRTUAL", "HYPE", "DOGE", "LINK", "ZEC", "NEAR", "SUI", "LIT"],
+      pairs: FRIDAY_SCAN_PAIRS,
     });
 
     if (upstream.status !== 204) {
@@ -119,7 +126,7 @@ async function triggerScan(request: NextRequest) {
       message: "FRIDAY research workflow dispatch accepted by GitHub Actions.",
       workflow: "friday-monitor.yml",
       ref: "main",
-      pairs: ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT"],
+      pairs: FRIDAY_SCAN_PAIRS,
       workflow_url: "https://github.com/jasb-to/atlas-8/actions/workflows/friday-monitor.yml",
       note: "202 confirms dispatch only. Follow the GitHub Actions run for per-market scan progress and completion.",
     }, 202);

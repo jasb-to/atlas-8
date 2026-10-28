@@ -64,7 +64,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           FRIDAY_AI_REVIEW_URL: https://atlas8-friday.vercel.app/api/friday/ai-review
           FRIDAY_TRACKING_START_UTC: "2026-10-23T17:00:00+00:00"
-          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT' }}
+          REQUESTED_PAIRS: ${{ github.event.inputs.pairs || 'XBTUSDT,ETHUSDT,SOLUSDT,XRPUSDT,ADAUSDT,AVAXUSDT,BNBUSDT,VIRTUALUSDT,HYPEUSDT,DOGEUSDT,LINKUSDT,ZECUSDT,NEARUSDT,SUIUSDT,LITUSDT,UNIUSDT' }}
         run: |
           # Never interpolate workflow_dispatch input into shell source. The Python
           # validator canonicalizes legacy USD aliases to the approved USDT universe.
@@ -123,8 +123,15 @@ jobs:
               print("[FRIDAY] No per-market summaries were written.")
           for row in summaries:
               pair = row.get("pair", "UNKNOWN")
-              if row.get("status") != "ok":
-                  print(f"[FRIDAY SCAN] {pair} | ERROR | {row.get('error', 'No error details recorded')}")
+              row_status = row.get("status")
+              if row_status == "weekly_inactive":
+                  thesis = row.get("weekly_thesis") or {}
+                  thesis_status = row.get("weekly_thesis_status") or thesis.get("status", "inactive")
+                  reason = row.get("scan_diagnostic") or thesis.get("reason") or "Weekly thesis is not active."
+                  print(f"[FRIDAY SCAN] {pair} | WEEKLY INACTIVE | Thesis={thesis_status} | {reason}")
+                  continue
+              if row_status != "ok":
+                  print(f"[FRIDAY SCAN] {pair} | ERROR | {row.get('error') or row.get('scan_diagnostic') or 'No error details recorded'}")
                   continue
 
               setup = row.get("latest_setup_state")
@@ -251,19 +258,10 @@ jobs:
             mkdir -p testing/friday/data testing/friday/runs
             # Vercel reads this branch-level config before attempting a build.
             # Research storage is not an application deployment source.
-            cat > vercel.json <<'JSON'
-            {
-              "$schema": "https://openapi.vercel.sh/vercel.json",
-              "git": {
-                "deploymentEnabled": {
-                  "friday-research-data": false
-                }
-              }
-            }
-            JSON
+            python -c 'import json; json.dump({"$schema":"https://openapi.vercel.sh/vercel.json","git":{"deploymentEnabled":{"friday-research-data":False}}}, open("vercel.json","w"), indent=2); print()'
             if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
             if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
-            git add -f testing/friday/data testing/friday/runs
+            git add -f vercel.json testing/friday/data testing/friday/runs
             if git diff --cached --quiet; then
               echo "[FRIDAY] No persistent state changes to save."
               exit 0

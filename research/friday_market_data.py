@@ -30,7 +30,13 @@ def _throttle_public_request() -> None:
 
 def _normalise_pair(value: str) -> str:
     compact = "".join(character for character in value.upper() if character.isalnum())
-    return "XBT" + compact[3:] if compact.startswith("BTC") else compact
+    # Kraken's REST AssetPairs catalogue uses XBT for BTC and XDG for DOGE.
+    # Preserve the public FRIDAY symbols while resolving Kraken's native alias.
+    if compact.startswith("BTC"):
+        return "XBT" + compact[3:]
+    if compact.startswith("DOGE"):
+        return "XDG" + compact[4:]
+    return compact
 
 
 def _resolve_kraken_usdt_pair(symbol: str) -> str:

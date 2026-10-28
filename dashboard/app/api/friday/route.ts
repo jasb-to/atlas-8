@@ -24,7 +24,7 @@ function response(body: DashboardPayload, status = 200) {
 
 export async function GET() {
   const repository = process.env.FRIDAY_GITHUB_REPOSITORY ?? "jasb-to/atlas-8";
-  const branch = process.env.FRIDAY_GITHUB_DATA_BRANCH ?? "main";
+  const branch = process.env.FRIDAY_GITHUB_DATA_BRANCH ?? "friday-research-data";
   const path = "testing/friday/data/dashboard.json";
   const url = `https://raw.githubusercontent.com/${repository}/${encodeURIComponent(branch)}/${path}?t=${Date.now()}`;
 
@@ -52,6 +52,7 @@ export async function GET() {
       connected: true,
       status: "connected",
       storage_backend: "github_repository_folder",
+      data_branch: branch,
       fetched_at: new Date().toISOString(),
     });
   } catch (error) {

@@ -98,6 +98,27 @@ class FridayMarketDataTests(unittest.TestCase):
 
     @patch("research.friday_market_data.requests.get")
     @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_resolves_dogecoin_to_kraken_xdg_alias(self, kraken, get):
+        get.return_value = Mock(
+            json=lambda: {"error": [], "result": {
+                "XDGUSDT": {"altname": "XDGUSDT", "wsname": "XDG/USDT"}
+            }},
+            raise_for_status=lambda: None,
+        )
+        timestamps = pd.date_range("2026-10-20", periods=50, freq="4h", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": [100.0] * 50, "high": [105.0] * 50,
+            "low": [99.0] * 50, "close": [103.0] * 50, "vwap": [102.0] * 50,
+            "volume": [10.0] * 50, "trades": [10] * 50,
+        })
+        kraken.return_value = frame
+        result = fetch_ohlc("DOGEUSDT", 240)
+        self.assertEqual(len(result), 50)
+        kraken.assert_called_once_with(pair="XDGUSDT", interval=240)
+        self.assertEqual(result.attrs["source"], "Kraken Spot")
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
     def test_resolves_requested_symbol_from_kraken_assetpairs_catalogue(self, kraken, get):
         get.return_value = Mock(
             json=lambda: {"error": [], "result": {
