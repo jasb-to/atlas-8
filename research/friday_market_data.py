@@ -165,6 +165,7 @@ def aggregate_ohlc(candles: pd.DataFrame, interval_minutes: int, target_minutes:
         result = result.sort_values("timestamp").reset_index(drop=True)
     result.attrs["source"] = f"{candles.attrs.get('source', 'unknown')} 4H aggregated to 1D"
     result.attrs["source_pair"] = candles.attrs.get("source_pair", "")
+    result.attrs["quote_currency"] = candles.attrs.get("quote_currency", "USDT")
     result.attrs["aggregation"] = "UTC; six complete 4H candles; gap-free"
     return result
 
