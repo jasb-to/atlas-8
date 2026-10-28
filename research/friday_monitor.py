@@ -17,7 +17,7 @@ from research.friday_alerts import build_signal_alert, send_telegram_alert
 from research.friday_persistence import (
     create_friday_store, make_archive_record, make_cron_run, make_trade_event, utc_now,
 )
-from research.strategy_preview import build_preview, momentum_reversal_enabled
+from research.strategy_preview import build_preview
 from research.friday_multitimeframe import analyse_pair
 from research.weekly_thesis import evaluate_sheldon_thesis
 from research.friday_paper_trades import register_paper_trade, update_paper_trades
@@ -583,8 +583,7 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                         raise
             # Separate Stoch RSI reversal archetype: notify only when a fresh
             # completed-candle candidate also has a valid structural risk plan.
-            # Weekly thesis remains authoritative; reversal candidates are opt-in only.
-            reversal = result.get("momentum_reversal", {}) if momentum_reversal_enabled() else {}
+            reversal = result.get("momentum_reversal", {})
             reversal_ts = _utc(reversal["signal_time"]) if reversal.get("signal_time") else None
             reversal_is_live = (
                 reversal_ts is not None and reversal_ts >= tracking_cutoff
