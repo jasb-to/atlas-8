@@ -94,13 +94,25 @@ class WeeklyThesisTests(unittest.TestCase):
         daily_values = np.linspace(200.0, 250.0, 220)
         weekly_values[-1] = 100.0
         daily_values[-1] = 99.0
-        weekly = pd.DataFrame({"timestamp": weekly_times, "close": weekly_values})
-        daily = pd.DataFrame({"timestamp": daily_times, "close": daily_values})
+        # Append still-forming candles with deliberately different prices. They
+        # must be excluded so the persisted values remain 100 weekly / 99 daily.
+        weekly = pd.DataFrame({
+            "timestamp": list(weekly_times) + [pd.Timestamp("2026-10-25T00:00:00Z")],
+            "close": list(weekly_values) + [101.0],
+        })
+        daily = pd.DataFrame({
+            "timestamp": list(daily_times) + [pd.Timestamp("2026-10-25T00:00:00Z")],
+            "close": list(daily_values) + [98.0],
+        })
+        calls = []
 
-        result = evaluate_sheldon_thesis(
-            "ETHUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of,
-        )
+        def fetcher(*, pair, interval):
+            calls.append((pair, interval))
+            return weekly if interval == 10080 else daily if interval == 1440 else pd.DataFrame()
 
+        result = evaluate_sheldon_thesis("BNBUSDT", fetcher=fetcher, as_of=as_of)
+
+        self.assertEqual(calls, [("BNBUSDT", 10080), ("BNBUSDT", 1440)])
         self.assertEqual(result["weekly_close"], 100.0)
         self.assertEqual(result["daily_close"], 99.0)
         self.assertNotEqual(result["weekly_close"], result["daily_close"])
