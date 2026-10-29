@@ -139,6 +139,25 @@ def _should_scan_4h(thesis: dict) -> bool:
     return str(thesis.get("status", "unavailable")).strip().lower() == "active"
 
 
+def _daily_weekly_conflict(thesis: dict) -> bool:
+    """True when a weekly short thesis conflicts with bullish daily Stoch RSI."""
+    if str(thesis.get("direction", "")).strip().lower() != "short":
+        return False
+    try:
+        k, d = float(thesis.get("daily_stoch_k")), float(thesis.get("daily_stoch_d"))
+    except (TypeError, ValueError):
+        return False
+    return pd.notna(k) and pd.notna(d) and k > d
+
+
+def _btc_blocks_short(btc_thesis: dict | None, pair: str, direction: str) -> bool:
+    """Suppress altcoin shorts during a bullish BTC weekly impulse."""
+    if _display_pair(pair) == "BTCUSDT" or str(direction).strip().lower() != "short":
+        return False
+    thesis = btc_thesis or {}
+    return str(thesis.get("wave_state", "")).lower() == "impulse" and str(thesis.get("direction", "")).lower() == "long"
+
+
 def _run_dry_run(pairs: list[str]) -> dict:
     """Read-only smoke path: evaluate weekly/daily thesis and print only."""
     results = []
@@ -171,6 +190,11 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
     historical_rows_ignored = 0
     tracking_cutoff = _utc(os.getenv("FRIDAY_TRACKING_START_UTC", "2026-10-23T17:00:00+00:00"))
     momentum_reversal_enabled = os.getenv("FRIDAY_MOMENTUM_REVERSAL_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+    try:
+        btc_thesis = evaluate_sheldon_thesis("BTCUSDT", as_of=pd.Timestamp.now(tz="UTC"))
+    except Exception as btc_error:
+        btc_thesis = {"status": "unavailable", "direction": None, "wave_state": None,
+                      "reason": f"btc_thesis_evaluation_error: {type(btc_error).__name__}: {btc_error}"}
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -204,6 +228,30 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                     "generated_at_utc": utc_now(),
                 }
             thesis_status = str(weekly_thesis.get("status", "unavailable")).lower()
+            if _daily_weekly_conflict(weekly_thesis):
+                conflict_reason = "Daily Stoch RSI K is above D while the weekly thesis direction is short."
+                weekly_thesis = {**weekly_thesis, "status": "conflict_wait", "reason": conflict_reason}
+                row = {
+                    "run_id": run_id, "pair": pair, "status": "conflict_wait",
+                    "market_started_at": pair_started, "market_finished_at": utc_now(),
+                    "weekly_thesis": weekly_thesis, "weekly_thesis_status": "conflict_wait",
+                    "latest_setup_state": "CONFLICT_WAIT", "friday_decision": "CONFLICT_WAIT",
+                    "scan_diagnostic": f"CONFLICT — 4H scan skipped. {conflict_reason}",
+                    "ai_review_status": "not_run", "break_event_count": 0,
+                    "persistence": "configured" if store.configured else "not_configured",
+                    "alert_results": [{"type": "SCAN", "sent": False, "status": "conflict_wait", "reason": conflict_reason}],
+                    "lifecycle_event": "daily_weekly_conflict_wait",
+                }
+                if store.configured:
+                    thesis_key = hashlib.sha256(f"{pair}|weekly_thesis|{weekly_thesis.get('generated_at_utc')}|conflict_wait".encode()).hexdigest()
+                    store.record_archive(make_archive_record(record_key=thesis_key, record_type="weekly_thesis_snapshot",
+                        pair=pair, timeframe="1W+1D", signal_time=weekly_thesis.get("generated_at_utc"), payload=weekly_thesis))
+                row["duration_seconds"] = round((pd.Timestamp(row["market_finished_at"]) - pd.Timestamp(pair_started)).total_seconds(), 3)
+                row["alert_outcomes_total"], row["alert_outcomes_sent"], row["alert_outcomes_blocked"] = 1, 0, 1
+                (pair_dir / "monitor_summary.json").write_text(json.dumps(row, indent=2, allow_nan=False))
+                pair_results.append(row)
+                print(f"[FRIDAY MARKET {index}/{len(pairs)}] CONFLICT pair={display_pair} action=SKIP_4H reason={conflict_reason}", flush=True)
+                continue
             if not _should_scan_4h(weekly_thesis):
                 thesis_reason = str(weekly_thesis.get("reason") or f"Weekly thesis status is {thesis_status}.")
                 row = {
@@ -411,6 +459,12 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                 )
                 if not is_fresh_entry or not store.configured or not hasattr(store, "paper_trades"):
                     continue
+                direction = str(event.get("direction", "")).lower()
+                if _btc_blocks_short(btc_thesis, pair, direction):
+                    row["alert_results"].append({"type": "PAPER_ENTRY", "sent": False, "status": "btc_impulse_bullish_block",
+                        "reason": "BTC weekly wave is a bullish impulse; altcoin SHORT suppressed."})
+                    print(f"[FRIDAY] btc_impulse_bullish_block pair={display_pair} direction=short", flush=True)
+                    continue
                 passed, filter_blockers = _entry_filters_pass(event, reversal_context_now, weekly_thesis.get("direction"))
                 # AI review is advisory only; it must never veto an aligned 4H breakout.
                 if not passed:
@@ -509,9 +563,14 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                         ),
                     })
                 if fresh_entry1 or fresh_entry2:
+                    direction = str(event.get("direction", "")).lower()
+                    if _btc_blocks_short(btc_thesis, pair, direction):
+                        row["alert_results"].append({"type": "ENTRY_2" if fresh_entry2 else "ENTRY_1", "sent": False,
+                            "status": "btc_impulse_bullish_block", "reason": "BTC weekly wave is a bullish impulse; altcoin SHORT suppressed."})
+                        print(f"[FRIDAY] btc_impulse_bullish_block pair={display_pair} direction=short", flush=True)
+                        continue
                     passed, filter_blockers = _entry_filters_pass(event, result.get("reversal_context", {}), weekly_thesis.get("direction"))
                     # AI review is advisory only; the HTF thesis and trade geometry govern entry.
-                    direction = str(event.get("direction", "")).lower()
                     plan = (result.get("trade_plans") or {}).get(direction, {})
                     entry_ref = float(event.get("continuation_add_close") or event.get("close_at_break") or result["last_close"])
                     stop = plan.get("stop")
@@ -592,6 +651,11 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                     and pair.upper().endswith("USDT")
                 )
                 ai_pass, ai_reason = _ai_candidate_pass(result.get("model_review"), "stoch-rsi-structural-reversal-v1", reversal.get("direction"))
+                if reversal.get("eligible") and _btc_blocks_short(btc_thesis, pair, reversal.get("direction")):
+                    row["alert_results"].append({"type": "MOMENTUM_REVERSAL", "sent": False,
+                        "status": "btc_impulse_bullish_block", "reason": "BTC weekly wave is a bullish impulse; altcoin SHORT suppressed."})
+                    print(f"[FRIDAY] btc_impulse_bullish_block pair={display_pair} direction=short", flush=True)
+                    reversal = {**reversal, "eligible": False}
                 if reversal.get("eligible") and reversal_is_live and reversal_ts == latest and store.configured and hasattr(store, "paper_trades"):
                     register_paper_trade(
                         store, pair=pair, strategy="friday-stoch-rsi-structural-reversal-v1",
