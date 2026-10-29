@@ -111,8 +111,8 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
                 resolved_quote = "USD"
                 print(
                     f"WARNING: No USDT market on Kraken for {base}. "
-                    f"Falling back to {match[0]} ({match[2] or 'pair name unavailable'}) "
-                    "for structural analysis only; no execution orders use this pair.",
+                    f"Falling back to {match[0]} for structural analysis only "
+                    f"(wsname={match[2] or 'pair name unavailable'}); no execution orders use this pair.",
                     flush=True,
                 )
     if match is None:
@@ -239,7 +239,7 @@ def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
                     cached.attrs["source"] = "Kraken downloadable historical OHLCVT (persisted weekly seed; REST refresh unavailable)"
                     return cached
                 raise RuntimeError(
-                    f"UNAVAILABLE — NO KRAKEN OHLC HISTORY: {symbol} "
+                    f"UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: {symbol} "
                     f"(interval={interval}m); detail: {exc}"
                 ) from exc
             daily = daily_cache
@@ -273,6 +273,6 @@ def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
             )
             return cached
         raise RuntimeError(
-            f"UNAVAILABLE — NO KRAKEN OHLC HISTORY: {symbol} "
+            f"UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: {symbol} "
             f"(interval={interval}m); detail: {exc}"
         ) from exc
