@@ -86,6 +86,19 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertNotEqual(enough["status"], "insufficient_data", enough["reason"])
 
 
+    def test_weekly_and_daily_close_fields_use_their_own_candle_series(self):
+        as_of = pd.Timestamp("2026-10-25T12:00:00Z")
+        weekly_times = pd.date_range(end="2026-10-18", periods=220, freq="7D", tz="UTC")
+        daily_times = pd.date_range(end="2026-10-24", periods=220, freq="D", tz="UTC")
+        weekly = pd.DataFrame({"timestamp": weekly_times, "close": np.linspace(100.0, 300.0, 220)})
+        daily = pd.DataFrame({"timestamp": daily_times, "close": np.linspace(200.0, 250.0, 220)})
+        result = evaluate_sheldon_thesis(
+            "ETHUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of,
+        )
+        self.assertEqual(result["weekly_close"], float(weekly["close"].iloc[-1]))
+        self.assertEqual(result["daily_close"], float(daily["close"].iloc[-1]))
+        self.assertNotEqual(result["weekly_close"], result["daily_close"])
+
     def test_weekly_alignment_does_not_require_stoch_extreme_zone(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=230, freq="D", tz="UTC")
