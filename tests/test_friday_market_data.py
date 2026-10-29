@@ -238,7 +238,7 @@ class FridayMarketDataTests(unittest.TestCase):
         kraken.return_value = frame
 
         for symbol in ("HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"):
-            result = fetch_ohlc(symbol, 10080)
+            result = fetch_ohlc(symbol, 240)
             self.assertEqual(len(result), 50)
             self.assertEqual(result.attrs["source_pair"], symbol)
 
@@ -267,8 +267,8 @@ class FridayMarketDataTests(unittest.TestCase):
         kraken.return_value = frame
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            uni = fetch_ohlc("UNIUSDT", 10080)
-            zec = fetch_ohlc("ZECUSDT", 10080)
+            uni = fetch_ohlc("UNIUSDT", 240)
+            zec = fetch_ohlc("ZECUSDT", 240)
         self.assertEqual(uni.attrs["source_pair"], "UNIUSD")
         self.assertEqual(zec.attrs["source_pair"], "ZECUSD")
         self.assertIn("requested=UNIUSDT pair_id=UNIUSD altname=UNIUSD wsname=UNI/USD quote=USD", output.getvalue())
