@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 
 from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
-from research.friday_historical_data import load_seeded_ohlc, merge_ohlc
+from research.friday_historical_data import aggregate_daily_to_weekly, load_seeded_ohlc, merge_ohlc
 
 # Space request starts to stay conservative with Kraken's public API rate limits.
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
@@ -225,6 +225,34 @@ def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
     symbol = pair.upper().strip()
     canonical = _normalise_pair(symbol)
     cached = load_seeded_ohlc(canonical, interval) if interval in {1440, 10080} else pd.DataFrame()
+    if interval == 10080:
+        # Kraken's bulk archive contains daily files, not weekly files. Build the
+        # weekly series from merged daily history so its candle boundaries are
+        # consistent and the 720-row weekly REST cap is irrelevant.
+        daily_cache = load_seeded_ohlc(canonical, 1440)
+        try:
+            live_daily = _fetch_kraken(symbol, 1440)
+            daily = merge_ohlc(daily_cache, live_daily) if not daily_cache.empty else live_daily
+        except (RuntimeError, requests.RequestException, ValueError) as exc:
+            if daily_cache.empty:
+                if not cached.empty:
+                    cached.attrs["source"] = "Kraken downloadable historical OHLCVT (persisted weekly seed; REST refresh unavailable)"
+                    return cached
+                raise RuntimeError(
+                    f"UNAVAILABLE — NO KRAKEN OHLC HISTORY: {symbol} "
+                    f"(interval={interval}m); detail: {exc}"
+                ) from exc
+            daily = daily_cache
+            print(
+                f"[FRIDAY HISTORY] {canonical} using {len(daily)} persisted daily candles "
+                f"to build weekly history; live refresh failed: {exc}",
+                flush=True,
+            )
+        weekly = aggregate_daily_to_weekly(daily)
+        if weekly.empty and not cached.empty:
+            return cached
+        return weekly
+
     try:
         frame = _fetch_kraken(symbol, interval)
         if not cached.empty:
