@@ -1,0 +1,113 @@
+name: Seed FRIDAY Kraken historical OHLCVT
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: friday-kraken-history-seed
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install seed dependencies
+        run: python -m pip install --upgrade pip pandas requests
+      - name: Restore existing FRIDAY data-branch state
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin friday-research-data >/dev/null 2>&1; then
+            git fetch origin friday-research-data
+            git checkout origin/friday-research-data -- testing/friday/data testing/friday/runs || true
+          fi
+          mkdir -p testing/friday/data testing/friday/runs
+      - name: Resolve exact Kraken UNI and ZEC asset-pair names
+        run: |
+          python - <<'PY'
+          import requests
+          url = "https://api.kraken.com/0/public/AssetPairs"
+          response = requests.get(url, timeout=30, headers={"User-Agent": "atlas-8-research/1.0"})
+          response.raise_for_status()
+          payload = response.json()
+          if payload.get("error"):
+              raise RuntimeError(f"Kraken AssetPairs error: {payload['error']}")
+          pairs = payload.get("result", {})
+          for symbol in ("UNI", "ZEC"):
+              found = []
+              for pair_id, details in pairs.items():
+                  altname = str(details.get("altname", ""))
+                  wsname = str(details.get("wsname", ""))
+                  base, _, quote = wsname.partition("/")
+                  if base.upper() == symbol and quote.upper() in {"USD", "USDT"}:
+                      found.append((pair_id, altname, wsname))
+              print(f"[KRAKEN ASSETPAIRS] {symbol}: " + (
+                  "; ".join(f"pair_id={p} altname={a} wsname={w}" for p, a, w in found)
+                  if found else "NO USD/USDT MATCH"
+              ), flush=True)
+          PY
+      - name: Download and verify Kraken bulk history archive
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/Kraken_OHLCVT_Full.zip"
+          : > "$archive"
+          for part in 00 01 02 03 04; do
+            url="https://assets.kraken.com/marketing/institutions/Kraken_OHLCVT_Full.zip.part$part"
+            target="$RUNNER_TEMP/Kraken_OHLCVT_Full.zip.part$part"
+            echo "[OHLCVT SEED] Downloading archive part $part"
+            curl --fail --location --retry 4 --retry-all-errors --connect-timeout 30 --max-time 3600 "$url" --output "$target"
+            cat "$target" >> "$archive"
+            rm "$target"
+          done
+          echo "bc273e9027470b07d790a7fa4df9bb43f0dfc527c20c6ecae48402e123e7b1c7  $archive" | sha256sum --check -
+          echo "KRAKEN_OHLCVT_ARCHIVE=$archive" >> "$GITHUB_ENV"
+      - name: Seed only FRIDAY's fixed 15 markets
+        run: |
+          python -m research.seed_kraken_ohlcvt --archive "$KRAKEN_OHLCVT_ARCHIVE" --output testing/friday/data/ohlc_history.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("testing/friday/data/ohlc_history.json")
+          data = json.loads(path.read_text())
+          missing = data.get("missing_pairs", [])
+          print(f"[OHLCVT SEED] Pair count={data.get('pair_count')} | missing={missing}")
+          if missing or data.get("pair_count") != 15:
+              raise SystemExit("Seed incomplete: require all 15 FRIDAY markets before persisting.")
+          for pair, row in data["pairs"].items():
+              print(f"[OHLCVT SEED VERIFY] {pair} source={row['source_pair']} quote={row['quote_currency']} daily={len(row['daily'])} weekly={len(row['weekly'])}")
+          PY
+      - name: Persist seeded history to friday-research-data
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/friday-data-export HEAD
+          (
+            cd /tmp/friday-data-export
+            git checkout --orphan friday-data-export
+            git rm -rf . >/dev/null 2>&1 || true
+            mkdir -p testing/friday/data testing/friday/runs
+            python -c 'import json; json.dump({"$schema":"https://openapi.vercel.sh/vercel.json","git":{"deploymentEnabled":{"friday-research-data":False}}}, open("vercel.json","w"), indent=2); print()'
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/data" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/data/." testing/friday/data/; fi
+            if [ -d "$GITHUB_WORKSPACE/testing/friday/runs" ]; then cp -a "$GITHUB_WORKSPACE/testing/friday/runs/." testing/friday/runs/; fi
+            git add -f vercel.json testing/friday/data testing/friday/runs
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "data(friday): seed Kraken OHLCVT history for 15 markets"
+            git push origin HEAD:refs/heads/friday-research-data --force
+          )
+      - name: Upload seed report
+        uses: actions/upload-artifact@v4
+        with:
+          name: friday-kraken-history-seed
+          path: testing/friday/data/ohlc_history.json
+          if-no-files-found: error
+          retention-days: 30
