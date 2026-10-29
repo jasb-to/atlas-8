@@ -22,9 +22,14 @@ class FridayMonitorTests(unittest.TestCase):
 
     def test_legacy_usd_inputs_are_canonicalized_to_usdt(self):
         self.assertEqual(
-            validate_friday_pairs(["XBTUSD", "ETHUSD", "SOLUSD", "VIRTUALUSD", "HYPEUSD", "DOGEUSD", "LINKUSD", "ZECUSD", "NEARUSD", "SUIUSD", "LITUSD"]),
-            ["XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT"],
+            validate_friday_pairs(["XBTUSD", "ETHUSD", "SOLUSD", "VIRTUALUSD", "HYPEUSD", "DOGEUSD", "LINKUSD", "ZECUSD", "NEARUSD", "SUIUSD"]),
+            ["XBTUSDT", "ETHUSDT", "SOLUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT"],
         )
+
+    def test_lit_is_not_in_the_approved_scan_universe(self):
+        for pair in ("LITUSDT", "LITUSD"):
+            with self.subTest(pair=pair), self.assertRaisesRegex(ValueError, "approved USDT universe"):
+                validate_friday_pairs([pair])
 
     def test_duplicate_aliases_do_not_create_duplicate_market_scans(self):
         self.assertEqual(validate_friday_pairs(["XBTUSD", "XBTUSDT", "ETHUSDT", "SUIUSDT", "SUIUSD"]), ["XBTUSDT", "ETHUSDT", "SUIUSDT"])

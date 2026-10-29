@@ -23,7 +23,7 @@ const pairName = (value: unknown) => {
 const shortPair = (value: unknown) => pairName(value).replace(/USDT$/, "");
 const THESIS_UNIVERSE = [
   "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "BNBUSDT", "VIRTUALUSDT",
-  "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
+  "HYPEUSDT", "DOGEUSDT", "LINKUSDT", "ZECUSDT", "NEARUSDT", "SUIUSDT", "UNIUSDT",
 ];
 const direction = (value: unknown) => String(value ?? "").toLowerCase();
 const isBull = (value: unknown) => ["long", "bullish", "active_long"].includes(direction(value));
@@ -53,6 +53,7 @@ export default function Home() {
   const pairScans: Row[] = Array.isArray(latestRun?.pair_results) ? latestRun.pair_results : [];
   const snapshots = data.snapshots ?? [];
   const openTrades = data.paper_trades.filter(trade => ["OPEN", "ACTIVE"].includes(String(trade.status ?? "").trim().toUpperCase()) && trade.ready !== false && trade.entry != null && (trade.stop_loss ?? trade.stop) != null && (trade.tp2 ?? trade.take_profit ?? trade.target) != null);
+  const closedTrades = data.paper_trades.filter(trade => String(trade.status ?? "").trim().toUpperCase() === "CLOSED").sort((a, b) => Date.parse(String(b.exit_time ?? b.last_checked_at ?? "")) - Date.parse(String(a.exit_time ?? a.last_checked_at ?? "")));
   const scanByPair = new Map<string, Row>(pairScans.map(scan => [pairName(scan.pair), scan] as [string, Row]));
   const aiStatuses = pairScans.map(scan => String(scan.ai_review_status ?? "missing").trim().toLowerCase());
   const aiReviewAttempted = aiStatuses.filter(status => !["disabled", "not_run", "missing", ""].includes(status));
@@ -96,7 +97,10 @@ export default function Home() {
     const sourceWeekly = String(thesis.data_source_weekly ?? "MISSING");
     const sourceDaily = String(thesis.data_source_daily ?? "MISSING");
     const quoteCurrency = String(thesis.quote_currency ?? (sourceWeekly.includes("(USD)") ? "USD" : "USDT")).toUpperCase();
-    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+    // Keep the timeframes explicitly mapped to their own persisted close fields.
+    const weeklyClose = thesis.weekly_close;
+    const dailyClose = thesis.daily_close;
+    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, weeklyClose, dailyClose, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
   }).sort((a, b) => {
     const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
@@ -133,8 +137,8 @@ export default function Home() {
             <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
             <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
-            <div className="thesis-row"><span>WEEKLY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(thesis.weekly_close)} {card.quoteCurrency}</b></div>
-            <div className="thesis-row"><span>DAILY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(thesis.daily_close)} {card.quoteCurrency}</b></div>
+            <div className="thesis-row"><span>WEEKLY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div>
+            <div className="thesis-row"><span>DAILY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
             <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div>
             <div className="thesis-row"><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
@@ -171,7 +175,35 @@ export default function Home() {
     </section>
 
     <section className="section-block">
-      <div className="section-heading"><div><span className="eyebrow">03 / WAITING FOR TRIGGER</span><h2>WATCHLIST</h2><p>Active weekly and daily thesis; waiting for a valid 4H trigger. No entry has been recorded.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
+      <div className="section-heading"><div><span className="eyebrow">03 / COMPLETED POSITIONS</span><h2>CLOSED PAPER TRADES</h2><p>Historical paper-trade outcomes, including stop-losses and thesis invalidations. No exchange orders are placed.</p></div><span className="section-count">{closedTrades.length} CLOSED</span></div>
+      {closedTrades.length ? <div className="trade-grid">
+        {closedTrades.map((trade, index) => {
+          const dir = direction(trade.direction);
+          const entry = Number(trade.entry);
+          const stop = Number(trade.stop_loss ?? trade.stop);
+          const target = Number(trade.tp2 ?? trade.take_profit ?? trade.target);
+          const risk = Math.abs(entry - stop);
+          const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
+          const realizedR = Number(trade.realized_r_multiple);
+          return <article className="trade-card trade-closed" key={trade.trade_id ?? index}>
+            <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)} · {clean(trade.timeframe ?? "4H")}</span></div><span className="direction">{clean(trade.status)}</span></div>
+            <div className="trade-prices">
+              <div><span>ENTRY</span><b>{fmtPrice(entry)}</b></div>
+              <div><span>EXIT</span><b>{fmtPrice(trade.exit_price)}</b></div>
+              <div><span>SL</span><b>{fmtPrice(stop)}</b></div>
+              <div><span>TP1 · 1.5R</span><b>{fmtPrice(tp1)}</b></div>
+              <div><span>TP2</span><b>{fmtPrice(target)}</b></div>
+              <div><span>REALIZED R</span><b>{Number.isFinite(realizedR) ? (realizedR > 0 ? "+" : "") + realizedR.toFixed(2) + "R" : "—"}</b></div>
+            </div>
+            <div className="trade-foot"><span>EXIT · {fmtTime(trade.exit_time)}</span><b>{clean(trade.exit_reason ?? "CLOSED")}</b></div>
+            <p>{trade.invalidation_reason ?? trade.reason ?? trade.thesis_reason ?? "Paper trade closed; see exit reason and realized R above."}</p>
+          </article>;
+        })}
+      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No closed paper trades yet</b><p>Closed trades will remain visible here with their exit reason and realized R multiple.</p></div></div>}
+    </section>
+
+    <section className="section-block">
+      <div className="section-heading"><div><span className="eyebrow">04 / WAITING FOR TRIGGER</span><h2>WATCHLIST</h2><p>Active weekly and daily thesis; waiting for a valid 4H trigger. No entry has been recorded.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
       {watchlist.length ? <div className="watchlist">
         {watchlist.map(card => <article className="watch-row" key={card.pair}>
           <div className="watch-token"><b>{shortPair(card.pair)}</b><span className={isBull(card.tradeDirection) ? "direction long" : "direction short"}>{isBull(card.tradeDirection) ? "LONG BIAS" : "SHORT BIAS"}</span></div>

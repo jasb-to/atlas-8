@@ -112,7 +112,7 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
 
 # Only use 4H-to-1D aggregation for markets whose history has been a known
 # coverage problem. Other markets keep their native daily feed.
-TARGETED_RESAMPLE_PAIRS = {"BNBUSDT", "HYPEUSDT", "LITUSDT", "SUIUSDT", "VIRTUALUSDT", "ZECUSDT"}
+TARGETED_RESAMPLE_PAIRS = {"BNBUSDT", "HYPEUSDT", "SUIUSDT", "VIRTUALUSDT", "ZECUSDT"}
 
 
 def aggregate_ohlc(candles: pd.DataFrame, interval_minutes: int, target_minutes: int) -> pd.DataFrame:

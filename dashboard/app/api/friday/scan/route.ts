@@ -12,7 +12,7 @@ const GITHUB_DISPATCH_URL =
 const FRIDAY_SCAN_PAIRS = [
   "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT",
   "BNBUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT",
-  "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
+  "ZECUSDT", "NEARUSDT", "SUIUSDT", "UNIUSDT",
 ] as const;
 
 function safeEqual(left: string, right: string): boolean {
