@@ -88,3 +88,40 @@ def merge_ohlc(history: pd.DataFrame, live: pd.DataFrame) -> pd.DataFrame:
     combined.attrs["source"] = "Kraken bulk OHLCVT seed + live Kraken REST"
     combined.attrs["seeded_history"] = True
     return combined
+
+
+def aggregate_daily_to_weekly(daily: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate daily OHLCV into completed UTC Monday-start weeks without fabricating bars."""
+    columns = ["timestamp", "open", "high", "low", "close", "volume", "trades"]
+    if daily is None or daily.empty:
+        return pd.DataFrame(columns=columns)
+    frame = daily.copy()
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+    for column in ("open", "high", "low", "close", "volume"):
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    frame = frame.dropna(subset=["timestamp", "open", "high", "low", "close", "volume"])
+    frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+    frame["trades"] = pd.to_numeric(frame.get("trades", pd.Series(0, index=frame.index)), errors="coerce").fillna(0)
+    frame["week"] = frame["timestamp"].dt.tz_localize(None).dt.to_period("W-SUN").dt.start_time.dt.tz_localize("UTC")
+    now = pd.Timestamp.now(tz="UTC")
+    rows = []
+    for bucket, group in frame.groupby("week", sort=True):
+        if bucket + pd.Timedelta(days=7) > now:
+            continue
+        group = group.sort_values("timestamp")
+        rows.append({
+            "timestamp": bucket,
+            "open": float(group.iloc[0]["open"]),
+            "high": float(group["high"].max()),
+            "low": float(group["low"].min()),
+            "close": float(group.iloc[-1]["close"]),
+            "volume": float(group["volume"].sum()),
+            "trades": int(group["trades"].sum()),
+        })
+    result = pd.DataFrame(rows, columns=columns)
+    if not result.empty:
+        result = result.sort_values("timestamp").reset_index(drop=True)
+    result.attrs.update(daily.attrs)
+    result.attrs["source"] = "Kraken bulk daily OHLCVT + live REST aggregated to completed 1W"
+    result.attrs["aggregation"] = "UTC Monday-start weeks; observed daily candles only"
+    return result
