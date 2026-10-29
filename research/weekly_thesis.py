@@ -66,6 +66,20 @@ def _completed_candles(
     frame["close"] = pd.to_numeric(frame["close"], errors="coerce")
     frame = frame.dropna(subset=["timestamp", "close"])
     frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last")
+
+    # Refuse a silently mislabelled timeframe. If a daily series is accidentally
+    # supplied for the weekly request (or vice versa), using its last close for
+    # both fields can make a plausible-looking but invalid persisted thesis.
+    if len(frame) >= 3:
+        observed_step = frame["timestamp"].diff().dropna().median()
+        expected_step = pd.Timedelta(minutes=interval_minutes)
+        if observed_step < expected_step * 0.75 or observed_step > expected_step * 1.5:
+            raise ValueError(
+                "OHLC timeframe mismatch: "
+                f"expected about {interval_minutes} minutes between candles, "
+                f"observed median {observed_step.total_seconds() / 60:.0f} minutes"
+            )
+
     candle_duration = pd.Timedelta(minutes=interval_minutes)
     frame = frame.loc[frame["timestamp"] + candle_duration <= as_of]
     return frame.reset_index(drop=True)
