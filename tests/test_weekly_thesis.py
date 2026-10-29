@@ -10,7 +10,7 @@ SCHEMA = {
     "pair", "status", "direction", "macro_regime", "wave_state",
     "momentum_bearish", "momentum_bullish", "weekly_close", "weekly_ema8",
     "weekly_ema21", "weekly_ema200", "weekly_stoch_k", "weekly_stoch_d",
-    "weekly_macd_histogram", "daily_close", "daily_ema8", "daily_ema21",
+    "weekly_macd_histogram", "weekly_candle_time_utc", "daily_close", "daily_candle_time_utc", "daily_ema8", "daily_ema21",
     "daily_ema50", "daily_stoch_k", "daily_stoch_d", "daily_alignment",
     "weekly_stoch_cross", "weekly_stoch_aligned", "data_source_weekly", "data_source_daily",
     "quote_currency", "reason", "generated_at_utc",
@@ -86,18 +86,26 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertNotEqual(enough["status"], "insufficient_data", enough["reason"])
 
 
-    def test_weekly_and_daily_close_fields_use_their_own_candle_series(self):
+    def test_weekly_and_daily_closes_use_last_completed_candle_from_own_timeframe(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         weekly_times = pd.date_range(end="2026-10-18", periods=220, freq="7D", tz="UTC")
         daily_times = pd.date_range(end="2026-10-24", periods=220, freq="D", tz="UTC")
-        weekly = pd.DataFrame({"timestamp": weekly_times, "close": np.linspace(100.0, 300.0, 220)})
-        daily = pd.DataFrame({"timestamp": daily_times, "close": np.linspace(200.0, 250.0, 220)})
+        weekly_values = np.linspace(100.0, 300.0, 220)
+        daily_values = np.linspace(200.0, 250.0, 220)
+        weekly_values[-1] = 100.0
+        daily_values[-1] = 99.0
+        weekly = pd.DataFrame({"timestamp": weekly_times, "close": weekly_values})
+        daily = pd.DataFrame({"timestamp": daily_times, "close": daily_values})
+
         result = evaluate_sheldon_thesis(
             "ETHUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of,
         )
-        self.assertEqual(result["weekly_close"], float(weekly["close"].iloc[-1]))
-        self.assertEqual(result["daily_close"], float(daily["close"].iloc[-1]))
+
+        self.assertEqual(result["weekly_close"], 100.0)
+        self.assertEqual(result["daily_close"], 99.0)
         self.assertNotEqual(result["weekly_close"], result["daily_close"])
+        self.assertEqual(result["weekly_candle_time_utc"], weekly_times[-1].isoformat())
+        self.assertEqual(result["daily_candle_time_utc"], daily_times[-1].isoformat())
 
     def test_weekly_alignment_does_not_require_stoch_extreme_zone(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
