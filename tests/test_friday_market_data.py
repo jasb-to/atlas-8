@@ -264,7 +264,7 @@ class FridayMarketDataTests(unittest.TestCase):
             "timestamp": timestamps, "open": 10.0, "high": 11.0,
             "low": 9.0, "close": 10.5, "vwap": 10.2, "volume": 100.0, "trades": 5,
         })
-        kraken.return_value = frame
+        kraken.side_effect = lambda pair, interval: frame.copy()
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             uni = fetch_ohlc("UNIUSDT", 240)
