@@ -137,8 +137,8 @@ export default function Home() {
             <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
             <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
-            <div className="thesis-row"><span>WEEKLY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div>
-            <div className="thesis-row"><span>DAILY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
+            <div className="thesis-row"><span>WEEKLY CLOSE:</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div>
+            <div className="thesis-row"><span>DAILY CLOSE:</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
             <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div>
             <div className="thesis-row"><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
             <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
