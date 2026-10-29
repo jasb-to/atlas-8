@@ -119,6 +119,15 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertEqual(result["weekly_candle_time_utc"], weekly_times[-1].isoformat())
         self.assertEqual(result["daily_candle_time_utc"], daily_times[-1].isoformat())
 
+    def test_rejects_daily_candles_mislabeled_as_weekly(self):
+        as_of = pd.Timestamp("2026-10-25T12:00:00Z")
+        daily_times = pd.date_range(end="2026-10-24", periods=220, freq="D", tz="UTC")
+        daily = pd.DataFrame({"timestamp": daily_times, "close": np.linspace(100.0, 200.0, 220)})
+        with self.assertRaisesRegex(ValueError, "OHLC timeframe mismatch"):
+            evaluate_sheldon_thesis(
+                "BNBUSDT", weekly_candles=daily, daily_candles=daily, as_of=as_of,
+            )
+
     def test_weekly_alignment_does_not_require_stoch_extreme_zone(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=230, freq="D", tz="UTC")
