@@ -55,12 +55,14 @@ def indicators(frame):
     return out
 
 def break_crossed(frame, line, i):
-    if i < 1: return False
+    """Confirm a break only after two consecutive completed closes beyond the line."""
+    if i < 1:
+        return False
     row, prev = frame.iloc[i], frame.iloc[i-1]
     lv, lp = line.value_at(i), line.value_at(i-1)
     if line.kind == "resistance":
-        return float(row.close) > lv*(1+BREAK_BUFFER) and float(prev.close) <= lp*(1+BREAK_BUFFER)
-    return float(row.close) < lv*(1-BREAK_BUFFER) and float(prev.close) >= lp*(1-BREAK_BUFFER)
+        return float(row.close) > lv * (1 + BREAK_BUFFER) and float(prev.close) > lp * (1 + BREAK_BUFFER)
+    return float(row.close) < lv * (1 - BREAK_BUFFER) and float(prev.close) < lp * (1 - BREAK_BUFFER)
 
 def line_retest(frame, line, break_i, i, *, origin=0):
     """Return first post-break contact using absolute frame indices.
