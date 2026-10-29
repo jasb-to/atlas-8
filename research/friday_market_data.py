@@ -111,7 +111,7 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
                 resolved_quote = "USD"
                 print(
                     f"WARNING: No USDT market on Kraken for {base}. "
-                    f"Falling back to {match[0]} for structural analysis only "
+                    f"Falling back to {match[0]} for structural analysis only. "
                     f"(wsname={match[2] or 'pair name unavailable'}); no execution orders use this pair.",
                     flush=True,
                 )
