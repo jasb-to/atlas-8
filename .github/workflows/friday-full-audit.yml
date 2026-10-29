@@ -3,7 +3,7 @@ name: FRIDAY Full Audit
 on:
   workflow_dispatch:
   push:
-    branches: [main, fix/kraken-symbol-mapping, fix/friday-dashboard-close-and-lit]
+    branches: [main, fix/kraken-symbol-mapping, fix/friday-dashboard-close-and-lit, fix/weekly-daily-close-ui-regression]
   pull_request:
     branches: [main]
 
@@ -38,7 +38,7 @@ jobs:
         continue-on-error: true
         run: |
           set -o pipefail
-          pytest tests/ -v 2>&1 | tee pytest.log
+          python -m pytest tests/ -v 2>&1 | tee pytest.log
 
       - name: Run monitor-gate tests separately
         id: monitor_gate
