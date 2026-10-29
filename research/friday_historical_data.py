@@ -58,7 +58,10 @@ def load_seeded_ohlc(pair: str, interval: int, root: str | None = None) -> pd.Da
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
     frame = frame.dropna(subset=["timestamp", "open", "high", "low", "close", "volume"])
     frame = frame.sort_values("timestamp").drop_duplicates("timestamp", keep="last").reset_index(drop=True)
-    frame["trades"] = pd.to_numeric(frame.get("trades", 0), errors="coerce").fillna(0).astype(int)
+    if "trades" in frame.columns:
+        frame["trades"] = pd.to_numeric(frame["trades"], errors="coerce").fillna(0).astype(int)
+    else:
+        frame["trades"] = 0
     frame["vwap"] = pd.NA
     frame.attrs.update({
         "source": "Kraken downloadable historical OHLCVT (persisted seed)",
