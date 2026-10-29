@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main, fix/kraken-symbol-mapping, fix/friday-dashboard-close-and-lit]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
