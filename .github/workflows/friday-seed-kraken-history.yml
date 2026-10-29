@@ -1,6 +1,11 @@
 name: Seed FRIDAY Kraken historical OHLCVT
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/friday-seed-kraken-history.yml"
+      - "research/seed_kraken_ohlcvt.py"
   workflow_dispatch:
 
 permissions:
@@ -32,7 +37,18 @@ jobs:
             git checkout origin/friday-research-data -- testing/friday/data testing/friday/runs || true
           fi
           mkdir -p testing/friday/data testing/friday/runs
+      - name: Check whether the one-time seed already exists
+        id: seed_guard
+        run: |
+          if [ -s testing/friday/data/ohlc_history.json ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "[OHLCVT SEED] Persisted history already exists; skipping the bulk download."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "[OHLCVT SEED] No persisted history found; preparing one-time seed."
+          fi
       - name: Resolve exact Kraken UNI and ZEC asset-pair names
+        if: steps.seed_guard.outputs.skip != 'true'
         run: |
           python - <<'PY'
           import requests
@@ -57,6 +73,7 @@ jobs:
               ), flush=True)
           PY
       - name: Download and verify Kraken bulk history archive
+        if: steps.seed_guard.outputs.skip != 'true'
         run: |
           set -euo pipefail
           archive="$RUNNER_TEMP/Kraken_OHLCVT_Full.zip"
@@ -72,6 +89,7 @@ jobs:
           echo "bc273e9027470b07d790a7fa4df9bb43f0dfc527c20c6ecae48402e123e7b1c7  $archive" | sha256sum --check -
           echo "KRAKEN_OHLCVT_ARCHIVE=$archive" >> "$GITHUB_ENV"
       - name: Seed only FRIDAY's fixed 15 markets
+        if: steps.seed_guard.outputs.skip != 'true'
         run: |
           python -m research.seed_kraken_ohlcvt --archive "$KRAKEN_OHLCVT_ARCHIVE" --output testing/friday/data/ohlc_history.json
           python - <<'PY'
@@ -87,6 +105,7 @@ jobs:
               print(f"[OHLCVT SEED VERIFY] {pair} source={row['source_pair']} quote={row['quote_currency']} daily={len(row['daily'])} weekly={len(row['weekly'])}")
           PY
       - name: Persist seeded history to friday-research-data
+        if: steps.seed_guard.outputs.skip != 'true'
         run: |
           set -euo pipefail
           git worktree add --detach /tmp/friday-data-export HEAD
@@ -105,6 +124,7 @@ jobs:
             git push origin HEAD:refs/heads/friday-research-data --force
           )
       - name: Upload seed report
+        if: steps.seed_guard.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: friday-kraken-history-seed
