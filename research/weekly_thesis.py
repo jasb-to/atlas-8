@@ -106,6 +106,7 @@ def _flat_result(
     direction: str | None,
     reason: str,
     weekly_close: float | None = None,
+    weekly_candle_time_utc: str | None = None,
     weekly_ema8: float | None = None,
     weekly_ema21: float | None = None,
     weekly_ema200: float | None = None,
@@ -113,6 +114,7 @@ def _flat_result(
     weekly_stoch_d: float | None = None,
     weekly_macd_histogram: float | None = None,
     daily_close: float | None = None,
+    daily_candle_time_utc: str | None = None,
     daily_ema8: float | None = None,
     daily_ema21: float | None = None,
     daily_ema50: float | None = None,
@@ -139,6 +141,7 @@ def _flat_result(
         "momentum_bearish": bool(momentum_bearish),
         "momentum_bullish": bool(momentum_bullish),
         "weekly_close": weekly_close,
+        "weekly_candle_time_utc": weekly_candle_time_utc,
         "weekly_ema8": weekly_ema8,
         "weekly_ema21": weekly_ema21,
         "weekly_ema200": weekly_ema200,
@@ -146,6 +149,7 @@ def _flat_result(
         "weekly_stoch_d": weekly_stoch_d,
         "weekly_macd_histogram": weekly_macd_histogram,
         "daily_close": daily_close,
+        "daily_candle_time_utc": daily_candle_time_utc,
         "daily_ema8": daily_ema8,
         "daily_ema21": daily_ema21,
         "daily_ema50": daily_ema50,
@@ -194,14 +198,20 @@ def evaluate_sheldon_thesis(
     weekly = _completed_candles(weekly_raw, interval_minutes=10080, as_of=now)
     daily = _completed_candles(daily_raw, interval_minutes=1440, as_of=now)
 
+    # Values and timestamps are extracted independently from the completed
+    # timeframe-specific frames. Persisting the candle timestamps makes it
+    # possible to audit the source candle behind each dashboard close.
     wc = _number(weekly["close"].iloc[-1]) if not weekly.empty else None
     dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
+    weekly_candle_time = weekly["timestamp"].iloc[-1].isoformat() if not weekly.empty else None
+    daily_candle_time = daily["timestamp"].iloc[-1].isoformat() if not daily.empty else None
     if len(weekly) < 200 or len(daily) < 50:
         return _flat_result(
             pair, status="insufficient_data", direction=None,
             reason=(f"Need at least 200 completed weekly and 50 completed daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
-            weekly_close=wc, daily_close=dc,
+            weekly_close=wc, weekly_candle_time_utc=weekly_candle_time,
+            daily_close=dc, daily_candle_time_utc=daily_candle_time,
             data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
             data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
             quote_currency=str(weekly_raw.attrs.get("quote_currency", "USDT")),
@@ -238,10 +248,12 @@ def evaluate_sheldon_thesis(
                daily_state: str = "unavailable") -> dict[str, Any]:
         return _flat_result(
             pair, status=status, direction=direction, reason=reason,
-            weekly_close=w_close, weekly_ema8=w_ema8, weekly_ema21=w_ema21,
+            weekly_close=w_close, weekly_candle_time_utc=weekly_candle_time,
+            weekly_ema8=w_ema8, weekly_ema21=w_ema21,
             weekly_ema200=w_ema200, weekly_stoch_k=w_k, weekly_stoch_d=w_d,
             weekly_macd_histogram=w_macd_hist,
-            daily_close=d_close, daily_ema8=d_ema8, daily_ema21=d_ema21,
+            daily_close=d_close, daily_candle_time_utc=daily_candle_time,
+            daily_ema8=d_ema8, daily_ema21=d_ema21,
             daily_ema50=d_ema50, daily_stoch_k=d_k, daily_stoch_d=d_d,
             macro_regime=macro, wave_state=wave,
             momentum_bearish=bearish, momentum_bullish=bullish,
