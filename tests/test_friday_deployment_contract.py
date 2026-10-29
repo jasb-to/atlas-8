@@ -9,12 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ROUTE_PAIRS = [
     "XBTUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT",
     "BNBUSDT", "VIRTUALUSDT", "HYPEUSDT", "DOGEUSDT", "LINKUSDT",
-    "ZECUSDT", "NEARUSDT", "SUIUSDT", "LITUSDT", "UNIUSDT",
+    "ZECUSDT", "NEARUSDT", "SUIUSDT", "UNIUSDT",
 ]
 
 
 class FridayDeploymentContractTests(unittest.TestCase):
-    def test_scan_route_workflow_and_dashboard_share_the_sixteen_market_universe(self):
+    def test_scan_route_workflow_and_dashboard_share_the_approved_market_universe(self):
         route = (ROOT / "dashboard/app/api/friday/scan/route.ts").read_text(encoding="utf-8")
         workflow = (ROOT / ".github/workflows/friday-monitor.yml").read_text(encoding="utf-8")
         page = (ROOT / "dashboard/app/page.tsx").read_text(encoding="utf-8")
