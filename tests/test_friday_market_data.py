@@ -238,7 +238,7 @@ class FridayMarketDataTests(unittest.TestCase):
         kraken.return_value = frame
 
         for symbol in ("HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"):
-            result = fetch_ohlc(symbol, 10080)
+            result = fetch_ohlc(symbol, 240)
             self.assertEqual(len(result), 50)
             self.assertEqual(result.attrs["source_pair"], symbol)
 
@@ -247,6 +247,72 @@ class FridayMarketDataTests(unittest.TestCase):
             [call.kwargs["pair"] for call in kraken.call_args_list],
             ["HYPEUSDT", "SUIUSDT", "ZECUSDT", "NEARUSDT", "UNIUSDT"],
         )
+
+
+    @patch("research.friday_market_data.requests.get")
+    @patch("research.friday_market_data.fetch_kraken_ohlc")
+    def test_uni_and_zec_resolve_exact_kraken_usd_pair_names(self, kraken, get):
+        import contextlib
+        import io
+
+        get.return_value = Mock(json=lambda: {"error": [], "result": {
+            "UNIUSD": {"altname": "UNIUSD", "wsname": "UNI/USD"},
+            "ZECUSD": {"altname": "ZECUSD", "wsname": "ZEC/USD"},
+        }}, raise_for_status=lambda: None)
+        timestamps = pd.date_range("2025-01-06", periods=220, freq="7D", tz="UTC")
+        frame = pd.DataFrame({
+            "timestamp": timestamps, "open": 10.0, "high": 11.0,
+            "low": 9.0, "close": 10.5, "vwap": 10.2, "volume": 100.0, "trades": 5,
+        })
+        kraken.side_effect = lambda pair, interval: frame.copy()
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            uni = fetch_ohlc("UNIUSDT", 240)
+            zec = fetch_ohlc("ZECUSDT", 240)
+        self.assertEqual(uni.attrs["source_pair"], "UNIUSD")
+        self.assertEqual(zec.attrs["source_pair"], "ZECUSD")
+        self.assertIn("requested=UNIUSDT pair_id=UNIUSD altname=UNIUSD wsname=UNI/USD quote=USD", output.getvalue())
+        self.assertIn("requested=ZECUSDT pair_id=ZECUSD altname=ZECUSD wsname=ZEC/USD quote=USD", output.getvalue())
+        self.assertEqual(
+            [call.kwargs["pair"] for call in kraken.call_args_list],
+            ["UNIUSD", "ZECUSD"],
+        )
+
+    def test_loads_persisted_bulk_history_for_daily_and_weekly_timeframes(self):
+        from research.friday_historical_data import load_seeded_ohlc
+
+        with tempfile.TemporaryDirectory() as directory:
+            data = {
+                "schema_version": 1,
+                "pairs": {
+                    "SUIUSDT": {
+                        "source_pair": "SUIUSD",
+                        "quote_currency": "USD",
+                        "daily": [{
+                            "timestamp": "2024-01-01T00:00:00+00:00",
+                            "open": 1.0, "high": 1.2, "low": 0.9,
+                            "close": 1.1, "volume": 100.0, "trades": 10,
+                        }],
+                        "weekly": [{
+                            "timestamp": "2024-01-01T00:00:00+00:00",
+                            "open": 1.0, "high": 1.5, "low": 0.8,
+                            "close": 1.2, "volume": 700.0, "trades": 70,
+                        }],
+                    }
+                },
+            }
+            root = os.path.join(directory, "testing", "friday", "data")
+            os.makedirs(root)
+            with open(os.path.join(root, "ohlc_history.json"), "w", encoding="utf-8") as handle:
+                json.dump(data, handle)
+            daily = load_seeded_ohlc("SUIUSDT", 1440, root=root)
+            weekly = load_seeded_ohlc("SUIUSDT", 10080, root=root)
+            self.assertEqual(len(daily), 1)
+            self.assertEqual(len(weekly), 1)
+            self.assertEqual(daily.attrs["source_pair"], "SUIUSD")
+            self.assertEqual(daily.attrs["quote_currency"], "USD")
+            self.assertTrue(daily.attrs["seeded_history"])
+            self.assertEqual(weekly.iloc[0]["close"], 1.2)
 
 
 class FridayLedgerTrackingTests(unittest.TestCase):
