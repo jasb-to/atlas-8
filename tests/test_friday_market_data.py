@@ -91,8 +91,10 @@ class FridayMarketDataTests(unittest.TestCase):
         self.assertEqual(result.attrs["source"], "Kraken Spot (USD)")
 
         weekly = result.iloc[:10].copy()
+        weekly["timestamp"] = pd.date_range(end="2026-10-18", periods=10, freq="7D", tz="UTC")
         weekly.attrs.update(result.attrs)
         daily = result.iloc[:10].copy()
+        daily["timestamp"] = pd.date_range(end="2026-10-24", periods=10, freq="D", tz="UTC")
         daily.attrs.update(result.attrs)
         thesis = evaluate_sheldon_thesis("HYPEUSDT", weekly_candles=weekly, daily_candles=daily)
         self.assertEqual(thesis["quote_currency"], "USD")
