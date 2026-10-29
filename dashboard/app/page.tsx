@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 type Row = Record<string, any>;
 type Payload = {
@@ -32,6 +32,8 @@ const isBear = (value: unknown) => ["short", "bearish", "active_short"].includes
 export default function Home() {
   const [data, setData] = useState<Payload>(empty);
   const [busy, setBusy] = useState(false);
+  const [expandedThesis, setExpandedThesis] = useState<string | null>(null);
+  const [showInsufficient, setShowInsufficient] = useState(false);
 
   async function refresh() {
     setBusy(true);
@@ -85,26 +87,31 @@ export default function Home() {
     const record = latestThesisByPair.get(pair);
     const thesis = payloadOf(record);
     const scan = scanByPair.get(pair);
-    // Strictly display persisted thesis values; missing snapshots remain visible as missing.
     const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").toUpperCase();
     const waveState = String(thesis.wave_state ?? "UNKNOWN").toUpperCase();
     const tradeDirection = String(thesis.direction ?? "UNKNOWN").toUpperCase();
-    const thesisStatus = record ? String(thesis.status ?? "UNKNOWN").toLowerCase() : "missing";
-    const waveLabel = thesis.wave_state ? `${waveState} (${tradeDirection})` : "UNKNOWN";
-    const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "UNKNOWN");
+    const thesisStatus = record ? String(thesis.status ?? "UNKNOWN").toLowerCase() : "no_snapshot";
+    const waveLabel = thesis.wave_state ? `${waveState} · ${tradeDirection}` : "—";
+    const dailyAlignment = thesisStatus === "veto" ? "VETO" : (thesisStatus === "active" ? "PASS" : "—");
     const active = thesisStatus === "active";
     const recordType = String(record?.record_type ?? "MISSING");
     const sourceWeekly = String(thesis.data_source_weekly ?? "MISSING");
     const sourceDaily = String(thesis.data_source_daily ?? "MISSING");
     const quoteCurrency = String(thesis.quote_currency ?? (sourceWeekly.includes("(USD)") ? "USD" : "USDT")).toUpperCase();
-    // Keep the timeframes explicitly mapped to their own persisted close fields.
     const weeklyClose = thesis.weekly_close;
     const dailyClose = thesis.daily_close;
-    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, weeklyClose, dailyClose, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+    const statusGroup = thesisStatus === "active" ? "active" : thesisStatus === "veto" ? "veto" : "insufficient";
+    const openTrade = data.paper_trades.find(trade => pairName(trade.pair) === pair && ["OPEN", "ACTIVE"].includes(String(trade.status ?? "").toUpperCase()));
+    const action = statusGroup === "veto" ? "SKIPPED" : openTrade ? String(openTrade.direction ?? "").toUpperCase() : "WAITING";
+    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, weeklyClose, dailyClose, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection, statusGroup, openTrade, action };
   }).sort((a, b) => {
     const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
   });
+  const activeTheses = weeklyCards.filter(card => card.statusGroup === "active");
+  const vetoedTheses = weeklyCards.filter(card => card.statusGroup === "veto");
+  const insufficientTheses = weeklyCards.filter(card => card.statusGroup === "insufficient");
+
 
   const watchlist = weeklyCards.filter(card =>
     card.active && !openTrades.some(trade => pairName(trade.pair) === card.pair)
@@ -122,36 +129,72 @@ export default function Home() {
     </header>
 
     <section className="section-block">
-      <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>16 fixed market slots · completed weekly and daily candles · missing snapshots stay visible.</p></div></div>
-      <p className="thesis-note">16 markets · completed candles only · only ACTIVE theses can pass the 4H gate.</p>
-      {weeklyCards.length ? <div className="thesis-grid">
-        {weeklyCards.map(card => {
-          const statusLabel = card.thesisStatus === "active" ? "ACTIVE" : card.thesisStatus === "veto" ? "VETO" : card.thesisStatus === "insufficient_data" ? "INSUFFICIENT DATA" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : card.thesisStatus === "missing" ? "NO SNAPSHOT" : "INACTIVE";
-          const macroBull = card.macroRegime === "BULLISH";
-          const macroBear = card.macroRegime === "BEARISH";
-          const dirBull = isBull(card.tradeDirection);
-          const dirBear = isBear(card.tradeDirection);
-          const thesis = card.thesis as Row;
-
-          return <article className="thesis-card" key={card.pair}>
-            <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
-            <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
-            <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
-            <div className="thesis-row"><span>WEEKLY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div>
-            <div className="thesis-row"><span>DAILY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
-            <div className="thesis-row"><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div>
-            <div className="thesis-row"><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
-            <div className="thesis-row"><span>DAILY ALIGNMENT</span><b className={card.dailyAlignment === "PASS" ? "positive-text" : card.dailyAlignment === "VETO" ? "negative-text" : ""}>{card.dailyAlignment}</b></div>
-            <div className="thesis-bottom"><span>THESIS STATUS</span><b>{statusLabel}</b></div>
-            {<p className="thesis-reason">{String(thesis.reason ?? (card.thesisStatus === "missing" ? "No snapshot persisted for this market in the latest scan." : "No additional reason recorded."))}</p>}
-          </article>;
-        })}
-      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No weekly thesis snapshots in the latest run</b><p>Cards appear here when FRIDAY persists a weekly_thesis_snapshot for a market.</p></div></div>}
+      <div className="section-heading"><div><span className="eyebrow">01 / HIGHER TIMEFRAME</span><h2>WEEKLY THESIS</h2><p>One row per market · completed weekly and daily candles · click a symbol for the underlying details.</p></div></div>
+      <p className="thesis-note">Active theses first · vetoes next · insufficient or unavailable data collapsed below.</p>
+      <div className="thesis-list-wrap">
+        <table className="thesis-list">
+          <thead><tr><th>SYMBOL</th><th>MACRO</th><th>WAVE</th><th>DAILY</th><th>STATUS</th><th>ACTION</th></tr></thead>
+          <tbody>
+            <tr className="list-section"><th colSpan={6}>ACTIVE <span>{activeTheses.length}</span></th></tr>
+            {activeTheses.map(card => {
+              const open = expandedThesis === card.pair;
+              return <Fragment key={card.pair}>
+                <tr className="thesis-list-row">
+                  <td><button className="symbol-expander" aria-expanded={open} onClick={() => setExpandedThesis(open ? null : card.pair)}><span className="status-dot active-dot">●</span><b>{shortPair(card.pair)}</b><span className="expand-mark">{open ? "−" : "+"}</span></button></td>
+                  <td className={card.macroRegime === "BULLISH" ? "positive-text" : card.macroRegime === "BEARISH" ? "negative-text" : ""}>{["BULLISH","BEARISH"].includes(card.macroRegime) ? card.macroRegime : "—"}</td>
+                  <td>{card.waveLabel === "UNKNOWN" ? "—" : card.waveLabel}</td>
+                  <td className="positive-text">{card.dailyAlignment}</td><td><span className="status-chip active-chip">ACTIVE</span></td><td>{card.action}</td>
+                </tr>
+                {open && <tr className="thesis-detail-row"><td colSpan={6}><div className="thesis-detail-grid">
+                  <div><span>WEEKLY CLOSE</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div><div><span>DAILY CLOSE</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
+                  <div><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div><div><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
+                  <div className="detail-reason"><span>REASON</span><b>{String(card.thesis.reason ?? "No reason recorded.")}</b></div>
+                </div></td></tr>}
+              </Fragment>;
+            })}
+            <tr className="list-section"><th colSpan={6}>VETOED <span>{vetoedTheses.length}</span></th></tr>
+            {vetoedTheses.map(card => {
+              const open = expandedThesis === card.pair;
+              return <React.Fragment key={card.pair}>
+                <tr className="thesis-list-row">
+                  <td><button className="symbol-expander" aria-expanded={open} onClick={() => setExpandedThesis(open ? null : card.pair)}><span className="status-dot veto-dot">●</span><b>{shortPair(card.pair)}</b><span className="expand-mark">{open ? "−" : "+"}</span></button></td>
+                  <td className={card.macroRegime === "BULLISH" ? "positive-text" : card.macroRegime === "BEARISH" ? "negative-text" : ""}>{["BULLISH","BEARISH"].includes(card.macroRegime) ? card.macroRegime : "—"}</td>
+                  <td>{card.waveLabel === "UNKNOWN" ? "—" : card.waveLabel}</td><td className="negative-text">{card.dailyAlignment}</td><td><span className="status-chip veto-chip">VETO</span></td><td>SKIPPED</td>
+                </tr>
+                {open && <tr className="thesis-detail-row"><td colSpan={6}><div className="thesis-detail-grid">
+                  <div><span>WEEKLY CLOSE</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div><div><span>DAILY CLOSE</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
+                  <div><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div><div><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
+                  <div className="detail-reason"><span>REASON</span><b>{String(card.thesis.reason ?? "No reason recorded.")}</b></div>
+                </div></td></tr>}
+              </React.Fragment>;
+            })}
+          </tbody>
+        </table>
+        <details className="insufficient-details" open={showInsufficient} onToggle={(event) => setShowInsufficient((event.currentTarget as HTMLDetailsElement).open)}>
+          <summary>INSUFFICIENT / UNAVAILABLE <span>{insufficientTheses.length}</span></summary>
+          <div className="table-wrap"><table className="thesis-list"><thead><tr><th>SYMBOL</th><th>MACRO</th><th>WAVE</th><th>DAILY</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>
+            {insufficientTheses.map(card => {
+              const open = expandedThesis === card.pair;
+              const status = card.thesisStatus === "insufficient_data" ? "INSUFFICIENT" : card.thesisStatus === "unavailable" ? "UNAVAILABLE" : "UNAVAILABLE";
+              return <React.Fragment key={card.pair}>
+                <tr className="thesis-list-row">
+                  <td><button className="symbol-expander" aria-expanded={open} onClick={() => setExpandedThesis(open ? null : card.pair)}><span className="status-dot inactive-dot">○</span><b>{shortPair(card.pair)}</b><span className="expand-mark">{open ? "−" : "+"}</span></button></td><td>—</td><td>—</td><td>—</td><td><span className="status-chip neutral-chip">{status}</span></td><td>—</td>
+                </tr>
+                {open && <tr className="thesis-detail-row"><td colSpan={6}><div className="thesis-detail-grid">
+                  <div><span>WEEKLY CLOSE</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div><div><span>DAILY CLOSE</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
+                  <div><span>SOURCE W / D</span><b>{clean(card.sourceWeekly)} / {clean(card.sourceDaily)}</b></div><div><span>RECORD TYPE</span><b>{clean(card.recordType)}</b></div>
+                  <div className="detail-reason"><span>REASON</span><b>{String(card.thesis.reason ?? "No snapshot persisted for this market in the latest scan.")}</b></div>
+                </div></td></tr>}
+              </React.Fragment>;
+            })}
+          </tbody></table></div>
+        </details>
+      </div>
     </section>
 
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">02 / ACTIVE POSITIONS</span><h2>OPEN PAPER TRADES</h2><p>Only open paper positions appear here. No exchange orders are placed.</p></div><span className="section-count">{openTrades.length} OPEN</span></div>
-      {openTrades.length ? <div className="trade-grid">
+      {openTrades.length ? <div className="trade-list-wrap"><table className="trade-list"><thead><tr><th>SYMBOL</th><th>DIRECTION</th><th>ENTRY</th><th>SL</th><th>TP1</th><th>TP2</th><th>R:R</th><th>STATUS</th></tr></thead><tbody>
         {openTrades.map((trade, index) => {
           const dir = direction(trade.direction);
           const entry = Number(trade.entry);
@@ -159,19 +202,10 @@ export default function Home() {
           const target = Number(trade.tp2 ?? trade.take_profit ?? trade.target);
           const risk = Math.abs(entry - stop);
           const tp1 = Number(trade.tp1 ?? (dir === "long" ? entry + risk * 1.5 : entry - risk * 1.5));
-          return <article className={dir === "long" ? "trade-card trade-long" : "trade-card trade-short"} key={trade.trade_id ?? index}>
-            <div className="trade-head"><div><b>{shortPair(trade.pair)}</b><span>{clean(trade.strategy)}</span></div><span className={dir === "long" ? "direction long" : "direction short"}>{dir.toUpperCase()}</span></div>
-            <div className="trade-prices">
-              <div><span>ENTRY</span><b>{fmtPrice(entry)}</b></div>
-              <div><span>SL</span><b>{fmtPrice(stop)}</b></div>
-              <div><span>TP1 · 1.5R</span><b>{fmtPrice(tp1)}</b></div>
-              <div><span>TP2</span><b>{fmtPrice(target)}</b></div>
-            </div>
-            <div className="trade-foot"><span>RESEARCH · PAPER ONLY</span><b>{Number.isFinite(Number(trade.reward_risk)) ? Number(trade.reward_risk).toFixed(2) + "R" : "—"}</b></div>
-            <p>{trade.reason ?? trade.thesis_reason ?? "Confirmed 4H structure aligned with the active higher-timeframe thesis."}</p>
-          </article>;
+          return <tr key={trade.trade_id ?? index}><td><b>{shortPair(trade.pair)}</b></td><td className={dir === "long" ? "positive-text" : "negative-text"}>{dir.toUpperCase()}</td><td>{fmtPrice(entry)}</td><td>{fmtPrice(stop)}</td><td>{fmtPrice(tp1)}</td><td>{fmtPrice(target)}</td><td>{Number.isFinite(Number(trade.reward_risk)) ? Number(trade.reward_risk).toFixed(2) + "R" : "—"}</td><td><span className="status-chip active-chip">OPEN</span></td></tr>;
         })}
-      </div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No open paper trades</b><p>FRIDAY will show a position here only after a valid, aligned 4H entry and structural risk plan.</p></div></div>}
+      </tbody></table></div> : <div className="empty-card"><span className="empty-symbol">—</span><div><b>No open paper trades</b><p>FRIDAY will show a position here only after a valid, aligned 4H entry and structural risk plan.</p></div></div>}
+
     </section>
 
     <section className="section-block">
@@ -204,14 +238,10 @@ export default function Home() {
 
     <section className="section-block">
       <div className="section-heading"><div><span className="eyebrow">04 / WAITING FOR TRIGGER</span><h2>WATCHLIST</h2><p>Active weekly and daily thesis; waiting for a valid 4H trigger. No entry has been recorded.</p></div><span className="section-count">{watchlist.length} WATCHING</span></div>
-      {watchlist.length ? <div className="watchlist">
-        {watchlist.map(card => <article className="watch-row" key={card.pair}>
-          <div className="watch-token"><b>{shortPair(card.pair)}</b><span className={isBull(card.tradeDirection) ? "direction long" : "direction short"}>{isBull(card.tradeDirection) ? "LONG BIAS" : "SHORT BIAS"}</span></div>
-          <div><span>WEEKLY THESIS</span><b>{clean(card.thesis?.reason ?? "No reason recorded")}</b></div>
-          <div><span>STATUS</span><b>WAITING FOR 4H TRIGGER</b></div>
-          <div><span>ENTRY</span><b>—</b></div>
-        </article>)}
-      </div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No active thesis waiting for a trigger</b><p>Inactive, vetoed, expired and invalidated states are kept out of the main dashboard.</p></div></div>}
+      {watchlist.length ? <div className="watchlist-list-wrap"><table className="watchlist-list"><thead><tr><th>SYMBOL</th><th>BIAS</th><th>WAITING FOR</th></tr></thead><tbody>
+        {watchlist.map(card => <tr key={card.pair}><td><b>{shortPair(card.pair)}</b></td><td className={isBull(card.tradeDirection) ? "positive-text" : "negative-text"}>{isBull(card.tradeDirection) ? "LONG" : isBear(card.tradeDirection) ? "SHORT" : "—"}</td><td>WAITING FOR 4H TRIGGER</td></tr>)}
+      </tbody></table></div> : <div className="empty-card"><span className="empty-symbol">◎</span><div><b>No active thesis waiting for a trigger</b><p>Inactive, vetoed, expired and invalidated states are kept out of the main dashboard.</p></div></div>}
+
     </section>
 
     <section className="section-block">
