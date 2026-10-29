@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 
 from research.validate_kraken_trendlines import fetch_ohlc as fetch_kraken_ohlc
+from research.friday_historical_data import load_seeded_ohlc, merge_ohlc
 
 # Space request starts to stay conservative with Kraken's public API rate limits.
 MIN_PUBLIC_REQUEST_INTERVAL_SECONDS = 1.1
@@ -73,38 +74,72 @@ def _resolve_kraken_usdt_pair(symbol: str) -> str:
     if quote is None:
         raise RuntimeError(f"Unsupported quote asset for pair: {symbol}")
 
-    def find_pair(requested_quote: str) -> str | None:
-        requested_base = canonical[:-len(quote)] if quote else canonical
+    requested_base = canonical[:-len(quote)] if quote else canonical
+
+    def find_pair(requested_quote: str) -> tuple[str, str, str] | None:
         for pair_id, details in pairs.items():
             if not isinstance(details, dict):
                 continue
-            altname = str(details.get("altname", ""))
-            wsname = str(details.get("wsname", ""))
+            altname = str(details.get("altname", "")).upper()
+            wsname = str(details.get("wsname", "")).upper()
             base_quote = wsname.split("/", 1) if "/" in wsname else ("", "")
-            base = base_quote[0]
-            actual_quote = base_quote[1].upper()
-            if (_normalise_pair(base) == _normalise_pair(requested_base)
-                    and actual_quote == requested_quote
-                    and (altname.upper().endswith(requested_quote)
-                         or wsname.upper().endswith("/" + requested_quote))):
-                return altname or str(pair_id)
+            ws_base, ws_quote = base_quote
+            # Kraken's REST catalogue can expose native asset IDs, alt names and
+            # WebSocket names that differ. Check both human-readable and altname
+            # forms, while matching the quote exactly (not by suffix alone).
+            alt_base = altname[:-len(requested_quote)] if altname.endswith(requested_quote) else ""
+            bases = {_normalise_pair(value) for value in (ws_base, alt_base) if value}
+            actual_quote = ws_quote if ws_quote else (
+                requested_quote if altname.endswith(requested_quote) else ""
+            )
+            if _normalise_pair(requested_base) in bases and actual_quote == requested_quote:
+                return (altname or str(pair_id), str(pair_id), wsname)
         return None
 
-    resolved = find_pair(quote)
-    if resolved is None and quote == "USDT":
+    match = find_pair(quote)
+    resolved_quote = quote
+    if match is None and quote == "USDT":
         base = canonical[:-4]
-        # USD is permitted only for these structural-thesis markets. It is not
-        # a general quote substitution and is never used for execution orders.
-        if base in {"HYPE", "SUI", "ZEC", "NEAR", "UNI"}:
-            resolved = find_pair("USD")
-            if resolved:
+        # USD fallback is for FRIDAY's fixed research universe only. It is for
+        # structural analysis, never order routing; the source quote is surfaced.
+        if base in {
+            "XBT", "ETH", "SOL", "XRP", "ADA", "AVAX", "BNB", "VIRTUAL",
+            "HYPE", "XDG", "LINK", "ZEC", "NEAR", "SUI", "UNI",
+        }:
+            match = find_pair("USD")
+            if match:
+                resolved_quote = "USD"
                 print(
                     f"WARNING: No USDT market on Kraken for {base}. "
-                    f"Falling back to {base}USD for structural analysis only.",
+                    f"Falling back to {match[0]} ({match[2] or 'pair name unavailable'}) "
+                    "for structural analysis only; no execution orders use this pair.",
                     flush=True,
                 )
-    if resolved is None:
+    if match is None:
+        if canonical in {"UNIUSDT", "ZECUSDT"}:
+            candidates = []
+            for pair_id, details in pairs.items():
+                if not isinstance(details, dict):
+                    continue
+                altname = str(details.get("altname", ""))
+                wsname = str(details.get("wsname", ""))
+                if requested_base in altname.upper() or requested_base in wsname.upper():
+                    candidates.append(
+                        f"{pair_id}(altname={altname},wsname={wsname})"
+                    )
+            print(
+                f"[KRAKEN PAIR RESOLUTION] requested={canonical} "
+                f"catalogue_candidates={candidates[:20]}",
+                flush=True,
+            )
         raise RuntimeError(f"Unknown asset pair: {symbol}")
+    resolved, pair_id, wsname = match
+    if canonical in {"UNIUSDT", "ZECUSDT"}:
+        print(
+            f"[KRAKEN PAIR RESOLUTION] requested={canonical} pair_id={pair_id} "
+            f"altname={resolved} wsname={wsname or 'n/a'} quote={resolved_quote}",
+            flush=True,
+        )
     with _pair_cache_lock:
         _pair_cache[canonical] = resolved
     return resolved
@@ -181,23 +216,35 @@ def _fetch_kraken(pair: str, interval: int) -> pd.DataFrame:
     return frame
 
 def fetch_ohlc(pair: str = "XBTUSDT", interval: int = 240) -> pd.DataFrame:
-    """Fetch Kraken USDT OHLC; targeted markets may aggregate complete 4H bars to 1D.
+    """Fetch Kraken candles, extending the 720-row REST window with persisted bulk history.
 
-    Binance is intentionally not used as a fallback. Aggregation is only attempted
-    for the known coverage-problem markets and never relaxes weekly/daily minimums.
+    The compact persisted seed covers daily and weekly structural analysis. Live
+    REST candles are merged on timestamp (live wins) so the last completed bars
+    stay current. The cache is never used for 4H execution timing.
     """
     symbol = pair.upper().strip()
     canonical = _normalise_pair(symbol)
+    cached = load_seeded_ohlc(canonical, interval) if interval in {1440, 10080} else pd.DataFrame()
     try:
         frame = _fetch_kraken(symbol, interval)
+        if not cached.empty:
+            frame = merge_ohlc(cached, frame)
         if interval == 1440 and canonical in TARGETED_RESAMPLE_PAIRS and len(frame) < 50:
             four_hour = _fetch_kraken(symbol, 240)
             aggregated = aggregate_ohlc(four_hour, 240, 1440)
             if len(aggregated) > len(frame):
-                return aggregated
+                return merge_ohlc(cached, aggregated) if not cached.empty else aggregated
         return frame
     except (RuntimeError, requests.RequestException, ValueError) as exc:
+        if not cached.empty:
+            cached.attrs["source"] = "Kraken downloadable historical OHLCVT (persisted seed; REST refresh unavailable)"
+            print(
+                f"[FRIDAY HISTORY] {canonical} interval={interval}m using "
+                f"{len(cached)} persisted bulk candles; live refresh failed: {exc}",
+                flush=True,
+            )
+            return cached
         raise RuntimeError(
-            f"UNAVAILABLE — NO KRAKEN USDT OHLC HISTORY: {symbol} "
+            f"UNAVAILABLE — NO KRAKEN OHLC HISTORY: {symbol} "
             f"(interval={interval}m); detail: {exc}"
         ) from exc
