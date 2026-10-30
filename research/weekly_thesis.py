@@ -230,6 +230,7 @@ def evaluate_sheldon_thesis(
             reason=(f"Need at least 50 completed weekly and 50 completed daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
             weekly_close=wc, weekly_candle_time_utc=weekly_candle_time,
+            weekly_ema_period=weekly_ema_period,
             daily_close=dc, daily_candle_time_utc=daily_candle_time,
             data_source_weekly=str(weekly_raw.attrs.get("source", "unknown")),
             data_source_daily=str(daily_raw.attrs.get("source", "unknown")),
