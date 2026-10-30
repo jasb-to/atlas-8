@@ -87,6 +87,8 @@ export default function Home() {
     const scan = scanByPair.get(pair);
     // Strictly display persisted thesis values; missing snapshots remain visible as missing.
     const macroRegime = String(thesis.macro_regime ?? "UNKNOWN").toUpperCase();
+    const macroEmaPeriod = Number(thesis.weekly_ema_period) || null;
+    const macroLabel = `${macroRegime}${macroEmaPeriod ? ` (${macroEmaPeriod}w)` : ""}`;
     const waveState = String(thesis.wave_state ?? "UNKNOWN").toUpperCase();
     const tradeDirection = String(thesis.direction ?? "UNKNOWN").toUpperCase();
     const thesisStatus = record ? String(thesis.status ?? "UNKNOWN").toLowerCase() : "missing";
@@ -100,7 +102,7 @@ export default function Home() {
     // Keep the timeframes explicitly mapped to their own persisted close fields.
     const weeklyClose = thesis.weekly_close;
     const dailyClose = thesis.daily_close;
-    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, weeklyClose, dailyClose, macroRegime, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
+    return { pair, thesis, scan, recordType, sourceWeekly, sourceDaily, quoteCurrency, weeklyClose, dailyClose, macroRegime, macroLabel, macroEmaPeriod, waveLabel, dailyAlignment, active, thesisStatus, tradeDirection };
   }).sort((a, b) => {
     const rank = (status: string) => status === "active" ? 0 : status === "veto" ? 1 : 2;
     return rank(a.thesisStatus) - rank(b.thesisStatus) || a.pair.localeCompare(b.pair);
@@ -135,7 +137,7 @@ export default function Home() {
 
           return <article className="thesis-card" key={card.pair}>
             <div className="thesis-top"><b>{shortPair(card.pair)}</b><span className={card.active ? "pill positive" : card.thesisStatus === "veto" ? "pill negative" : "pill neutral"}>{statusLabel}</span></div>
-            <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroRegime}</b></div>
+            <div className="thesis-row"><span>MACRO</span><b className={macroBull ? "positive-text" : macroBear ? "negative-text" : ""}>{card.macroLabel}</b></div>
             <div className="thesis-row"><span>WAVE</span><b className={dirBear ? "negative-text" : dirBull ? "positive-text" : ""}>{card.waveLabel}</b></div>
             <div className="thesis-row"><span>WEEKLY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.weeklyClose)} {card.quoteCurrency}</b></div>
             <div className="thesis-row"><span>DAILY CLOSE ({card.quoteCurrency})</span><b>{fmtPrice(card.dailyClose)} {card.quoteCurrency}</b></div>
