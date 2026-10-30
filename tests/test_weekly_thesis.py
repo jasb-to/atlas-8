@@ -9,7 +9,7 @@ from research.weekly_thesis import calculate_stoch_rsi, evaluate_sheldon_thesis
 SCHEMA = {
     "pair", "status", "direction", "macro_regime", "wave_state",
     "momentum_bearish", "momentum_bullish", "weekly_close", "weekly_ema8",
-    "weekly_ema21", "weekly_ema200", "weekly_stoch_k", "weekly_stoch_d",
+    "weekly_ema21", "weekly_ema200", "weekly_macro_ema", "weekly_ema_period", "weekly_stoch_k", "weekly_stoch_d",
     "weekly_macd_histogram", "weekly_candle_time_utc", "daily_close", "daily_candle_time_utc", "daily_ema8", "daily_ema21",
     "daily_ema50", "daily_stoch_k", "daily_stoch_d", "daily_alignment",
     "weekly_stoch_cross", "weekly_stoch_aligned", "data_source_weekly", "data_source_daily",
@@ -33,8 +33,8 @@ class WeeklyThesisTests(unittest.TestCase):
             "close": np.linspace(100, 150, 100),
         })
         weekly = pd.DataFrame({
-            "timestamp": pd.date_range(end="2026-10-18", periods=100, freq="7D", tz="UTC"),
-            "close": np.linspace(100, 150, 100),
+            "timestamp": pd.date_range(end="2026-10-18", periods=30, freq="7D", tz="UTC"),
+            "close": np.linspace(100, 150, 30),
         })
         result = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
@@ -42,7 +42,7 @@ class WeeklyThesisTests(unittest.TestCase):
         self.assertEqual(result["status"], "insufficient_data")
         self.assertIsNone(result["direction"])
         self.assertEqual(set(result), SCHEMA)
-        self.assertIn("weekly=100, daily=100", result["reason"])
+        self.assertIn("weekly=30, daily=100", result["reason"])
 
     def test_open_candles_are_not_used_and_schema_is_flat(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
@@ -67,7 +67,7 @@ class WeeklyThesisTests(unittest.TestCase):
             self.assertEqual(result_with_open[key], result_without_open[key], key)
 
 
-    def test_history_boundary_requires_200_weekly_and_50_daily_candles(self):
+    def test_199_weeks_uses_150_week_ema_and_50_daily_candles(self):
         as_of = pd.Timestamp("2026-10-25T12:00:00Z")
         daily_times = pd.date_range(end="2026-10-24", periods=60, freq="D", tz="UTC")
         weekly_times = pd.date_range(end="2026-10-18", periods=200, freq="7D", tz="UTC")
@@ -78,8 +78,9 @@ class WeeklyThesisTests(unittest.TestCase):
         boundary = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly.iloc[:-1], daily_candles=daily, as_of=as_of
         )
-        self.assertEqual(boundary["status"], "insufficient_data")
-        self.assertIn("weekly=199", boundary["reason"])
+        self.assertEqual(boundary["weekly_ema_period"], 150)
+        self.assertNotEqual(boundary["status"], "insufficient_data", boundary["reason"])
+        self.assertIn("150", str(boundary["weekly_ema_period"]))
         enough = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
         )
