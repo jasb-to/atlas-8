@@ -133,6 +133,14 @@ class SupabaseFridayStore:
                 return bool(existing and existing[0].get("status") != "sent")
             raise
 
+    def claim_alert_permanent(self, alert_key: str) -> bool:
+        """Atomically claim an alert key forever; existing claims are never reclaimed."""
+        result = self._request(
+            "POST", "alerts_sent", payload={"alert_key": alert_key},
+            prefer="resolution=ignore-duplicates,return=representation",
+        )
+        return bool(result)
+
     def finish_alert(self, alert_key: str, *, status: str,
                      message_id: int | None = None, error: str | None = None) -> None:
         self._request("PATCH", ALERTS_TABLE, params={"alert_key": f"eq.{alert_key}"},
@@ -296,6 +304,10 @@ class UpstashFridayStore:
             return True
         return False
 
+    def claim_alert_permanent(self, alert_key: str) -> bool:
+        """Use non-expiring Redis set membership as the permanent claim."""
+        return int(self._command("SADD", "alerts_perm", alert_key) or 0) == 1
+
     def finish_alert(self, alert_key: str, *, status: str,
                      message_id: int | None = None, error: str | None = None) -> None:
         key = f"FRIDAY:alert:{alert_key}"
@@ -323,6 +335,21 @@ class RepoFolderFridayStore:
         from pathlib import Path
         self.root = Path(root or os.getenv("FRIDAY_REPO_DATA_DIR", "testing/friday/data"))
         self.root.mkdir(parents=True, exist_ok=True)
+
+    def claim_alert_permanent(self, alert_key: str) -> bool:
+        """Persist a permanent test-backend claim across store instances."""
+        path = self.root / "alerts_perm.json"
+        try:
+            claims = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+        except (OSError, json.JSONDecodeError):
+            claims = []
+        if alert_key in claims:
+            return False
+        claims.append(alert_key)
+        temporary = path.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(claims, indent=2) + "\n", encoding="utf-8")
+        temporary.replace(path)
+        return True
 
     @property
     def configured(self) -> bool:
