@@ -124,6 +124,8 @@ def _flat_result(
     weekly_ema8: float | None = None,
     weekly_ema21: float | None = None,
     weekly_ema200: float | None = None,
+    weekly_macro_ema: float | None = None,
+    weekly_ema_period: int | None = None,
     weekly_stoch_k: float | None = None,
     weekly_stoch_d: float | None = None,
     weekly_macd_histogram: float | None = None,
@@ -159,6 +161,8 @@ def _flat_result(
         "weekly_ema8": weekly_ema8,
         "weekly_ema21": weekly_ema21,
         "weekly_ema200": weekly_ema200,
+        "weekly_macro_ema": weekly_macro_ema,
+        "weekly_ema_period": weekly_ema_period,
         "weekly_stoch_k": weekly_stoch_k,
         "weekly_stoch_d": weekly_stoch_d,
         "weekly_macd_histogram": weekly_macd_histogram,
@@ -199,7 +203,7 @@ def evaluate_sheldon_thesis(
 ) -> dict[str, Any]:
     """Evaluate the 3-State Wave Model using completed weekly/daily candles only.
 
-    Macro regime is weekly close versus EMA 200. Weekly momentum is Stoch RSI
+    Macro regime uses the longest supported weekly EMA (200/150/100/50). Weekly momentum is Stoch RSI
     K/D with MACD histogram as an alternative signal. Bullish macro + bearish
     momentum is a SHORT pullback; bearish macro + bullish momentum is a LONG
     pullback. Daily close versus EMA 50 is the direction veto.
@@ -219,10 +223,11 @@ def evaluate_sheldon_thesis(
     dc = _number(daily["close"].iloc[-1]) if not daily.empty else None
     weekly_candle_time = weekly["timestamp"].iloc[-1].isoformat() if not weekly.empty else None
     daily_candle_time = daily["timestamp"].iloc[-1].isoformat() if not daily.empty else None
-    if len(weekly) < 200 or len(daily) < 50:
+    weekly_ema_period = next((period for period in (200, 150, 100, 50) if len(weekly) >= period), None)
+    if weekly_ema_period is None or len(daily) < 50:
         return _flat_result(
             pair, status="insufficient_data", direction=None,
-            reason=(f"Need at least 200 completed weekly and 50 completed daily candles; "
+            reason=(f"Need at least 50 completed weekly and 50 completed daily candles; "
                     f"available weekly={len(weekly)}, daily={len(daily)}."),
             weekly_close=wc, weekly_candle_time_utc=weekly_candle_time,
             daily_close=dc, daily_candle_time_utc=daily_candle_time,
@@ -235,7 +240,8 @@ def evaluate_sheldon_thesis(
     daily_close = daily["close"].astype(float)
     weekly_ema8 = weekly_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     weekly_ema21 = weekly_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
-    weekly_ema200 = weekly_close.ewm(span=200, adjust=False, min_periods=200).mean()
+    weekly_macro_ema_series = weekly_close.ewm(span=weekly_ema_period, adjust=False, min_periods=weekly_ema_period).mean()
+    weekly_ema200 = weekly_close.ewm(span=200, adjust=False, min_periods=200).mean() if weekly_ema_period == 200 else None
     daily_ema8 = daily_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     daily_ema21 = daily_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
     daily_ema50 = daily_close.ewm(span=50, adjust=False, min_periods=50).mean()
@@ -245,7 +251,8 @@ def evaluate_sheldon_thesis(
 
     w_close = float(weekly_close.iloc[-1])
     w_ema8, w_ema21 = _number(weekly_ema8.iloc[-1]), _number(weekly_ema21.iloc[-1])
-    w_ema200 = _number(weekly_ema200.iloc[-1])
+    w_ema200 = _number(weekly_ema200.iloc[-1]) if weekly_ema200 is not None else None
+    w_macro_ema = _number(weekly_macro_ema_series.iloc[-1])
     d_close = float(daily_close.iloc[-1])
     d_ema8, d_ema21 = _number(daily_ema8.iloc[-1]), _number(daily_ema21.iloc[-1])
     d_ema50 = _number(daily_ema50.iloc[-1])
@@ -264,7 +271,8 @@ def evaluate_sheldon_thesis(
             pair, status=status, direction=direction, reason=reason,
             weekly_close=w_close, weekly_candle_time_utc=weekly_candle_time,
             weekly_ema8=w_ema8, weekly_ema21=w_ema21,
-            weekly_ema200=w_ema200, weekly_stoch_k=w_k, weekly_stoch_d=w_d,
+            weekly_ema200=w_ema200, weekly_macro_ema=w_macro_ema,
+            weekly_ema_period=weekly_ema_period, weekly_stoch_k=w_k, weekly_stoch_d=w_d,
             weekly_macd_histogram=w_macd_hist,
             daily_close=d_close, daily_candle_time_utc=daily_candle_time,
             daily_ema8=d_ema8, daily_ema21=d_ema21,
@@ -279,12 +287,12 @@ def evaluate_sheldon_thesis(
             quote_currency=str(weekly_raw.attrs.get("quote_currency", "USDT")),
         )
 
-    if None in (w_ema200, d_ema50, w_macd_hist):
+    if None in (w_macro_ema, d_ema50, w_macd_hist):
         return result("insufficient_data", None,
-                      "Weekly EMA 200, Stoch RSI/MACD, or daily EMA 50 is not valid.")
+                      f"Weekly EMA {weekly_ema_period}, Stoch RSI/MACD, or daily EMA 50 is not valid.")
 
-    macro_bull = w_close > w_ema200
-    macro_bear = w_close < w_ema200
+    macro_bull = w_close > w_macro_ema
+    macro_bear = w_close < w_macro_ema
     if not macro_bull and not macro_bear:
         return result("inactive", None, "Weekly close equals the 200 EMA; no macro regime.")
 
