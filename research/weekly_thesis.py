@@ -242,7 +242,8 @@ def evaluate_sheldon_thesis(
     weekly_ema8 = weekly_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     weekly_ema21 = weekly_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
     weekly_macro_ema_series = weekly_close.ewm(span=weekly_ema_period, adjust=False, min_periods=weekly_ema_period).mean()
-    weekly_ema200 = weekly_close.ewm(span=200, adjust=False, min_periods=200).mean() if weekly_ema_period == 200 else None
+    # Preserve the legacy field as an alias; do not calculate the 200 EMA twice.
+    weekly_ema200 = weekly_macro_ema_series if weekly_ema_period == 200 else None
     daily_ema8 = daily_close.ewm(span=EMA_FAST_LENGTH, adjust=False, min_periods=EMA_FAST_LENGTH).mean()
     daily_ema21 = daily_close.ewm(span=EMA_SLOW_LENGTH, adjust=False, min_periods=EMA_SLOW_LENGTH).mean()
     daily_ema50 = daily_close.ewm(span=50, adjust=False, min_periods=50).mean()
