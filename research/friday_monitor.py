@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import sys
 import traceback
@@ -540,11 +541,25 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                         })
                         continue
                     alert_timestamp = event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")
-                    alert_key = row_event["event_key"] + f":telegram:{alert_type}:{alert_timestamp}"
-                    claimed = store.claim_alert(
-                        alert_key=alert_key, pair=pair, alert_type=alert_type,
-                        signal_time=(event.get("continuation_add_time") if fresh_entry2 else event.get("signal_time")),
-                    )
+                    event_type = event.get("event_add") or event.get("event") or alert_type
+                    alert_key = f"{pair}:{direction}:{alert_timestamp}:{event_type}"
+                    current_price = float(result.get("last_close")) if result.get("last_close") is not None else float("nan")
+                    entry_price = float(event.get("close_at_break")) if event.get("close_at_break") is not None else float("nan")
+                    atr_raw = (result.get("current_indicators") or {}).get("atr14")
+                    try:
+                        atr = float(atr_raw)
+                    except (TypeError, ValueError):
+                        atr = float("nan")
+                    if not all(math.isfinite(value) for value in (current_price, entry_price, atr)) or atr <= 0:
+                        print(f"ALERT_SKIPPED_NO_ATR {pair}", flush=True)
+                        row["alert_results"].append({"type": alert_type, "sent": False, "status": "alert_skipped_no_atr"})
+                        continue
+                    distance = abs(current_price - entry_price)
+                    if distance > atr:
+                        print(f"ALERT_STALE_ENTRY {pair} entry={entry_price} current={current_price} atr={atr}", flush=True)
+                        row["alert_results"].append({"type": alert_type, "sent": False, "status": "alert_stale_entry"})
+                        continue
+                    claimed = store.claim_alert_permanent(alert_key=alert_key)
                     if not claimed:
                         row["alert_results"].append({
                             "type": alert_type, "sent": False, "status": "duplicate_suppressed",
@@ -554,6 +569,8 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                     alert_event["paper_stop"] = float(stop)
                     alert_event["paper_target"] = float(target)
                     alert_event["paper_reward_risk"] = round(rr, 3)
+                    alert_event["current_price"] = current_price
+                    alert_event["distance_from_entry_pct"] = ((current_price - entry_price) / entry_price * 100.0) if entry_price else None
                     if fresh_entry2:
                         alert_event["event_add"] = "CONTINUATION_ADD_CONFIRMED"
                         alert_event["continuation_add_time"] = event["continuation_add_time"]
@@ -631,11 +648,8 @@ def run_monitor(pairs: list[str], output_dir: str, *, dry_run: bool = False) -> 
                             strategy_version="friday-stoch-rsi-structural-reversal-v1",
                         ))
                         if ai_pass:
-                            alert_key = reversal_row["event_key"] + ":telegram:REVERSAL:" + str(reversal.get("signal_time"))
-                            claimed = store.claim_alert(
-                                alert_key=alert_key, pair=pair, alert_type="MOMENTUM_REVERSAL",
-                                signal_time=reversal.get("signal_time"),
-                            )
+                            alert_key = f"{pair}:{str(reversal.get('direction', '')).lower()}:{reversal.get('signal_time')}:MOMENTUM_REVERSAL_CANDIDATE"
+                            claimed = store.claim_alert_permanent(alert_key=alert_key)
                             if claimed:
                                 from research.friday_alerts import build_momentum_reversal_alert
                                 try:
