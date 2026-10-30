@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS alerts_sent (
+  alert_key TEXT PRIMARY KEY,
+  claimed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
