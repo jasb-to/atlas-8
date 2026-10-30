@@ -102,6 +102,7 @@ def build_signal_alert(
         f"🛑 Stop Loss: {_fmt_price(stop_value)}",
         f"💰 TP1: {_fmt_price(tp1)} (1.5R)",
         f"💰 TP2: {_fmt_price(target_value)} ({tp2_rr:.1f}R)",
+        *([f"📊 Current: {_fmt_price(event.get('current_price'))} ({float(event.get('distance_from_entry_pct')):+.2f}% from entry)"] if event.get("current_price") is not None and event.get("distance_from_entry_pct") not in (None, 0, 0.0, "") else []),
         "",
         f"🧠 Why: {why}",
         "",
