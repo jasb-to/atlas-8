@@ -34,7 +34,7 @@ class WeeklyThesisTests(unittest.TestCase):
         })
         weekly = pd.DataFrame({
             "timestamp": pd.date_range(end="2026-10-18", periods=30, freq="7D", tz="UTC"),
-            "close": np.linspace(100, 150, 100),
+            "close": np.linspace(100, 150, 30),
         })
         result = evaluate_sheldon_thesis(
             "XBTUSDT", weekly_candles=weekly, daily_candles=daily, as_of=as_of
