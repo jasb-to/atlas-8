@@ -1,0 +1,37 @@
+{
+  "run_id": "0751d96e-2d56-44cd-ade4-655682756caf",
+  "pair": "ADAUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-25T12:51:43.048889+00:00",
+  "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+  "last_close": 0.205055,
+  "latest_setup_state": "INVALIDATED",
+  "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_STRUCTURE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "error",
+  "ai_review_latency_ms": 234,
+  "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+  "ai_review_error_category": "quota_or_billing",
+  "ai_model_id": "openai/gpt-oss-120b:cheapest",
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 29,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "SCAN",
+      "sent": false,
+      "status": "no_actionable_signal",
+      "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=INVALIDATED; execution_blockers=none"
+    }
+  ],
+  "market_finished_at": "2026-10-25T12:51:54.459823+00:00",
+  "duration_seconds": 11.411,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}

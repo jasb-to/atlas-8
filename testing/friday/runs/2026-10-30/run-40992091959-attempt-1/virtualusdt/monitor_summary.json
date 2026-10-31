@@ -1,0 +1,44 @@
+{
+  "run_id": "b549bdbc-bc23-4d32-b381-cbd3959a8325",
+  "pair": "VIRTUALUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-30T02:32:38.953884+00:00",
+  "last_completed_candle_utc": "2026-10-29T20:00:00+00:00",
+  "last_close": 0.5829,
+  "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+  "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_MAJOR_MOVE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "disabled",
+  "ai_provider": null,
+  "ai_review_latency_ms": 0,
+  "ai_review_error": null,
+  "ai_review_error_category": null,
+  "ai_model_id": null,
+  "ai_review_assessment": null,
+  "reversal_context": "possible_bearish_turn",
+  "break_event_count": 11,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "blocked_trade_plan",
+      "reason": "entry-adjusted structural plan failed geometry or 1.5R minimum"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "structural plan failed entry geometry or minimum 1.5R"
+    }
+  ],
+  "market_finished_at": "2026-10-30T02:32:48.615720+00:00",
+  "duration_seconds": 9.662,
+  "alert_outcomes_total": 2,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 2
+}
