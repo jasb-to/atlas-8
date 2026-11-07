@@ -1,0 +1,39 @@
+{
+  "run_id": "a6e63781-d11c-43f5-b0a2-d47fbd6fa450",
+  "pair": "VIRTUALUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-30T11:12:49.442530+00:00",
+  "last_completed_candle_utc": "2026-10-30T04:00:00+00:00",
+  "last_close": 0.5801,
+  "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+  "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
+  "friday_decision": "WATCHING",
+  "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "multitimeframe_state": "WATCH_MAJOR_MOVE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "disabled",
+  "ai_provider": null,
+  "ai_review_latency_ms": 0,
+  "ai_review_error": null,
+  "ai_review_error_category": null,
+  "ai_model_id": null,
+  "ai_review_assessment": null,
+  "reversal_context": "possible_bearish_turn",
+  "break_event_count": 11,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "not_sent_break_no_longer_fresh",
+      "signal_time": "2026-10-29T20:00:00+00:00",
+      "reason": "Break candle 2026-10-29T20:00:00+00:00 is older than the latest completed candle 2026-10-30T04:00:00+00:00; FRIDAY only sends Entry 1 alerts on the break candle, so it will not send a delayed entry. Retest is held and continuation is still pending."
+    }
+  ],
+  "market_finished_at": "2026-10-30T11:13:01.156387+00:00",
+  "duration_seconds": 11.714,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}

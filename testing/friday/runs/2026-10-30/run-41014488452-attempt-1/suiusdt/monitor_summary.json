@@ -1,0 +1,56 @@
+{
+  "run_id": "da4885dc-ddba-40e6-bd20-4bf59d966fc9",
+  "pair": "SUIUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-30T06:33:22.246872+00:00",
+  "last_completed_candle_utc": "2026-10-30T00:00:00+00:00",
+  "last_close": 0.8824,
+  "latest_setup_state": "INVALIDATED",
+  "latest_setup_message": "The breakout failed its close-based invalidation rule.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_MAJOR_MOVE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "disabled",
+  "ai_provider": null,
+  "ai_review_latency_ms": 0,
+  "ai_review_error": null,
+  "ai_review_error_category": null,
+  "ai_model_id": null,
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 52,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "blocked_trade_plan",
+      "reason": "entry-adjusted structural plan failed geometry or 1.5R minimum"
+    },
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "blocked_trade_plan",
+      "reason": "entry-adjusted structural plan failed geometry or 1.5R minimum"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "structural plan failed entry geometry or minimum 1.5R"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "structural plan failed entry geometry or minimum 1.5R"
+    }
+  ],
+  "market_finished_at": "2026-10-30T06:33:33.846456+00:00",
+  "duration_seconds": 11.6,
+  "alert_outcomes_total": 4,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 4
+}

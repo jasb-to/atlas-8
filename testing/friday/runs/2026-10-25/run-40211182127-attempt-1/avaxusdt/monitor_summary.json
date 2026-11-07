@@ -1,0 +1,38 @@
+{
+  "run_id": "9899607e-ead7-480a-8f50-906177dc782d",
+  "pair": "AVAXUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-25T16:21:24.951758+00:00",
+  "last_completed_candle_utc": "2026-10-25T12:00:00+00:00",
+  "last_close": 8.913,
+  "latest_setup_state": "CONTINUATION_ADD_CONFIRMED",
+  "latest_setup_message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order.",
+  "friday_decision": "FIB_REACTION_CANDIDATE",
+  "friday_decision_reason": "Confirmed long impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+  "scan_diagnostic": "Confirmed long impulse; 0.382 retracement touched and reclaimed/rejected with structural or sweep evidence and bounded invalidation. This is contextual evidence only; the separate trendline break \u2192 retest \u2192 continuation lifecycle must confirm any actionable entry.",
+  "multitimeframe_state": "WATCH_STRUCTURE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "error",
+  "ai_review_latency_ms": 184,
+  "ai_review_error": "Vercel review proxy HTTP 502: Groq returned HTTP 429",
+  "ai_review_error_category": "rate_limit_or_quota",
+  "ai_model_id": "openai/gpt-oss-120b",
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 34,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "ENTRY_2",
+      "sent": false,
+      "status": "not_sent_continuation_no_longer_fresh",
+      "signal_time": "2026-10-25T08:00:00+00:00",
+      "reason": "Continuation candle 2026-10-25T08:00:00+00:00 is older than the latest completed candle 2026-10-25T12:00:00+00:00; FRIDAY does not send delayed Entry 2 alerts. The historical continuation remains in the ledger, but is not a fresh entry."
+    }
+  ],
+  "market_finished_at": "2026-10-25T16:21:33.368918+00:00",
+  "duration_seconds": 8.417,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}
