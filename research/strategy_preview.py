@@ -145,10 +145,11 @@ def write_jsonl(path, rows):
         encoding="utf-8",
     )
 
-def causal_replay(raw):
+def causal_replay(raw, *, record_state_history=False):
     frame = indicators(raw.sort_values("timestamp").reset_index(drop=True))
     events, active = [], []
     seen_keys = set()
+    state_history = []
     status={"state":"no_qualifying_line","message":"No recent three-touch line within 2.5% of close."}
     for i in range(max(90, LOOKBACK//2), len(frame)):
         start=max(0, i-LOOKBACK+1)
@@ -264,6 +265,15 @@ def causal_replay(raw):
             elif age>=RETEST_BARS and not e.get("retest_confirmed"):
                 e.update({"outcome":"no_retest_within_window","outcome_bars":age})
                 active.remove(a)
+        if record_state_history:
+            # Snapshot the lifecycle as known at this candle; copy the event so
+            # later terminal outcomes cannot rewrite earlier historical states.
+            current_time = frame.iloc[i].timestamp
+            latest_event = max(events, key=lambda item: pd.Timestamp(item["signal_time"])) if events else None
+            state_history.append({
+                "timestamp": current_time.isoformat(),
+                **latest_setup_state([dict(latest_event)] if latest_event else [], current_time),
+            })
     for e in events:
         matches=frame.index[frame.timestamp == pd.Timestamp(e["signal_time"])]
         if not len(matches): continue
@@ -277,6 +287,8 @@ def causal_replay(raw):
                     e[f"forward_{h}_bar_return_pct"]=round(ret*100,4)
                     e[f"forward_{h}_bar_end_time"]=frame.iloc[end].timestamp.isoformat()
         e["forward_returns_note"]="Raw directional close-to-close diagnostic for pending events only; no fees, slippage, stops or sizing."
+    if record_state_history:
+        return events, status, frame, state_history
     return events,status,frame
 
 def entry2_replay_events(events):

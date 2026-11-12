@@ -111,6 +111,24 @@ class StrategyPreviewTests(unittest.TestCase):
         self.assertIn("macd_histogram", context)
 
 
+    def test_causal_replay_can_record_point_in_time_setup_states(self):
+        n = 100
+        frame = pd.DataFrame({
+            "timestamp": pd.date_range("2026-10-01", periods=n, freq="4h", tz="UTC"),
+            "open": [100.0 + i * 0.1 for i in range(n)],
+            "high": [101.0 + i * 0.1 for i in range(n)],
+            "low": [99.0 + i * 0.1 for i in range(n)],
+            "close": [100.5 + i * 0.1 for i in range(n)],
+            "volume": [1000.0] * n,
+        })
+        with (patch("research.strategy_preview.find_wick_pivots", return_value=[]),
+              patch("research.strategy_preview.fit_touch_trendlines", return_value=[])):
+            events, _status, enriched, history = causal_replay(frame, record_state_history=True)
+        self.assertEqual(events, [])
+        self.assertEqual(len(history), n - 90)
+        self.assertEqual(history[-1]["timestamp"], enriched.iloc[-1].timestamp.isoformat())
+        self.assertEqual(history[-1]["state"], "NO_SETUP")
+
     def test_live_preview_does_not_retain_stale_line_when_latest_has_none(self):
         n = 100
         frame = pd.DataFrame({
