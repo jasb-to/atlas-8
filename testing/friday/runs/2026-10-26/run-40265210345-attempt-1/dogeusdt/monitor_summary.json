@@ -1,0 +1,51 @@
+{
+  "run_id": "17b67c9e-2719-4b20-8d0b-4918799e365a",
+  "pair": "DOGEUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-26T03:41:57.727267+00:00",
+  "last_completed_candle_utc": "2026-10-25T20:00:00+00:00",
+  "last_close": 0.07699,
+  "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+  "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
+  "friday_decision": "WATCHING",
+  "friday_decision_reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "scan_diagnostic": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete.",
+  "multitimeframe_state": "WATCH_STRUCTURE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "disabled",
+  "ai_provider": null,
+  "ai_review_latency_ms": 0,
+  "ai_review_error": null,
+  "ai_review_error_category": null,
+  "ai_model_id": null,
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 33,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "filtered",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "not_sent_break_no_longer_fresh",
+      "signal_time": "2026-10-25T16:00:00+00:00",
+      "reason": "Break candle 2026-10-25T16:00:00+00:00 is older than the latest completed candle 2026-10-25T20:00:00+00:00; the retest is held but continuation has not been confirmed. No delayed Entry 1 alert is sent; wait for a fresh continuation signal."
+    }
+  ],
+  "market_finished_at": "2026-10-26T03:42:08.951783+00:00",
+  "duration_seconds": 11.225,
+  "alert_outcomes_total": 3,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 3
+}

@@ -1,0 +1,113 @@
+{
+  "pair": "LINKUSDT",
+  "strategy": "daily-thesis-4h-execution-v1",
+  "generated_at_utc": "2026-11-05T20:00:02.480423+00:00",
+  "state": "WATCH_STRUCTURE",
+  "thesis_direction": "bearish",
+  "daily_thesis": {
+    "timeframe": "1D",
+    "state": "bearish",
+    "last_closed_candle_utc": "2026-11-04T00:00:00+00:00",
+    "close": 11.45516,
+    "ema5": 11.311997842341107,
+    "ema13": 11.50139516330856,
+    "ema8": 11.362184927504954,
+    "ema21": 11.742453613222416,
+    "ema_5_13_spread_pct": -1.6467,
+    "ema_8_21_spread_pct": -3.2384,
+    "stoch_k": 70.102511,
+    "stoch_d": 68.566389,
+    "stoch_cross_up": true,
+    "stoch_cross_down": false,
+    "macd": -0.388831,
+    "macd_signal": -0.386209,
+    "macd_hist": -0.002621,
+    "macd_hist_change": "improving",
+    "volume": 43275.56348658,
+    "volume_vs_20_candle_average": 1.361561,
+    "nearby_trendlines": [
+      {
+        "kind": "resistance",
+        "price": 61.29406,
+        "distance_pct": -81.311,
+        "touches": 3,
+        "start_time": "2020-12-21T00:00:00+00:00",
+        "end_time": "2021-01-02T00:00:00+00:00",
+        "start_price": 8.61598,
+        "end_price": 8.91082,
+        "slope_per_candle": 0.024569999999999908
+      }
+    ],
+    "confirmed_breaks": []
+  },
+  "four_hour_execution": {
+    "timeframe": "4H",
+    "state": "bearish",
+    "last_closed_candle_utc": "2026-11-05T16:00:00+00:00",
+    "close": 10.85558,
+    "ema5": 11.099865882665721,
+    "ema13": 11.206846840410517,
+    "ema8": 11.169876770544812,
+    "ema21": 11.237027142092263,
+    "ema_5_13_spread_pct": -0.9546,
+    "ema_8_21_spread_pct": -0.5976,
+    "stoch_k": 49.049295,
+    "stoch_d": 68.746503,
+    "stoch_cross_up": false,
+    "stoch_cross_down": false,
+    "macd": -0.052611,
+    "macd_signal": -0.031602,
+    "macd_hist": -0.021009,
+    "macd_hist_change": "deteriorating",
+    "volume": 9629.54240007,
+    "volume_vs_20_candle_average": 1.684961,
+    "nearby_trendlines": [
+      {
+        "kind": "support",
+        "price": 7.680095,
+        "distance_pct": 41.347,
+        "touches": 3,
+        "start_time": "2026-07-10T16:00:00+00:00",
+        "end_time": "2026-07-19T20:00:00+00:00",
+        "start_price": 12.10355,
+        "end_price": 11.75992,
+        "slope_per_candle": -0.0062478181818182
+      },
+      {
+        "kind": "support",
+        "price": 5.687952,
+        "distance_pct": 90.852,
+        "touches": 3,
+        "start_time": "2026-07-10T16:00:00+00:00",
+        "end_time": "2026-07-26T12:00:00+00:00",
+        "start_price": 12.10355,
+        "end_price": 11.2427,
+        "slope_per_candle": -0.009061578947368431
+      },
+      {
+        "kind": "resistance",
+        "price": 2.248611,
+        "distance_pct": 382.768,
+        "touches": 3,
+        "start_time": "2026-07-15T04:00:00+00:00",
+        "end_time": "2026-07-22T12:00:00+00:00",
+        "start_price": 13.17603,
+        "end_price": 12.47,
+        "slope_per_candle": -0.016046136363636367
+      }
+    ],
+    "confirmed_breaks": []
+  },
+  "daily_directional_breaks": [],
+  "aligned_4h_breaks": [],
+  "entry1_alert_eligible": false,
+  "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+  "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+  "limitations": [
+    "Research signal only; it never executes trades.",
+    "Indicator confluence is evidence, not a calibrated probability.",
+    "Trendlines are algorithmic candidates and need walk-forward validation.",
+    "Daily context uses only the latest completed daily candle.",
+    "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+  ]
+}

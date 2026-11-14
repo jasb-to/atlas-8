@@ -1,0 +1,1645 @@
+{
+  "mode": "research_preview_no_orders",
+  "source": "Kraken public Spot OHLC API",
+  "pair": "HYPEUSDT",
+  "latest_setup_state": {
+    "direction": "long",
+    "signal_time": "2026-10-20T12:00:00+00:00",
+    "line_kind": "resistance",
+    "line_price_at_break": 78.948,
+    "touch_count": 3,
+    "daily_bias": "bearish",
+    "ema_aligned": false,
+    "momentum_context": {
+      "stoch_bullish_cross": false,
+      "stoch_bearish_cross": false,
+      "macd_bullish_expansion": true,
+      "macd_bearish_expansion": false,
+      "macd_histogram": 0.2007,
+      "macd_histogram_previous": 0.1226
+    },
+    "age_hours": 72.0,
+    "outcome": "continuation_add_confirmed",
+    "state": "CONTINUATION_ADD_CONFIRMED",
+    "retest_confirmed_time": "2026-10-22T16:00:00+00:00",
+    "add_signal_time": "2026-10-23T04:00:00+00:00",
+    "add_close": 78.51,
+    "message": "Retest held, then price closed beyond the retest reaction extreme; continuation add confirmed in research replay, not an order."
+  },
+  "interval_minutes": 240,
+  "generated_at_utc": "2026-10-23T17:40:55.540004+00:00",
+  "completed_candles": 176,
+  "last_completed_candle_utc": "2026-10-23T12:00:00+00:00",
+  "walk_forward_split_time": "2026-10-14T20:00:00+00:00",
+  "last_close": 78.45,
+  "trade_plans": {
+    "long": {
+      "eligible": true,
+      "direction": "long",
+      "entry": 78.45,
+      "atr14": 1.4952535171,
+      "stop": 76.4157119724,
+      "target": 82.54,
+      "target_source": "confirmed_structure",
+      "risk_per_unit": 2.0342880276,
+      "reward_per_unit": 4.09,
+      "reward_risk": 2.0105,
+      "min_reward_risk": 1.5,
+      "fib": {
+        "retracements": {
+          "0.382": 80.28620000000001,
+          "0.5": 79.59,
+          "0.618": 78.8938,
+          "0.786": 77.9026
+        },
+        "extensions": {
+          "1.272": 84.1448,
+          "1.618": 86.18620000000001
+        }
+      },
+      "confirmed_swing_high": {
+        "index": 163,
+        "price": 82.54
+      },
+      "confirmed_swing_low": {
+        "index": 170,
+        "price": 76.64
+      },
+      "blockers": [],
+      "research_only": true
+    },
+    "short": {
+      "eligible": false,
+      "direction": "short",
+      "entry": 78.45,
+      "atr14": 1.4952535171,
+      "stop": 82.7642880276,
+      "target": 77.88,
+      "target_source": "confirmed_structure",
+      "risk_per_unit": 4.3142880276,
+      "reward_per_unit": 0.57,
+      "reward_risk": 0.1321,
+      "min_reward_risk": 1.5,
+      "fib": {
+        "retracements": {
+          "0.382": 78.8938,
+          "0.5": 79.59,
+          "0.618": 80.28620000000001,
+          "0.786": 81.2774
+        },
+        "extensions": {
+          "1.272": 75.0352,
+          "1.618": 72.9938
+        }
+      },
+      "confirmed_swing_high": {
+        "index": 163,
+        "price": 82.54
+      },
+      "confirmed_swing_low": {
+        "index": 170,
+        "price": 76.64
+      },
+      "blockers": [
+        "no_target_meets_minimum_reward_risk",
+        "reward_risk_below_minimum"
+      ],
+      "research_only": true
+    }
+  },
+  "closed_candles": [
+    {
+      "timestamp": "2026-10-07T00:00:00+00:00",
+      "open": 91.97,
+      "high": 92.25,
+      "low": 89.26,
+      "close": 90.8
+    },
+    {
+      "timestamp": "2026-10-07T04:00:00+00:00",
+      "open": 90.81,
+      "high": 91.34,
+      "low": 90.13,
+      "close": 90.85
+    },
+    {
+      "timestamp": "2026-10-07T08:00:00+00:00",
+      "open": 90.83,
+      "high": 91.04,
+      "low": 88.87,
+      "close": 89.08
+    },
+    {
+      "timestamp": "2026-10-07T12:00:00+00:00",
+      "open": 89.09,
+      "high": 89.55,
+      "low": 88.04,
+      "close": 88.57
+    },
+    {
+      "timestamp": "2026-10-07T16:00:00+00:00",
+      "open": 88.56,
+      "high": 89.09,
+      "low": 87.17,
+      "close": 87.35
+    },
+    {
+      "timestamp": "2026-10-07T20:00:00+00:00",
+      "open": 87.35,
+      "high": 88.56,
+      "low": 87.3,
+      "close": 88.54
+    },
+    {
+      "timestamp": "2026-10-08T00:00:00+00:00",
+      "open": 88.54,
+      "high": 88.9,
+      "low": 87.62,
+      "close": 87.78
+    },
+    {
+      "timestamp": "2026-10-08T04:00:00+00:00",
+      "open": 87.78,
+      "high": 87.83,
+      "low": 86.65,
+      "close": 87.25
+    },
+    {
+      "timestamp": "2026-10-08T08:00:00+00:00",
+      "open": 87.26,
+      "high": 87.41,
+      "low": 85.38,
+      "close": 85.41
+    },
+    {
+      "timestamp": "2026-10-08T12:00:00+00:00",
+      "open": 85.41,
+      "high": 86.4,
+      "low": 83.28,
+      "close": 83.38
+    },
+    {
+      "timestamp": "2026-10-08T16:00:00+00:00",
+      "open": 83.39,
+      "high": 84.64,
+      "low": 82.68,
+      "close": 84.2
+    },
+    {
+      "timestamp": "2026-10-08T20:00:00+00:00",
+      "open": 84.2,
+      "high": 84.82,
+      "low": 84.16,
+      "close": 84.23
+    },
+    {
+      "timestamp": "2026-10-09T00:00:00+00:00",
+      "open": 84.23,
+      "high": 85.55,
+      "low": 83.89,
+      "close": 85.4
+    },
+    {
+      "timestamp": "2026-10-09T04:00:00+00:00",
+      "open": 85.41,
+      "high": 86.16,
+      "low": 85.01,
+      "close": 86.08
+    },
+    {
+      "timestamp": "2026-10-09T08:00:00+00:00",
+      "open": 86.07,
+      "high": 86.62,
+      "low": 85.57,
+      "close": 86.21
+    },
+    {
+      "timestamp": "2026-10-09T12:00:00+00:00",
+      "open": 86.2,
+      "high": 86.4,
+      "low": 84.55,
+      "close": 85.29
+    },
+    {
+      "timestamp": "2026-10-09T16:00:00+00:00",
+      "open": 85.28,
+      "high": 85.55,
+      "low": 83.42,
+      "close": 83.47
+    },
+    {
+      "timestamp": "2026-10-09T20:00:00+00:00",
+      "open": 83.49,
+      "high": 84.42,
+      "low": 83.4,
+      "close": 84.22
+    },
+    {
+      "timestamp": "2026-10-10T00:00:00+00:00",
+      "open": 84.22,
+      "high": 84.62,
+      "low": 83.91,
+      "close": 83.91
+    },
+    {
+      "timestamp": "2026-10-10T04:00:00+00:00",
+      "open": 83.91,
+      "high": 84.52,
+      "low": 83.78,
+      "close": 84.38
+    },
+    {
+      "timestamp": "2026-10-10T08:00:00+00:00",
+      "open": 84.39,
+      "high": 84.61,
+      "low": 83.72,
+      "close": 84.31
+    },
+    {
+      "timestamp": "2026-10-10T12:00:00+00:00",
+      "open": 84.31,
+      "high": 86.79,
+      "low": 84.2,
+      "close": 86.01
+    },
+    {
+      "timestamp": "2026-10-10T16:00:00+00:00",
+      "open": 86.01,
+      "high": 86.17,
+      "low": 85.05,
+      "close": 85.37
+    },
+    {
+      "timestamp": "2026-10-10T20:00:00+00:00",
+      "open": 85.38,
+      "high": 85.65,
+      "low": 85.18,
+      "close": 85.47
+    },
+    {
+      "timestamp": "2026-10-11T00:00:00+00:00",
+      "open": 85.5,
+      "high": 86.06,
+      "low": 84.87,
+      "close": 84.93
+    },
+    {
+      "timestamp": "2026-10-11T04:00:00+00:00",
+      "open": 84.92,
+      "high": 85.21,
+      "low": 84.67,
+      "close": 84.74
+    },
+    {
+      "timestamp": "2026-10-11T08:00:00+00:00",
+      "open": 84.76,
+      "high": 85.54,
+      "low": 84.72,
+      "close": 85.42
+    },
+    {
+      "timestamp": "2026-10-11T12:00:00+00:00",
+      "open": 85.43,
+      "high": 87.0,
+      "low": 85.11,
+      "close": 86.83
+    },
+    {
+      "timestamp": "2026-10-11T16:00:00+00:00",
+      "open": 86.85,
+      "high": 87.34,
+      "low": 86.2,
+      "close": 86.58
+    },
+    {
+      "timestamp": "2026-10-11T20:00:00+00:00",
+      "open": 86.59,
+      "high": 86.81,
+      "low": 85.51,
+      "close": 86.72
+    },
+    {
+      "timestamp": "2026-10-12T00:00:00+00:00",
+      "open": 86.7,
+      "high": 87.43,
+      "low": 86.35,
+      "close": 87.41
+    },
+    {
+      "timestamp": "2026-10-12T04:00:00+00:00",
+      "open": 87.43,
+      "high": 88.12,
+      "low": 87.06,
+      "close": 87.82
+    },
+    {
+      "timestamp": "2026-10-12T08:00:00+00:00",
+      "open": 87.81,
+      "high": 87.81,
+      "low": 85.63,
+      "close": 85.91
+    },
+    {
+      "timestamp": "2026-10-12T12:00:00+00:00",
+      "open": 85.88,
+      "high": 86.0,
+      "low": 84.01,
+      "close": 84.42
+    },
+    {
+      "timestamp": "2026-10-12T16:00:00+00:00",
+      "open": 84.41,
+      "high": 84.75,
+      "low": 82.97,
+      "close": 83.71
+    },
+    {
+      "timestamp": "2026-10-12T20:00:00+00:00",
+      "open": 83.71,
+      "high": 83.89,
+      "low": 80.91,
+      "close": 81.04
+    },
+    {
+      "timestamp": "2026-10-13T00:00:00+00:00",
+      "open": 81.04,
+      "high": 83.05,
+      "low": 79.48,
+      "close": 82.69
+    },
+    {
+      "timestamp": "2026-10-13T04:00:00+00:00",
+      "open": 82.68,
+      "high": 83.39,
+      "low": 82.38,
+      "close": 83.11
+    },
+    {
+      "timestamp": "2026-10-13T08:00:00+00:00",
+      "open": 83.11,
+      "high": 83.42,
+      "low": 81.57,
+      "close": 82.08
+    },
+    {
+      "timestamp": "2026-10-13T12:00:00+00:00",
+      "open": 82.08,
+      "high": 82.35,
+      "low": 80.59,
+      "close": 80.91
+    },
+    {
+      "timestamp": "2026-10-13T16:00:00+00:00",
+      "open": 80.91,
+      "high": 81.82,
+      "low": 80.86,
+      "close": 81.46
+    },
+    {
+      "timestamp": "2026-10-13T20:00:00+00:00",
+      "open": 81.48,
+      "high": 81.96,
+      "low": 81.26,
+      "close": 81.58
+    },
+    {
+      "timestamp": "2026-10-14T00:00:00+00:00",
+      "open": 81.58,
+      "high": 82.79,
+      "low": 81.53,
+      "close": 82.4
+    },
+    {
+      "timestamp": "2026-10-14T04:00:00+00:00",
+      "open": 82.41,
+      "high": 82.46,
+      "low": 81.47,
+      "close": 82.0
+    },
+    {
+      "timestamp": "2026-10-14T08:00:00+00:00",
+      "open": 81.99,
+      "high": 82.65,
+      "low": 81.0,
+      "close": 81.71
+    },
+    {
+      "timestamp": "2026-10-14T12:00:00+00:00",
+      "open": 81.69,
+      "high": 82.21,
+      "low": 79.6,
+      "close": 80.09
+    },
+    {
+      "timestamp": "2026-10-14T16:00:00+00:00",
+      "open": 80.1,
+      "high": 81.69,
+      "low": 79.16,
+      "close": 81.66
+    },
+    {
+      "timestamp": "2026-10-14T20:00:00+00:00",
+      "open": 81.66,
+      "high": 82.1,
+      "low": 80.61,
+      "close": 80.88
+    },
+    {
+      "timestamp": "2026-10-15T00:00:00+00:00",
+      "open": 80.89,
+      "high": 81.46,
+      "low": 78.18,
+      "close": 78.48
+    },
+    {
+      "timestamp": "2026-10-15T04:00:00+00:00",
+      "open": 78.48,
+      "high": 80.69,
+      "low": 78.29,
+      "close": 80.54
+    },
+    {
+      "timestamp": "2026-10-15T08:00:00+00:00",
+      "open": 80.54,
+      "high": 80.65,
+      "low": 78.77,
+      "close": 79.23
+    },
+    {
+      "timestamp": "2026-10-15T12:00:00+00:00",
+      "open": 79.23,
+      "high": 81.84,
+      "low": 77.56,
+      "close": 81.62
+    },
+    {
+      "timestamp": "2026-10-15T16:00:00+00:00",
+      "open": 81.61,
+      "high": 82.21,
+      "low": 80.91,
+      "close": 82.11
+    },
+    {
+      "timestamp": "2026-10-15T20:00:00+00:00",
+      "open": 82.11,
+      "high": 82.64,
+      "low": 81.61,
+      "close": 81.81
+    },
+    {
+      "timestamp": "2026-10-16T00:00:00+00:00",
+      "open": 81.81,
+      "high": 82.38,
+      "low": 80.36,
+      "close": 80.96
+    },
+    {
+      "timestamp": "2026-10-16T04:00:00+00:00",
+      "open": 80.96,
+      "high": 81.57,
+      "low": 80.52,
+      "close": 81.29
+    },
+    {
+      "timestamp": "2026-10-16T08:00:00+00:00",
+      "open": 81.29,
+      "high": 82.54,
+      "low": 80.84,
+      "close": 81.97
+    },
+    {
+      "timestamp": "2026-10-16T12:00:00+00:00",
+      "open": 81.98,
+      "high": 82.13,
+      "low": 78.82,
+      "close": 78.95
+    },
+    {
+      "timestamp": "2026-10-16T16:00:00+00:00",
+      "open": 78.94,
+      "high": 79.85,
+      "low": 78.48,
+      "close": 79.22
+    },
+    {
+      "timestamp": "2026-10-16T20:00:00+00:00",
+      "open": 79.22,
+      "high": 80.56,
+      "low": 79.13,
+      "close": 80.35
+    },
+    {
+      "timestamp": "2026-10-17T00:00:00+00:00",
+      "open": 80.36,
+      "high": 80.38,
+      "low": 79.6,
+      "close": 80.1
+    },
+    {
+      "timestamp": "2026-10-17T04:00:00+00:00",
+      "open": 80.1,
+      "high": 80.5,
+      "low": 79.66,
+      "close": 80.25
+    },
+    {
+      "timestamp": "2026-10-17T08:00:00+00:00",
+      "open": 80.25,
+      "high": 80.28,
+      "low": 78.9,
+      "close": 78.98
+    },
+    {
+      "timestamp": "2026-10-17T12:00:00+00:00",
+      "open": 78.97,
+      "high": 79.24,
+      "low": 78.5,
+      "close": 78.58
+    },
+    {
+      "timestamp": "2026-10-17T16:00:00+00:00",
+      "open": 78.58,
+      "high": 79.26,
+      "low": 78.21,
+      "close": 79.24
+    },
+    {
+      "timestamp": "2026-10-17T20:00:00+00:00",
+      "open": 79.24,
+      "high": 79.4,
+      "low": 77.16,
+      "close": 78.08
+    },
+    {
+      "timestamp": "2026-10-18T00:00:00+00:00",
+      "open": 78.08,
+      "high": 79.37,
+      "low": 77.86,
+      "close": 79.29
+    },
+    {
+      "timestamp": "2026-10-18T04:00:00+00:00",
+      "open": 79.3,
+      "high": 79.4,
+      "low": 78.32,
+      "close": 78.4
+    },
+    {
+      "timestamp": "2026-10-18T08:00:00+00:00",
+      "open": 78.41,
+      "high": 79.37,
+      "low": 78.3,
+      "close": 79.08
+    },
+    {
+      "timestamp": "2026-10-18T12:00:00+00:00",
+      "open": 79.09,
+      "high": 79.53,
+      "low": 77.29,
+      "close": 77.59
+    },
+    {
+      "timestamp": "2026-10-18T16:00:00+00:00",
+      "open": 77.58,
+      "high": 77.6,
+      "low": 76.36,
+      "close": 76.5
+    },
+    {
+      "timestamp": "2026-10-18T20:00:00+00:00",
+      "open": 76.5,
+      "high": 79.18,
+      "low": 76.15,
+      "close": 78.97
+    },
+    {
+      "timestamp": "2026-10-19T00:00:00+00:00",
+      "open": 78.97,
+      "high": 79.64,
+      "low": 78.66,
+      "close": 79.53
+    },
+    {
+      "timestamp": "2026-10-19T04:00:00+00:00",
+      "open": 79.54,
+      "high": 80.43,
+      "low": 79.27,
+      "close": 79.87
+    },
+    {
+      "timestamp": "2026-10-19T08:00:00+00:00",
+      "open": 79.87,
+      "high": 80.21,
+      "low": 78.79,
+      "close": 79.05
+    },
+    {
+      "timestamp": "2026-10-19T12:00:00+00:00",
+      "open": 79.05,
+      "high": 79.97,
+      "low": 78.04,
+      "close": 78.72
+    },
+    {
+      "timestamp": "2026-10-19T16:00:00+00:00",
+      "open": 78.72,
+      "high": 79.08,
+      "low": 77.64,
+      "close": 77.73
+    },
+    {
+      "timestamp": "2026-10-19T20:00:00+00:00",
+      "open": 77.74,
+      "high": 79.48,
+      "low": 77.74,
+      "close": 79.28
+    },
+    {
+      "timestamp": "2026-10-20T00:00:00+00:00",
+      "open": 79.27,
+      "high": 79.68,
+      "low": 78.37,
+      "close": 79.53
+    },
+    {
+      "timestamp": "2026-10-20T04:00:00+00:00",
+      "open": 79.54,
+      "high": 79.79,
+      "low": 78.52,
+      "close": 78.63
+    },
+    {
+      "timestamp": "2026-10-20T08:00:00+00:00",
+      "open": 78.62,
+      "high": 78.73,
+      "low": 77.89,
+      "close": 78.08
+    },
+    {
+      "timestamp": "2026-10-20T12:00:00+00:00",
+      "open": 78.08,
+      "high": 81.85,
+      "low": 77.88,
+      "close": 79.88
+    },
+    {
+      "timestamp": "2026-10-20T16:00:00+00:00",
+      "open": 79.88,
+      "high": 80.48,
+      "low": 79.31,
+      "close": 80.17
+    },
+    {
+      "timestamp": "2026-10-20T20:00:00+00:00",
+      "open": 80.17,
+      "high": 81.64,
+      "low": 79.91,
+      "close": 80.44
+    },
+    {
+      "timestamp": "2026-10-21T00:00:00+00:00",
+      "open": 80.45,
+      "high": 82.39,
+      "low": 80.3,
+      "close": 81.16
+    },
+    {
+      "timestamp": "2026-10-21T04:00:00+00:00",
+      "open": 81.17,
+      "high": 81.98,
+      "low": 80.59,
+      "close": 81.75
+    },
+    {
+      "timestamp": "2026-10-21T08:00:00+00:00",
+      "open": 81.76,
+      "high": 81.84,
+      "low": 80.63,
+      "close": 81.5
+    },
+    {
+      "timestamp": "2026-10-21T12:00:00+00:00",
+      "open": 81.51,
+      "high": 82.54,
+      "low": 80.2,
+      "close": 81.46
+    },
+    {
+      "timestamp": "2026-10-21T16:00:00+00:00",
+      "open": 81.47,
+      "high": 82.33,
+      "low": 80.92,
+      "close": 81.84
+    },
+    {
+      "timestamp": "2026-10-21T20:00:00+00:00",
+      "open": 81.85,
+      "high": 82.19,
+      "low": 80.55,
+      "close": 80.68
+    },
+    {
+      "timestamp": "2026-10-22T00:00:00+00:00",
+      "open": 80.69,
+      "high": 81.15,
+      "low": 78.57,
+      "close": 78.94
+    },
+    {
+      "timestamp": "2026-10-22T04:00:00+00:00",
+      "open": 78.95,
+      "high": 79.15,
+      "low": 78.45,
+      "close": 78.5
+    },
+    {
+      "timestamp": "2026-10-22T08:00:00+00:00",
+      "open": 78.5,
+      "high": 78.82,
+      "low": 77.74,
+      "close": 78.14
+    },
+    {
+      "timestamp": "2026-10-22T12:00:00+00:00",
+      "open": 78.15,
+      "high": 78.81,
+      "low": 77.33,
+      "close": 78.29
+    },
+    {
+      "timestamp": "2026-10-22T16:00:00+00:00",
+      "open": 78.3,
+      "high": 78.43,
+      "low": 76.64,
+      "close": 77.58
+    },
+    {
+      "timestamp": "2026-10-22T20:00:00+00:00",
+      "open": 77.58,
+      "high": 78.05,
+      "low": 76.87,
+      "close": 77.48
+    },
+    {
+      "timestamp": "2026-10-23T00:00:00+00:00",
+      "open": 77.47,
+      "high": 78.34,
+      "low": 77.34,
+      "close": 78.15
+    },
+    {
+      "timestamp": "2026-10-23T04:00:00+00:00",
+      "open": 78.14,
+      "high": 78.69,
+      "low": 77.8,
+      "close": 78.51
+    },
+    {
+      "timestamp": "2026-10-23T08:00:00+00:00",
+      "open": 78.51,
+      "high": 78.94,
+      "low": 77.35,
+      "close": 78.09
+    },
+    {
+      "timestamp": "2026-10-23T12:00:00+00:00",
+      "open": 78.08,
+      "high": 78.61,
+      "low": 77.21,
+      "close": 78.45
+    }
+  ],
+  "momentum_reversal": {
+    "strategy": "stoch-rsi-structural-reversal-v1",
+    "pair": "HYPEUSDT",
+    "state": "NO_SETUP",
+    "direction": null,
+    "signal_time": null,
+    "entry": null,
+    "stop": null,
+    "target": null,
+    "reward_risk": null,
+    "eligible": false,
+    "blockers": [
+      "no_fresh_extreme_zone_stoch_rsi_cross"
+    ],
+    "research_only": true,
+    "stoch_rsi_k": 29.4967,
+    "stoch_rsi_d": 24.3262
+  },
+  "current_indicators": {
+    "ema8_4h": 78.4243,
+    "ema21_4h": 78.9832,
+    "daily_bias": "bearish",
+    "stoch_rsi_k": 29.4967,
+    "stoch_rsi_d": 24.3262,
+    "atr14": 1.4953
+  },
+  "live_preview": {
+    "state": "watching_support",
+    "line_kind": "support",
+    "line_price": 78.935283,
+    "close": 78.45,
+    "distance_pct": -0.6148,
+    "touch_count": 3,
+    "anchor_start_time": "2026-09-29T20:00:00+00:00",
+    "anchor_end_time": "2026-10-08T16:00:00+00:00",
+    "anchor_start_wick": 84.91,
+    "anchor_end_wick": 82.68,
+    "converging_wedge": null,
+    "structure_state": "no_active_converging_break",
+    "last_closed_candle": "2026-10-23T12:00:00+00:00"
+  },
+  "friday_decision": {
+    "decision_time": "2026-10-23T12:00:00+00:00",
+    "direction": "short",
+    "impulse_origin": {
+      "kind": "high",
+      "index": 163,
+      "price": 82.54,
+      "pivot_time": "2026-10-21T12:00:00+00:00",
+      "confirmed_at": "2026-10-22T00:00:00+00:00",
+      "confirmation_index": 166
+    },
+    "impulse_extreme": {
+      "kind": "low",
+      "index": 170,
+      "price": 76.64,
+      "pivot_time": "2026-10-22T16:00:00+00:00",
+      "confirmed_at": "2026-10-23T04:00:00+00:00",
+      "confirmation_index": 173
+    },
+    "fib_entry_plan": {
+      "direction": "short",
+      "entry_1": {
+        "fib": 0.0,
+        "price": 82.54,
+        "role": "early_probe_area"
+      },
+      "entry_2_candidates": [
+        {
+          "fib": 0.382,
+          "price": 78.8938,
+          "role": "retest_add_candidate"
+        },
+        {
+          "fib": 0.5,
+          "price": 79.59,
+          "role": "retest_add_candidate"
+        },
+        {
+          "fib": 0.618,
+          "price": 80.28620000000001,
+          "role": "retest_add_candidate"
+        }
+      ],
+      "impulse_range": 5.900000000000006,
+      "status": "retest_levels_ready"
+    },
+    "retracement_levels": [
+      {
+        "fib": 0.382,
+        "price": 78.8938,
+        "bounce_ranking": {
+          "fib": 0.382,
+          "price": 78.8938,
+          "confluence_score": 4.5,
+          "rank": 2,
+          "heuristic_reasons": [
+            "overlaps resistance zone with 14 prior touches",
+            "near enough to monitor for a reaction",
+            "level not decisively lost at current close"
+          ],
+          "historical_probability": null,
+          "probability_status": "uncalibrated_requires_walk_forward_replay",
+          "warning": "Ranking is not a statistically calibrated probability.",
+          "distance_atr": 0.306
+        },
+        "touched": true,
+        "reaction": true,
+        "invalidation": 78.72791500000001,
+        "risk_pct": 0.3542574888464082,
+        "risk_ok": true,
+        "evidence": {
+          "fib_zero": 78.8938,
+          "fib_area_touched": true,
+          "near_support_resistance": true,
+          "nearest_level": {
+            "price": 78.84,
+            "touches": 4,
+            "kind": "both",
+            "low": 78.79,
+            "high": 78.94
+          },
+          "liquidity_reference": 82.54,
+          "liquidity_sweep_and_reclaim": false,
+          "rejection_or_reclaim_candle": false,
+          "atr": 1.4492857142857167,
+          "confluence_score": 3,
+          "entry1_candidate": false,
+          "status": "WAIT_FOR_CONFLUENCE"
+        },
+        "eligible": false
+      },
+      {
+        "fib": 0.5,
+        "price": 79.59,
+        "bounce_ranking": {
+          "fib": 0.5,
+          "price": 79.59,
+          "confluence_score": 4.0,
+          "rank": 3,
+          "heuristic_reasons": [
+            "overlaps resistance zone with 8 prior touches",
+            "within 1.5 ATR",
+            "level not decisively lost at current close"
+          ],
+          "historical_probability": null,
+          "probability_status": "uncalibrated_requires_walk_forward_replay",
+          "warning": "Ranking is not a statistically calibrated probability.",
+          "distance_atr": 0.787
+        },
+        "touched": false,
+        "reaction": true,
+        "invalidation": 78.72791500000001,
+        "risk_pct": 0.3542574888464082,
+        "risk_ok": true,
+        "evidence": {
+          "fib_zero": 79.59,
+          "fib_area_touched": false,
+          "near_support_resistance": true,
+          "nearest_level": {
+            "price": 79.624,
+            "touches": 5,
+            "kind": "resistance",
+            "low": 79.48,
+            "high": 79.79
+          },
+          "liquidity_reference": 82.54,
+          "liquidity_sweep_and_reclaim": false,
+          "rejection_or_reclaim_candle": false,
+          "atr": 1.4492857142857167,
+          "confluence_score": 2,
+          "entry1_candidate": false,
+          "status": "WAIT_FOR_CONFLUENCE"
+        },
+        "eligible": false
+      },
+      {
+        "fib": 0.618,
+        "price": 80.28620000000001,
+        "bounce_ranking": {
+          "fib": 0.618,
+          "price": 80.28620000000001,
+          "confluence_score": 5.0,
+          "rank": 1,
+          "heuristic_reasons": [
+            "overlaps resistance zone with 8 prior touches",
+            "overlaps prior confirmed-style swing structure",
+            "within 1.5 ATR",
+            "level not decisively lost at current close"
+          ],
+          "historical_probability": null,
+          "probability_status": "uncalibrated_requires_walk_forward_replay",
+          "warning": "Ranking is not a statistically calibrated probability.",
+          "distance_atr": 1.267
+        },
+        "touched": false,
+        "reaction": true,
+        "invalidation": 78.72791500000001,
+        "risk_pct": 0.3542574888464082,
+        "risk_ok": true,
+        "evidence": {
+          "fib_zero": 80.28620000000001,
+          "fib_area_touched": false,
+          "near_support_resistance": true,
+          "nearest_level": {
+            "price": 80.42375,
+            "touches": 8,
+            "kind": "both",
+            "low": 80.2,
+            "high": 80.63
+          },
+          "liquidity_reference": 82.54,
+          "liquidity_sweep_and_reclaim": false,
+          "rejection_or_reclaim_candle": false,
+          "atr": 1.4492857142857167,
+          "confluence_score": 2,
+          "entry1_candidate": false,
+          "status": "WAIT_FOR_CONFLUENCE"
+        },
+        "eligible": false
+      }
+    ],
+    "bounce_level_ranking": [
+      {
+        "fib": 0.618,
+        "price": 80.28620000000001,
+        "confluence_score": 5.0,
+        "rank": 1,
+        "heuristic_reasons": [
+          "overlaps resistance zone with 8 prior touches",
+          "overlaps prior confirmed-style swing structure",
+          "within 1.5 ATR",
+          "level not decisively lost at current close"
+        ],
+        "historical_probability": null,
+        "probability_status": "uncalibrated_requires_walk_forward_replay",
+        "warning": "Ranking is not a statistically calibrated probability.",
+        "distance_atr": 1.267
+      },
+      {
+        "fib": 0.382,
+        "price": 78.8938,
+        "confluence_score": 4.5,
+        "rank": 2,
+        "heuristic_reasons": [
+          "overlaps resistance zone with 14 prior touches",
+          "near enough to monitor for a reaction",
+          "level not decisively lost at current close"
+        ],
+        "historical_probability": null,
+        "probability_status": "uncalibrated_requires_walk_forward_replay",
+        "warning": "Ranking is not a statistically calibrated probability.",
+        "distance_atr": 0.306
+      },
+      {
+        "fib": 0.5,
+        "price": 79.59,
+        "confluence_score": 4.0,
+        "rank": 3,
+        "heuristic_reasons": [
+          "overlaps resistance zone with 8 prior touches",
+          "within 1.5 ATR",
+          "level not decisively lost at current close"
+        ],
+        "historical_probability": null,
+        "probability_status": "uncalibrated_requires_walk_forward_replay",
+        "warning": "Ranking is not a statistically calibrated probability.",
+        "distance_atr": 0.787
+      }
+    ],
+    "execution": "no trade; no order submitted",
+    "state": "WATCHING",
+    "close": 78.45,
+    "reason": "Price is in a confirmed impulse retracement zone, but reaction/confluence or risk checks are incomplete."
+  },
+  "reversal_context": {
+    "status": "ok",
+    "as_of": "2026-10-23T12:00:00+00:00",
+    "state": "possible_bullish_turn",
+    "long_reversal_score": 2,
+    "short_reversal_score": 0,
+    "score_note": "Evidence count only; not a probability and not an entry gate.",
+    "atr14": 1.4952535171490113,
+    "rsi14": 45.61634116359545,
+    "ema8": 78.42434942482764,
+    "ema21": 78.98318716490809,
+    "evidence": {
+      "bullish": [
+        "lower_wick_rejection",
+        "close_reclaimed_ema8_while_ema_was_flat_or_falling"
+      ],
+      "bearish": []
+    },
+    "use_policy": "Context for Friday review; require a closed-candle structural break/retest for confirmation."
+  },
+  "structure_lifecycle": {
+    "as_of": "2026-10-23T12:00:00+00:00",
+    "active_lines": [],
+    "broken_lines": [
+      {
+        "kind": "support",
+        "line_price": 78.93528301886795,
+        "distance_pct": -0.6147859364131864,
+        "touch_count": 3,
+        "anchor_start_index": 33,
+        "anchor_end_index": 86,
+        "anchor_start_time": "2026-09-29T20:00:00+00:00",
+        "anchor_end_time": "2026-10-08T16:00:00+00:00",
+        "anchor_start_wick": 84.91,
+        "anchor_end_wick": 82.68,
+        "slope_per_bar": -0.042075471698113015,
+        "status": "broken",
+        "break": {
+          "kind": "support",
+          "break_index": 111,
+          "break_time": "2026-10-12T20:00:00+00:00",
+          "line_price": 81.62811320754719,
+          "close": 81.04,
+          "direction": "short",
+          "anchor_start_index": 33,
+          "anchor_end_index": 86,
+          "touch_count": 3
+        }
+      }
+    ],
+    "latest_support": null,
+    "latest_resistance": null,
+    "rebuild_policy": "recomputed from completed candles at each snapshot; broken lines retained as history, not active guides"
+  },
+  "break_events": [
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-12T20:00:00+00:00",
+      "direction": "short",
+      "line_kind": "support",
+      "line_price_at_break": 81.62811320754719,
+      "close_at_break": 81.04,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": true,
+      "stoch_k": 4.9711,
+      "stoch_d": 26.4663,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": false,
+        "macd_bearish_expansion": true,
+        "macd_histogram": -0.2353,
+        "macd_histogram_previous": 0.0379
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-15T20:00:00+00:00",
+      "outcome": "failed_break",
+      "forward_bars_checked": 1,
+      "anchor_start_time": "2026-09-29T20:00:00+00:00",
+      "anchor_end_time": "2026-10-08T16:00:00+00:00",
+      "outcome_bars": 1,
+      "failure_time": "2026-10-13T00:00:00+00:00",
+      "forward_3_bar_return_pct": -1.2833,
+      "forward_3_bar_end_time": "2026-10-13T08:00:00+00:00",
+      "forward_6_bar_return_pct": -0.6663,
+      "forward_6_bar_end_time": "2026-10-13T20:00:00+00:00",
+      "forward_12_bar_return_pct": 0.1974,
+      "forward_12_bar_end_time": "2026-10-14T20:00:00+00:00",
+      "forward_18_bar_return_pct": -0.9501,
+      "forward_18_bar_end_time": "2026-10-15T20:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    },
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-15T00:00:00+00:00",
+      "direction": "short",
+      "line_kind": "support",
+      "line_price_at_break": 78.65518987341773,
+      "close_at_break": 78.48,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": true,
+      "stoch_k": 65.7933,
+      "stoch_d": 61.14,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": false,
+        "macd_bearish_expansion": true,
+        "macd_histogram": -0.2027,
+        "macd_histogram_previous": -0.0747
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-18T00:00:00+00:00",
+      "outcome": "failed_break",
+      "forward_bars_checked": 1,
+      "anchor_start_time": "2026-09-29T20:00:00+00:00",
+      "anchor_end_time": "2026-10-13T00:00:00+00:00",
+      "outcome_bars": 1,
+      "failure_time": "2026-10-15T04:00:00+00:00",
+      "forward_3_bar_return_pct": -4.001,
+      "forward_3_bar_end_time": "2026-10-15T12:00:00+00:00",
+      "forward_6_bar_return_pct": -3.16,
+      "forward_6_bar_end_time": "2026-10-16T00:00:00+00:00",
+      "forward_12_bar_return_pct": -2.0642,
+      "forward_12_bar_end_time": "2026-10-17T00:00:00+00:00",
+      "forward_18_bar_return_pct": -1.0321,
+      "forward_18_bar_end_time": "2026-10-18T00:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    },
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-20T12:00:00+00:00",
+      "direction": "long",
+      "line_kind": "resistance",
+      "line_price_at_break": 78.94800000000001,
+      "close_at_break": 79.88,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": false,
+      "stoch_k": 77.2289,
+      "stoch_d": 80.6119,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": true,
+        "macd_bearish_expansion": false,
+        "macd_histogram": 0.2007,
+        "macd_histogram_previous": 0.1226
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-23T12:00:00+00:00",
+      "outcome": "continuation_add_confirmed",
+      "forward_bars_checked": 16,
+      "anchor_start_time": "2026-10-05T20:00:00+00:00",
+      "anchor_end_time": "2026-10-19T04:00:00+00:00",
+      "retest_confirmed": true,
+      "retest_confirmed_time": "2026-10-22T16:00:00+00:00",
+      "retest_confirmed_bar_index": 170,
+      "retest_close": 77.58,
+      "retest_high": 78.43,
+      "retest_low": 76.64,
+      "outcome_bars": 16,
+      "event_add": "CONTINUATION_ADD_CONFIRMED",
+      "continuation_add_time": "2026-10-23T04:00:00+00:00",
+      "continuation_add_close": 78.51,
+      "continuation_trigger": 78.43,
+      "forward_3_bar_return_pct": 1.6024,
+      "forward_3_bar_end_time": "2026-10-21T00:00:00+00:00",
+      "forward_6_bar_return_pct": 1.978,
+      "forward_6_bar_end_time": "2026-10-21T12:00:00+00:00",
+      "forward_12_bar_return_pct": -1.9905,
+      "forward_12_bar_end_time": "2026-10-22T12:00:00+00:00",
+      "forward_18_bar_return_pct": -1.7902,
+      "forward_18_bar_end_time": "2026-10-23T12:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    }
+  ],
+  "event_count": 3,
+  "consolidated_setups": [
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-12T20:00:00+00:00",
+      "direction": "short",
+      "line_kind": "support",
+      "line_price_at_break": 81.62811320754719,
+      "close_at_break": 81.04,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": true,
+      "stoch_k": 4.9711,
+      "stoch_d": 26.4663,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": false,
+        "macd_bearish_expansion": true,
+        "macd_histogram": -0.2353,
+        "macd_histogram_previous": 0.0379
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-15T20:00:00+00:00",
+      "outcome": "failed_break",
+      "forward_bars_checked": 1,
+      "anchor_start_time": "2026-09-29T20:00:00+00:00",
+      "anchor_end_time": "2026-10-08T16:00:00+00:00",
+      "outcome_bars": 1,
+      "failure_time": "2026-10-13T00:00:00+00:00",
+      "forward_3_bar_return_pct": -1.2833,
+      "forward_3_bar_end_time": "2026-10-13T08:00:00+00:00",
+      "forward_6_bar_return_pct": -0.6663,
+      "forward_6_bar_end_time": "2026-10-13T20:00:00+00:00",
+      "forward_12_bar_return_pct": 0.1974,
+      "forward_12_bar_end_time": "2026-10-14T20:00:00+00:00",
+      "forward_18_bar_return_pct": -0.9501,
+      "forward_18_bar_end_time": "2026-10-15T20:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    },
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-15T00:00:00+00:00",
+      "direction": "short",
+      "line_kind": "support",
+      "line_price_at_break": 78.65518987341773,
+      "close_at_break": 78.48,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": true,
+      "stoch_k": 65.7933,
+      "stoch_d": 61.14,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": false,
+        "macd_bearish_expansion": true,
+        "macd_histogram": -0.2027,
+        "macd_histogram_previous": -0.0747
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-18T00:00:00+00:00",
+      "outcome": "failed_break",
+      "forward_bars_checked": 1,
+      "anchor_start_time": "2026-09-29T20:00:00+00:00",
+      "anchor_end_time": "2026-10-13T00:00:00+00:00",
+      "outcome_bars": 1,
+      "failure_time": "2026-10-15T04:00:00+00:00",
+      "forward_3_bar_return_pct": -4.001,
+      "forward_3_bar_end_time": "2026-10-15T12:00:00+00:00",
+      "forward_6_bar_return_pct": -3.16,
+      "forward_6_bar_end_time": "2026-10-16T00:00:00+00:00",
+      "forward_12_bar_return_pct": -2.0642,
+      "forward_12_bar_end_time": "2026-10-17T00:00:00+00:00",
+      "forward_18_bar_return_pct": -1.0321,
+      "forward_18_bar_end_time": "2026-10-18T00:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    },
+    {
+      "event": "BREAK_CLOSE_PROBE",
+      "signal_time": "2026-10-20T12:00:00+00:00",
+      "direction": "long",
+      "line_kind": "resistance",
+      "line_price_at_break": 78.94800000000001,
+      "close_at_break": 79.88,
+      "touch_count": 3,
+      "daily_bias": "bearish",
+      "ema_aligned": false,
+      "stoch_k": 77.2289,
+      "stoch_d": 80.6119,
+      "momentum_context": {
+        "stoch_bullish_cross": false,
+        "stoch_bearish_cross": false,
+        "macd_bullish_expansion": true,
+        "macd_bearish_expansion": false,
+        "macd_histogram": 0.2007,
+        "macd_histogram_previous": 0.1226
+      },
+      "converging_wedge": null,
+      "entry_plan": "small probe after closed-candle break; momentum/context are visible, not hard gates",
+      "retest_deadline": "2026-10-23T12:00:00+00:00",
+      "outcome": "continuation_add_confirmed",
+      "forward_bars_checked": 16,
+      "anchor_start_time": "2026-10-05T20:00:00+00:00",
+      "anchor_end_time": "2026-10-19T04:00:00+00:00",
+      "retest_confirmed": true,
+      "retest_confirmed_time": "2026-10-22T16:00:00+00:00",
+      "retest_confirmed_bar_index": 170,
+      "retest_close": 77.58,
+      "retest_high": 78.43,
+      "retest_low": 76.64,
+      "outcome_bars": 16,
+      "event_add": "CONTINUATION_ADD_CONFIRMED",
+      "continuation_add_time": "2026-10-23T04:00:00+00:00",
+      "continuation_add_close": 78.51,
+      "continuation_trigger": 78.43,
+      "forward_3_bar_return_pct": 1.6024,
+      "forward_3_bar_end_time": "2026-10-21T00:00:00+00:00",
+      "forward_6_bar_return_pct": 1.978,
+      "forward_6_bar_end_time": "2026-10-21T12:00:00+00:00",
+      "forward_12_bar_return_pct": -1.9905,
+      "forward_12_bar_end_time": "2026-10-22T12:00:00+00:00",
+      "forward_18_bar_return_pct": -1.7902,
+      "forward_18_bar_end_time": "2026-10-23T12:00:00+00:00",
+      "forward_returns_note": "Directional close-to-close diagnostic; no fees, slippage, stops or sizing."
+    }
+  ],
+  "consolidated_setup_count": 3,
+  "trade_replay": [
+    {
+      "signal_time": "2026-10-12T20:00:00+00:00",
+      "direction": "short",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-13T00:00:00+00:00",
+      "entry_price": 80.93464800000001,
+      "stop_price": 82.4700347785229,
+      "target_price": 77.86387444295424,
+      "target_type": "fixed_r",
+      "target_mode": "fixed_r",
+      "exit_time": "2026-10-13T00:00:00+00:00",
+      "exit_price": 82.57724582373498,
+      "exit_reason": "stop",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2635643641462858,
+      "net_equity_return_pct": -0.5349133673390181,
+      "net_r_multiple": -1.0698267346780361,
+      "round_trip_cost_assumption_bps": 26.0
+    },
+    {
+      "signal_time": "2026-10-15T00:00:00+00:00",
+      "direction": "short",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-15T04:00:00+00:00",
+      "entry_price": 78.377976,
+      "stop_price": 80.12808717199822,
+      "target_price": 74.87775365600358,
+      "target_type": "fixed_r",
+      "target_mode": "fixed_r",
+      "exit_time": "2026-10-15T04:00:00+00:00",
+      "exit_price": 80.23225368532182,
+      "exit_reason": "stop",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2239228491710926,
+      "net_equity_return_pct": -0.5297599703922441,
+      "net_r_multiple": -1.0595199407844882,
+      "round_trip_cost_assumption_bps": 26.0
+    },
+    {
+      "signal_time": "2026-10-20T12:00:00+00:00",
+      "direction": "long",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-20T16:00:00+00:00",
+      "entry_price": 79.983844,
+      "stop_price": 78.30178353260499,
+      "target_price": 83.34796493479006,
+      "target_type": "fixed_r",
+      "target_mode": "fixed_r",
+      "exit_time": "2026-10-22T08:00:00+00:00",
+      "exit_price": 78.1999912140126,
+      "exit_reason": "stop",
+      "bars_held": 11,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2377555550183929,
+      "net_equity_return_pct": -0.5302582221523914,
+      "net_r_multiple": -1.0605164443047828,
+      "round_trip_cost_assumption_bps": 26.0
+    }
+  ],
+  "structural_target_replay": [
+    {
+      "signal_time": "2026-10-12T20:00:00+00:00",
+      "direction": "short",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-13T00:00:00+00:00",
+      "entry_price": 80.93464800000001,
+      "stop_price": 82.4700347785229,
+      "target_price": 79.26096000000001,
+      "target_type": "fib_1.272_extension",
+      "target_mode": "structure_fib",
+      "exit_time": "2026-10-13T00:00:00+00:00",
+      "exit_price": 82.57724582373498,
+      "exit_reason": "stop",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2635643641462858,
+      "net_equity_return_pct": -0.5349133673390181,
+      "net_r_multiple": -1.0698267346780361,
+      "round_trip_cost_assumption_bps": 26.0
+    },
+    {
+      "signal_time": "2026-10-15T00:00:00+00:00",
+      "direction": "short",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-15T04:00:00+00:00",
+      "entry_price": 78.377976,
+      "stop_price": 80.12808717199822,
+      "target_price": 74.78352,
+      "target_type": "fib_1.272_extension",
+      "target_mode": "structure_fib",
+      "exit_time": "2026-10-15T04:00:00+00:00",
+      "exit_price": 80.23225368532182,
+      "exit_reason": "stop",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2239228491710926,
+      "net_equity_return_pct": -0.5297599703922441,
+      "net_r_multiple": -1.0595199407844882,
+      "round_trip_cost_assumption_bps": 26.0
+    },
+    {
+      "signal_time": "2026-10-20T12:00:00+00:00",
+      "direction": "long",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-20T16:00:00+00:00",
+      "entry_price": 79.983844,
+      "stop_price": 78.30178353260499,
+      "target_price": 80.21,
+      "target_type": "prior_structure",
+      "target_mode": "structure_fib",
+      "exit_time": "2026-10-20T16:00:00+00:00",
+      "exit_price": 80.105727,
+      "exit_reason": "target",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.2377555550183929,
+      "net_equity_return_pct": 0.036230267092821934,
+      "net_r_multiple": 0.07246053418564387,
+      "round_trip_cost_assumption_bps": 26.0
+    }
+  ],
+  "entry2_trade_replay": [
+    {
+      "signal_time": "2026-10-23T04:00:00+00:00",
+      "direction": "long",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-23T08:00:00+00:00",
+      "entry_price": 78.612063,
+      "stop_price": 77.1162068499337,
+      "target_price": 81.60377530013263,
+      "target_type": "fixed_r",
+      "target_mode": "fixed_r",
+      "exit_time": "2026-10-23T12:00:00+00:00",
+      "exit_price": 78.348015,
+      "exit_reason": "time_exit",
+      "bars_held": 2,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.26276611890961443,
+      "net_equity_return_pct": -0.08825982364290139,
+      "net_r_multiple": -0.17651964728580277,
+      "round_trip_cost_assumption_bps": 26.0
+    }
+  ],
+  "entry2_structural_target_replay": [
+    {
+      "signal_time": "2026-10-23T04:00:00+00:00",
+      "direction": "long",
+      "strategy_version": "friday-price-action-v2",
+      "entry_time": "2026-10-23T08:00:00+00:00",
+      "entry_price": 78.612063,
+      "stop_price": 77.1162068499337,
+      "target_price": 78.73,
+      "target_type": "prior_structure",
+      "target_mode": "structure_fib",
+      "exit_time": "2026-10-23T08:00:00+00:00",
+      "exit_price": 78.627651,
+      "exit_reason": "target",
+      "bars_held": 1,
+      "risk_fraction_pct": 0.5,
+      "position_fraction_of_equity": 0.26276611890961443,
+      "net_equity_return_pct": 0.005210394060720016,
+      "net_r_multiple": 0.010420788121440032,
+      "round_trip_cost_assumption_bps": 26.0
+    }
+  ],
+  "structural_target_replay_summary": {
+    "target_policy": "nearest prior structure; if unavailable/invalid, 1.272 Fib extension of prior range",
+    "trades": 3,
+    "wins": 1,
+    "losses": 2,
+    "net_equity_return_pct": -1.0284,
+    "mean_net_r": -0.6856,
+    "exit_reasons": {
+      "target": 1,
+      "stop": 2,
+      "time_exit": 0
+    }
+  },
+  "trade_replay_summary": {
+    "trades": 3,
+    "wins": 0,
+    "losses": 3,
+    "net_equity_return_pct": -1.5949,
+    "mean_net_r": -1.0633,
+    "exit_reasons": {
+      "target": 0,
+      "stop": 3,
+      "time_exit": 0
+    }
+  },
+  "latest_momentum_context": {
+    "stoch_bullish_cross": false,
+    "stoch_bearish_cross": false,
+    "macd_bullish_expansion": false,
+    "macd_bearish_expansion": false,
+    "macd_histogram": -0.1427,
+    "macd_histogram_previous": -0.1959
+  },
+  "event_summary": {
+    "retest_held_waiting_continuation": 0,
+    "continuation_add_confirmed": 1,
+    "failed_break": 2,
+    "no_retest_within_window": 0,
+    "pending": 0,
+    "no_continuation_within_window": 0
+  },
+  "rules": {
+    "probe": "closed 4H close >=0.15% beyond genuine three-touch line",
+    "entry_1": "small research probe candidate after a meaningful closed-candle trendline break; no live order",
+    "retest": "within 18 bars / 72h, price revisits the broken line and closes on the breakout side",
+    "entry_2": "only after a subsequent closed candle breaks the retest reaction high/low in breakout direction",
+    "expiry": "if the retest does not happen in 72h, expire; if continuation does not confirm within 24h after retest, expire",
+    "failure": "close crosses back through line by 0.30%",
+    "daily_bias_and_ema": "shown, not hard gates"
+  },
+  "trade_replay_rules": {
+    "entry": "next 4H open after break signal",
+    "stop": "1.0 ATR from entry",
+    "baseline_target": "2R for comparison",
+    "alternative_target": "nearest prior structural level, otherwise 1.272 Fib extension of prior range",
+    "risk_per_trade_pct": 0.5,
+    "max_hold_bars": 18,
+    "costs_bps_per_side": {
+      "fee": 8,
+      "slippage": 5
+    },
+    "same_candle_stop_target": "stop assumed first; conservative OHLC approximation"
+  },
+  "limitations": [
+    "Kraken supplies at most 720 recent candles.",
+    "Walk-forward signals use only the prefix available at each candle.",
+    "Daily bias is lagged one full UTC day; pivots must be confirmed before use.",
+    "Forward returns are descriptive, not fee-aware. No stops, sizing, fees, slippage or orders.",
+    "This is a fresh-data snapshot, not a continuously running alert service."
+  ],
+  "model_review": {
+    "status": "error",
+    "provider": "huggingface",
+    "model_id": "openai/gpt-oss-120b:cheapest",
+    "response": null,
+    "latency_ms": 483,
+    "error": "Vercel review proxy: RuntimeError: Vercel review proxy HTTP 502: Hugging Face returned HTTP 402: {\"error\":\"You have no remaining credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO "
+  }
+}

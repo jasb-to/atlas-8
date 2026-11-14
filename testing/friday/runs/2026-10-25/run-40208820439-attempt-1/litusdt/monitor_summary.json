@@ -1,0 +1,37 @@
+{
+  "run_id": "dac86390-71d0-445f-bf94-1c32b4e9f752",
+  "pair": "LITUSDT",
+  "status": "ok",
+  "market_started_at": "2026-10-25T15:52:48.853924+00:00",
+  "last_completed_candle_utc": "2026-10-25T08:00:00+00:00",
+  "last_close": 3.2161,
+  "latest_setup_state": "ENTRY_PROBE_WAITING_RETEST",
+  "latest_setup_message": "Closed-candle breakout confirmed; paper probe state, waiting for a controlled retest.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_MAJOR_MOVE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "error",
+  "ai_review_latency_ms": 267,
+  "ai_review_error": "Vercel review proxy HTTP 502: Hugging Face returned HTTP 402",
+  "ai_review_error_category": "quota_or_billing",
+  "ai_model_id": "openai/gpt-oss-120b:cheapest",
+  "ai_review_assessment": null,
+  "reversal_context": "mixed_early_reversal_evidence",
+  "break_event_count": 7,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "SCAN",
+      "sent": false,
+      "status": "no_actionable_signal",
+      "reason": "No fresh execution trigger passed thesis, momentum, structural-risk and AI gates. setup=ENTRY_PROBE_WAITING_RETEST; execution_blockers=no_fresh_closed_4h_stoch_cross"
+    }
+  ],
+  "market_finished_at": "2026-10-25T15:52:56.651712+00:00",
+  "duration_seconds": 7.798,
+  "alert_outcomes_total": 1,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 1
+}
