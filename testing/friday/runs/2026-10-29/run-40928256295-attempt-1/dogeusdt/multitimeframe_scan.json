@@ -1,0 +1,113 @@
+{
+  "pair": "DOGEUSDT",
+  "strategy": "daily-thesis-4h-execution-v1",
+  "generated_at_utc": "2026-10-29T18:12:13.598884+00:00",
+  "state": "WATCH_STRUCTURE",
+  "thesis_direction": "bearish",
+  "daily_thesis": {
+    "timeframe": "1D",
+    "state": "bearish",
+    "last_closed_candle_utc": "2026-10-28T00:00:00+00:00",
+    "close": 0.07992,
+    "ema5": 0.07896994973939142,
+    "ema13": 0.08003745335824691,
+    "ema8": 0.07916416076233121,
+    "ema21": 0.08165054840428931,
+    "ema_5_13_spread_pct": -1.3338,
+    "ema_8_21_spread_pct": -3.0452,
+    "stoch_k": 69.878229,
+    "stoch_d": 38.779256,
+    "stoch_cross_up": false,
+    "stoch_cross_down": false,
+    "macd": -0.002614,
+    "macd_signal": -0.002672,
+    "macd_hist": 5.8e-05,
+    "macd_hist_change": "improving",
+    "volume": 1276743.16179041,
+    "volume_vs_20_candle_average": 0.320284,
+    "nearby_trendlines": [
+      {
+        "kind": "support",
+        "price": 0.137361,
+        "distance_pct": -41.818,
+        "touches": 3,
+        "start_time": "2025-02-07T00:00:00+00:00",
+        "end_time": "2025-02-18T00:00:00+00:00",
+        "start_price": 0.06771,
+        "end_price": 0.06893,
+        "slope_per_candle": 0.00011090909090909081
+      }
+    ],
+    "confirmed_breaks": []
+  },
+  "four_hour_execution": {
+    "timeframe": "4H",
+    "state": "bullish",
+    "last_closed_candle_utc": "2026-10-29T12:00:00+00:00",
+    "close": 0.08066,
+    "ema5": 0.07931866798930129,
+    "ema13": 0.07899427431463064,
+    "ema8": 0.07918529649770206,
+    "ema21": 0.0787788310337382,
+    "ema_5_13_spread_pct": 0.4107,
+    "ema_8_21_spread_pct": 0.516,
+    "stoch_k": 36.33475,
+    "stoch_d": 23.6512,
+    "stoch_cross_up": true,
+    "stoch_cross_down": false,
+    "macd": 0.000308,
+    "macd_signal": 0.000198,
+    "macd_hist": 0.000109,
+    "macd_hist_change": "improving",
+    "volume": 468799.6662748,
+    "volume_vs_20_candle_average": 1.960619,
+    "nearby_trendlines": [
+      {
+        "kind": "resistance",
+        "price": 0.042348,
+        "distance_pct": 90.468,
+        "touches": 3,
+        "start_time": "2026-07-10T00:00:00+00:00",
+        "end_time": "2026-07-30T20:00:00+00:00",
+        "start_price": 0.08966,
+        "end_price": 0.08082,
+        "slope_per_candle": -7.072e-05
+      },
+      {
+        "kind": "resistance",
+        "price": 0.041096,
+        "distance_pct": 96.274,
+        "touches": 3,
+        "start_time": "2026-07-10T00:00:00+00:00",
+        "end_time": "2026-07-23T12:00:00+00:00",
+        "start_price": 0.08966,
+        "end_price": 0.08378,
+        "slope_per_candle": -7.259259259259273e-05
+      },
+      {
+        "kind": "resistance",
+        "price": 0.017504,
+        "distance_pct": 360.797,
+        "touches": 3,
+        "start_time": "2026-07-06T20:00:00+00:00",
+        "end_time": "2026-07-30T20:00:00+00:00",
+        "start_price": 0.09758,
+        "end_price": 0.08082,
+        "slope_per_candle": -0.00011638888888888887
+      }
+    ],
+    "confirmed_breaks": []
+  },
+  "daily_directional_breaks": [],
+  "aligned_4h_breaks": [],
+  "entry1_alert_eligible": false,
+  "entry2_policy": "Wait for a post-break retest that holds, then a later closed 4H candle beyond the reaction extreme; never infer from an open candle.",
+  "risk_policy": "No alert is actionable without structural invalidation, target/resistance room, and portfolio risk checks.",
+  "limitations": [
+    "Research signal only; it never executes trades.",
+    "Indicator confluence is evidence, not a calibrated probability.",
+    "Trendlines are algorithmic candidates and need walk-forward validation.",
+    "Daily context uses only the latest completed daily candle.",
+    "This scanner is a first implementation; target room, structural stops, and full retest lifecycle remain separate validation work."
+  ]
+}
