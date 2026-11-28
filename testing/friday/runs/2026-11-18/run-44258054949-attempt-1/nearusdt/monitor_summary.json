@@ -1,0 +1,63 @@
+{
+  "run_id": "friday-gha-44258054949-1",
+  "pair": "NEARUSDT",
+  "status": "ok",
+  "market_started_at": "2026-11-18T07:24:31.082448+00:00",
+  "last_completed_candle_utc": "2026-11-18T00:00:00+00:00",
+  "last_close": 3.3831,
+  "latest_setup_state": "RETEST_HELD_WAITING_CONTINUATION",
+  "latest_setup_message": "Breakout retest held; waiting for a closed-candle continuation through the retest reaction extreme before Entry 2 add.",
+  "friday_decision": "NO_TRADE",
+  "friday_decision_reason": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "scan_diagnostic": "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.",
+  "multitimeframe_state": "WATCH_STRUCTURE",
+  "multitimeframe_direction": "bearish",
+  "ai_review_status": "disabled",
+  "ai_provider": null,
+  "ai_review_latency_ms": 0,
+  "ai_review_error": null,
+  "ai_review_error_category": null,
+  "ai_model_id": null,
+  "ai_review_assessment": null,
+  "reversal_context": "possible_bullish_turn",
+  "break_event_count": 30,
+  "persistence": "configured",
+  "alert_results": [
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "filtered",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "PAPER_ENTRY",
+      "sent": false,
+      "status": "filtered",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "filtered_or_no_valid_plan",
+      "reason": "direction_conflicts_with_weekly_thesis"
+    },
+    {
+      "type": "ENTRY_1",
+      "sent": false,
+      "status": "not_sent_break_no_longer_fresh",
+      "signal_time": "2026-11-17T20:00:00+00:00",
+      "reason": "Break candle 2026-11-17T20:00:00+00:00 is older than the latest completed candle 2026-11-18T00:00:00+00:00; the retest is held but continuation has not been confirmed. No delayed Entry 1 alert is sent; wait for a fresh continuation signal."
+    }
+  ],
+  "market_finished_at": "2026-11-18T07:24:48.440222+00:00",
+  "duration_seconds": 17.358,
+  "alert_outcomes_total": 5,
+  "alert_outcomes_sent": 0,
+  "alert_outcomes_blocked": 5
+}

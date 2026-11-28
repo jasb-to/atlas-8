@@ -1,0 +1,362 @@
+{
+  "report_version": 1,
+  "decision_count": 1,
+  "decision_statuses": {
+    "NO_TRADE": 1
+  },
+  "no_trade_count": 1,
+  "common_blockers": {
+    "No confirmed 0.382/0.5/0.618 pullback zone touched; wait for the rally/pullback rather than treating a rolling lookback low as 0-Fib.": 1
+  },
+  "model_statuses": {
+    "disabled": 1
+  },
+  "replay": {
+    "trades": 35,
+    "wins": 13,
+    "losses": 22,
+    "win_rate_pct": 37.14,
+    "net_equity_return_pct_compounded": 0.0006,
+    "mean_net_equity_return_pct": 0.0025,
+    "profit_factor": 1.0075,
+    "max_drawdown_pct": 2.8593,
+    "exit_reasons": {
+      "stop": 19,
+      "target": 12,
+      "time_exit": 4
+    },
+    "target_types": {
+      "fixed_r": 35
+    },
+    "long_trades": 12,
+    "short_trades": 23
+  },
+  "structural_target_replay": {
+    "trades": 35,
+    "wins": 10,
+    "losses": 25,
+    "win_rate_pct": 28.57,
+    "net_equity_return_pct_compounded": -3.2397,
+    "mean_net_equity_return_pct": -0.0934,
+    "profit_factor": 0.4627,
+    "max_drawdown_pct": 4.462,
+    "exit_reasons": {
+      "stop": 9,
+      "target": 26
+    },
+    "target_types": {
+      "fib_1.272_extension": 6,
+      "prior_structure": 29
+    },
+    "long_trades": 12,
+    "short_trades": 23
+  },
+  "entry2_replay": {
+    "trades": 14,
+    "wins": 5,
+    "losses": 9,
+    "win_rate_pct": 35.71,
+    "net_equity_return_pct_compounded": -0.5527,
+    "mean_net_equity_return_pct": -0.037,
+    "profit_factor": 0.8992,
+    "max_drawdown_pct": 2.669,
+    "exit_reasons": {
+      "stop": 9,
+      "target": 5
+    },
+    "target_types": {
+      "fixed_r": 14
+    },
+    "long_trades": 6,
+    "short_trades": 8
+  },
+  "entry2_structural_target_replay": {
+    "trades": 14,
+    "wins": 2,
+    "losses": 12,
+    "win_rate_pct": 14.29,
+    "net_equity_return_pct_compounded": -2.4162,
+    "mean_net_equity_return_pct": -0.1734,
+    "profit_factor": 0.356,
+    "max_drawdown_pct": 3.5212,
+    "exit_reasons": {
+      "stop": 6,
+      "target": 8
+    },
+    "target_types": {
+      "fib_1.272_extension": 2,
+      "prior_structure": 12
+    },
+    "long_trades": 6,
+    "short_trades": 8
+  },
+  "replay_comparison_note": "Entry 1 probe and Entry 2 continuation replays, each with fixed-R and structural targets, are separate samples; compare only with matched periods, assumptions, and sample sizes.",
+  "by_strategy_version": {
+    "friday-price-action-v2": {
+      "trades": 35,
+      "wins": 13,
+      "losses": 22,
+      "win_rate_pct": 37.14,
+      "net_equity_return_pct_compounded": 0.0006,
+      "mean_net_equity_return_pct": 0.0025,
+      "profit_factor": 1.0075,
+      "max_drawdown_pct": 2.8593,
+      "exit_reasons": {
+        "stop": 19,
+        "target": 12,
+        "time_exit": 4
+      },
+      "target_types": {
+        "fixed_r": 35
+      },
+      "long_trades": 12,
+      "short_trades": 23
+    }
+  },
+  "by_direction": {
+    "long": {
+      "trades": 12,
+      "wins": 6,
+      "losses": 6,
+      "win_rate_pct": 50.0,
+      "net_equity_return_pct_compounded": 2.0811,
+      "mean_net_equity_return_pct": 0.1747,
+      "profit_factor": 1.5935,
+      "max_drawdown_pct": 1.2552,
+      "exit_reasons": {
+        "stop": 6,
+        "target": 6
+      },
+      "target_types": {
+        "fixed_r": 12
+      },
+      "long_trades": 12,
+      "short_trades": 0
+    },
+    "short": {
+      "trades": 23,
+      "wins": 7,
+      "losses": 16,
+      "win_rate_pct": 30.43,
+      "net_equity_return_pct_compounded": -2.0381,
+      "mean_net_equity_return_pct": -0.0874,
+      "profit_factor": 0.754,
+      "max_drawdown_pct": 4.0252,
+      "exit_reasons": {
+        "stop": 13,
+        "target": 6,
+        "time_exit": 4
+      },
+      "target_types": {
+        "fixed_r": 23
+      },
+      "long_trades": 0,
+      "short_trades": 23
+    }
+  },
+  "directional_forward_returns": {
+    "3_bar": {
+      "observations": 0,
+      "directional_positive_pct": null,
+      "mean_directional_return_pct": null
+    },
+    "6_bar": {
+      "observations": 0,
+      "directional_positive_pct": null,
+      "mean_directional_return_pct": null
+    },
+    "12_bar": {
+      "observations": 0,
+      "directional_positive_pct": null,
+      "mean_directional_return_pct": null
+    },
+    "18_bar": {
+      "observations": 0,
+      "directional_positive_pct": null,
+      "mean_directional_return_pct": null
+    }
+  },
+  "walk_forward": {
+    "status": "ready",
+    "split_time": "2026-10-19T20:00:00+00:00",
+    "last_candle_time": "2026-11-24T20:00:00+00:00",
+    "variants": {
+      "entry1_fixed_r": {
+        "train": {
+          "trades": 20,
+          "wins": 7,
+          "losses": 13,
+          "win_rate_pct": 35.0,
+          "net_equity_return_pct_compounded": -0.8905,
+          "mean_net_equity_return_pct": -0.0421,
+          "profit_factor": 0.8862,
+          "max_drawdown_pct": 2.8593,
+          "exit_reasons": {
+            "stop": 12,
+            "target": 7,
+            "time_exit": 1
+          },
+          "target_types": {
+            "fixed_r": 20
+          },
+          "long_trades": 7,
+          "short_trades": 13
+        },
+        "test": {
+          "trades": 14,
+          "wins": 6,
+          "losses": 8,
+          "win_rate_pct": 42.86,
+          "net_equity_return_pct_compounded": 1.4766,
+          "mean_net_equity_return_pct": 0.1071,
+          "profit_factor": 1.4024,
+          "max_drawdown_pct": 2.6013,
+          "exit_reasons": {
+            "stop": 6,
+            "target": 5,
+            "time_exit": 3
+          },
+          "target_types": {
+            "fixed_r": 14
+          },
+          "long_trades": 4,
+          "short_trades": 10
+        },
+        "excluded_cross_split_or_censored": 1
+      },
+      "entry1_structural_targets": {
+        "train": {
+          "trades": 21,
+          "wins": 5,
+          "losses": 16,
+          "win_rate_pct": 23.81,
+          "net_equity_return_pct_compounded": -2.8801,
+          "mean_net_equity_return_pct": -0.1387,
+          "profit_factor": 0.1803,
+          "max_drawdown_pct": 3.077,
+          "exit_reasons": {
+            "stop": 5,
+            "target": 16
+          },
+          "target_types": {
+            "fib_1.272_extension": 1,
+            "prior_structure": 20
+          },
+          "long_trades": 8,
+          "short_trades": 13
+        },
+        "test": {
+          "trades": 14,
+          "wins": 5,
+          "losses": 9,
+          "win_rate_pct": 35.71,
+          "net_equity_return_pct_compounded": -0.3702,
+          "mean_net_equity_return_pct": -0.0254,
+          "profit_factor": 0.8594,
+          "max_drawdown_pct": 1.6288,
+          "exit_reasons": {
+            "stop": 4,
+            "target": 10
+          },
+          "target_types": {
+            "fib_1.272_extension": 5,
+            "prior_structure": 9
+          },
+          "long_trades": 4,
+          "short_trades": 10
+        },
+        "excluded_cross_split_or_censored": 0
+      },
+      "entry2_fixed_r": {
+        "train": {
+          "trades": 8,
+          "wins": 3,
+          "losses": 5,
+          "win_rate_pct": 37.5,
+          "net_equity_return_pct_compounded": -0.1393,
+          "mean_net_equity_return_pct": -0.0148,
+          "profit_factor": 0.9585,
+          "max_drawdown_pct": 1.6951,
+          "exit_reasons": {
+            "stop": 5,
+            "target": 3
+          },
+          "target_types": {
+            "fixed_r": 8
+          },
+          "long_trades": 3,
+          "short_trades": 5
+        },
+        "test": {
+          "trades": 6,
+          "wins": 2,
+          "losses": 4,
+          "win_rate_pct": 33.33,
+          "net_equity_return_pct_compounded": -0.4139,
+          "mean_net_equity_return_pct": -0.0666,
+          "profit_factor": 0.8247,
+          "max_drawdown_pct": 2.259,
+          "exit_reasons": {
+            "stop": 4,
+            "target": 2
+          },
+          "target_types": {
+            "fixed_r": 6
+          },
+          "long_trades": 3,
+          "short_trades": 3
+        },
+        "excluded_cross_split_or_censored": 0
+      },
+      "entry2_structural_targets": {
+        "train": {
+          "trades": 8,
+          "wins": 1,
+          "losses": 7,
+          "win_rate_pct": 12.5,
+          "net_equity_return_pct_compounded": -0.6546,
+          "mean_net_equity_return_pct": -0.0804,
+          "profit_factor": 0.6733,
+          "max_drawdown_pct": 1.7635,
+          "exit_reasons": {
+            "stop": 3,
+            "target": 5
+          },
+          "target_types": {
+            "fib_1.272_extension": 1,
+            "prior_structure": 7
+          },
+          "long_trades": 3,
+          "short_trades": 5
+        },
+        "test": {
+          "trades": 6,
+          "wins": 1,
+          "losses": 5,
+          "win_rate_pct": 16.67,
+          "net_equity_return_pct_compounded": -1.7732,
+          "mean_net_equity_return_pct": -0.2974,
+          "profit_factor": 0.009,
+          "max_drawdown_pct": 1.7892,
+          "exit_reasons": {
+            "stop": 3,
+            "target": 3
+          },
+          "target_types": {
+            "fib_1.272_extension": 1,
+            "prior_structure": 5
+          },
+          "long_trades": 3,
+          "short_trades": 3
+        },
+        "excluded_cross_split_or_censored": 0
+      }
+    }
+  },
+  "learning_policy": {
+    "automatic_parameter_changes": false,
+    "model_is_advisory_until_walk_forward_validation": true,
+    "warning": "Forward-return diagnostics are not equivalent to executable, fee-aware trade outcomes.",
+    "equity_curve_assumption": "Sequential trade-level compounding ignores overlapping positions and portfolio exposure; not a portfolio backtest."
+  }
+}
